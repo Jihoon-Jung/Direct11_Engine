@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\GameCoding.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\AnimatedMesh.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\Default.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\Light.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\SkyBox.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JHEngine_TEST\Binaries\StaticMesh.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

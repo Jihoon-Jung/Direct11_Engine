@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>kachujin_MAT</Name>
+        <DiffuseFile>Kachujin_diffuse.png</DiffuseFile>
+        <SpecularFile>Kachujin_specular.png</SpecularFile>
+        <NormalFile>Kachujin_normal.png</NormalFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+        <Specular R="0.5" G="0.5" B="0.5" A="20"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+    </Material>
+</Materials>
