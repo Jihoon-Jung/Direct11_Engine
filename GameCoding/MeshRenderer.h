@@ -22,9 +22,8 @@ public:
 	void SetRasterzierState(D3D11_FILL_MODE fillMode, D3D11_CULL_MODE cullMode, bool frontCouterClockWise);
 
 	auto GetMaterial() { return _material; }
-	auto GetVertexShader() { return GetMaterial()->GetVertexShader(); }
-	auto GetInputLayout() { return GetVertexShader()->GetInputLayout(); }
-	auto GetPixelShader() { return GetMaterial()->GetPixelShader(); }
+	auto GetShader() { return GetMaterial()->GetShader(); }
+	auto GetInputLayout() { return GetShader()->GetInputLayout(); }
 	auto GetRasterzerStates() { return _rasterzerStates; }
 
 	shared_ptr<Mesh> GetMesh() { return _mesh; }

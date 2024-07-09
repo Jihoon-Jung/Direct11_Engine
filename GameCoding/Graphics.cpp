@@ -100,19 +100,14 @@ void Graphics::CreateDepthStencilView()
 
 }
 
-void Graphics::CreateViewport(int width, int height)
+void Graphics::CreateViewport(float width, float height, float x, float y, float minDepth, float maxDepth)
 {
-	_viewport.TopLeftX = 0.f;
-	_viewport.TopLeftY = 0.f;
-	_viewport.Width = static_cast<float>(width);
-	_viewport.Height = static_cast<float>(height);
-	_viewport.MinDepth = 0.f;
-	_viewport.MaxDepth = 1.f;
+	_viewport.Set(width, height, x, y, minDepth, maxDepth);
 }
 
 void Graphics::SetViewport()
 {
-	_deviceContext->RSSetViewports(1, &_viewport);
+	_viewport.RSSetViewport();
 }
 
 void Graphics::SetRenderTarget()

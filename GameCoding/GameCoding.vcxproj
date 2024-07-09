@@ -143,8 +143,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Animator.h" />
+    <ClInclude Include="BaseCollider.h" />
     <ClInclude Include="BlendState.h" />
+    <ClInclude Include="BoxCollider.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ConstantBufferType.h" />
@@ -180,20 +183,28 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderSlot.h" />
     <ClInclude Include="SimpleMath.h" />
+    <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureBuffer.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="UIImage.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Values.h" />
     <ClInclude Include="VertexDescription.h" />
+    <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="BaseCollider.cpp" />
     <ClCompile Include="BlendState.cpp" />
+    <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBufferType.cpp" />
@@ -230,14 +241,19 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderSlot.cpp" />
     <ClCompile Include="SimpleMath.cpp" />
+    <ClCompile Include="SphereCollider.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureBuffer.cpp" />
     <ClCompile Include="TimeManager.cpp" />
     <ClCompile Include="tinyxml2.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UIImage.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="VertexDescription.cpp" />
+    <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc" />
@@ -253,6 +269,16 @@
     <FxCompile Include="AnimatedMesh.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Billboard.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="ComputeShader_AdjustTexture.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CS</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Default.hlsl">

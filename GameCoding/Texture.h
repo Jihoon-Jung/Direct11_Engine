@@ -7,8 +7,9 @@ class Texture : public ResourceBase
 public:
 	Texture();
 	~Texture();
-	ComPtr<ID3D11ShaderResourceView> GetComPtr() { return _shaderResourceView; }
 
+	ComPtr<ID3D11Texture2D> GetTexture2D();
+	void SetShaderResourceView(ComPtr<ID3D11ShaderResourceView> shaderResourceView);
 	void CreateTexture(const wstring& path);
 	ComPtr<ID3D11ShaderResourceView>GetShaderResourceView() { return _shaderResourceView; }
 	Vec2 GetSize() { return _size; }

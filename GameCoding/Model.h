@@ -15,8 +15,7 @@ public:
 	void ReadAnimation(wstring filename);
 
 
-	void SetVertexShaderForMaterial(shared_ptr<Shader> vertexShader) { _vertexShader = vertexShader; }
-	void SetPixelShaderForMaterial(shared_ptr<Shader> pixelShader) { _pixelShader = pixelShader; }
+	void SetShaderForMaterial(shared_ptr<Shader> shader) { _shader = shader; }
 	uint32 GetMaterialCount() { return static_cast<uint32>(_materials.size()); }
 	vector<shared_ptr<Material>>& GetMaterials() { return _materials; }
 	shared_ptr<Material> GetMaterialByIndex(uint32 index) { return _materials[index]; }
@@ -48,8 +47,7 @@ private:
 	void BindCacheInfo();
 
 private:
-	shared_ptr<Shader> _vertexShader;
-	shared_ptr<Shader> _pixelShader;
+	shared_ptr<Shader> _shader;
 private:
 	wstring _modelPath = L"../Resources/Models/";
 	wstring _texturePath = L"../Resources/Textures/";

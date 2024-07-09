@@ -25,10 +25,6 @@ cbuffer CameraBuffer : register(b0)
 	row_major matrix projectionMatrix;
 }
 
-cbuffer TransformBuffer : register(b1)
-{
-	row_major matrix worldMatrix;
-}
 
 SamplerState sampler0 : register(s0);
 Texture2D texture0 : register(t0);

@@ -23,3 +23,13 @@ void Texture::CreateTexture(const wstring& path)
 	_size.x = md.width;
 	_size.y = md.height;
 }
+void Texture::SetShaderResourceView(ComPtr<ID3D11ShaderResourceView> shaderResourceView)
+{
+	_shaderResourceView = shaderResourceView;
+}
+Microsoft::WRL::ComPtr<ID3D11Texture2D> Texture::GetTexture2D()
+{
+	ComPtr<ID3D11Texture2D> texture;
+	_shaderResourceView->GetResource((ID3D11Resource**)texture.GetAddressOf());
+	return texture;
+}

@@ -54,15 +54,6 @@ cbuffer LightAndCameraPos : register(b4)
 	float padding2;
 }
 
-cbuffer BoneBuffer : register(b5)
-{
-	row_major matrix BoneTransforms[MAX_MODEL_TRANSFORMS];
-};
-cbuffer BonIndex : register(b6)
-{
-	uint BoneIndex;
-	float3 padding;
-}
 struct KeyframeDesc
 {
 	int animIndex;
@@ -83,7 +74,7 @@ struct blendFrameDesc
 	KeyframeDesc next;
 };
 
-cbuffer BlendBuffer : register(b7)
+cbuffer BlendBuffer : register(b5)
 {
 	blendFrameDesc blendFrames;
 };
@@ -182,6 +173,6 @@ VS_OUTPUT VS(VS_INPUT input)
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-	
-	return diffuseMap.Sample(sampler0, input.uv);
+
+	return  diffuseMap.Sample(sampler0, input.uv);
 }

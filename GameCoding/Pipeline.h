@@ -21,7 +21,6 @@ class Pipeline
 public:
 	Pipeline();
 	~Pipeline();
-	bool isAnimation = false;
 	void SetTexture(shared_ptr<Texture> texture) { _texture = texture; }
 	void SetNormalMap(shared_ptr<Texture> normal) { _normalMap = normal; }
 	void SetSpecularMap(shared_ptr<Texture> specular) { _specularMap = specular; }
@@ -29,10 +28,9 @@ public:
 	void UpdatePipeline(PipelineInfo pipelineInfo);
 	void SetBuffer(shared_ptr<Buffer> buffer) { _buffer = buffer; }
 	void SetIndicesSize(UINT size) { _indicesSize = size; }
-	void SetShader(shared_ptr<Shader> vertexShader, shared_ptr<Shader> pixelShader)
+	void SetShader(shared_ptr<Shader> shader)
 	{
-		_vertexShader = vertexShader;
-		_pixelShader = pixelShader;
+		_shader = shader;
 	}
 	PipelineInfo GetPipelineInfo() { return _pipelineInfo; }
 private:
@@ -42,8 +40,7 @@ private:
 	shared_ptr<Texture> _normalMap;
 	shared_ptr<Texture> _specularMap;
 	shared_ptr<Texture> _diffuseMap;
-	shared_ptr<Shader> _vertexShader;
-	shared_ptr<Shader> _pixelShader;
+	shared_ptr<Shader> _shader;
 	UINT _indicesSize = 0;
 	
 };

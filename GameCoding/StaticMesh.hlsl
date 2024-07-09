@@ -1,4 +1,4 @@
-
+#define MAX_MODEL_TRANSFORMS 250
 
 struct VS_INPUT
 {
@@ -52,7 +52,6 @@ cbuffer LightAndCameraPos : register(b4)
 	float padding2;
 }
 
-#define MAX_MODEL_TRANSFORMS 250
 cbuffer BoneBuffer : register(b5)
 {
 	row_major matrix BoneTransforms[MAX_MODEL_TRANSFORMS];
@@ -61,21 +60,6 @@ cbuffer BonIndex : register(b6)
 {
 	uint BoneIndex;
 	float3 padding;
-}
-struct KeyframeDesc
-{
-	int animIndex;
-	int currFrame;
-	int nextFrame;
-	float ratio;
-	float sumTime;
-	float speed;
-	float2 padding3;
-};
-
-cbuffer KeyframeBuffer : register(b7)
-{
-	KeyframeDesc Keyframes;
 }
 
 SamplerState sampler0 : register(s0);

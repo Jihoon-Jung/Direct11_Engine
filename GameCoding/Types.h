@@ -16,6 +16,7 @@ using uint64 = unsigned __int64;
 //using Vec3 = DirectX::XMFLOAT3;
 //using Vec4 = DirectX::XMFLOAT4;
 using Color = DirectX::XMFLOAT4;
+using Ray = DirectX::SimpleMath::Ray;
 
 using Vec2 = DirectX::SimpleMath::Vector2;
 using Vec3 = DirectX::SimpleMath::Vector3;

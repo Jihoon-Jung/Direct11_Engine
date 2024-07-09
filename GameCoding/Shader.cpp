@@ -4,6 +4,7 @@
 Shader::Shader()
 	:Super(ResourceType::Shader)
 {
+	_shaderSlot = make_shared<ShaderSlot>();
 }
 
 Shader::~Shader()
@@ -42,6 +43,38 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath)
 	{
 		LoadShaderFromFile(shaderPath, "PS", "ps_5_0", _psBlob);
 		HRESULT hr = DEVICE->CreatePixelShader(_psBlob->GetBufferPointer(), _psBlob->GetBufferSize(), nullptr, _pixelShader.GetAddressOf());
-
+		CHECK(hr);
 	}
+	else if (type == ShaderType::COMPUTE_SHADER)
+	{
+		LoadShaderFromFile(shaderPath, "CS", "cs_5_0", _csBlob);
+		HRESULT hr = DEVICE->CreateComputeShader(_csBlob->GetBufferPointer(), _csBlob->GetBufferSize(), nullptr, &_computeShader);
+		CHECK(hr);
+	}
+}
+
+void Shader::PushConstantBufferToShader(ShaderType type, const wstring& name, UINT numBuffers, shared_ptr<Buffer> buffer)
+{
+	UINT slot = _shaderSlot->GetSlotNumber(name);
+	if (type == ShaderType::VERTEX_SHADER)
+		DEVICECONTEXT->VSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
+	else
+		DEVICECONTEXT->PSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
+}
+
+void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, ComPtr<ID3D11ShaderResourceView> shaderResourceViews)
+{
+	UINT slot = _shaderSlot->GetSlotNumber(name);
+	if (type == ShaderType::VERTEX_SHADER)
+		DEVICECONTEXT->VSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
+	else
+		DEVICECONTEXT->PSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
+}
+void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, shared_ptr<Texture> texture)
+{
+	UINT slot = _shaderSlot->GetSlotNumber(name);
+	if (type == ShaderType::VERTEX_SHADER)
+		DEVICECONTEXT->VSSetShaderResources(slot, numViews, texture->GetShaderResourceView().GetAddressOf());
+	else
+		DEVICECONTEXT->PSSetShaderResources(slot, numViews, texture->GetShaderResourceView().GetAddressOf());
 }

@@ -10,11 +10,15 @@ enum class ComponentType : uint8
 	Camera,
 	Animator,
 	Light,
+	Collider,
+	Terrain,
+	UIImage,
+	Button,
 	Script
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 5
+	FIXED_COMPONENT_COUNT = 9
 };
 
 class Component

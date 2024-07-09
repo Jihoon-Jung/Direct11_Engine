@@ -1,4 +1,6 @@
 #pragma once
+#include "Viewport.h"
+
 class Graphics
 {
 private:
@@ -12,7 +14,8 @@ private:
 	ComPtr<ID3D11DepthStencilView> _depthStencilView;
 	ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
-	D3D11_VIEWPORT _viewport = { 0 };
+	//D3D11_VIEWPORT _viewport = { 0 };
+	Viewport _viewport;
 	float _clearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 
@@ -26,7 +29,7 @@ public:
 		static Graphics instance;
 		return instance;
 	}
-
+	Viewport& GetViewport() { return _viewport; }
 
 	void Initialize(HWND hwnd, int width, int height)
 	{
@@ -37,7 +40,7 @@ public:
 		CreateDeviceAndSwapChain();
 		CreateRenderTarget();
 		CreateDepthStencilView();
-		CreateViewport(width, height);
+		CreateViewport(width, height, 0, 0, 0, 1);
 		
 	}
 	int GetViewWidth() { return _viewWidth; }
@@ -45,7 +48,7 @@ public:
 	void CreateDeviceAndSwapChain();
 	void CreateRenderTarget();
 	void CreateDepthStencilView();
-	void CreateViewport(int width, int height);
+	void CreateViewport(float width, float height, float x, float y, float minDepth, float maxDepth);
 	void SetViewport();
 	void SetRenderTarget();
 	void SetDepthStencilView();

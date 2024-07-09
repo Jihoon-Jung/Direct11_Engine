@@ -15,19 +15,7 @@ void RenderManager::Update()
 	GP.SetRenderTarget();
 	GP.SetViewport();
 
-	vector<shared_ptr<GameObject>> gameObjects = SCENE.GetActiveScene()->GetGameObjects();
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera);
-	if (cameraObject != nullptr)
-	{
-		cameraObject->GetCameraBuffer();
-		DEVICECONTEXT->VSSetConstantBuffers(0, 1, cameraObject->GetCameraBuffer()->GetConstantBuffer().GetAddressOf());
-	}
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light);
-	if (lightObject != nullptr)
-	{
-		lightObject->GetLightBuffer();
-		DEVICECONTEXT->PSSetConstantBuffers(3, 1, lightObject->GetLightBuffer()->GetConstantBuffer().GetAddressOf());
-	}
+	
 
 	GetRenderObject();
 	RenderObject();
@@ -48,11 +36,36 @@ void RenderManager::GetRenderObject()
 
 void RenderManager::RenderObject()
 {
+
 	for (const shared_ptr<GameObject>& gameObject : _renderObjects)
 	{
-		_pipeline->isAnimation = false;
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<Model> model = meshRenderer->GetModel();
+
+		shared_ptr<Shader> shader = meshRenderer->GetShader();
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, gameObject->GetTransformBuffer());
+
+		shared_ptr<GameObject> cameraObject;
+		//shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera);
+		if(gameObject->GetObjectType() == GameObjectType::NormalObject)
+			cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+		else
+			cameraObject = SCENE.GetActiveScene()->Find(L"UICamera");
+
+		if (cameraObject != nullptr)
+		{
+			cameraObject->GetCameraBuffer();
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+			
+		}
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light);
+		if (lightObject != nullptr)
+		{
+			lightObject->GetLightBuffer();
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		}
+
 		if (model == nullptr)
 		{
 			
@@ -62,13 +75,13 @@ void RenderManager::RenderObject()
 			_pipeline->SetIndicesSize(meshRenderer->GetMesh()->GetGeometry()->GetIndices().size());
 			_pipeline->SetTexture(material->GetTexture());
 			_pipeline->SetNormalMap(material->GetNormalMap());
-			_pipeline->SetShader(material->GetVertexShader(), material->GetPixelShader());
-
+			_pipeline->SetShader(material->GetShader());
+			
 
 			_pipelineInfo = _pipeline->GetPipelineInfo();
 			_pipelineInfo.blendState = make_shared<BlendState>();
 			_pipelineInfo.blendState->CreateBlendState();
-			_pipelineInfo.inputLayout = material->GetVertexShader()->GetInputLayout();
+			_pipelineInfo.inputLayout = material->GetShader()->GetInputLayout();
 			_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
 			_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
 
@@ -84,9 +97,9 @@ void RenderManager::RenderObject()
 			light->CreateConstantBuffer<LightAndCameraPos>();
 			light->CopyData(lightDirection);
 
-			DEVICECONTEXT->VSSetConstantBuffers(1, 1, gameObject->GetTransformBuffer()->GetConstantBuffer().GetAddressOf());
-			DEVICECONTEXT->PSSetConstantBuffers(2, 1, meshRenderer->GetMaterialBuffer()->GetConstantBuffer().GetAddressOf());
-			DEVICECONTEXT->PSSetConstantBuffers(4, 1, light->GetConstantBuffer().GetAddressOf());
+			
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, meshRenderer->GetMaterialBuffer());
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
 
 			_pipeline->UpdatePipeline(_pipelineInfo);
 		}
@@ -99,7 +112,6 @@ void RenderManager::RenderObject()
 				_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
 				_blendAnimDesc.SetAnimSpeed(2.0f, 2.0f);
 
-				_pipeline->isAnimation = true;
 				shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
 
 				{
@@ -151,26 +163,30 @@ void RenderManager::RenderObject()
 				blendBuffer->CreateConstantBuffer<BlendAnimDesc>();
 				blendBuffer->CopyData(_blendAnimDesc);
 
-				DEVICECONTEXT->VSSetConstantBuffers(7, 1, blendBuffer->GetConstantBuffer().GetAddressOf());
-				DEVICECONTEXT->VSSetShaderResources(3, 1, model->GetAnimationTextureBuffer().GetAddressOf());
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BlendBuffer", 1, blendBuffer);
+				UINT animationTexture_Slot = meshRenderer->GetMaterial()->GetShader()->GetShaderSlot()->GetSlotNumber(L"TransformMap");
+				shader->PushShaderResourceToShader(ShaderType::VERTEX_SHADER, L"TransformMap", 1, model->GetAnimationTextureBuffer());
+				
 
-				//model->SetTBuffer();
 			}
-
-			BoneBuffer boneDesc;
-
-			const uint32 boneCount = model->GetBoneCount();
-			for (uint32 i = 0; i < boneCount; i++)
+			else
 			{
-				shared_ptr<ModelBone> bone = model->GetBoneByIndex(i);
-				boneDesc.BoneTransforms[i] = bone->transform;
-			}
+				BoneBuffer boneDesc;
 
-			shared_ptr<Buffer> boneBuffer = make_shared<Buffer>();
-			boneBuffer->CreateConstantBuffer<BoneBuffer>();
-			boneBuffer->CopyData(boneDesc);
-			DEVICECONTEXT->VSSetConstantBuffers(5, 1, boneBuffer->GetConstantBuffer().GetAddressOf());
-			DEVICECONTEXT->VSSetConstantBuffers(1, 1, gameObject->GetTransformBuffer()->GetConstantBuffer().GetAddressOf());
+				const uint32 boneCount = model->GetBoneCount();
+				for (uint32 i = 0; i < boneCount; i++)
+				{
+					shared_ptr<ModelBone> bone = model->GetBoneByIndex(i);
+					boneDesc.BoneTransforms[i] = bone->transform;
+				}
+
+				shared_ptr<Buffer> boneBuffer = make_shared<Buffer>();
+				boneBuffer->CreateConstantBuffer<BoneBuffer>();
+				boneBuffer->CopyData(boneDesc);
+
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BoneBuffer", 1, boneBuffer);
+			}
+			
 
 			const auto& meshes = model->GetMeshes();
 			for (auto& mesh : meshes)
@@ -183,13 +199,16 @@ void RenderManager::RenderObject()
 
 				}
 
-				// BoneIndex
-				BoneIndex boneIndex;
-				boneIndex.index = mesh->boneIndex;
-				shared_ptr<Buffer> boneIndexBuffer = make_shared<Buffer>();
-				boneIndexBuffer->CreateConstantBuffer<BoneIndex>();
-				boneIndexBuffer->CopyData(boneIndex);
-				DEVICECONTEXT->VSSetConstantBuffers(6, 1, boneIndexBuffer->GetConstantBuffer().GetAddressOf());
+				if (!model->HasAnimation())
+				{
+					// BoneIndex
+					BoneIndex boneIndex;
+					boneIndex.index = mesh->boneIndex;
+					shared_ptr<Buffer> boneIndexBuffer = make_shared<Buffer>();
+					boneIndexBuffer->CreateConstantBuffer<BoneIndex>();
+					boneIndexBuffer->CopyData(boneIndex);
+					shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BonIndex", 1, boneIndexBuffer);
+				}
 
 				// Light
 				LightAndCameraPos lightDirection;
@@ -199,17 +218,18 @@ void RenderManager::RenderObject()
 				shared_ptr<Buffer> light = make_shared<Buffer>();
 				light->CreateConstantBuffer<LightAndCameraPos>();
 				light->CopyData(lightDirection);
-				DEVICECONTEXT->PSSetConstantBuffers(4, 1, light->GetConstantBuffer().GetAddressOf());
+				
 
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
 
 				_pipeline->SetBuffer(mesh->GetBuffer());
 				_pipeline->SetIndicesSize(mesh->GetGeometry()->GetIndices().size());
-				_pipeline->SetShader(mesh->material->GetVertexShader(), mesh->material->GetPixelShader());
+				_pipeline->SetShader(mesh->material->GetShader());
 
 				_pipelineInfo = _pipeline->GetPipelineInfo();
 				_pipelineInfo.blendState = make_shared<BlendState>();
 				_pipelineInfo.blendState->CreateBlendState();
-				_pipelineInfo.inputLayout = mesh->material->GetVertexShader()->GetInputLayout();
+				_pipelineInfo.inputLayout = mesh->material->GetShader()->GetInputLayout();
 				_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
 				_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
 

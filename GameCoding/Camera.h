@@ -1,5 +1,11 @@
 #pragma once
 
+enum class ProjectionType
+{
+	Perspective,
+	Orthographic
+};
+
 class Camera : public Component
 {
 	using Super = Component;
@@ -12,6 +18,7 @@ public:
 	virtual void LateUpdate() override;
 	void SetViewProjectionMatrix();
 
+	void SetProjectionType(ProjectionType type) { _type = type; }
 	Matrix GetViewMatrix() { return _matView; }
 	Matrix GetProjectionMatrix() { return _matProjcetion; }
 	shared_ptr<Buffer> GetCameraBuffer() { return _cameraBuffer; }
@@ -20,5 +27,6 @@ private:
 	Matrix _matView;
 	Matrix _matProjcetion;
 	shared_ptr<Buffer> _cameraBuffer;
+	ProjectionType _type;
 };
 

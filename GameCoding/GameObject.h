@@ -6,6 +6,15 @@
 #include "MeshRenderer.h"
 #include "MonoBehaviour.h"
 #include "Light.h"
+#include "BaseCollider.h"
+#include "Terrain.h"
+#include "UIImage.h"
+#include "Button.h"
+enum class GameObjectType
+{
+	NormalObject,
+	UIObject
+};
 class GameObject : public enable_shared_from_this<GameObject>
 {
 public:
@@ -19,6 +28,9 @@ public:
 	void AddComponent(shared_ptr<Component> component);
 	void SetParent(shared_ptr<GameObject> parent);
 	void AddChild(shared_ptr<GameObject> child);
+	void SetObjectType(GameObjectType type) { _type = type; }
+	
+	GameObjectType GetObjectType() { return _type; }
 	template <typename T>
 	shared_ptr<T> GetComponent()
 	{
@@ -31,6 +43,14 @@ public:
 			type = ComponentType::Camera;
 		if (std::is_same_v<T, Light>)
 			type = ComponentType::Light;
+		if (std::is_same_v<T, BaseCollider>)
+			type = ComponentType::Collider;
+		if (std::is_same_v<T, Terrain>)
+			type = ComponentType::Terrain;
+		if (std::is_same_v<T, UIImage>)
+			type = ComponentType::UIImage;
+		if (std::is_same_v<T, Button>)
+			type = ComponentType::Button;
 		if (std::is_same_v<T, MonoBehaviour>)
 			type = ComponentType::Script;
 
@@ -67,6 +87,7 @@ private:
 	vector<shared_ptr<Component>> _components;
 	vector<shared_ptr<GameObject>> _children;
 	wstring _name;
+	GameObjectType _type;
 	shared_ptr<GameObject> _parent;
 };
 

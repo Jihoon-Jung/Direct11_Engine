@@ -144,8 +144,7 @@ void Model::ReadMaterial(wstring filename)
 			materialDesc.emissive = color;
 		}
 
-		material->SetVertexShader(_vertexShader);
-		material->SetPixelShader(_pixelShader);
+		material->SetShader(_shader);
 		material->SetMaterialDesc(materialDesc);
 		_materials.push_back(material);
 

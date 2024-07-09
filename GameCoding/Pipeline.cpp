@@ -25,39 +25,28 @@ void Pipeline::UpdatePipeline(PipelineInfo pipelineInfo)
 	DEVICECONTEXT->IASetPrimitiveTopology(pipelineInfo.topology);
 
 	// VertexShader
-	DEVICECONTEXT->VSSetShader(_vertexShader->GetVertexShader().Get(), nullptr, 0);
+	DEVICECONTEXT->VSSetShader(_shader->GetVertexShader().Get(), nullptr, 0);
 
 	// Rasterizer
 	DEVICECONTEXT->RSSetState(pipelineInfo.rasterizerState->GetRasterizerState().Get());
 
 	// PixelShader
-	DEVICECONTEXT->PSSetShader(_pixelShader->GetPixelShader().Get(), nullptr, 0);
-	if (isAnimation)
-	{
-		// Set NormalMap
-		if (_normalMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(0, 1, _normalMap->GetShaderResourceView().GetAddressOf());
-		// Set SpecularMap
-		if (_specularMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(1, 1, _specularMap->GetShaderResourceView().GetAddressOf());
-		// Set DiffuseMap
-		if (_diffuseMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(2, 1, _diffuseMap->GetShaderResourceView().GetAddressOf());
-	}
-	else
-	{
-		if (_texture != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(0, 1, _texture->GetShaderResourceView().GetAddressOf());
-		// Set NormalMap
-		if (_normalMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(1, 1, _normalMap->GetShaderResourceView().GetAddressOf());
-		// Set SpecularMap
-		if (_specularMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(2, 1, _specularMap->GetShaderResourceView().GetAddressOf());
-		// Set DiffuseMap
-		if (_diffuseMap != nullptr)
-			DEVICECONTEXT->PSSetShaderResources(3, 1, _diffuseMap->GetShaderResourceView().GetAddressOf());
-	}
+	DEVICECONTEXT->PSSetShader(_shader->GetPixelShader().Get(), nullptr, 0);
+	
+
+	// Set Default Texture
+	if (_texture != nullptr)
+		_shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, _texture->GetShaderResourceView());
+	// Set NormalMap
+	if (_normalMap != nullptr)
+		_shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, _normalMap->GetShaderResourceView());
+
+	// Set SpecularMap
+	if (_specularMap != nullptr)
+		_shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, _specularMap->GetShaderResourceView());
+	// Set DiffuseMap
+	if (_diffuseMap != nullptr)
+		_shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, _diffuseMap->GetShaderResourceView());
 
 	DEVICECONTEXT->PSSetSamplers(0, 1, pipelineInfo.samplerState->GetSamplerState().GetAddressOf());
 

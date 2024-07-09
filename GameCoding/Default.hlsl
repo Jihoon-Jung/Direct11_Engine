@@ -138,5 +138,5 @@ float4 PS(VS_OUTPUT input) : SV_Target
 		emissiveColor = materialEmissive * emissive * e;
 	}
 
-	return float4((textureColor + diffuseColor + specularColor).xyz, 1.0);
+	return textureColor;// float4((textureColor + diffuseColor + specularColor).xyz, 1.0);
 }							 

@@ -60,6 +60,9 @@
     <Filter Include="소스 파일\Shaders\Slot">
       <UniqueIdentifier>{c6ef8c11-7a85-4f2d-a944-faee3205260c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Collider">
+      <UniqueIdentifier>{899f0e05-fc64-4c93-9930-7911c359b3fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -117,9 +120,6 @@
       <Filter>소스 파일\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.h">
-      <Filter>소스 파일\PipleLine</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry.h">
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
@@ -203,6 +203,33 @@
     <ClInclude Include="ShaderSlot.h">
       <Filter>소스 파일\Shaders\Slot</Filter>
     </ClInclude>
+    <ClInclude Include="TextureBuffer.h">
+      <Filter>소스 파일\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>소스 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseCollider.h">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewport.h">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxCollider.h">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="UIImage.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -259,12 +286,6 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>소스 파일\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Geometry.cpp">
-      <Filter>소스 파일\Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics.cpp">
-      <Filter>소스 파일\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>소스 파일\Manager</Filter>
@@ -344,6 +365,36 @@
     <ClCompile Include="ShaderSlot.cpp">
       <Filter>소스 파일\Shaders\Slot</Filter>
     </ClCompile>
+    <ClCompile Include="TextureBuffer.cpp">
+      <Filter>소스 파일\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry.cpp">
+      <Filter>소스 파일\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseCollider.cpp">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewport.cpp">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollider.cpp">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>소스 파일\Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>소스 파일\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>소스 파일\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="UIImage.cpp">
+      <Filter>소스 파일\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
@@ -364,6 +415,12 @@
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SkyBox.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader_AdjustTexture.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Billboard.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

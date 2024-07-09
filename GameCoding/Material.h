@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "ConstantBufferType.h"
 
+
 class Material : public ResourceBase
 {
 	using Super = ResourceBase;
@@ -11,12 +12,9 @@ class Material : public ResourceBase
 public:
 	Material();
 	virtual ~Material();
-
-	void SetVertexShader(shared_ptr<Shader> vertexShader) {
-		_vertexShader = vertexShader;
-	}
-	void SetPixelShader(shared_ptr<Shader> pixelShader) {
-		_pixelShader = pixelShader;
+	void SetShader(shared_ptr<Shader> shader)
+	{
+		_shader = shader;
 	}
 	void SetTexture(shared_ptr<Texture> texture)
 	{
@@ -34,24 +32,28 @@ public:
 	{
 		_specularMap = specular;
 	}
+
+	ComPtr<ID3D11ShaderResourceView> AdjustTexture(shared_ptr<Shader> computeShader, shared_ptr<Texture> texture);
+
 	void PushMaterialDesc();
 	MaterialDesc GetMaterialDesc() { return _materialDesc; }
 	void SetMaterialDesc(MaterialDesc materialDesc);
-	shared_ptr<Shader> GetVertexShader() { return _vertexShader; }
-	shared_ptr<Shader> GetPixelShader() { return _pixelShader; }
+	shared_ptr<Shader> GetShader() { return _shader; }
 	shared_ptr<Texture> GetTexture() { return _texture; }
 	shared_ptr<Texture> GetNormalMap() { return _normalMap; }
 	shared_ptr<Texture> GetSpecularMap() { return _specularMap; }
 	shared_ptr<Texture> GetDiffuseMap() { return _diffuseMap; }
 	shared_ptr<Buffer> GetMaterialBuffer() { return _materialBuffer; }
+	
+
 private:
-	shared_ptr<Shader> _vertexShader;
-	shared_ptr<Shader> _pixelShader;
+	shared_ptr<Shader> _shader;
 	shared_ptr<Texture> _texture;
 	shared_ptr<Texture> _normalMap;
 	shared_ptr<Texture> _diffuseMap;
 	shared_ptr<Texture> _specularMap;
 	shared_ptr<Buffer> _materialBuffer;
 	MaterialDesc _materialDesc;
+	
 };
 

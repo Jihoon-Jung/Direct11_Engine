@@ -55,9 +55,19 @@ using namespace Microsoft::WRL;
 #include "MonoBehaviour.h"
 #include "Animator.h"
 #include "Light.h"
+#include "BaseCollider.h"
+#include "SphereCollider.h"
+#include "BoxCollider.h"
+#include "Terrain.h"
+#include "UIImage.h"
+#include "Button.h"
 
-
+#include "ShaderSlot.h"
 #include "ConstantBufferType.h"
+
+// Buffer
+#include "Buffer.h"
+#include "TextureBuffer.h"
 
 
 #define GP							Graphics::GetInstance()
