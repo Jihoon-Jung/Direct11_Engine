@@ -86,6 +86,10 @@ void SceneManager::LoadTestScene()
 	Kachujin->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> kachujin_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> billboard_Terrain = make_shared<GameObject>();
+	billboard_Terrain->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> billboard_Terrain_transform = make_shared<Transform>();
+
 	{
 		sphere_transform->SetPosition(Vec3(-1.0f, 0.f, 2.f));
 		sphere->AddComponent(sphere_transform);
@@ -222,19 +226,39 @@ void SceneManager::LoadTestScene()
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
-	int parentCount = cube->transform()->ParentCount();
-	int childCount = sphere->transform()->ChildCount();
+
+	//{
+	//	billboard_Terrain_transform->SetPosition(Vec3(0.f, 0.f, 11.f));
+	//	billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
+	//	billboard_Terrain->AddComponent(billboard_Terrain_transform);
+	//	shared_ptr<Billboard> billboard = make_shared<Billboard>();
+	//	for (int32 i = -5; i < 5; i++)
+	//	{
+
+	//		Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
+	//		for (int32 j = -5; j < 5; j++)
+	//		{
+	//			Vec2 position = Vec2(i,j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
+
+	//			billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
+	//		}
+	//	}
+	//	billboard_Terrain->AddComponent(billboard);
+	//	billboard_Terrain->SetName(L"Billboard");
+	//}
+
 
 	_activeScene->AddGameObject(camera);
 	_activeScene->AddGameObject(uiCamera);
 	_activeScene->AddGameObject(light);
-	//_activeScene->AddGameObject(skyBox);
-	//_activeScene->AddGameObject(sphere);
-	//_activeScene->AddGameObject(cube);
-	//_activeScene->AddGameObject(grid);
+	_activeScene->AddGameObject(skyBox);
+	_activeScene->AddGameObject(sphere);
+	_activeScene->AddGameObject(cube);
+	_activeScene->AddGameObject(grid);
 	//_activeScene->AddGameObject(tower);
 	//_activeScene->AddGameObject(quard_ui);
 	//_activeScene->AddGameObject(uiButton);
-	_activeScene->AddGameObject(quard);
+	//_activeScene->AddGameObject(quard);
+	//_activeScene->AddGameObject(billboard_Terrain);
 	//_activeScene->AddGameObject(Kachujin);
 }

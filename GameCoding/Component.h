@@ -14,11 +14,12 @@ enum class ComponentType : uint8
 	Terrain,
 	UIImage,
 	Button,
+	Billboard,
 	Script
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 9
+	FIXED_COMPONENT_COUNT = 10
 };
 
 class Component

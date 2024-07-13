@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Animator.h" />
     <ClInclude Include="BaseCollider.h" />
+    <ClInclude Include="Billboard.h" />
     <ClInclude Include="BlendState.h" />
     <ClInclude Include="BoxCollider.h" />
     <ClInclude Include="Buffer.h" />
@@ -201,6 +202,7 @@
   <ItemGroup>
     <ClCompile Include="Animator.cpp" />
     <ClCompile Include="BaseCollider.cpp" />
+    <ClCompile Include="Billboard.cpp" />
     <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="Buffer.cpp" />

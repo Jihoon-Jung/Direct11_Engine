@@ -10,6 +10,8 @@
 #include "Terrain.h"
 #include "UIImage.h"
 #include "Button.h"
+#include "Billboard.h"
+
 enum class GameObjectType
 {
 	NormalObject,
@@ -51,6 +53,8 @@ public:
 			type = ComponentType::UIImage;
 		if (std::is_same_v<T, Button>)
 			type = ComponentType::Button;
+		if (std::is_same_v<T, Billboard>)
+			type = ComponentType::Billboard;
 		if (std::is_same_v<T, MonoBehaviour>)
 			type = ComponentType::Script;
 

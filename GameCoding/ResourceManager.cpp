@@ -21,6 +21,8 @@ void ResourceManager::AddResource()
 	shared_ptr<Texture> lightTexture = make_shared<Texture>();
 	shared_ptr<Texture> skyBoxTexture = make_shared<Texture>();
 
+	shared_ptr<Texture> grassTexture = make_shared<Texture>();
+
 	shared_ptr<Shader> ligthRenderShader = make_shared<Shader>();
 
 	shared_ptr<Shader> defaultShader = make_shared<Shader>();
@@ -62,8 +64,13 @@ void ResourceManager::AddResource()
 
 	texture = make_shared<Texture>();
 	texture->CreateTexture(L"Leather.jpg");
-	texture->SetName(L"panda");
+	texture->SetName(L"Leather");
 	RESOURCE.AddResource(texture->GetName(), texture);
+
+	grassTexture = make_shared<Texture>();
+	grassTexture->CreateTexture(L"Golem.png");
+	grassTexture->SetName(L"Grass");
+	RESOURCE.AddResource(grassTexture->GetName(), grassTexture);
 
 	skyBoxTexture = make_shared<Texture>();
 	skyBoxTexture->CreateTexture(L"4k_Sky.jpg");
@@ -81,8 +88,8 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(lightTexture->GetName(), lightTexture);
 
 	defaultShader = make_shared<Shader>();
-	defaultShader->CreateShader(ShaderType::VERTEX_SHADER, L"Default.hlsl");
-	defaultShader->CreateShader(ShaderType::PIXEL_SHADER, L"Default.hlsl");
+	defaultShader->CreateShader(ShaderType::VERTEX_SHADER, L"Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	defaultShader->CreateShader(ShaderType::PIXEL_SHADER, L"Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	defaultShader->SetName(L"Default_Shader");
 	{
 		defaultShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -97,25 +104,25 @@ void ResourceManager::AddResource()
 	}
 	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
 
-	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl");
-	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl");
+	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl", InputLayoutType::VertexTextureNormalBillboard);
+	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl", InputLayoutType::VertexTextureNormalBillboard);
 	billBoardShader->SetName(L"Billboard_Shader");
 	{
 		billBoardShader->GetShaderSlot()->SetSlot(L"CameraBuffer",0);
 		billBoardShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		billBoardShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 2);
+		billBoardShader->GetShaderSlot()->SetSlot(L"CameraPos", 2);
 		billBoardShader->GetShaderSlot()->SetSlot(L"texture0", 0);
 	}
 	RESOURCE.AddResource(billBoardShader->GetName(), billBoardShader);
 
 	adjustTexture_shader = make_shared<Shader>();
-	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_AdjustTexture.hlsl");
+	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_AdjustTexture.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	adjustTexture_shader->SetName(L"AdjustTexture_Shader");
 	RESOURCE.AddResource(adjustTexture_shader->GetName(), adjustTexture_shader);
 
 	skyboxShader = make_shared<Shader>();
-	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"SkyBox.hlsl");
-	skyboxShader->CreateShader(ShaderType::PIXEL_SHADER, L"SkyBox.hlsl");
+	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	skyboxShader->CreateShader(ShaderType::PIXEL_SHADER, L"SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	skyboxShader->SetName(L"SkyBox_Shader");
 	{
 		skyboxShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -125,9 +132,9 @@ void ResourceManager::AddResource()
 
 
 	ligthRenderShader = make_shared<Shader>();
-	ligthRenderShader->CreateShader(ShaderType::VERTEX_SHADER, L"Light.hlsl");
+	ligthRenderShader->CreateShader(ShaderType::VERTEX_SHADER, L"Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	ligthRenderShader->SetName(L"Light_Render_Shader");
-	ligthRenderShader->CreateShader(ShaderType::PIXEL_SHADER, L"Light.hlsl");
+	ligthRenderShader->CreateShader(ShaderType::PIXEL_SHADER, L"Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	{
 		ligthRenderShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
 		ligthRenderShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
@@ -137,8 +144,8 @@ void ResourceManager::AddResource()
 
 
 	staticMesh_shader = make_shared<Shader>();
-	staticMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"StaticMesh.hlsl");
-	staticMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"StaticMesh.hlsl");
+	staticMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	staticMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	staticMesh_shader->SetName(L"StaticMesh_Shader");
 	{
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -157,8 +164,8 @@ void ResourceManager::AddResource()
 
 
 	animatedMesh_shader = make_shared<Shader>();
-	animatedMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"AnimatedMesh.hlsl");
-	animatedMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"AnimatedMesh.hlsl");
+	animatedMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	animatedMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	animatedMesh_shader->SetName(L"AnimatedMesh_Shader");
 	{
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -176,13 +183,13 @@ void ResourceManager::AddResource()
 
 
 	material = make_shared<Material>();
-	material->SetTexture(RESOURCE.GetResource<Texture>(L"panda"));
+	material->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
 	material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
 	material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
 	material->SetName(L"DefaultMaterial");
 	RESOURCE.AddResource(material->GetName(), material);
 
-	billboardMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"panda"));
+	billboardMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
 	billboardMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Billboard_Shader"));
 	billboardMaterial->SetName(L"Billboard_Material");
 	RESOURCE.AddResource(billboardMaterial->GetName(), billboardMaterial);

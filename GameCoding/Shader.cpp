@@ -29,15 +29,23 @@ void Shader::LoadShaderFromFile(const wstring& path, const string& name, const s
 	CHECK(hr);
 }
 
-void Shader::CreateShader(ShaderType type, const wstring& shaderPath)
+void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayoutType inputType)
 {
 	if (type == ShaderType::VERTEX_SHADER)
 	{
 		LoadShaderFromFile(shaderPath, "VS", "vs_5_0", _vsBlob);
 		HRESULT hr = DEVICE->CreateVertexShader(_vsBlob->GetBufferPointer(), _vsBlob->GetBufferSize(), nullptr, _vertexShader.GetAddressOf());
 		CHECK(hr);
-		_inputLayout = make_shared<InputLayout>();
-		_inputLayout->CreateInputLayout(VertexTextureNormalTangentBlendData::descs, _vsBlob);
+		if (inputType == InputLayoutType::VertexTextureNormalTangentBlendData)
+		{
+			_inputLayout = make_shared<InputLayout>();
+			_inputLayout->CreateInputLayout(VertexTextureNormalTangentBlendData::descs, _vsBlob);
+		}
+		else if (inputType == InputLayoutType::VertexTextureNormalBillboard)
+		{
+			_inputLayout = make_shared<InputLayout>();
+			_inputLayout->CreateInputLayout(VertexBillboard::descs, _vsBlob);
+		}
 	}
 	else if (type == ShaderType::PIXEL_SHADER)
 	{

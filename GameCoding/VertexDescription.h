@@ -39,3 +39,11 @@ struct VertexTextureNormalTangentBlendData
 	Vec4 blendWeights = { 0, 0, 0, 0 };
 	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
 };
+
+struct VertexBillboard
+{
+	Vec3 position;
+	Vec2 uv;
+	Vec2 scale;
+	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
+};

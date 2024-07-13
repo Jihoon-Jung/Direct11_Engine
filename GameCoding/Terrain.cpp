@@ -4,6 +4,7 @@
 Terrain::Terrain()
 	: Super(ComponentType::Terrain)
 {
+	
 }
 
 Terrain::~Terrain()
@@ -17,12 +18,23 @@ void Terrain::GetGridMesh(shared_ptr<Mesh> grid)
 	
 	_mesh = grid;
 	_vertices = _mesh->GetGeometry()->GetVertices();
+
+	Vec3 localPosition = GetGameObject()->transform()->GetLocalPosition();
+	for (int i = 0; i < _vertices.size(); i++)
+	{
+		_vertices[i].position += localPosition;
+	}
 }
 
-bool Terrain::Pick(Ray ray, float& distance)
+void Terrain::Start()
+{
+	
+}
+
+bool Terrain::Pick(Ray ray, float& distance, Vec3& hitPoint)
 {
 	//_mesh->GetGeometry()->GetVertices();
-
+	
 	for (int32 z = 0; z < _sizeZ; z++)
 	{
 		for (int32 x = 0; x < _sizeX; x++)
@@ -42,6 +54,10 @@ bool Terrain::Pick(Ray ray, float& distance)
 			//  [0] - [1]
 			if (ray.Intersects(p[0], p[1], p[2], OUT distance))
 			{
+				float xAverage = (p[0].x + p[1].x + p[2].x) / 3.0f;
+				float yAverage = (p[0].y + p[1].y + p[2].y) / 3.0f;
+				float zAverage = (p[0].z + p[1].z + p[2].z) / 3.0f;
+				hitPoint = Vec3(xAverage, yAverage, zAverage);
 				return true;
 			}
 
@@ -50,6 +66,10 @@ bool Terrain::Pick(Ray ray, float& distance)
 			//		  [1]
 			if (ray.Intersects(p[3], p[1], p[2], OUT distance))
 			{
+				float xAverage = (p[3].x + p[1].x + p[2].x) / 3.0f;
+				float yAverage = (p[3].y + p[1].y + p[2].y) / 3.0f;
+				float zAverage = (p[3].z + p[1].z + p[2].z) / 3.0f;
+				hitPoint = Vec3(xAverage, yAverage, zAverage);
 				return true;
 			}
 		}

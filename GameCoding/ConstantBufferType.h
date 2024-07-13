@@ -1,4 +1,9 @@
 #pragma once
+enum class InputLayoutType
+{
+	VertexTextureNormalTangentBlendData,
+	VertexTextureNormalBillboard
+};
 struct CameraBuffer
 {
 	Matrix viewMatrix = Matrix::Identity;
@@ -9,6 +14,13 @@ struct TransformBuffer
 {
 	Matrix worldMatrix = Matrix::Identity;
 	Matrix inverseTransposeWorldMatrix = Matrix::Identity;
+};
+
+struct WVPBuffer
+{
+	Matrix viewMatrix = Matrix::Identity;
+	Matrix projectionMatrix = Matrix::Identity;
+	Matrix worldMatrix = Matrix::Identity;
 };
 struct MaterialDesc
 {
@@ -31,6 +43,11 @@ struct LightAndCameraPos
 	float padding1 = 1.0f;
 	Vec3 cameraPosition = Vec3(0.f, 0.f, 0.f);
 	float padding2 = 1.0f;
+};
+struct CameraPos
+{
+	Vec3 cameraPosition = Vec3(0.f, 0.f, 0.f);
+	float padding = 0.0f;
 };
 // Bone
 #define MAX_MODEL_TRANSFORMS 250

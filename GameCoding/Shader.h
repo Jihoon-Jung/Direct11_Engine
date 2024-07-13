@@ -3,7 +3,7 @@
 #include "ResourceBase.h"
 #include "ShaderSlot.h"
 #include "Texture.h"
-
+#include "ConstantBufferType.h"
 enum class ShaderType
 {
 	VERTEX_SHADER,
@@ -18,7 +18,7 @@ public:
 	~Shader();
 
 	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
-	void CreateShader(ShaderType type, const wstring& shaderPath);
+	void CreateShader(ShaderType type, const wstring& shaderPath, InputLayoutType inputType);
 	void PushConstantBufferToShader(ShaderType type, const wstring& name, UINT numBuffers, shared_ptr<Buffer> buffer);
 	void PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, shared_ptr<Texture> texture);
 	void PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, ComPtr<ID3D11ShaderResourceView> shaderResourceViews);

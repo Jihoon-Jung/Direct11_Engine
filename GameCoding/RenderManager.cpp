@@ -31,11 +31,22 @@ void RenderManager::GetRenderObject()
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		if (meshRenderer != nullptr)
 			_renderObjects.push_back(gameObject);
+		if (gameObject->GetComponent<Billboard>() != nullptr)
+			_billboardObjs.push_back(gameObject);
 	}
 }
 
 void RenderManager::RenderObject()
 {
+	if (_billboardObjs.size() > 0)
+	{
+		for (const shared_ptr<GameObject>& gameObject : _billboardObjs)
+		{
+			gameObject->GetComponent<Billboard>()->DrawBillboard();
+		}
+		
+	}
+		
 
 	for (const shared_ptr<GameObject>& gameObject : _renderObjects)
 	{
@@ -44,14 +55,25 @@ void RenderManager::RenderObject()
 
 		shared_ptr<Shader> shader = meshRenderer->GetShader();
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, gameObject->GetTransformBuffer());
-
 		shared_ptr<GameObject> cameraObject;
-		//shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera);
-		if(gameObject->GetObjectType() == GameObjectType::NormalObject)
+		if (gameObject->GetObjectType() == GameObjectType::NormalObject)
 			cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 		else
 			cameraObject = SCENE.GetActiveScene()->Find(L"UICamera");
+
+		WVPBuffer wvp;
+		wvp.worldMatrix = gameObject->GetComponent<Transform>()->GetWorldMatrix();
+		wvp.viewMatrix = cameraObject->GetComponent<Camera>()->GetViewMatrix();
+		wvp.projectionMatrix = cameraObject->GetComponent<Camera>()->GetProjectionMatrix();
+
+		shared_ptr<Buffer> wvpBufer = make_shared<Buffer>();
+		wvpBufer->CreateConstantBuffer<WVPBuffer>();
+		wvpBufer->CopyData(wvp);
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, gameObject->GetTransformBuffer());
+
+
+		
 
 		if (cameraObject != nullptr)
 		{

@@ -3,7 +3,6 @@
 #include "VertexDescription.h"
 #include "Geometry.h"
 #include "ResourceBase.h"
-
 class Mesh : public ResourceBase
 {
 	using Super = ResourceBase;

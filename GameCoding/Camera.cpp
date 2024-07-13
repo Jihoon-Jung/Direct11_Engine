@@ -14,6 +14,7 @@ Camera::~Camera()
 
 void Camera::Update()
 {
+	SetViewProjectionMatrix();
 }
 
 void Camera::Start()
@@ -22,7 +23,7 @@ void Camera::Start()
 
 void Camera::LateUpdate()
 {
-	SetViewProjectionMatrix();
+	
 }
 
 void Camera::SetViewProjectionMatrix()

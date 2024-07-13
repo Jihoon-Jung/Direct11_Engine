@@ -230,6 +230,9 @@
     <ClInclude Include="UIImage.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Billboard.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -393,6 +396,9 @@
       <Filter>소스 파일\Component</Filter>
     </ClCompile>
     <ClCompile Include="UIImage.cpp">
+      <Filter>소스 파일\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Billboard.cpp">
       <Filter>소스 파일\Component</Filter>
     </ClCompile>
   </ItemGroup>

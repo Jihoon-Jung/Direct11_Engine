@@ -45,20 +45,18 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::Picking()
 {
-	Matrix projectionMatrix;
-	Matrix viewMatrix;
 	Matrix worldMatrix;
+	shared_ptr<GameObject> camera = Find(L"MainCamera");
+	shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
 
+	Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
+	Matrix viewMatrix = cameraComponent->GetViewMatrix();
+	shared_ptr<GameObject> billboard_Terrain;
+	bool isTerrainPicked = false;
 	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON))
 	{
 		firstClickedMouseX = INPUT.GetMousePos().x;
 		firstClickedMouseY = INPUT.GetMousePos().y;
-
-		shared_ptr<GameObject> camera = Find(L"MainCamera");
-		shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
-
-		projectionMatrix = cameraComponent->GetProjectionMatrix();
-		viewMatrix = cameraComponent->GetViewMatrix();
 
 		const auto& gameObjects = GetGameObjects();
 
@@ -90,16 +88,49 @@ void Scene::Picking()
 			{
 				float distance = 0.f;
 				Ray ray = GP.GetViewport().GetRayFromScreenPoint(firstClickedMouseX, firstClickedMouseY, gameObject->transform()->GetWorldMatrix(), viewMatrix, projectionMatrix, camera->transform()->GetWorldPosition());
-				if (terrain->Pick(ray, distance) == false)
+				
+				if (terrain->Pick(ray, distance, hitPoint) == false)
 					continue;
 				if (distance < minDistance)
 				{
 					minDistance = distance;
 					picked = gameObject;
+
+					//if (picked->GetComponent<Billboard>() != nullptr)
+					{
+						isTerrainPicked = true;
+						shared_ptr<GameObject> billboard_obj = make_shared<GameObject>();
+						shared_ptr<Transform> billboard_Terrain_transform = make_shared<Transform>();
+
+						billboard_Terrain_transform->SetPosition(hitPoint);
+						billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
+						billboard_obj->AddComponent(billboard_Terrain_transform);
+						shared_ptr<Billboard> billboard = make_shared<Billboard>();
+						for (int32 i = -2; i < 2; i++)
+						{
+
+							Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
+							for (int32 j = -2; j < 2; j++)
+							{
+								Vec2 position = Vec2(i, j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
+
+								billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
+							}
+						}
+						billboard_obj->AddComponent(billboard);
+						billboard_obj->SetName(L"Billboard");
+						AddGameObject(billboard_obj);
+						break;
+					}
 				}
 			}
 			
 		}
+		//if (isTerrainPicked)
+		//{
+		//	billboard_Terrain->SetName(L"Billboard");
+		//	AddGameObject(billboard_Terrain);
+		//}
 	}
 
 	if (INPUT.GetButton(KEY_TYPE::LBUTTON))
@@ -221,4 +252,19 @@ shared_ptr<GameObject> Scene::FindWithComponent(ComponentType type)
 		}
 	}
 	return nullptr;
+}
+
+Vec3 Scene::GetCameraPos()
+{
+	for(const shared_ptr<GameObject>& gameObject : _gameObjects)
+	{
+		if (gameObject->GetComponent<Camera>() != nullptr)
+		{
+			Vec3 cameraPos = gameObject->transform()->GetWorldPosition();
+			return cameraPos;
+		}
+			
+		
+	}
+	return Vec3();
 }

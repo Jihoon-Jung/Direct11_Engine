@@ -13,17 +13,36 @@ public:
 	~Buffer();
 
 	template <typename T>
-	void CreateBuffer(BufferType type, vector<T> source)
+	void CreateBuffer(BufferType type, vector<T> source, bool cpuWrite = false, bool gpuWrite = false)
 	{
 		if (type == BufferType::VERTEX_BUFFER)
 		{
 			_stride = sizeof(T);
 			D3D11_BUFFER_DESC desc;
 			ZeroMemory(&desc, sizeof(desc));
-			desc.Usage = D3D11_USAGE_IMMUTABLE;
+			//desc.Usage = D3D11_USAGE_IMMUTABLE;
 			desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			desc.ByteWidth = (uint32)(sizeof(T) * static_cast<uint32>(source.size()));
+			//desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 
+			if (cpuWrite == false && gpuWrite == false)
+			{
+				desc.Usage = D3D11_USAGE_IMMUTABLE; // CPU Read, GPU Read
+			}
+			else if (cpuWrite == true && gpuWrite == false)
+			{
+				desc.Usage = D3D11_USAGE_DYNAMIC; // CPU Write, GPU Read
+				desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+			}
+			else if (cpuWrite == false && gpuWrite == true) // CPU Read, GPU Write
+			{
+				desc.Usage = D3D11_USAGE_DEFAULT;
+			}
+			else
+			{
+				desc.Usage = D3D11_USAGE_STAGING;
+				desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+			}
 			D3D11_SUBRESOURCE_DATA data;
 			ZeroMemory(&data, sizeof(data));
 			data.pSysMem = source.data();
@@ -69,6 +88,7 @@ public:
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 		HRESULT hr = Graphics::GetInstance().GetDevice()->CreateBuffer(&desc, nullptr, _constantBuffer.GetAddressOf());
+		CHECK(hr);
 	}
 	template <typename T>
 	void CopyData(const T& data)

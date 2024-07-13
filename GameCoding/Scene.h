@@ -18,8 +18,12 @@ public:
 	shared_ptr<GameObject> Find(const wstring& name);
 
 	shared_ptr<GameObject> FindWithComponent(ComponentType type);
+
+	Vec3 GetCameraPos();
 private:
 	vector<shared_ptr<GameObject>> _gameObjects;
+
+	Vec3 hitPoint;
 
 	shared_ptr<GameObject> picked = nullptr;
 	int32 firstClickedMouseX = 0;

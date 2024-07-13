@@ -27,6 +27,7 @@ private:
 	shared_ptr<Pipeline> _pipeline;
 	PipelineInfo _pipelineInfo;
 	vector<shared_ptr<GameObject>> _renderObjects;
+	vector<shared_ptr<GameObject>> _billboardObjs;
 	KeyframeDesc _keyframeDesc;
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
