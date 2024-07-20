@@ -127,6 +127,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		cube->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		boxCollider->SetScale(1.0f);
 		cube->AddComponent(boxCollider);
 		cube->SetName(L"cube");
 	}
@@ -196,6 +197,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		tower->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		boxCollider->SetScale(1000.0f);
 		tower->AddComponent(boxCollider);
 		tower->SetName(L"tower");
 	}
@@ -223,6 +225,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		Kachujin->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		boxCollider->SetScale(1000.0f);
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
@@ -252,13 +255,13 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(uiCamera);
 	_activeScene->AddGameObject(light);
 	_activeScene->AddGameObject(skyBox);
-	_activeScene->AddGameObject(sphere);
-	_activeScene->AddGameObject(cube);
+	//_activeScene->AddGameObject(sphere);
+	//_activeScene->AddGameObject(cube);
 	_activeScene->AddGameObject(grid);
 	//_activeScene->AddGameObject(tower);
 	//_activeScene->AddGameObject(quard_ui);
 	//_activeScene->AddGameObject(uiButton);
 	//_activeScene->AddGameObject(quard);
 	//_activeScene->AddGameObject(billboard_Terrain);
-	//_activeScene->AddGameObject(Kachujin);
+	_activeScene->AddGameObject(Kachujin);
 }

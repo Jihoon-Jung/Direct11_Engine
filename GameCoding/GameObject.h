@@ -36,7 +36,7 @@ public:
 	template <typename T>
 	shared_ptr<T> GetComponent()
 	{
-		ComponentType type = ComponentType::Script;
+		ComponentType type = ComponentType::None;
 		if (std::is_same_v<T, Transform>)
 			type = ComponentType::Transform;
 		if (std::is_same_v<T, MeshRenderer>)
@@ -58,8 +58,11 @@ public:
 		if (std::is_same_v<T, MonoBehaviour>)
 			type = ComponentType::Script;
 
+
 		uint8 index = static_cast<uint8>(type);
 		shared_ptr<Component> component = _components[index];
+		if (component == nullptr)
+			return nullptr;
 		shared_ptr<T> castedComponent = static_pointer_cast<T>(component);
 		return castedComponent;
 

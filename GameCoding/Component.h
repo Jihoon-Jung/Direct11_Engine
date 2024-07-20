@@ -15,7 +15,8 @@ enum class ComponentType : uint8
 	UIImage,
 	Button,
 	Billboard,
-	Script
+	Script,
+	None
 };
 enum
 {

@@ -57,5 +57,7 @@ public:
 	ComPtr<ID3D11DeviceContext> GetDeviceContext() { return _deviceContext; }
 	int _viewWidth = 0;
 	int _viewHeight = 0;
+
+	uint32    _4xMsaaQuality = 0;
 };
 

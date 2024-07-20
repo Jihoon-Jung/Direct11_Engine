@@ -22,7 +22,9 @@ public:
 	Vec3 GetCameraPos();
 private:
 	vector<shared_ptr<GameObject>> _gameObjects;
-
+	shared_ptr<GameObject> _billboard_obj = make_shared<GameObject>();
+	shared_ptr<Transform> _billboard_Terrain_transform = make_shared<Transform>();
+	shared_ptr<Billboard> _billboard = make_shared<Billboard>();
 	Vec3 hitPoint;
 
 	shared_ptr<GameObject> picked = nullptr;

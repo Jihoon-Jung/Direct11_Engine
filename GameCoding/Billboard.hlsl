@@ -37,7 +37,7 @@ VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
-	float4 position = mul(input.position, worldMatrix);
+	float4 position = input.position;// mul(input.position, worldMatrix);
 
 	float3 up = float3(0, 1, 0);
 	float3 forward = position.xyz - cameraPosition; // BillBoard

@@ -13,9 +13,9 @@ void SamplerState::CreateSamplerState()
 {
 	D3D11_SAMPLER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	desc.BorderColor[0] = 1;
 	desc.BorderColor[1] = 0;
 	desc.BorderColor[2] = 0;

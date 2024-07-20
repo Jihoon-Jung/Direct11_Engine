@@ -18,8 +18,9 @@ public:
 	virtual bool Intersects(shared_ptr<BaseCollider>& other) = 0; // 다른 collider와 충돌했는지 판별
 
 	ColliderType GetColliderType() { return _colliderType; }
-
+	void SetScale(float scale) { _scale = scale; }
 protected:
 	ColliderType _colliderType;
+	float _scale = 1.0f;
 };
 

@@ -4,27 +4,6 @@
 Billboard::Billboard()
 	: Super(ComponentType::Billboard)
 {
-	int32 vertexCount = MAX_BILLBOARD_COUNT * 4;
-	int32 indexCount = MAX_BILLBOARD_COUNT * 6;
-
-	_vertices.resize(vertexCount);
-
-	_indices.resize(indexCount);
-
-	for (int32 i = 0; i < MAX_BILLBOARD_COUNT; i++)
-	{
-		_indices[i * 6 + 0] = i * 4 + 0;
-		_indices[i * 6 + 1] = i * 4 + 1;
-		_indices[i * 6 + 2] = i * 4 + 2;
-		_indices[i * 6 + 3] = i * 4 + 2;
-		_indices[i * 6 + 4] = i * 4 + 1;
-		_indices[i * 6 + 5] = i * 4 + 3;
-	}
-
-	_buffer = make_shared<Buffer>();
-	_buffer->CreateBuffer(BufferType::VERTEX_BUFFER, _vertices, true, false);
-	_buffer->CreateBuffer(BufferType::INDEX_BUFFER, _indices);
-
 }
 
 Billboard::~Billboard()
@@ -38,11 +17,15 @@ void Billboard::Update()
 
 void Billboard::Add(Vec3 position, Vec2 scale)
 {
-	_vertices[_drawCount * 4 + 0].position = position;
-	_vertices[_drawCount * 4 + 1].position = position;
-	_vertices[_drawCount * 4 + 2].position = position;
-	_vertices[_drawCount * 4 + 3].position = position;
+	shared_ptr<GameObject> obj = GetGameObject();
+	shared_ptr<Transform> transform = obj->transform();
+	
+	Matrix matWorld = GetGameObject()->transform()->GetWorldMatrix();
 
+	for (int i = 0; i < 4; i++)
+	{
+		_vertices[_drawCount * 4 + i].position = Vec3::Transform(position, matWorld);
+	}
 	_vertices[_drawCount * 4 + 0].uv = Vec2(0, 1);
 	_vertices[_drawCount * 4 + 1].uv = Vec2(0, 0);
 	_vertices[_drawCount * 4 + 2].uv = Vec2(1, 1);
@@ -52,6 +35,7 @@ void Billboard::Add(Vec3 position, Vec2 scale)
 	_vertices[_drawCount * 4 + 1].scale = scale;
 	_vertices[_drawCount * 4 + 2].scale = scale;
 	_vertices[_drawCount * 4 + 3].scale = scale;
+
 
 	_drawCount++;
 }
@@ -120,4 +104,30 @@ void Billboard::DrawBillboard()
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 
 	DEVICECONTEXT->DrawIndexed(_drawCount * 6, 0, 0);
+}
+
+void Billboard::SetBillboardBuffer(int count)
+{
+	_billboardCount += count;
+
+	int32 vertexCount = _billboardCount * 4;
+	int32 indexCount = _billboardCount * 6;
+
+	_vertices.resize(vertexCount);
+
+	_indices.resize(indexCount);
+
+	for (int32 i = 0; i < _billboardCount; i++)
+	{
+		_indices[i * 6 + 0] = i * 4 + 0;
+		_indices[i * 6 + 1] = i * 4 + 1;
+		_indices[i * 6 + 2] = i * 4 + 2;
+		_indices[i * 6 + 3] = i * 4 + 2;
+		_indices[i * 6 + 4] = i * 4 + 1;
+		_indices[i * 6 + 5] = i * 4 + 3;
+	}
+
+	_buffer = make_shared<Buffer>();
+	_buffer->CreateBuffer(BufferType::VERTEX_BUFFER, _vertices, true, false);
+	_buffer->CreateBuffer(BufferType::INDEX_BUFFER, _indices);
 }

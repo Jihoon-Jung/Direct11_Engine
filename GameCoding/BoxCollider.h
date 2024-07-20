@@ -10,8 +10,8 @@ public:
 	virtual bool Intersects(shared_ptr<BaseCollider>& other) override;
 
 	BoundingOrientedBox& GetBoundingBox() { return _boundingBox; }
-
 private:
 	BoundingOrientedBox _boundingBox;
+	
 };
 

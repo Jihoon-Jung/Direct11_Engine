@@ -16,10 +16,12 @@ public:
 
 	void SetMaterial(shared_ptr<Material> material) { _material = material; }
 	void DrawBillboard();
+	void SetBillboardBuffer(int count);
 private:
 	vector<VertexBillboard> _vertices;
 	vector<uint32> _indices;
 	shared_ptr<Buffer> _buffer;
+	int _billboardCount = 0;
 
 	int32 _drawCount = 0;
 	int32 _prevCount = 0;

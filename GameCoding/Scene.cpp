@@ -52,7 +52,7 @@ void Scene::Picking()
 	Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
 	Matrix viewMatrix = cameraComponent->GetViewMatrix();
 	shared_ptr<GameObject> billboard_Terrain;
-	bool isTerrainPicked = false;
+
 	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON))
 	{
 		firstClickedMouseX = INPUT.GetMousePos().x;
@@ -98,14 +98,16 @@ void Scene::Picking()
 
 					//if (picked->GetComponent<Billboard>() != nullptr)
 					{
-						isTerrainPicked = true;
-						shared_ptr<GameObject> billboard_obj = make_shared<GameObject>();
-						shared_ptr<Transform> billboard_Terrain_transform = make_shared<Transform>();
+						_billboard_Terrain_transform->SetPosition(hitPoint);
+						_billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
+						if (_billboard_obj->GetComponent<Transform>() == nullptr)
+							_billboard_obj->AddComponent(_billboard_Terrain_transform);
+						if (_billboard_obj->GetComponent<Billboard>() == nullptr)
+							_billboard_obj->AddComponent(_billboard);
 
-						billboard_Terrain_transform->SetPosition(hitPoint);
-						billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
-						billboard_obj->AddComponent(billboard_Terrain_transform);
-						shared_ptr<Billboard> billboard = make_shared<Billboard>();
+						_billboard_obj->SetName(L"Billboard");
+						_billboard->SetBillboardBuffer(16);
+
 						for (int32 i = -2; i < 2; i++)
 						{
 
@@ -114,18 +116,16 @@ void Scene::Picking()
 							{
 								Vec2 position = Vec2(i, j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
 
-								billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
+								_billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
 							}
 						}
-						billboard_obj->AddComponent(billboard);
-						billboard_obj->SetName(L"Billboard");
-						AddGameObject(billboard_obj);
-						break;
 					}
 				}
 			}
 			
 		}
+		if (Find(L"Billboard") == nullptr)
+			AddGameObject(_billboard_obj);
 		//if (isTerrainPicked)
 		//{
 		//	billboard_Terrain->SetName(L"Billboard");
