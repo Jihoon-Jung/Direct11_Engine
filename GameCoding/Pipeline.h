@@ -4,6 +4,7 @@
 #include "RasterizerState.h"
 #include "BlendState.h"
 #include "SamplerState.h"
+#include "DepthStencilState.h"
 #include "Buffer.h"
 #include "Texture.h"
 
@@ -13,6 +14,7 @@ struct PipelineInfo
 	shared_ptr<RasterizerState> rasterizerState;
 	shared_ptr<BlendState> blendState;
 	shared_ptr<SamplerState> samplerState;
+	shared_ptr<DepthStencilState> depthStencilState;
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 };
 

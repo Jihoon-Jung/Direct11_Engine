@@ -50,6 +50,7 @@ void RenderManager::RenderObject()
 
 	for (const shared_ptr<GameObject>& gameObject : _renderObjects)
 	{
+		
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<Model> model = meshRenderer->GetModel();
 
@@ -90,40 +91,135 @@ void RenderManager::RenderObject()
 
 		if (model == nullptr)
 		{
+			// for stencil test
+			if (gameObject->GetName() == L"stencil_cube1")
+			{
+				shared_ptr<Material> material = meshRenderer->GetMaterial();
+				_pipeline->SetBuffer(meshRenderer->GetMesh()->GetBuffer());
+
+				_pipeline->SetIndicesSize(meshRenderer->GetMesh()->GetGeometry()->GetIndices().size());
+				_pipeline->SetTexture(material->GetTexture());
+				_pipeline->SetNormalMap(material->GetNormalMap());
+				_pipeline->SetShader(material->GetShader());
+
+
+				_pipelineInfo = _pipeline->GetPipelineInfo();
+
+				_pipelineInfo.blendState = make_shared<BlendState>();
+				_pipelineInfo.blendState->CreateBlendState();
+
+				_pipelineInfo.inputLayout = material->GetShader()->GetInputLayout();
+
+				_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
+				_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
+
+				_pipelineInfo.depthStencilState = make_shared<DepthStencilState>();
+				_pipelineInfo.depthStencilState->SetDepthStencilState(DSState::CUSTOM1);
+
+				_pipelineInfo.samplerState = make_shared<SamplerState>();
+				_pipelineInfo.samplerState->CreateSamplerState();
+
+
+				LightAndCameraPos lightDirection;
+				lightDirection.lightPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light)->transform()->GetWorldPosition();
+				lightDirection.cameraPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
+
+				shared_ptr<Buffer> light = make_shared<Buffer>();
+				light->CreateConstantBuffer<LightAndCameraPos>();
+				light->CopyData(lightDirection);
+
+
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, meshRenderer->GetMaterialBuffer());
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+
+				_pipeline->UpdatePipeline(_pipelineInfo);
+			}
+			if (gameObject->GetName() == L"stencil_cube2")
+			{
+				shared_ptr<Material> material = meshRenderer->GetMaterial();
+				_pipeline->SetBuffer(meshRenderer->GetMesh()->GetBuffer());
+
+				_pipeline->SetIndicesSize(meshRenderer->GetMesh()->GetGeometry()->GetIndices().size());
+				_pipeline->SetTexture(material->GetTexture());
+				_pipeline->SetNormalMap(material->GetNormalMap());
+				_pipeline->SetShader(material->GetShader());
+
+
+				_pipelineInfo = _pipeline->GetPipelineInfo();
+
+				_pipelineInfo.blendState = make_shared<BlendState>();
+				_pipelineInfo.blendState->CreateBlendState();
+
+				_pipelineInfo.inputLayout = material->GetShader()->GetInputLayout();
+
+				_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
+				_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
+
+				_pipelineInfo.depthStencilState = make_shared<DepthStencilState>();
+				_pipelineInfo.depthStencilState->SetDepthStencilState(DSState::CUStom2);
+
+				_pipelineInfo.samplerState = make_shared<SamplerState>();
+				_pipelineInfo.samplerState->CreateSamplerState();
+
+
+				LightAndCameraPos lightDirection;
+				lightDirection.lightPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light)->transform()->GetWorldPosition();
+				lightDirection.cameraPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
+
+				shared_ptr<Buffer> light = make_shared<Buffer>();
+				light->CreateConstantBuffer<LightAndCameraPos>();
+				light->CopyData(lightDirection);
+
+
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, meshRenderer->GetMaterialBuffer());
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+
+				_pipeline->UpdatePipeline(_pipelineInfo);
+				DEVICECONTEXT->OMSetDepthStencilState(0, 0);
+			}
+			else
+			{
+				shared_ptr<Material> material = meshRenderer->GetMaterial();
+				_pipeline->SetBuffer(meshRenderer->GetMesh()->GetBuffer());
+
+				_pipeline->SetIndicesSize(meshRenderer->GetMesh()->GetGeometry()->GetIndices().size());
+				_pipeline->SetTexture(material->GetTexture());
+				_pipeline->SetNormalMap(material->GetNormalMap());
+				_pipeline->SetShader(material->GetShader());
+
+
+				_pipelineInfo = _pipeline->GetPipelineInfo();
+
+				_pipelineInfo.blendState = make_shared<BlendState>();
+				_pipelineInfo.blendState->CreateBlendState();
+
+				_pipelineInfo.inputLayout = material->GetShader()->GetInputLayout();
+
+				_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
+				_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
+
+				_pipelineInfo.depthStencilState = make_shared<DepthStencilState>();
+				_pipelineInfo.depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
+				_pipelineInfo.samplerState = make_shared<SamplerState>();
+				_pipelineInfo.samplerState->CreateSamplerState();
+
+
+				LightAndCameraPos lightDirection;
+				lightDirection.lightPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light)->transform()->GetWorldPosition();
+				lightDirection.cameraPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
+
+				shared_ptr<Buffer> light = make_shared<Buffer>();
+				light->CreateConstantBuffer<LightAndCameraPos>();
+				light->CopyData(lightDirection);
+
+
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, meshRenderer->GetMaterialBuffer());
+				shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+
+				_pipeline->UpdatePipeline(_pipelineInfo);
+			}
 			
-			shared_ptr<Material> material = meshRenderer->GetMaterial();
-			_pipeline->SetBuffer(meshRenderer->GetMesh()->GetBuffer());
-
-			_pipeline->SetIndicesSize(meshRenderer->GetMesh()->GetGeometry()->GetIndices().size());
-			_pipeline->SetTexture(material->GetTexture());
-			_pipeline->SetNormalMap(material->GetNormalMap());
-			_pipeline->SetShader(material->GetShader());
-			
-
-			_pipelineInfo = _pipeline->GetPipelineInfo();
-			_pipelineInfo.blendState = make_shared<BlendState>();
-			_pipelineInfo.blendState->CreateBlendState();
-			_pipelineInfo.inputLayout = material->GetShader()->GetInputLayout();
-			_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
-			_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
-
-			_pipelineInfo.samplerState = make_shared<SamplerState>();
-			_pipelineInfo.samplerState->CreateSamplerState();
-			
-
-			LightAndCameraPos lightDirection;
-			lightDirection.lightPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Light)->transform()->GetWorldPosition();
-			lightDirection.cameraPosition = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
-
-			shared_ptr<Buffer> light = make_shared<Buffer>();
-			light->CreateConstantBuffer<LightAndCameraPos>();
-			light->CopyData(lightDirection);
-
-			
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, meshRenderer->GetMaterialBuffer());
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
-
-			_pipeline->UpdatePipeline(_pipelineInfo);
 		}
 		else
 		{
@@ -249,11 +345,17 @@ void RenderManager::RenderObject()
 				_pipeline->SetShader(mesh->material->GetShader());
 
 				_pipelineInfo = _pipeline->GetPipelineInfo();
+
 				_pipelineInfo.blendState = make_shared<BlendState>();
 				_pipelineInfo.blendState->CreateBlendState();
+
 				_pipelineInfo.inputLayout = mesh->material->GetShader()->GetInputLayout();
+
 				_pipelineInfo.rasterizerState = make_shared<RasterizerState>();
 				_pipelineInfo.rasterizerState->CreateRasterizerState(meshRenderer->GetRasterzerStates());
+
+				_pipelineInfo.depthStencilState = make_shared<DepthStencilState>();
+				_pipelineInfo.depthStencilState->SetDepthStencilState(DSState::NORMAL);
 
 				_pipelineInfo.samplerState = make_shared<SamplerState>();
 				_pipelineInfo.samplerState->CreateSamplerState();

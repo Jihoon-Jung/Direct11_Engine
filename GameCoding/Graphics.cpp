@@ -87,16 +87,6 @@ void Graphics::CreateDepthStencilView()
 		HRESULT hr = DEVICE->CreateDepthStencilView(_depthStencilTexture.Get(), &desc, _depthStencilView.GetAddressOf());
 		CHECK(hr);
 	}
-	{
-		D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
-		ZeroMemory(&depthStencilStateDesc, sizeof(depthStencilStateDesc));
-		depthStencilStateDesc.DepthEnable = TRUE;
-		depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
-		depthStencilStateDesc.StencilEnable = FALSE;
-		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
-		CHECK(hr);
-	}
 }
 
 
@@ -119,7 +109,6 @@ void Graphics::SetRenderTarget()
 
 void Graphics::SetDepthStencilView()
 {
-	_deviceContext->OMSetDepthStencilState(_depthStencilState.Get(), 1);
 	_deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 }
 

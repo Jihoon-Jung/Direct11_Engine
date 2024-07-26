@@ -12,7 +12,6 @@ private:
 
 	ComPtr<ID3D11Texture2D> _depthStencilTexture;
 	ComPtr<ID3D11DepthStencilView> _depthStencilView;
-	ComPtr<ID3D11DepthStencilState> _depthStencilState;
 
 	//D3D11_VIEWPORT _viewport = { 0 };
 	Viewport _viewport;

@@ -2,30 +2,30 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\GameCoding.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\AnimatedMesh.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\AnimatedMesh.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Billboard.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\Billboard.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_AdjustTexture.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\ComputeShader_AdjustTexture.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Default.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\Default.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Light.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\Light.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SkyBox.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\SkyBox.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\StaticMesh.cso</FullPath>
+      <FullPath>C:\Direct11_JJH\Direct11_Engine\Binaries\StaticMesh.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

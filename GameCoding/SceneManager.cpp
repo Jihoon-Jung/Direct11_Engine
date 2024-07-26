@@ -62,6 +62,14 @@ void SceneManager::LoadTestScene()
 	cube->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> cube_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> stencil_cube1 = make_shared<GameObject>();
+	stencil_cube1->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> stencil_cube1_transform = make_shared<Transform>();
+
+	shared_ptr<GameObject> stencil_cube2 = make_shared<GameObject>();
+	stencil_cube2->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> stencil_cube2_transform = make_shared<Transform>();
+
 	shared_ptr<GameObject> grid = make_shared<GameObject>();
 	grid->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> grid_transform = make_shared<Transform>();
@@ -130,6 +138,28 @@ void SceneManager::LoadTestScene()
 		boxCollider->SetScale(1.0f);
 		cube->AddComponent(boxCollider);
 		cube->SetName(L"cube");
+	}
+	{
+		stencil_cube1_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube1_transform->SetLocalScale(Vec3(1.0f));
+		stencil_cube1->AddComponent(stencil_cube1_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		stencil_cube1->AddComponent(meshRenderer);
+		stencil_cube1->SetName(L"stencil_cube1");
+	}
+	{
+		stencil_cube2_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube2_transform->SetScale(Vec3(1.1f));
+		stencil_cube2->AddComponent(stencil_cube2_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		stencil_cube2->AddComponent(meshRenderer);
+		stencil_cube2->SetName(L"stencil_cube2");
 	}
 	{
 		grid_transform->SetPosition(Vec3(5.0f, 0.0f, 0.0f));
@@ -216,7 +246,7 @@ void SceneManager::LoadTestScene()
 		light->SetName(L"MainLight");
 	}
 	{
-		kachujin_transform->SetPosition(Vec3(0.0f, 0.0f, 0.0f));
+		kachujin_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
 		kachujin_transform->SetLocalScale(Vec3(0.01f));
 		Kachujin->AddComponent(kachujin_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -263,5 +293,8 @@ void SceneManager::LoadTestScene()
 	//_activeScene->AddGameObject(uiButton);
 	//_activeScene->AddGameObject(quard);
 	//_activeScene->AddGameObject(billboard_Terrain);
+	_activeScene->AddGameObject(stencil_cube1);
+	_activeScene->AddGameObject(stencil_cube2);
+	
 	_activeScene->AddGameObject(Kachujin);
 }

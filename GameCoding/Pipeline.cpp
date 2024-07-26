@@ -52,7 +52,7 @@ void Pipeline::UpdatePipeline(PipelineInfo pipelineInfo)
 
 	// OutputMerger
 	DEVICECONTEXT->OMSetBlendState(pipelineInfo.blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
-
+	DEVICECONTEXT->OMSetDepthStencilState(pipelineInfo.depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_indicesSize, 0, 0);
 
 }

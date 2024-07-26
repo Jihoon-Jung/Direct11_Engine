@@ -233,6 +233,9 @@
     <ClInclude Include="Billboard.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
+    <ClInclude Include="DepthStencilState.h">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -400,6 +403,9 @@
     </ClCompile>
     <ClCompile Include="Billboard.cpp">
       <Filter>소스 파일\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencilState.cpp">
+      <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
