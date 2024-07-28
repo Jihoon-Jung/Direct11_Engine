@@ -2,7 +2,8 @@
 enum class InputLayoutType
 {
 	VertexTextureNormalTangentBlendData,
-	VertexTextureNormalBillboard
+	VertexTextureNormalBillboard,
+	VertexBillboard_Geometry
 };
 struct CameraBuffer
 {

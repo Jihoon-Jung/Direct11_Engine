@@ -8,7 +8,8 @@ enum class ShaderType
 {
 	VERTEX_SHADER,
 	PIXEL_SHADER,
-	COMPUTE_SHADER
+	COMPUTE_SHADER,
+	GEOMETRY_SHADER,
 };
 class Shader : public ResourceBase
 {
@@ -25,6 +26,7 @@ public:
 	ComPtr<ID3D11VertexShader> GetVertexShader() { return _vertexShader; }
 	ComPtr<ID3D11PixelShader> GetPixelShader() { return _pixelShader; }
 	ComPtr<ID3D11ComputeShader> GetComputeShader() { return _computeShader; }
+	ComPtr<ID3D11GeometryShader> GetGeometryShader() { return _geometryShader; }
 	ComPtr<ID3DBlob> GetVertexShaderBlob() { return _vsBlob; }
 	ComPtr<ID3DBlob> GetPixelShaderBlob() { return _psBlob; }
 	shared_ptr<InputLayout> GetInputLayout() { return _inputLayout; }
@@ -34,9 +36,11 @@ private:
 	ComPtr<ID3DBlob> _vsBlob;
 	ComPtr<ID3DBlob> _psBlob;
 	ComPtr<ID3DBlob> _csBlob;
+	ComPtr<ID3DBlob> _gsBlob;
 	ComPtr<ID3D11VertexShader> _vertexShader;
 	ComPtr<ID3D11PixelShader> _pixelShader;
 	ComPtr<ID3D11ComputeShader> _computeShader;
+	ComPtr<ID3D11GeometryShader> _geometryShader;
 	shared_ptr<InputLayout> _inputLayout;
 	shared_ptr<ShaderSlot> _shaderSlot;
 };

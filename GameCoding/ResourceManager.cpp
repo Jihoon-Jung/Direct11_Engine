@@ -104,8 +104,9 @@ void ResourceManager::AddResource()
 	}
 	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
 
-	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl", InputLayoutType::VertexTextureNormalBillboard);
-	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl", InputLayoutType::VertexTextureNormalBillboard);
+	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
+	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
+	billBoardShader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
 	billBoardShader->SetName(L"Billboard_Shader");
 	{
 		billBoardShader->GetShaderSlot()->SetSlot(L"CameraBuffer",0);

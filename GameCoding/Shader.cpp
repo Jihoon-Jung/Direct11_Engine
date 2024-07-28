@@ -36,15 +36,18 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayou
 		LoadShaderFromFile(shaderPath, "VS", "vs_5_0", _vsBlob);
 		HRESULT hr = DEVICE->CreateVertexShader(_vsBlob->GetBufferPointer(), _vsBlob->GetBufferSize(), nullptr, _vertexShader.GetAddressOf());
 		CHECK(hr);
+		_inputLayout = make_shared<InputLayout>();
 		if (inputType == InputLayoutType::VertexTextureNormalTangentBlendData)
 		{
-			_inputLayout = make_shared<InputLayout>();
 			_inputLayout->CreateInputLayout(VertexTextureNormalTangentBlendData::descs, _vsBlob);
 		}
 		else if (inputType == InputLayoutType::VertexTextureNormalBillboard)
 		{
-			_inputLayout = make_shared<InputLayout>();
 			_inputLayout->CreateInputLayout(VertexBillboard::descs, _vsBlob);
+		}
+		else if (inputType == InputLayoutType::VertexBillboard_Geometry)
+		{
+			_inputLayout->CreateInputLayout(VertexBillboard_GeometryShader::descs, _vsBlob);
 		}
 	}
 	else if (type == ShaderType::PIXEL_SHADER)
@@ -57,6 +60,12 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayou
 	{
 		LoadShaderFromFile(shaderPath, "CS", "cs_5_0", _csBlob);
 		HRESULT hr = DEVICE->CreateComputeShader(_csBlob->GetBufferPointer(), _csBlob->GetBufferSize(), nullptr, &_computeShader);
+		CHECK(hr);
+	}
+	else if (type == ShaderType::GEOMETRY_SHADER)
+	{
+		LoadShaderFromFile(shaderPath, "GS", "gs_5_0", _gsBlob);
+		HRESULT hr = DEVICE->CreateGeometryShader(_gsBlob->GetBufferPointer(), _gsBlob->GetBufferSize(), nullptr, &_geometryShader);
 		CHECK(hr);
 	}
 }

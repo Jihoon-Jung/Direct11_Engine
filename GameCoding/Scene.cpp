@@ -98,27 +98,31 @@ void Scene::Picking()
 
 					//if (picked->GetComponent<Billboard>() != nullptr)
 					{
-						_billboard_Terrain_transform->SetPosition(hitPoint);
-						_billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
+						
 						if (_billboard_obj->GetComponent<Transform>() == nullptr)
+						{
+							_billboard_Terrain_transform->SetPosition(hitPoint);
+							_billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
 							_billboard_obj->AddComponent(_billboard_Terrain_transform);
+						}
+							
 						if (_billboard_obj->GetComponent<Billboard>() == nullptr)
 							_billboard_obj->AddComponent(_billboard);
 
 						_billboard_obj->SetName(L"Billboard");
-						_billboard->SetBillboardBuffer(16);
+						Vec2 scale = Vec2(0.5f);
+						_billboard->Add(hitPoint, scale);
+						//for (int32 i = -2; i < 2; i++)
+						//{
 
-						for (int32 i = -2; i < 2; i++)
-						{
+						//	Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
+						//	for (int32 j = -2; j < 2; j++)
+						//	{
+						//		Vec2 position = Vec2(i, j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
 
-							Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
-							for (int32 j = -2; j < 2; j++)
-							{
-								Vec2 position = Vec2(i, j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
-
-								_billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
-							}
-						}
+						//		_billboard->Add(hitPoint, scale);
+						//	}
+						//}
 					}
 				}
 			}
