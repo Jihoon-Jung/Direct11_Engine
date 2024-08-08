@@ -373,4 +373,5 @@ void RenderManager::RenderObject()
 void RenderManager::ClearRenderObject()
 {
 	_renderObjects.clear();
+	_billboardObjs.clear();
 }

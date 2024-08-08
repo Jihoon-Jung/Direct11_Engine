@@ -9,7 +9,7 @@ RasterizerState::~RasterizerState()
 {
 }
 
-void RasterizerState::CreateRasterizerState(RasterzerStates rasterizerState)
+void RasterizerState::CreateRasterizerState(RasterizerStates rasterizerState)
 {
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));

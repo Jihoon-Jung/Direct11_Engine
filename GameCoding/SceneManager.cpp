@@ -162,7 +162,7 @@ void SceneManager::LoadTestScene()
 		stencil_cube2->SetName(L"stencil_cube2");
 	}
 	{
-		grid_transform->SetPosition(Vec3(5.0f, 0.0f, 0.0f));
+		grid_transform->SetPosition(Vec3(4.0f, 0.0f, 0.0f));
 		grid->AddComponent(grid_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
@@ -255,7 +255,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		Kachujin->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		boxCollider->SetScale(1000.0f);
+		boxCollider->SetScale(1.0f);
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
@@ -284,7 +284,7 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(camera);
 	_activeScene->AddGameObject(uiCamera);
 	_activeScene->AddGameObject(light);
-	_activeScene->AddGameObject(skyBox);
+	//_activeScene->AddGameObject(skyBox);
 	//_activeScene->AddGameObject(sphere);
 	//_activeScene->AddGameObject(cube);
 	_activeScene->AddGameObject(grid);

@@ -20,6 +20,7 @@ void ResourceManager::AddResource()
 	shared_ptr<Texture> normalMap = make_shared<Texture>();
 	shared_ptr<Texture> lightTexture = make_shared<Texture>();
 	shared_ptr<Texture> skyBoxTexture = make_shared<Texture>();
+	shared_ptr<Texture> treeTexture = make_shared<Texture>();
 
 	shared_ptr<Texture> grassTexture = make_shared<Texture>();
 
@@ -76,6 +77,11 @@ void ResourceManager::AddResource()
 	skyBoxTexture->CreateTexture(L"4k_Sky.jpg");
 	skyBoxTexture->SetName(L"skyBox");
 	RESOURCE.AddResource(skyBoxTexture->GetName(), skyBoxTexture);
+
+	treeTexture = make_shared<Texture>();
+	treeTexture->CreateTexture(L"tree.png");
+	treeTexture->SetName(L"tree");
+	RESOURCE.AddResource(treeTexture->GetName(), treeTexture);
 
 	normalMap = make_shared<Texture>();
 	normalMap->CreateTexture(L"Leather_Normal.jpg");

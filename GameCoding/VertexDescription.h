@@ -51,6 +51,5 @@ struct VertexBillboard
 struct VertexBillboard_GeometryShader
 {
 	Vec3 position;
-	Vec2 scale;
 	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
 };

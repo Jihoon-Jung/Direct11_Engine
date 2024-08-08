@@ -75,6 +75,8 @@ void Shader::PushConstantBufferToShader(ShaderType type, const wstring& name, UI
 	UINT slot = _shaderSlot->GetSlotNumber(name);
 	if (type == ShaderType::VERTEX_SHADER)
 		DEVICECONTEXT->VSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
+	if (type == ShaderType::GEOMETRY_SHADER)
+		DEVICECONTEXT->GSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 	else
 		DEVICECONTEXT->PSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 }

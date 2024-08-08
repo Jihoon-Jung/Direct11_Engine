@@ -1,8 +1,6 @@
 #pragma once
 #include "Component.h"
 
-#define MAX_BILLBOARD_COUNT 16
-
 class Billboard : public Component
 {
 	using Super = Component;

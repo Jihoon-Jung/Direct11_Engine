@@ -20,8 +20,13 @@ void Texture::CreateTexture(const wstring& path)
 	hr = ::CreateShaderResourceView(DEVICE.Get(), img.GetImages(), img.GetImageCount(), md, _shaderResourceView.GetAddressOf());
 	CHECK(hr);
 
+	// 텍스처 포맷 확인
+	DXGI_FORMAT format = md.format;
+
 	_size.x = md.width;
 	_size.y = md.height;
+
+	
 }
 void Texture::SetShaderResourceView(ComPtr<ID3D11ShaderResourceView> shaderResourceView)
 {

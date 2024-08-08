@@ -1,7 +1,7 @@
 #pragma once
 #include "Model.h"
 
-struct RasterzerStates
+struct RasterizerStates
 {
 	D3D11_FILL_MODE fillMode;
 	D3D11_CULL_MODE cullMode;
@@ -40,7 +40,7 @@ private:
 	shared_ptr<Material> _material;
 	shared_ptr<Model> _model;
 
-	RasterzerStates _rasterzerStates;
+	RasterizerStates _rasterzerStates;
 
 };
 

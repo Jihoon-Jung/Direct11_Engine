@@ -13,33 +13,42 @@ Material::~Material()
 
 ComPtr<ID3D11ShaderResourceView> Material::AdjustTexture(shared_ptr<Shader> computeShader, shared_ptr<Texture> texture)
 {
-	shared_ptr<TextureBuffer> textureBuffer = make_shared<TextureBuffer>(texture->GetTexture2D());
-	DEVICECONTEXT->CSSetShader(computeShader->GetComputeShader().Get(), nullptr, 0);
+    shared_ptr<TextureBuffer> textureBuffer = make_shared<TextureBuffer>(texture->GetTexture2D());
+    DEVICECONTEXT->CSSetShader(computeShader->GetComputeShader().Get(), nullptr, 0);
 
-	ComPtr<ID3D11ShaderResourceView> input = textureBuffer->GetSRV();
-	ComPtr<ID3D11UnorderedAccessView> output = textureBuffer->GetUAV();
+    ComPtr<ID3D11ShaderResourceView> input = textureBuffer->GetSRV();
+    ComPtr<ID3D11UnorderedAccessView> output = textureBuffer->GetUAV();
 
-	DEVICECONTEXT->CSSetShaderResources(0, 1, input.GetAddressOf()); // t0 slot
-	DEVICECONTEXT->CSSetUnorderedAccessViews(0, 1, output.GetAddressOf(), nullptr); // u0 slot
+    // 텍스처 포맷 확인
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    input->GetDesc(&srvDesc);
+    srvDesc.Format;
 
-	uint32 width = textureBuffer->GetWidth();
-	uint32 height = textureBuffer->GetHeight();
-	uint32 arraySize = textureBuffer->GetArraySize();
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+    output->GetDesc(&uavDesc);
+    uavDesc.Format;
 
-	uint32 x = max(1, (width + 31) / 32);
-	uint32 y = max(1, (height + 31) / 32);
-	uint32_t z = arraySize;
+    DEVICECONTEXT->CSSetShaderResources(0, 1, input.GetAddressOf()); // t0 slot
+    DEVICECONTEXT->CSSetUnorderedAccessViews(0, 1, output.GetAddressOf(), nullptr); // u0 slot
 
-	DEVICECONTEXT->Dispatch(x, y, z);
+    uint32 width = textureBuffer->GetWidth();
+    uint32 height = textureBuffer->GetHeight();
+    uint32 arraySize = textureBuffer->GetArraySize();
 
-	// Unbind resources
-	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-	DEVICECONTEXT->CSSetShaderResources(0, 1, nullSRV);
-	ID3D11UnorderedAccessView* nullUAV[1] = { nullptr };
-	DEVICECONTEXT->CSSetUnorderedAccessViews(0, 1, nullUAV, nullptr);
-	DEVICECONTEXT->CSSetShader(nullptr, nullptr, 0);
+    uint32 x = max(1, (width + 31) / 32);
+    uint32 y = max(1, (height + 31) / 32);
+    uint32_t z = arraySize;
 
-	return textureBuffer->GetOutputSRV();
+    DEVICECONTEXT->Dispatch(x, y, z);
+
+    // Unbind resources
+    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+    DEVICECONTEXT->CSSetShaderResources(0, 1, nullSRV);
+    ID3D11UnorderedAccessView* nullUAV[1] = { nullptr };
+    DEVICECONTEXT->CSSetUnorderedAccessViews(0, 1, nullUAV, nullptr);
+    DEVICECONTEXT->CSSetShader(nullptr, nullptr, 0);
+
+    return textureBuffer->GetOutputSRV();
 }
 
 void Material::PushMaterialDesc()

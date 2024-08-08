@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Billboard.h"
+#include "MeshRenderer.h"
 
 Billboard::Billboard()
 	: Super(ComponentType::Billboard)
@@ -22,10 +23,50 @@ void Billboard::Add(Vec3 position, Vec2 scale)
 	
 	Matrix matWorld = GetGameObject()->transform()->GetWorldMatrix();
 
-	VertexBillboard_GeometryShader vb;
+	/*VertexBillboard_GeometryShader vb;
 	vb.position = position;
-	vb.scale = scale;
-	_vertices.push_back(vb);
+	_vertices.push_back(vb);*/
+
+	float gap = 1.2f;
+	float height = 0.5f;
+	// first line
+	VertexBillboard_GeometryShader vb1;
+	vb1.position = position + Vec3(-gap, height, gap);
+	_vertices.push_back(vb1);
+
+	VertexBillboard_GeometryShader vb2;
+	vb2.position = position + Vec3(0, height, gap);
+	_vertices.push_back(vb2);
+
+	VertexBillboard_GeometryShader vb3;
+	vb3.position = position + Vec3(gap, height, gap);
+	_vertices.push_back(vb3);
+
+	// second line
+	VertexBillboard_GeometryShader vb4;
+	vb4.position = position + Vec3(-gap, height, 0);
+	_vertices.push_back(vb4);
+
+	VertexBillboard_GeometryShader vb5;
+	vb5.position = position + Vec3(0, height, 0);
+	_vertices.push_back(vb5);
+
+	VertexBillboard_GeometryShader vb6;
+	vb6.position = position + Vec3(gap, height, 0);
+	_vertices.push_back(vb6);
+
+	// thrid line
+	VertexBillboard_GeometryShader vb7;
+	vb7.position = position + Vec3(-gap, height, -gap);
+	_vertices.push_back(vb7);
+
+	VertexBillboard_GeometryShader vb8;
+	vb8.position = position + Vec3(0, height, -gap);
+	_vertices.push_back(vb8);
+
+	VertexBillboard_GeometryShader vb9;
+	vb9.position = position + Vec3(gap, height, -gap);
+	_vertices.push_back(vb9);
 
 	_buffer = make_shared<Buffer>();
 	_buffer->CreateBuffer(BufferType::VERTEX_BUFFER, _vertices);
@@ -36,12 +77,24 @@ void Billboard::DrawBillboard()
 	uint32 stride = _buffer->GetStride();
 	uint32 offset = 0;
 
-	shared_ptr<Texture> texture = RESOURCE.GetResource<Texture>(L"Grass");
+	shared_ptr<Texture> texture = RESOURCE.GetResource<Texture>(L"tree");
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"Billboard_Shader");
+
 	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+	RasterizerStates states;
+	states.fillMode = D3D11_FILL_SOLID;
+	states.cullMode = D3D11_CULL_BACK;
+	states.frontCouterClockWise = false;
+	rasterizerState->CreateRasterizerState(states);
+
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
 	shared_ptr<BlendState> blendState = make_shared<BlendState>();
+	blendState->CreateBlendState();
+
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+	samplerState->CreateSamplerState();
 
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 
@@ -51,17 +104,16 @@ void Billboard::DrawBillboard()
 	cpBuffer->CreateConstantBuffer<CameraPos>();
 	cpBuffer->CopyData(cameraPos);
 
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraPos", 1, cpBuffer);
+	shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraPos", 1, cpBuffer);
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, GetGameObject()->GetTransformBuffer());
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+	shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
 
 
 	// inputAssembler
 	DEVICECONTEXT->IASetVertexBuffers(0, 1, _buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
-	DEVICECONTEXT->IASetIndexBuffer(_buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
-	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	// VertexShader
 	DEVICECONTEXT->VSSetShader(shader->GetVertexShader().Get(), nullptr, 0);
@@ -84,9 +136,12 @@ void Billboard::DrawBillboard()
 	// OutputMerger
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 
-	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+	
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 
 	DEVICECONTEXT->Draw(_vertices.size(), 0);
+
+	DEVICECONTEXT->GSSetShader(nullptr, nullptr, 0);
+
 }
 

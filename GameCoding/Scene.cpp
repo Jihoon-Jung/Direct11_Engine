@@ -91,6 +91,8 @@ void Scene::Picking()
 				
 				if (terrain->Pick(ray, distance, hitPoint) == false)
 					continue;
+				else
+					int a = 1;
 				if (distance < minDistance)
 				{
 					minDistance = distance;
@@ -110,19 +112,8 @@ void Scene::Picking()
 							_billboard_obj->AddComponent(_billboard);
 
 						_billboard_obj->SetName(L"Billboard");
-						Vec2 scale = Vec2(0.5f);
+						Vec2 scale = Vec2(0.1f);
 						_billboard->Add(hitPoint, scale);
-						//for (int32 i = -2; i < 2; i++)
-						//{
-
-						//	Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
-						//	for (int32 j = -2; j < 2; j++)
-						//	{
-						//		Vec2 position = Vec2(i, j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
-
-						//		_billboard->Add(hitPoint, scale);
-						//	}
-						//}
 					}
 				}
 			}
@@ -130,11 +121,6 @@ void Scene::Picking()
 		}
 		if (Find(L"Billboard") == nullptr)
 			AddGameObject(_billboard_obj);
-		//if (isTerrainPicked)
-		//{
-		//	billboard_Terrain->SetName(L"Billboard");
-		//	AddGameObject(billboard_Terrain);
-		//}
 	}
 
 	if (INPUT.GetButton(KEY_TYPE::LBUTTON))

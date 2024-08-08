@@ -22,3 +22,9 @@ private:
 	vector<VertexTextureNormalTangentBlendData> _vertices;
 };
 
+struct ExtendedRay : public Ray
+{
+	ExtendedRay(const Vec3& pos, const Vec3& dir) : Ray(pos, dir) {}
+
+	bool Intersects(const Vec3& v0, const Vec3& v1, const Vec3& v2, float& distance, float& u, float& v) const;
+};
