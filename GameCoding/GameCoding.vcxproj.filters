@@ -435,5 +435,11 @@
     <FxCompile Include="Billboard.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="ComputeShader_GaussianBlurHorizontal.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader_GaussianBlurVertical.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

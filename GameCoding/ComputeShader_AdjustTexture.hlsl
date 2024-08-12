@@ -6,5 +6,5 @@ void CS(uint3 id : SV_DispatchThreadID)
 {
 	float4 color = Input.Load(int4(id, 0));
 
-	Output[id] = float4(1.0f - color.xyz, 1.0);
+	Output[id] = float4(color.x, 1.0, color.z, 1.0);
 }

@@ -62,14 +62,6 @@ void SceneManager::LoadTestScene()
 	cube->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> cube_transform = make_shared<Transform>();
 
-	shared_ptr<GameObject> stencil_cube1 = make_shared<GameObject>();
-	stencil_cube1->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> stencil_cube1_transform = make_shared<Transform>();
-
-	shared_ptr<GameObject> stencil_cube2 = make_shared<GameObject>();
-	stencil_cube2->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> stencil_cube2_transform = make_shared<Transform>();
-
 	shared_ptr<GameObject> grid = make_shared<GameObject>();
 	grid->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> grid_transform = make_shared<Transform>();
@@ -93,10 +85,6 @@ void SceneManager::LoadTestScene()
 	shared_ptr<GameObject> Kachujin = make_shared<GameObject>();
 	Kachujin->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> kachujin_transform = make_shared<Transform>();
-
-	shared_ptr<GameObject> billboard_Terrain = make_shared<GameObject>();
-	billboard_Terrain->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> billboard_Terrain_transform = make_shared<Transform>();
 
 	{
 		sphere_transform->SetPosition(Vec3(-1.0f, 0.f, 2.f));
@@ -135,41 +123,27 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		cube->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		boxCollider->SetScale(1.0f);
 		cube->AddComponent(boxCollider);
 		cube->SetName(L"cube");
 	}
 	{
-		stencil_cube1_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
-		stencil_cube1_transform->SetLocalScale(Vec3(1.0f));
-		stencil_cube1->AddComponent(stencil_cube1_transform);
-		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
-		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-		stencil_cube1->AddComponent(meshRenderer);
-		stencil_cube1->SetName(L"stencil_cube1");
-	}
-	{
-		stencil_cube2_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
-		stencil_cube2_transform->SetScale(Vec3(1.1f));
-		stencil_cube2->AddComponent(stencil_cube2_transform);
-		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
-		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-		stencil_cube2->AddComponent(meshRenderer);
-		stencil_cube2->SetName(L"stencil_cube2");
-	}
-	{
-		grid_transform->SetPosition(Vec3(4.0f, 0.0f, 0.0f));
+		grid_transform->SetPosition(Vec3(5.0f, 0.0f, 0.0f));
 		grid->AddComponent(grid_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		shared_ptr<Shader> computeShader = RESOURCE.GetResource<Shader>(L"AdjustTexture_Shader");
+		// change color by compute shader
+		/*shared_ptr<Shader> computeShader = RESOURCE.GetResource<Shader>(L"AdjustTexture_Shader");
 		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
 		ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->AdjustTexture(computeShader, inputTexture);
+		meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);*/
+
+		// gaussian blur
+		shared_ptr<Shader> computeShader_gaussianBlurHorizontal = RESOURCE.GetResource<Shader>(L"Gaussian_Horizontal");
+		shared_ptr<Shader> computeShader_gaussianBlurVertical = RESOURCE.GetResource<Shader>(L"Gaussian_Vertical");
+		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
+		ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->GaussainBlur(computeShader_gaussianBlurVertical, computeShader_gaussianBlurHorizontal, inputTexture->GetShaderResourceView());
 		meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);
+
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		grid->AddComponent(meshRenderer);
@@ -227,7 +201,6 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		tower->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		boxCollider->SetScale(1000.0f);
 		tower->AddComponent(boxCollider);
 		tower->SetName(L"tower");
 	}
@@ -246,7 +219,7 @@ void SceneManager::LoadTestScene()
 		light->SetName(L"MainLight");
 	}
 	{
-		kachujin_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		kachujin_transform->SetPosition(Vec3(0.0f, 0.0f, 0.0f));
 		kachujin_transform->SetLocalScale(Vec3(0.01f));
 		Kachujin->AddComponent(kachujin_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -255,46 +228,22 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		Kachujin->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		boxCollider->SetScale(1.0f);
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
-
-	//{
-	//	billboard_Terrain_transform->SetPosition(Vec3(0.f, 0.f, 11.f));
-	//	billboard_Terrain_transform->SetLocalScale(Vec3(0.5f));
-	//	billboard_Terrain->AddComponent(billboard_Terrain_transform);
-	//	shared_ptr<Billboard> billboard = make_shared<Billboard>();
-	//	for (int32 i = -5; i < 5; i++)
-	//	{
-
-	//		Vec2 scale = Vec2(0.5f);// Vec2(1 + rand() % 3, 1 + rand() % 3);
-	//		for (int32 j = -5; j < 5; j++)
-	//		{
-	//			Vec2 position = Vec2(i,j);//Vec2(-100 + rand() % 200, -100 + rand() % 200);
-
-	//			billboard->Add(Vec3(position.x, scale.y * 0.5f, position.y), scale);
-	//		}
-	//	}
-	//	billboard_Terrain->AddComponent(billboard);
-	//	billboard_Terrain->SetName(L"Billboard");
-	//}
-
+	int parentCount = cube->transform()->ParentCount();
+	int childCount = sphere->transform()->ChildCount();
 
 	_activeScene->AddGameObject(camera);
 	_activeScene->AddGameObject(uiCamera);
 	_activeScene->AddGameObject(light);
 	//_activeScene->AddGameObject(skyBox);
 	//_activeScene->AddGameObject(sphere);
-	//_activeScene->AddGameObject(cube);
+	_activeScene->AddGameObject(cube);
 	_activeScene->AddGameObject(grid);
 	//_activeScene->AddGameObject(tower);
 	//_activeScene->AddGameObject(quard_ui);
 	//_activeScene->AddGameObject(uiButton);
-	//_activeScene->AddGameObject(quard);
-	//_activeScene->AddGameObject(billboard_Terrain);
-	_activeScene->AddGameObject(stencil_cube1);
-	_activeScene->AddGameObject(stencil_cube2);
-	
+	_activeScene->AddGameObject(quard);
 	_activeScene->AddGameObject(Kachujin);
 }

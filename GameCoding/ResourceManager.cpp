@@ -38,6 +38,10 @@ void ResourceManager::AddResource()
 
 	shared_ptr<Shader> adjustTexture_shader = make_shared<Shader>();
 
+	shared_ptr<Shader> gaussianBlur_csShaderHorizontal = make_shared<Shader>();
+
+	shared_ptr<Shader> gaussianBlur_csShaderVertical = make_shared<Shader>();
+
 	shared_ptr<Material> material = make_shared<Material>();
 
 	shared_ptr<Material> billboardMaterial = make_shared<Material>();
@@ -64,7 +68,7 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(quard_mesh->GetName(), quard_mesh);
 
 	texture = make_shared<Texture>();
-	texture->CreateTexture(L"Leather.jpg");
+	texture->CreateTexture(L"Golem.png");
 	texture->SetName(L"Leather");
 	RESOURCE.AddResource(texture->GetName(), texture);
 
@@ -126,6 +130,16 @@ void ResourceManager::AddResource()
 	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_AdjustTexture.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	adjustTexture_shader->SetName(L"AdjustTexture_Shader");
 	RESOURCE.AddResource(adjustTexture_shader->GetName(), adjustTexture_shader);
+
+	gaussianBlur_csShaderHorizontal = make_shared<Shader>();
+	gaussianBlur_csShaderHorizontal->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_GaussianBlurHorizontal.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	gaussianBlur_csShaderHorizontal->SetName(L"Gaussian_Horizontal");
+	RESOURCE.AddResource(gaussianBlur_csShaderHorizontal->GetName(), gaussianBlur_csShaderHorizontal);
+
+	gaussianBlur_csShaderVertical = make_shared<Shader>();
+	gaussianBlur_csShaderVertical->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_GaussianBlurVertical.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	gaussianBlur_csShaderVertical->SetName(L"Gaussian_Vertical");
+	RESOURCE.AddResource(gaussianBlur_csShaderVertical->GetName(), gaussianBlur_csShaderVertical);
 
 	skyboxShader = make_shared<Shader>();
 	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);

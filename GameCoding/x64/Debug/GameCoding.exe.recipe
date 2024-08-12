@@ -16,6 +16,12 @@
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_AdjustTexture.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_GaussianBlurHorizontal.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_GaussianBlurVertical.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Default.cso</FullPath>
     </ContentFile>
     <ContentFile>

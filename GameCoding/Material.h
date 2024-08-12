@@ -34,6 +34,7 @@ public:
 	}
 
 	ComPtr<ID3D11ShaderResourceView> AdjustTexture(shared_ptr<Shader> computeShader, shared_ptr<Texture> texture);
+	ComPtr<ID3D11ShaderResourceView> GaussainBlur(shared_ptr<Shader> verticalBlurShader, shared_ptr<Shader> horizontalBlurShader, ComPtr<ID3D11ShaderResourceView> texture);
 
 	void PushMaterialDesc();
 	MaterialDesc GetMaterialDesc() { return _materialDesc; }
