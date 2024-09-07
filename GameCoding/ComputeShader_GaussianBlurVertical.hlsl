@@ -18,7 +18,7 @@
 
 cbuffer cbSettings
 {
-	float gWeights[11] =
+	static const float gWeights[11] =
 	{
 		0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
 	};

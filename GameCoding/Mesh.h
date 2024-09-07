@@ -9,7 +9,7 @@ class Mesh : public ResourceBase
 public:
 	Mesh();
 	~Mesh();
-	void CreateQuard_NormalTangent();
+	void CreateQuad_NormalTangent();
 	void CreateGrid_NormalTangent(int32 sizeX, int32 sizeZ);
 	void CreateCube_NormalTangent();
 	void CreateSphere_NormalTangent();

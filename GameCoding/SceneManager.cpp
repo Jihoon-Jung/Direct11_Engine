@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "GameObject.h"
 #include "MoveObject.h"
+#include "RenderPass.h"
 
 void SceneManager::Init()
 {
@@ -62,6 +63,18 @@ void SceneManager::LoadTestScene()
 	cube->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> cube_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> testPlane = make_shared<GameObject>();
+	testPlane->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> testPlane_transform = make_shared<Transform>();
+
+	shared_ptr<GameObject> stencil_cube1 = make_shared<GameObject>();
+	stencil_cube1->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> stencil_cube1_transform = make_shared<Transform>();
+
+	shared_ptr<GameObject> stencil_cube2 = make_shared<GameObject>();
+	stencil_cube2->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> stencil_cube2_transform = make_shared<Transform>();
+
 	shared_ptr<GameObject> grid = make_shared<GameObject>();
 	grid->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> grid_transform = make_shared<Transform>();
@@ -82,17 +95,31 @@ void SceneManager::LoadTestScene()
 	tower->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> tower_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> anna = make_shared<GameObject>();
+	anna->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> anna_transform = make_shared<Transform>();
+
 	shared_ptr<GameObject> Kachujin = make_shared<GameObject>();
 	Kachujin->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> kachujin_transform = make_shared<Transform>();
 
 	{
-		sphere_transform->SetPosition(Vec3(-1.0f, 0.f, 2.f));
+		sphere_transform->SetPosition(Vec3(4.0f, 0.f, 2.f));
 		sphere->AddComponent(sphere_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"TestMesh"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		meshRenderer->SetUseEnvironmentMap(true);
 		sphere->AddComponent(meshRenderer);
 		shared_ptr<SphereCollider> sphereCollider = make_shared<SphereCollider>();
 		sphereCollider->SetRadius(0.5f);
@@ -102,30 +129,103 @@ void SceneManager::LoadTestScene()
 	{
 		skyBox_transform->SetPosition(Vec3(0.f, 0.f, 0.f));
 		skyBox->AddComponent(skyBox_transform);
-		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>(); 
+		//meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"TestMesh"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, true);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		
 		skyBox->AddComponent(meshRenderer);
 		skyBox->SetName(L"skyBox");
 	}
 	{
-		cube_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		cube_transform->SetPosition(Vec3(-6.5f, 0.f, 2.f));
 		cube->AddComponent(cube_transform);
 		//cube->SetParent(sphere);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		shared_ptr<Shader> computeShader = RESOURCE.GetResource<Shader>(L"AdjustTexture_Shader");
-		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
-		ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->AdjustTexture(computeShader, inputTexture);
-		meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);
+		//shared_ptr<Shader> computeShader = RESOURCE.GetResource<Shader>(L"AdjustTexture_Shader");
+		//shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
+		//ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->AdjustTexture(computeShader, inputTexture);
+		//meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		meshRenderer->SetUseEnvironmentMap(true);
+		/*meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[1]->SetPass(Pass::QUAD_RENDER);
+		meshRenderer->GetRenderPasses()[1]->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->GetRenderPasses()[1]->SetShader(RESOURCE.GetResource<Shader>(L"Quad_Shader"));*/
+
+
 		cube->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
 		cube->AddComponent(boxCollider);
 		cube->SetName(L"cube");
 	}
+	{
+		testPlane_transform->SetPosition(Vec3(7.0f, 0.f, 0.f));
+		testPlane_transform->SetRotation(Vec3(0.f, 90.f, 0.f));
+		testPlane->AddComponent(testPlane_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+
+		testPlane->AddComponent(meshRenderer);
+		testPlane->SetName(L"testPlane");
+	}
+	
+
+	{
+		stencil_cube1_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube1_transform->SetLocalScale(Vec3(1.0f));
+		stencil_cube1->AddComponent(stencil_cube1_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		stencil_cube1->AddComponent(meshRenderer);
+		stencil_cube1->SetName(L"stencil_cube1");
+	}
+	{
+		stencil_cube2_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube2_transform->SetScale(Vec3(1.1f));
+		stencil_cube2->AddComponent(stencil_cube2_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		stencil_cube2->AddComponent(meshRenderer);
+		stencil_cube2->SetName(L"stencil_cube2");
+	}
+
 	{
 		grid_transform->SetPosition(Vec3(5.0f, 0.0f, 0.0f));
 		grid->AddComponent(grid_transform);
@@ -136,16 +236,20 @@ void SceneManager::LoadTestScene()
 		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
 		ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->AdjustTexture(computeShader, inputTexture);
 		meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);*/
-
-		// gaussian blur
-		shared_ptr<Shader> computeShader_gaussianBlurHorizontal = RESOURCE.GetResource<Shader>(L"Gaussian_Horizontal");
-		shared_ptr<Shader> computeShader_gaussianBlurVertical = RESOURCE.GetResource<Shader>(L"Gaussian_Vertical");
-		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
-		ComPtr<ID3D11ShaderResourceView> result = meshRenderer->GetMaterial()->GaussainBlur(computeShader_gaussianBlurVertical, computeShader_gaussianBlurHorizontal, inputTexture->GetShaderResourceView());
-		meshRenderer->GetMaterial()->GetTexture()->SetShaderResourceView(result);
-
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+
+
 		grid->AddComponent(meshRenderer);
 		shared_ptr<Terrain> terrain = make_shared<Terrain>();
 		grid->AddComponent(terrain);
@@ -159,6 +263,15 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Billboard_Material"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
 		quard->AddComponent(meshRenderer);
 		quard->SetName(L"Quard_Billboard");
 	}
@@ -173,6 +286,15 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
 		quard_ui->AddComponent(meshRenderer);
 		quard_ui->SetName(L"UI_Quard");
 	}
@@ -188,6 +310,15 @@ void SceneManager::LoadTestScene()
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
 		uiButton->AddComponent(meshRenderer);
 		uiButton->SetName(L"UI_Button");
 	}
@@ -204,7 +335,19 @@ void SceneManager::LoadTestScene()
 		tower->AddComponent(boxCollider);
 		tower->SetName(L"tower");
 	}
-
+	{
+		//anna_transform->SetPosition(Vec3(-7.0f, 0.0f, -1.0f));
+		//anna_transform->SetLocalScale(Vec3(0.01f));
+		//anna->AddComponent(anna_transform);
+		//shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		//meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"AnnaModel"));
+		//meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
+		//meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		//anna->AddComponent(meshRenderer);
+		//shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		//anna->AddComponent(boxCollider);
+		//anna->SetName(L"Anna");
+	}
 	{
 		light_transform->SetPosition(Vec3(-5.f, 0.f, -2.f));
 		light->AddComponent(light_transform);
@@ -237,13 +380,19 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(camera);
 	_activeScene->AddGameObject(uiCamera);
 	_activeScene->AddGameObject(light);
-	//_activeScene->AddGameObject(skyBox);
-	//_activeScene->AddGameObject(sphere);
+	_activeScene->AddGameObject(skyBox);
+	_activeScene->AddGameObject(sphere);
 	_activeScene->AddGameObject(cube);
-	_activeScene->AddGameObject(grid);
+
+	//_activeScene->AddGameObject(grid);
 	//_activeScene->AddGameObject(tower);
 	//_activeScene->AddGameObject(quard_ui);
 	//_activeScene->AddGameObject(uiButton);
-	_activeScene->AddGameObject(quard);
+	//_activeScene->AddGameObject(stencil_cube1);
+	//_activeScene->AddGameObject(stencil_cube2);
+	//_activeScene->AddGameObject(quard);
 	_activeScene->AddGameObject(Kachujin);
+	//_activeScene->AddGameObject(anna);
+	//_activeScene->AddGameObject(house);
+	//_activeScene->AddGameObject(testPlane);
 }

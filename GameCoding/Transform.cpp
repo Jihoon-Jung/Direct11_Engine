@@ -45,9 +45,9 @@ void Transform::UpdateTransform()
 	//	_localPosition = Vec3::Transform(_worldPosition, _parent->GetWorldMatrix().Invert());
 	//}
 	Matrix scale = Matrix::CreateScale(_localScale);
-	Matrix rotation = Matrix::CreateRotationX(_localRotation.x);
-	rotation *= Matrix::CreateRotationY(_localRotation.y);
-	rotation *= Matrix::CreateRotationZ(_localRotation.z);
+	Matrix rotation = Matrix::CreateRotationX(DirectX::XMConvertToRadians(_localRotation.x));
+	rotation *= Matrix::CreateRotationY(DirectX::XMConvertToRadians(_localRotation.y));
+	rotation *= Matrix::CreateRotationZ(DirectX::XMConvertToRadians(_localRotation.z));
 	Matrix position = Matrix::CreateTranslation(_localPosition);
 
 	_localMat = scale * rotation * position;
@@ -61,7 +61,7 @@ void Transform::UpdateTransform()
 	}
 
 	Quaternion quat;
-	_worldMat.Decompose(_worldScale, quat, _worldPosition);
+	_worldMat.Decompose(_worldScale, quat, _worldPosition); // world matrix로 부터 s r t를 분리 (r은 quaternion으로 변환)
 	_worldRotation = ToEulerAngles(quat);
 
 
@@ -113,7 +113,7 @@ void Transform::SetRotation(const Vec3& rotation)
 	{
 		_localRotation = rotation;
 	}
-	
+	UpdateTransform();
 }
 
 void Transform::SetScale(const Vec3& scale)
@@ -129,3 +129,4 @@ void Transform::SetScale(const Vec3& scale)
 		_localScale = scale;
 	}
 }
+

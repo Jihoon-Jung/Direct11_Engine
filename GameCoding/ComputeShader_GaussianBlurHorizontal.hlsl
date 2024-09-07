@@ -13,9 +13,9 @@
 
 cbuffer cbSettings
 {
-	float gWeights[11] =
+	static const float gWeights[11] =
 	{
-		0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
+		 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f,
 	};
 };
 
@@ -95,5 +95,9 @@ void CS(int3 groupThreadID : SV_GroupThreadID,
 		blurColor += gWeights[i + gBlurRadius] * gCache[k];
 	}
 
-	gOutput[dispatchThreadID.xy] =  blurColor;//gInput[dispatchThreadID.xy];
+
+	gOutput[dispatchThreadID.xy] = blurColor;//gInput[dispatchThreadID.xy];
 }
+
+
+

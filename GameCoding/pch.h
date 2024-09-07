@@ -64,6 +64,7 @@ using namespace Microsoft::WRL;
 
 #include "ShaderSlot.h"
 #include "ConstantBufferType.h"
+#include "RasterizerStateInfo.h"
 
 // Buffer
 #include "Buffer.h"

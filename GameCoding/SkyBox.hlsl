@@ -10,13 +10,19 @@ struct VS_INPUT
 	float4 blendWeights : BLENDWEIGHTS;
 };
 
+//struct VS_OUTPUT
+//{
+//	float4 position : SV_POSITION;
+//	float2 uv : TEXCOORD;
+//	float3 normal : NORMAL;
+//	float3 tangent : TANGENT;
+//	float3 worldPosition : POSITION1;
+//};
+
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
-	float3 worldPosition : POSITION1;
+	float3 PosL : POSITION;
 };
 
 cbuffer CameraBuffer : register(b0)
@@ -27,15 +33,16 @@ cbuffer CameraBuffer : register(b0)
 
 
 SamplerState sampler0 : register(s0);
-Texture2D texture0 : register(t0);
+//Texture2D texture0 : register(t0);
+TextureCube texture0 : register(t0);
 
+// SkyBox는 하늘과 카메라가 같이 움직이고 회전시 하늘과 카메라가 반대방향으로 회전.
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
-	// Local -> World -> View -> Projection
-	// 행렬의 마지막행을 0으로 사용하면 translation이 적용되지않고
-	// 회전, scale만 적용됨. 카메라가 움직이면 skyBox도 (반대로)회전해야하니
+	// world 변환을 하지 않으면 원점을 기준으로 한 좌표가 되고 여기에 view변환을 하면 카메라와 오브젝트 모두 원점에 있게 됨.
+	// 대신 View행렬의 이동은 적용하면 안되고 회전만 적용되어야 하기 떄문에 정점의 w를 0으로 하여 곱해주면 이동은 적용되지 않음.
 	float4 viewPos = mul(float4(input.position.xyz, 0), viewMatrix);
 	float4 clipSpacePos = mul(viewPos, projectionMatrix);
 	output.position = clipSpacePos.xyzw;
@@ -44,15 +51,14 @@ VS_OUTPUT VS(VS_INPUT input)
 	// 1에 아주 가까운 값으로 해주는게 편함.
 	output.position.z = output.position.w * 0.999999f;
 
-	output.uv = input.uv;
-
+	output.PosL = input.position.xyz;
 	return output;
 }
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
 	
-	float4 textureColor = texture0.Sample(sampler0, input.uv);
+	float4 textureColor = texture0.Sample(sampler0, input.PosL);
 
 	return textureColor;
 }							 

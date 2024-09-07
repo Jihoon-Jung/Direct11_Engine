@@ -16,20 +16,31 @@ void AssimpTool::Init(HWND hwnd)
 
 	//	// CustomData (File) -> Memory
 	//}
+	//{
+	//	shared_ptr<Converter> converter = make_shared<Converter>();
+	//	converter->init(hwnd);
+	//	// FBX -> Memory
+	//	converter->ReadAssetFile(L"Dragon/dragon.fbx");
 
+	//	// Memory -> CustomData (File)
+	//	converter->ExportMaterialData(L"Dragon/Dragon");
+	//	converter->ExportModelData(L"Dragon/Dragon");
+
+	//	// CustomData (File) -> Memory
+	//}
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->init(hwnd);
 		// FBX -> Memory
-		converter->ReadAssetFile(L"Tower/Tower.fbx");
+		converter->ReadAssetFile(L"Anna/Anna_FBX.FBX");
 
 		// Memory -> CustomData (File)
-		converter->ExportMaterialData(L"Tower/Tower");
-		converter->ExportModelData(L"Tower/Tower");
+		converter->ExportMaterialData(L"Anna/Anna");
+		converter->ExportModelData(L"Anna/Anna");
 
 		// CustomData (File) -> Memory
 	}
-	{
+	/*{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Mesh.fbx");
 		converter->ExportMaterialData(L"Kachujin/Kachujin");
@@ -49,7 +60,7 @@ void AssimpTool::Init(HWND hwnd)
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Slash.fbx");
 		converter->ExportAnimationData(L"Kachujin/Slash");
-	}
+	}*/
 }
 
 void AssimpTool::Update()

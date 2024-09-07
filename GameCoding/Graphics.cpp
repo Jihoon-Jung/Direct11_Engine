@@ -6,10 +6,8 @@ void Graphics::CreateDeviceAndSwapChain()
 	DXGI_SWAP_CHAIN_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
 	{
-		int32 _width = 800;
-		int32 _height = 600;
-		desc.BufferDesc.Width = _width;
-		desc.BufferDesc.Height = _height;
+		desc.BufferDesc.Width = GWinSizeX;
+		desc.BufferDesc.Height = GWinSizeY;
 		desc.BufferDesc.RefreshRate.Numerator = 60;
 		desc.BufferDesc.RefreshRate.Denominator = 1;
 		desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -53,6 +51,52 @@ void Graphics::CreateRenderTarget()
 
 	hr = _device->CreateRenderTargetView(backBuffer.Get(), nullptr, _renderTargetView.GetAddressOf());
 	CHECK(hr);
+}
+
+void Graphics::CreateOffscreenRenderTarget()
+{
+	D3D11_TEXTURE2D_DESC texDesc;
+
+	texDesc.Width = GetViewWidth();
+	texDesc.Height = GetViewHeight();
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	ComPtr<ID3D11Texture2D> offscreenTex = 0;
+	HRESULT hr = DEVICE->CreateTexture2D(&texDesc, 0, offscreenTex.GetAddressOf());
+	CHECK(hr);
+
+	// Null description means to create a view to all mipmap levels using 
+	// the format the texture was created with.
+	hr = DEVICE->CreateShaderResourceView(offscreenTex.Get(), 0, _offscreenSRV.GetAddressOf());
+	CHECK(hr);
+	hr = DEVICE->CreateRenderTargetView(offscreenTex.Get(), 0, _offscreenRTV.GetAddressOf());
+	CHECK(hr);
+
+	// depthStenciView 생성
+
+	D3D11_TEXTURE2D_DESC depthDesc = {};
+	depthDesc.Width = GetViewWidth();  // 렌더 타겟과 동일한 너비
+	depthDesc.Height = GetViewHeight(); // 렌더 타겟과 동일한 높이
+	depthDesc.MipLevels = 1;
+	depthDesc.ArraySize = 1;
+	depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthDesc.SampleDesc.Count = 1;
+	depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	hr = DEVICE->CreateTexture2D(&depthDesc, nullptr, &_offScreenDepthStencilTexture);
+	CHECK(hr);
+
+	hr = DEVICE->CreateDepthStencilView(_offScreenDepthStencilTexture.Get(), nullptr, &_offScreenDepthStencilView);
+	CHECK(hr);
+
 }
 
 
@@ -104,10 +148,30 @@ void Graphics::SetRenderTarget()
 {
 	_deviceContext->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
 	_deviceContext->ClearRenderTargetView(_renderTargetView.Get(), _clearColor);
-	SetDepthStencilView();
+	ClearDepthStencilView();
 }
 
-void Graphics::SetDepthStencilView()
+void Graphics::SetOffscreenRenderTarget()
+{
+	// viewport 설정
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = GetViewWidth();
+	viewport.Height = GetViewHeight();
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	float _clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+
+	DEVICECONTEXT->RSSetViewports(1, &viewport);
+	DEVICECONTEXT->OMSetRenderTargets(1, _offscreenRTV.GetAddressOf(), _offScreenDepthStencilView.Get());
+	DEVICECONTEXT->ClearRenderTargetView(_offscreenRTV.Get(), _clearColor);
+	DEVICECONTEXT->ClearDepthStencilView(_offScreenDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void Graphics::ClearDepthStencilView()
 {
 	_deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 }
@@ -116,4 +180,74 @@ void Graphics::SwapChain()
 {
 	HRESULT hr = _swapChain->Present(1, 0);
 	CHECK(hr);
+}
+
+void Graphics::RestoreRenderTarget()
+{
+	_deviceContext->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), _depthStencilView.Get());
+	SetViewport();
+}
+
+void Graphics::RenderQuad()
+{
+	shared_ptr<Material> material = make_shared<Material>();
+
+	shared_ptr<Shader> computeShader_gaussianBlurHorizontal = RESOURCE.GetResource<Shader>(L"Gaussian_Horizontal");
+	shared_ptr<Shader> computeShader_gaussianBlurVertical = RESOURCE.GetResource<Shader>(L"Gaussian_Vertical");
+	ComPtr<ID3D11ShaderResourceView> convertedSRV = material->GaussainBlur(computeShader_gaussianBlurVertical, computeShader_gaussianBlurHorizontal, _offscreenSRV);
+
+	RestoreRenderTarget();
+	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	shared_ptr<Mesh> mesh = RESOURCE.GetResource<Mesh>(L"Quard");
+	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"Quad_Shader");
+	shared_ptr<Buffer> buffer = mesh->GetBuffer();
+	uint32 stride = buffer->GetStride();
+	uint32 offset = 0;
+
+	shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
+	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+
+	RasterizerStateInfo rasterzerStates;
+	rasterzerStates.fillMode = D3D11_FILL_SOLID;
+	rasterzerStates.cullMode = D3D11_CULL_BACK;
+	rasterzerStates.frontCouterClockWise = false;
+	rasterizerState->CreateRasterizerState(rasterzerStates);
+
+	// inputAssembler
+	DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+	DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
+	DEVICECONTEXT->IASetPrimitiveTopology(topology);
+
+	// VertexShader
+	DEVICECONTEXT->VSSetShader(shader->GetVertexShader().Get(), nullptr, 0);
+
+	// Rasterizer
+	DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+	// PixelShader
+	DEVICECONTEXT->PSSetShader(shader->GetPixelShader().Get(), nullptr, 0);
+
+
+	// Set Default Texture
+	shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, convertedSRV);
+
+	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
+	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+	samplerState->CreateSamplerState();
+
+	shared_ptr<BlendState> blendState = make_shared<BlendState>();
+	blendState->CreateBlendState();
+
+	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+
+	// OutputMerger
+	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+	DEVICECONTEXT->DrawIndexed(mesh->GetGeometry()->GetIndices().size(), 0, 0);
+
 }

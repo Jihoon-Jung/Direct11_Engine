@@ -9,13 +9,13 @@ RasterizerState::~RasterizerState()
 {
 }
 
-void RasterizerState::CreateRasterizerState(RasterizerStates rasterizerState)
+void RasterizerState::CreateRasterizerState(RasterizerStateInfo rasterizerStateInfo)
 {
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
-	desc.FillMode = rasterizerState.fillMode;
-	desc.CullMode = rasterizerState.cullMode;
-	desc.FrontCounterClockwise = rasterizerState.frontCouterClockWise;
+	desc.FillMode = rasterizerStateInfo.fillMode;
+	desc.CullMode = rasterizerStateInfo.cullMode;
+	desc.FrontCounterClockwise = rasterizerStateInfo.frontCouterClockWise;
 
 	HRESULT hr = DEVICE->CreateRasterizerState(&desc, _rasterizerState.GetAddressOf());
 	CHECK(hr);

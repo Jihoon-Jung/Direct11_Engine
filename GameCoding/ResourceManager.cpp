@@ -14,19 +14,35 @@ void ResourceManager::AddResource()
 	shared_ptr<Mesh> quard_mesh = make_shared<Mesh>();
 
 	shared_ptr<Model> tower_model = make_shared<Model>();
+	shared_ptr<Model> house_model = make_shared<Model>();
+	shared_ptr<Model> anna_model = make_shared<Model>();
 	shared_ptr<Model> kachujin_Anim = make_shared<Model>();
+	
 
 	shared_ptr<Texture> texture = make_shared<Texture>();
 	shared_ptr<Texture> normalMap = make_shared<Texture>();
 	shared_ptr<Texture> lightTexture = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> skyBoxTexture1 = make_shared<Texture>();
+	shared_ptr<Texture> skyBoxTexture2 = make_shared<Texture>();
+	shared_ptr<Texture> skyBoxTexture3 = make_shared<Texture>();
+	shared_ptr<Texture> skyBoxTexture4 = make_shared<Texture>();
+	shared_ptr<Texture> skyBoxTexture5 = make_shared<Texture>();
+	shared_ptr<Texture> skyBoxTexture6 = make_shared<Texture>();
+
 	shared_ptr<Texture> treeTexture = make_shared<Texture>();
 
 	shared_ptr<Texture> grassTexture = make_shared<Texture>();
 
+	shared_ptr<Texture> pandaTexture = make_shared<Texture>();
+
 	shared_ptr<Shader> ligthRenderShader = make_shared<Shader>();
 
 	shared_ptr<Shader> defaultShader = make_shared<Shader>();
+	
+	shared_ptr<Shader> environmentMapShader = make_shared<Shader>();
+
+	shared_ptr<Shader> quadShader = make_shared<Shader>();
 
 	shared_ptr<Shader> billBoardShader = make_shared<Shader>();
 
@@ -37,6 +53,8 @@ void ResourceManager::AddResource()
 	shared_ptr<Shader> animatedMesh_shader = make_shared<Shader>();
 
 	shared_ptr<Shader> adjustTexture_shader = make_shared<Shader>();
+
+	shared_ptr<Shader> tessellation_shader = make_shared<Shader>();
 
 	shared_ptr<Shader> gaussianBlur_csShaderHorizontal = make_shared<Shader>();
 
@@ -50,7 +68,6 @@ void ResourceManager::AddResource()
 
 	shared_ptr<Material> skyBoxMaterial = make_shared<Material>();
 
-
 	sphere_mesh->CreateSphere_NormalTangent();
 	sphere_mesh->SetName(L"TestMesh");
 	RESOURCE.AddResource(sphere_mesh->GetName(), sphere_mesh);
@@ -63,12 +80,12 @@ void ResourceManager::AddResource()
 	grid_mesh->SetName(L"Grid");
 	RESOURCE.AddResource(grid_mesh->GetName(), grid_mesh);
 
-	quard_mesh->CreateQuard_NormalTangent();
+	quard_mesh->CreateQuad_NormalTangent();
 	quard_mesh->SetName(L"Quard");
 	RESOURCE.AddResource(quard_mesh->GetName(), quard_mesh);
 
 	texture = make_shared<Texture>();
-	texture->CreateTexture(L"Golem.png");
+	texture->CreateTexture(L"veigar.jpg");
 	texture->SetName(L"Leather");
 	RESOURCE.AddResource(texture->GetName(), texture);
 
@@ -77,10 +94,42 @@ void ResourceManager::AddResource()
 	grassTexture->SetName(L"Grass");
 	RESOURCE.AddResource(grassTexture->GetName(), grassTexture);
 
-	skyBoxTexture = make_shared<Texture>();
-	skyBoxTexture->CreateTexture(L"4k_Sky.jpg");
-	skyBoxTexture->SetName(L"skyBox");
-	RESOURCE.AddResource(skyBoxTexture->GetName(), skyBoxTexture);
+	pandaTexture = make_shared<Texture>();
+	pandaTexture->CreateTexture(L"website.jpg");
+	pandaTexture->SetName(L"Panda");
+	RESOURCE.AddResource(pandaTexture->GetName(), pandaTexture);
+
+	{
+		skyBoxTexture1 = make_shared<Texture>();
+		skyBoxTexture1->CreateTexture(L"Sky1-1.jpg");
+		skyBoxTexture1->SetName(L"skyBox1");
+		RESOURCE.AddResource(skyBoxTexture1->GetName(), skyBoxTexture1);
+
+		skyBoxTexture2 = make_shared<Texture>();
+		skyBoxTexture2->CreateTexture(L"Sky1-2.jpg");
+		skyBoxTexture2->SetName(L"skyBox2");
+		RESOURCE.AddResource(skyBoxTexture2->GetName(), skyBoxTexture2);
+
+		skyBoxTexture3 = make_shared<Texture>();
+		skyBoxTexture3->CreateTexture(L"Sky1-3.jpg");
+		skyBoxTexture3->SetName(L"skyBox3");
+		RESOURCE.AddResource(skyBoxTexture3->GetName(), skyBoxTexture3);
+
+		skyBoxTexture4 = make_shared<Texture>();
+		skyBoxTexture4->CreateTexture(L"Sky1-4.jpg");
+		skyBoxTexture4->SetName(L"skyBox4");
+		RESOURCE.AddResource(skyBoxTexture4->GetName(), skyBoxTexture4);
+
+		skyBoxTexture5 = make_shared<Texture>();
+		skyBoxTexture5->CreateTexture(L"Sky1-5.jpg");
+		skyBoxTexture5->SetName(L"skyBox5");
+		RESOURCE.AddResource(skyBoxTexture5->GetName(), skyBoxTexture5);
+
+		skyBoxTexture6 = make_shared<Texture>();
+		skyBoxTexture6->CreateTexture(L"Sky1-6.jpg");
+		skyBoxTexture6->SetName(L"skyBox6");
+		RESOURCE.AddResource(skyBoxTexture6->GetName(), skyBoxTexture6);
+	}
 
 	treeTexture = make_shared<Texture>();
 	treeTexture->CreateTexture(L"tree.png");
@@ -113,6 +162,52 @@ void ResourceManager::AddResource()
 		defaultShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
 	}
 	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
+
+	tessellation_shader = make_shared<Shader>();
+	tessellation_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::HULL_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->SetName(L"Tesselation_Shader");
+	{
+		tessellation_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"normalMap", 1);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"specularMap", 2);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+	}
+	RESOURCE.AddResource(tessellation_shader->GetName(), tessellation_shader);
+
+
+	environmentMapShader = make_shared<Shader>();
+	environmentMapShader->CreateShader(ShaderType::VERTEX_SHADER, L"EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	environmentMapShader->CreateShader(ShaderType::PIXEL_SHADER, L"EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	environmentMapShader->SetName(L"EnvironmentMap_Shader");
+	{
+		environmentMapShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"texture0", 0);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"normalMap", 1);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"specularMap", 2);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+	}
+	RESOURCE.AddResource(environmentMapShader->GetName(), environmentMapShader);
+
+	quadShader = make_shared<Shader>();
+	quadShader->CreateShader(ShaderType::VERTEX_SHADER, L"Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	quadShader->CreateShader(ShaderType::PIXEL_SHADER, L"Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	quadShader->SetName(L"Quad_Shader");
+	{
+		quadShader->GetShaderSlot()->SetSlot(L"texture0", 0);
+	}
+	RESOURCE.AddResource(quadShader->GetName(), quadShader);
 
 	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
 	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
@@ -215,13 +310,16 @@ void ResourceManager::AddResource()
 	billboardMaterial->SetName(L"Billboard_Material");
 	RESOURCE.AddResource(billboardMaterial->GetName(), billboardMaterial);
 
+
 	skyBoxMaterial = make_shared<Material>();
-	skyBoxMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"skyBox"));
+	shared_ptr<Texture> textureArray[6] = { skyBoxTexture1, skyBoxTexture2, skyBoxTexture3, skyBoxTexture4, skyBoxTexture5, skyBoxTexture6 };
+	skyBoxMaterial->CreateCubeMapTexture(textureArray);
+	shared_ptr<Texture> cubeMapTexture = make_shared<Texture>();
+	cubeMapTexture->SetShaderResourceView(skyBoxMaterial->GetCubeMapSRV());
+	skyBoxMaterial->SetTexture(cubeMapTexture);
 	skyBoxMaterial->SetShader(RESOURCE.GetResource<Shader>(L"SkyBox_Shader"));
 	skyBoxMaterial->SetName(L"SkyBoxMaterial");
 	RESOURCE.AddResource(skyBoxMaterial->GetName(), skyBoxMaterial);
-
-
 
 	shared_ptr<Material> tmp = RESOURCE.GetResource<Material>(L"DefaultMaterial");
 	lightMaterial = make_shared<Material>();
@@ -235,6 +333,18 @@ void ResourceManager::AddResource()
 	tower_model->ReadMaterial(L"Tower/Tower");
 	tower_model->SetName(L"TowerModel");
 	RESOURCE.AddResource(tower_model->GetName(), tower_model);
+
+	//anna_model->ReadModel(L"Anna/Anna");
+	//anna_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
+	//anna_model->ReadMaterial(L"Anna/Anna");
+	//anna_model->SetName(L"AnnaModel");
+	//RESOURCE.AddResource(anna_model->GetName(), anna_model);
+
+	house_model->ReadModel(L"House/House");
+	house_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
+	house_model->ReadMaterial(L"House/House");
+	house_model->SetName(L"HouseModel");
+	RESOURCE.AddResource(house_model->GetName(), house_model);
 
 	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
 	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));

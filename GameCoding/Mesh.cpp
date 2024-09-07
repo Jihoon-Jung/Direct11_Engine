@@ -9,27 +9,23 @@ Mesh::Mesh()
 Mesh::~Mesh()
 {
 }
-void Mesh::CreateQuard_NormalTangent()
+
+void Mesh::CreateQuad_NormalTangent()
 {
 	vector<VertexTextureNormalTangentBlendData> vtx;
 	vtx.resize(4);
 
-	vtx[0].position = Vec3(-0.5f, -0.5f, 0.f);
+	vtx[0].position = Vec3(-1.0f, -1.0f, 0.f);
 	vtx[0].uv = Vec2(0.f, 1.f);
-	vtx[0].normal = Vec3(0.f, 0.f, -1.f);
-	vtx[0].tangent = Vec3(1.0f, 0.0f, 0.0f);
-	vtx[1].position = Vec3(-0.5f, 0.5f, 0.f);
+
+	vtx[1].position = Vec3(-1.0f, 1.0f, 0.f);
 	vtx[1].uv = Vec2(0.f, 0.f);
-	vtx[1].normal = Vec3(0.f, 0.f, -1.f);
-	vtx[1].tangent = Vec3(1.0f, 0.0f, 0.0f);
-	vtx[2].position = Vec3(0.5f, -0.5f, 0.f);
+
+	vtx[2].position = Vec3(1.0f, -1.0f, 0.f);
 	vtx[2].uv = Vec2(1.f, 1.f);
-	vtx[2].normal = Vec3(0.f, 0.f, -1.f);
-	vtx[2].tangent = Vec3(1.0f, 0.0f, 0.0f);
-	vtx[3].position = Vec3(0.5f, 0.5f, 0.f);
+
+	vtx[3].position = Vec3(1.0f, 1.0f, 0.f);
 	vtx[3].uv = Vec2(1.f, 0.f);
-	vtx[3].normal = Vec3(0.f, 0.f, -1.f);
-	vtx[3].tangent = Vec3(1.0f, 0.0f, 0.0f);
 
 	vector<uint32> idx = { 0, 1, 2, 2, 1, 3 };
 

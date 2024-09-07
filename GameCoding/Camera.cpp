@@ -58,3 +58,36 @@ void Camera::SetViewProjectionMatrix()
 	_cameraBuffer->CreateConstantBuffer<CameraBuffer>();
 	_cameraBuffer->CopyData(_cameraBufferData);
 }
+
+void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 lookVector, Vec3 upVector)
+{
+	Vec3 eye = worldPosition;
+	Vec3 at = eye + lookVector;
+	Vec3 up = upVector;
+	_envMatView = ::XMMatrixLookAtLH(eye, at, up);
+
+	int width = Graphics::GetInstance().GetEnvironmentMapWidth();
+	int height = Graphics::GetInstance().GetEnvironmentMapHeight();
+
+	float aspectRatio = (float)(width) / (float)(height);
+
+	float fovAngleY = 0.5f * XM_PI;
+	float nearZ = 0.1f;
+	float farZ = 1000.f;
+	if (_type == ProjectionType::Perspective)
+		_envMatProjection = ::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
+	else
+	{
+		nearZ = 1.f;
+		farZ = 100.f;
+		_envMatProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
+	}
+
+
+	_environmentCameraBuffer = make_shared<Buffer>();
+	CameraBuffer _cameraBufferData;
+	_cameraBufferData.viewMatrix = _envMatView;
+	_cameraBufferData.projectionMatrix = _envMatProjection;
+	_environmentCameraBuffer->CreateConstantBuffer<CameraBuffer>();
+	_environmentCameraBuffer->CopyData(_cameraBufferData);
+}

@@ -2,7 +2,7 @@
 #include "Viewport.h"
 Viewport::Viewport()
 {
-	Set(800, 600);
+	Set(GWinSizeX, GWinSizeY);
 }
 
 Viewport::Viewport(float width, float height, float x, float y, float minDepth, float maxDepth)

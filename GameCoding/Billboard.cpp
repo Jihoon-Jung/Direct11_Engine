@@ -81,7 +81,7 @@ void Billboard::DrawBillboard()
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"Billboard_Shader");
 
 	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
-	RasterizerStates states;
+	RasterizerStateInfo states;
 	states.fillMode = D3D11_FILL_SOLID;
 	states.cullMode = D3D11_CULL_BACK;
 	states.frontCouterClockWise = false;

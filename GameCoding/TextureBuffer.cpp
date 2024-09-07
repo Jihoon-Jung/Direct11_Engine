@@ -89,7 +89,7 @@ void TextureBuffer::CreateUAV()
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
 	ZeroMemory(&uavDesc, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC));
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.Format = desc.Format;
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uavDesc.Texture2DArray.ArraySize = _arraySize;
 

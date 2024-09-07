@@ -11,97 +11,90 @@ MoveObject::~MoveObject()
 
 void MoveObject::Start()
 {
-
 }
 
 void MoveObject::Update()
 {
-	//if (_gameObject->GetName() == L"MainCamera")
-	{
-		float dt = TIME.GetDeltaTime();
-		Vec3 pos = _gameObject->transform()->GetTransform()->GetWorldPosition();
+    if (INPUT.GetButton(KEY_TYPE::RBUTTON) && INPUT.GetButton(KEY_TYPE::KEY_CTRL))
+    {
+        if (!_isResetMouse)
+        {
+            ResetMouse();
+            _isResetMouse = true;
+        }
+        float dt = TIME.GetDeltaTime();
 
-		if (INPUT.GetButton(KEY_TYPE::W))
-			pos += GetTransform()->GetLook() * _speed * dt;
+        // 키보드를 이용한 이동
+        Vec3 pos = _gameObject->transform()->GetWorldPosition();
 
-		if (INPUT.GetButton(KEY_TYPE::S))
-			pos -= GetTransform()->GetLook() * _speed * dt;
+        if (INPUT.GetButton(KEY_TYPE::W))
+            pos += GetTransform()->GetLook() * _speed * dt;
 
-		if (INPUT.GetButton(KEY_TYPE::A))
-			pos -= GetTransform()->GetRight() * _speed * dt;
+        if (INPUT.GetButton(KEY_TYPE::S))
+            pos -= GetTransform()->GetLook() * _speed * dt;
 
-		if (INPUT.GetButton(KEY_TYPE::D))
-			pos += GetTransform()->GetRight() * _speed * dt;
+        if (INPUT.GetButton(KEY_TYPE::A))
+            pos -= GetTransform()->GetRight() * _speed * dt;
 
-		_gameObject->transform()->SetPosition(pos);
+        if (INPUT.GetButton(KEY_TYPE::D))
+            pos += GetTransform()->GetRight() * _speed * dt;
 
-		if (INPUT.GetButton(KEY_TYPE::Q))
-		{
-			Vec3 rotation = GetTransform()->GetLocalRotation();
-			rotation.x += dt * 0.5f;
-			GetTransform()->SetLocalRotation(rotation);
-		}
+        _gameObject->transform()->SetPosition(pos);
 
-		if (INPUT.GetButton(KEY_TYPE::E))
-		{
-			Vec3 rotation = GetTransform()->GetLocalRotation();
-			rotation.x -= dt * 0.5f;
-			GetTransform()->SetLocalRotation(rotation);
-		}
+        // 마우스 회전 처리
+        POINT cursorPos;
+        if (GetCursorPos(&cursorPos))
+        {
+            // 마우스 이동 차이 계산
+            float deltaX = static_cast<float>(cursorPos.x - _prevMousePos.x);
+            float deltaY = static_cast<float>(cursorPos.y - _prevMousePos.y);
 
-		if (INPUT.GetButton(KEY_TYPE::Z))
-		{
-			Vec3 rotation = GetTransform()->GetLocalRotation();
-			rotation.y += dt * 0.5f;
-			GetTransform()->SetLocalRotation(rotation);
-		}
+            if (abs(deltaX) > 1000.f || abs(deltaY) > 1000.f)
+            {
+                // 이전 마우스 위치 업데이트만 하고 return
+                _prevMousePos = cursorPos;
+                return;
+            }
 
-		if (INPUT.GetButton(KEY_TYPE::C))
-		{
-			Vec3 rotation = GetTransform()->GetLocalRotation();
-			rotation.y -= dt * 0.5f;
-			GetTransform()->SetLocalRotation(rotation);
-		}
-	}
-	/*else if (_gameObject->GetName() == L"MainLight")
-	{
-		float dt = TIME.GetDeltaTime();
-		Vec3 pos = _gameObject->transform()->GetTransform()->GetWorldPosition();
+            // 마우스 움직임에 따른 회전 적용 (Yaw 및 Pitch)
+            Vec3 rotation = GetTransform()->GetLocalRotation();
 
-		if (INPUT.GetButton(KEY_TYPE::KEY_1))
-			pos += GetTransform()->GetLook() * _speed * dt;
+            float MOUSE_SENSITIVITY_X = 10.1f;
+            float MOUSE_SENSITIVITY_Y = 10.1f;
 
-		if (INPUT.GetButton(KEY_TYPE::KEY_2))
-			pos -= GetTransform()->GetLook() * _speed * dt;
+            // Yaw 회전 적용 (좌우 회전)
+            rotation.y += deltaX * MOUSE_SENSITIVITY_X * dt;
 
-		if (INPUT.GetButton(KEY_TYPE::KEY_3))
-			pos -= GetTransform()->GetRight() * _speed * dt;
+            // Pitch 회전 적용 (상하 회전)
+            rotation.x += deltaY * MOUSE_SENSITIVITY_Y * dt;
 
-		if (INPUT.GetButton(KEY_TYPE::KEY_4))
-			pos += GetTransform()->GetRight() * _speed * dt;
+            // 피치 값 제한하여 카메라가 뒤집히지 않도록 함
+            //rotation.x = clamp(rotation.x, -XM_PIDIV2, XM_PIDIV2);
 
-		_gameObject->transform()->SetPosition(pos);
+            // 회전 적용
+            GetTransform()->SetRotation(rotation);
 
-	}*/
-	
-	//if (!INPUT.isMouseOut())
-	//{
-	//	// 회전 처리
-	//	Vec3 rotation = GetTransform()->GetLocalRotation();
-
-	//	// 마우스 위치에 따라 회전
-	//	POINT currentMousePos = INPUT.GetMousePos();
-	//	POINT deltaMousePos = { currentMousePos.x - _prevMousePos.x, currentMousePos.y - _prevMousePos.y };
-	//	rotation.y += deltaMousePos.x * dt * 0.1f; // 마우스 X축 이동량에 따라 Y축 회전
-	//	rotation.x -= deltaMousePos.y * dt * 0.1f; // 마우스 Y축 이동량에 따라 X축 회전
-	//	_prevMousePos = currentMousePos;
-
-	//	// 회전 각도 제한
-	//	rotation.x = clamp(rotation.x, -90.0f, 90.0f);
-	//	rotation.y = clamp(rotation.y, -90.0f, 90.0f); // 추가: y축 회전 각도도 제한
-
-	//	GetTransform()->SetLocalRotation(rotation);
-	//	_gameObject->transform()->Update();
-	//}
-
+            // 이전 마우스 위치 업데이트
+            _prevMousePos = cursorPos;
+        }
+        else
+        {
+            char buffer[100];
+            sprintf_s(buffer, "Failed to get cursor position.\n");
+            OutputDebugStringA(buffer);
+        }
+    }
+    else
+        _isResetMouse = false;
 }
+
+void MoveObject::ResetMouse()
+{
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+    _prevMousePos = cursorPos;
+}
+
+
+
+

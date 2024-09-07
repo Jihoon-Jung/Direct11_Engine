@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "ConstantBufferType.h"
 
+class GameObject;
 
 class Material : public ResourceBase
 {
@@ -39,6 +40,10 @@ public:
 	void PushMaterialDesc();
 	MaterialDesc GetMaterialDesc() { return _materialDesc; }
 	void SetMaterialDesc(MaterialDesc materialDesc);
+	void CreateCubeMapTexture(shared_ptr<Texture> textureArray[6]);
+	void CreateEnvironmentMapTexture(shared_ptr<GameObject> gameObject);
+	ComPtr<ID3D11ShaderResourceView> GetCubeMapSRV() { return _cubeMapSRV; }
+
 	shared_ptr<Shader> GetShader() { return _shader; }
 	shared_ptr<Texture> GetTexture() { return _texture; }
 	shared_ptr<Texture> GetNormalMap() { return _normalMap; }
@@ -54,6 +59,8 @@ private:
 	shared_ptr<Texture> _diffuseMap;
 	shared_ptr<Texture> _specularMap;
 	shared_ptr<Buffer> _materialBuffer;
+	ComPtr<ID3D11ShaderResourceView> _cubeMapSRV;
+	ComPtr<ID3D11ShaderResourceView> _environmentMapSRV;
 	MaterialDesc _materialDesc;
 	
 };

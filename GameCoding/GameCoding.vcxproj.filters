@@ -236,6 +236,12 @@
     <ClInclude Include="DepthStencilState.h">
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerStateInfo.h">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -407,6 +413,12 @@
     <ClCompile Include="DepthStencilState.cpp">
       <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPass.cpp">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizerStateInfo.cpp">
+      <Filter>소스 파일\PipleLine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
@@ -439,6 +451,15 @@
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="ComputeShader_GaussianBlurVertical.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Quad.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="EnvironmentMap.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Tesselation.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

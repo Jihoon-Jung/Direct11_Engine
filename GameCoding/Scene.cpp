@@ -137,7 +137,7 @@ void Scene::Picking()
 			Vec3 endWorldPos = GP.GetViewport().Unproject(endScreenPos, worldMatrix, viewMatrix, projectionMatrix);
 			Vec3 worldMoveRatio = endWorldPos - startWorldPos;
 
-			picked->transform()->SetLocalPosition(picked->transform()->GetLocalPosition() + worldMoveRatio);
+			picked->transform()->SetLocalPosition(picked->transform()->GetLocalPosition() + worldMoveRatio * 50.0f);
 
 			// Update first clicked position for next frame
 			firstClickedMouseX = currentMouseX;
