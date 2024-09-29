@@ -12,29 +12,29 @@ void ResourceManager::AddResource()
 	shared_ptr<Mesh> cube_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> grid_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> quard_mesh = make_shared<Mesh>();
+	shared_ptr<Mesh> cylinder_mesh = make_shared<Mesh>();
+	shared_ptr<Mesh> terrain_mesh = make_shared<Mesh>();
 
 	shared_ptr<Model> tower_model = make_shared<Model>();
-	shared_ptr<Model> house_model = make_shared<Model>();
-	shared_ptr<Model> anna_model = make_shared<Model>();
 	shared_ptr<Model> kachujin_Anim = make_shared<Model>();
-	
+
+	shared_ptr<Model> Ely_Anim = make_shared<Model>();
 
 	shared_ptr<Texture> texture = make_shared<Texture>();
 	shared_ptr<Texture> normalMap = make_shared<Texture>();
 	shared_ptr<Texture> lightTexture = make_shared<Texture>();
 
-	shared_ptr<Texture> skyBoxTexture1 = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture2 = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture3 = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture4 = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture5 = make_shared<Texture>();
-	shared_ptr<Texture> skyBoxTexture6 = make_shared<Texture>();
+	shared_ptr<Texture> bricks_texture = make_shared<Texture>();
 
 	shared_ptr<Texture> treeTexture = make_shared<Texture>();
 
 	shared_ptr<Texture> grassTexture = make_shared<Texture>();
 
 	shared_ptr<Texture> pandaTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> fireParticleTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> randomTexture = make_shared<Texture>();
 
 	shared_ptr<Shader> ligthRenderShader = make_shared<Shader>();
 
@@ -60,13 +60,23 @@ void ResourceManager::AddResource()
 
 	shared_ptr<Shader> gaussianBlur_csShaderVertical = make_shared<Shader>();
 
+	shared_ptr<Shader> terrain_shader = make_shared<Shader>();
+	
+	shared_ptr<Shader> initParticle_shader = make_shared<Shader>();
+
+	shared_ptr<Shader> renderParticle_shader = make_shared<Shader>();
+
 	shared_ptr<Material> material = make_shared<Material>();
+
+	shared_ptr<Material> tessellation_material = make_shared<Material>();
 
 	shared_ptr<Material> billboardMaterial = make_shared<Material>();
 
 	shared_ptr<Material> lightMaterial = make_shared<Material>();
 
 	shared_ptr<Material> skyBoxMaterial = make_shared<Material>();
+
+	shared_ptr<Material> terrainMaterial = make_shared<Material>();
 
 	sphere_mesh->CreateSphere_NormalTangent();
 	sphere_mesh->SetName(L"TestMesh");
@@ -80,9 +90,34 @@ void ResourceManager::AddResource()
 	grid_mesh->SetName(L"Grid");
 	RESOURCE.AddResource(grid_mesh->GetName(), grid_mesh);
 
+	TerrainInfo info;
+	info.heightMapFilename = L"Terrain/terrain.raw";
+	info.layerMapFilename0 = L"Terrain/grass.dds";
+	info.layerMapFilename1 = L"Terrain/darkdirt.dds";
+	info.layerMapFilename2 = L"Terrain/stone.dds";
+	info.layerMapFilename3 = L"Terrain/lightdirt.dds";
+	info.layerMapFilename4 = L"Terrain/snow.dds";
+	info.blendMapFilename = L"Terrain/blend.dds";
+	info.heightScale = 50.0f;
+	info.heightmapWidth = 2049;
+	info.heightmapHeight = 2049;
+	info.cellSpacing = 0.5f;
+	terrain_mesh->CreateTerrain(info);
+	terrain_mesh->SetName(L"Terrain");
+	RESOURCE.AddResource(terrain_mesh->GetName(), terrain_mesh);
+
 	quard_mesh->CreateQuad_NormalTangent();
 	quard_mesh->SetName(L"Quard");
 	RESOURCE.AddResource(quard_mesh->GetName(), quard_mesh);
+
+	cylinder_mesh->CreateCylinder_NormalTangent();
+	cylinder_mesh->SetName(L"Cylinder");
+	RESOURCE.AddResource(cylinder_mesh->GetName(), cylinder_mesh);
+
+	bricks_texture = make_shared<Texture>();
+	bricks_texture->CreateTexture(L"bricks.jpg");
+	bricks_texture->SetName(L"Bricks");
+	RESOURCE.AddResource(bricks_texture->GetName(), bricks_texture);
 
 	texture = make_shared<Texture>();
 	texture->CreateTexture(L"veigar.jpg");
@@ -99,37 +134,17 @@ void ResourceManager::AddResource()
 	pandaTexture->SetName(L"Panda");
 	RESOURCE.AddResource(pandaTexture->GetName(), pandaTexture);
 
-	{
-		skyBoxTexture1 = make_shared<Texture>();
-		skyBoxTexture1->CreateTexture(L"Sky1-1.jpg");
-		skyBoxTexture1->SetName(L"skyBox1");
-		RESOURCE.AddResource(skyBoxTexture1->GetName(), skyBoxTexture1);
+	fireParticleTexture = make_shared<Texture>();
+	vector<wstring> textureVector;
+	textureVector.push_back(L"flare0.dds");
+	fireParticleTexture->CreateTexture2DArraySRV(textureVector);
+	fireParticleTexture->SetName(L"Fire_Particle");
+	RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
 
-		skyBoxTexture2 = make_shared<Texture>();
-		skyBoxTexture2->CreateTexture(L"Sky1-2.jpg");
-		skyBoxTexture2->SetName(L"skyBox2");
-		RESOURCE.AddResource(skyBoxTexture2->GetName(), skyBoxTexture2);
-
-		skyBoxTexture3 = make_shared<Texture>();
-		skyBoxTexture3->CreateTexture(L"Sky1-3.jpg");
-		skyBoxTexture3->SetName(L"skyBox3");
-		RESOURCE.AddResource(skyBoxTexture3->GetName(), skyBoxTexture3);
-
-		skyBoxTexture4 = make_shared<Texture>();
-		skyBoxTexture4->CreateTexture(L"Sky1-4.jpg");
-		skyBoxTexture4->SetName(L"skyBox4");
-		RESOURCE.AddResource(skyBoxTexture4->GetName(), skyBoxTexture4);
-
-		skyBoxTexture5 = make_shared<Texture>();
-		skyBoxTexture5->CreateTexture(L"Sky1-5.jpg");
-		skyBoxTexture5->SetName(L"skyBox5");
-		RESOURCE.AddResource(skyBoxTexture5->GetName(), skyBoxTexture5);
-
-		skyBoxTexture6 = make_shared<Texture>();
-		skyBoxTexture6->CreateTexture(L"Sky1-6.jpg");
-		skyBoxTexture6->SetName(L"skyBox6");
-		RESOURCE.AddResource(skyBoxTexture6->GetName(), skyBoxTexture6);
-	}
+	randomTexture = make_shared<Texture>();
+	randomTexture->CreateRandomTexture1DSRV();
+	randomTexture->SetName(L"Random_Texture");
+	RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
 
 	treeTexture = make_shared<Texture>();
 	treeTexture->CreateTexture(L"tree.png");
@@ -137,7 +152,7 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(treeTexture->GetName(), treeTexture);
 
 	normalMap = make_shared<Texture>();
-	normalMap->CreateTexture(L"Leather_Normal.jpg");
+	normalMap->CreateTexture(L"bricks_nmap.png");
 	normalMap->SetName(L"NormalMap");
 	RESOURCE.AddResource(normalMap->GetName(), normalMap);
 
@@ -147,8 +162,8 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(lightTexture->GetName(), lightTexture);
 
 	defaultShader = make_shared<Shader>();
-	defaultShader->CreateShader(ShaderType::VERTEX_SHADER, L"Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	defaultShader->CreateShader(ShaderType::PIXEL_SHADER, L"Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	defaultShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	defaultShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	defaultShader->SetName(L"Default_Shader");
 	{
 		defaultShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -163,11 +178,51 @@ void ResourceManager::AddResource()
 	}
 	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
 
+	initParticle_shader = make_shared<Shader>();
+	initParticle_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/InitParticleSystem.hlsl", InputLayoutType::VertexParticle);
+	initParticle_shader->CreateShader(ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT, L"Shader/InitParticleSystem.hlsl", InputLayoutType::VertexParticle);
+	initParticle_shader->SetName(L"InitParticle_Shader");
+	{
+		initParticle_shader->GetShaderSlot()->SetSlot(L"ParticleBuffer", 0);
+		initParticle_shader->GetShaderSlot()->SetSlot(L"gRandomTex", 0);
+	}
+	RESOURCE.AddResource(initParticle_shader->GetName(), initParticle_shader);
+
+	renderParticle_shader = make_shared<Shader>();
+	renderParticle_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
+	renderParticle_shader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
+	renderParticle_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
+	renderParticle_shader->SetName(L"RenderParticle_Shader");
+	{
+		renderParticle_shader->GetShaderSlot()->SetSlot(L"ParticleBuffer", 0);
+		renderParticle_shader->GetShaderSlot()->SetSlot(L"gTexArray", 0);
+	}
+	RESOURCE.AddResource(renderParticle_shader->GetName(), renderParticle_shader);
+
+	terrain_shader = make_shared<Shader>();
+	terrain_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
+	terrain_shader->CreateShader(ShaderType::HULL_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
+	terrain_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
+	terrain_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
+	terrain_shader->SetName(L"Terrain_Shader");
+	{
+		terrain_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
+		terrain_shader->GetShaderSlot()->SetSlot(L"LightMaterial ", 1);
+		terrain_shader->GetShaderSlot()->SetSlot(L"LightDesc", 2);
+		terrain_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 3);
+		terrain_shader->GetShaderSlot()->SetSlot(L"TerrainBuffer", 4);
+		terrain_shader->GetShaderSlot()->SetSlot(L"gLayerMapArray", 0);
+		terrain_shader->GetShaderSlot()->SetSlot(L"gBlendMap", 1);
+		terrain_shader->GetShaderSlot()->SetSlot(L"gHeightMap", 2);
+	}
+	RESOURCE.AddResource(terrain_shader->GetName(), terrain_shader);
+
+
 	tessellation_shader = make_shared<Shader>();
-	tessellation_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::HULL_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::HULL_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	tessellation_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	tessellation_shader->SetName(L"Tesselation_Shader");
 	{
 		tessellation_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -184,8 +239,8 @@ void ResourceManager::AddResource()
 
 
 	environmentMapShader = make_shared<Shader>();
-	environmentMapShader->CreateShader(ShaderType::VERTEX_SHADER, L"EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	environmentMapShader->CreateShader(ShaderType::PIXEL_SHADER, L"EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	environmentMapShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	environmentMapShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	environmentMapShader->SetName(L"EnvironmentMap_Shader");
 	{
 		environmentMapShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -201,17 +256,17 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(environmentMapShader->GetName(), environmentMapShader);
 
 	quadShader = make_shared<Shader>();
-	quadShader->CreateShader(ShaderType::VERTEX_SHADER, L"Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	quadShader->CreateShader(ShaderType::PIXEL_SHADER, L"Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	quadShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	quadShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	quadShader->SetName(L"Quad_Shader");
 	{
 		quadShader->GetShaderSlot()->SetSlot(L"texture0", 0);
 	}
 	RESOURCE.AddResource(quadShader->GetName(), quadShader);
 
-	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
-	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
-	billBoardShader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
+	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
+	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
+	billBoardShader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
 	billBoardShader->SetName(L"Billboard_Shader");
 	{
 		billBoardShader->GetShaderSlot()->SetSlot(L"CameraBuffer",0);
@@ -222,23 +277,23 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(billBoardShader->GetName(), billBoardShader);
 
 	adjustTexture_shader = make_shared<Shader>();
-	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_AdjustTexture.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_AdjustTexture.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	adjustTexture_shader->SetName(L"AdjustTexture_Shader");
 	RESOURCE.AddResource(adjustTexture_shader->GetName(), adjustTexture_shader);
 
 	gaussianBlur_csShaderHorizontal = make_shared<Shader>();
-	gaussianBlur_csShaderHorizontal->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_GaussianBlurHorizontal.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	gaussianBlur_csShaderHorizontal->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_GaussianBlurHorizontal.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	gaussianBlur_csShaderHorizontal->SetName(L"Gaussian_Horizontal");
 	RESOURCE.AddResource(gaussianBlur_csShaderHorizontal->GetName(), gaussianBlur_csShaderHorizontal);
 
 	gaussianBlur_csShaderVertical = make_shared<Shader>();
-	gaussianBlur_csShaderVertical->CreateShader(ShaderType::COMPUTE_SHADER, L"ComputeShader_GaussianBlurVertical.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	gaussianBlur_csShaderVertical->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_GaussianBlurVertical.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	gaussianBlur_csShaderVertical->SetName(L"Gaussian_Vertical");
 	RESOURCE.AddResource(gaussianBlur_csShaderVertical->GetName(), gaussianBlur_csShaderVertical);
 
 	skyboxShader = make_shared<Shader>();
-	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	skyboxShader->CreateShader(ShaderType::PIXEL_SHADER, L"SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	skyboxShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	skyboxShader->SetName(L"SkyBox_Shader");
 	{
 		skyboxShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -248,9 +303,9 @@ void ResourceManager::AddResource()
 
 
 	ligthRenderShader = make_shared<Shader>();
-	ligthRenderShader->CreateShader(ShaderType::VERTEX_SHADER, L"Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	ligthRenderShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	ligthRenderShader->SetName(L"Light_Render_Shader");
-	ligthRenderShader->CreateShader(ShaderType::PIXEL_SHADER, L"Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	ligthRenderShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	{
 		ligthRenderShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
 		ligthRenderShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
@@ -260,8 +315,8 @@ void ResourceManager::AddResource()
 
 
 	staticMesh_shader = make_shared<Shader>();
-	staticMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	staticMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	staticMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	staticMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	staticMesh_shader->SetName(L"StaticMesh_Shader");
 	{
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -280,8 +335,8 @@ void ResourceManager::AddResource()
 
 
 	animatedMesh_shader = make_shared<Shader>();
-	animatedMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	animatedMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	animatedMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	animatedMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
 	animatedMesh_shader->SetName(L"AnimatedMesh_Shader");
 	{
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
@@ -305,6 +360,13 @@ void ResourceManager::AddResource()
 	material->SetName(L"DefaultMaterial");
 	RESOURCE.AddResource(material->GetName(), material);
 
+	tessellation_material = make_shared<Material>();
+	tessellation_material->SetTexture(RESOURCE.GetResource<Texture>(L"Bricks"));
+	tessellation_material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
+	tessellation_material->SetShader(RESOURCE.GetResource<Shader>(L"Tesselation_Shader"));
+	tessellation_material->SetName(L"Tessellation_Material");
+	RESOURCE.AddResource(tessellation_material->GetName(), tessellation_material);
+
 	billboardMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
 	billboardMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Billboard_Shader"));
 	billboardMaterial->SetName(L"Billboard_Material");
@@ -312,14 +374,17 @@ void ResourceManager::AddResource()
 
 
 	skyBoxMaterial = make_shared<Material>();
-	shared_ptr<Texture> textureArray[6] = { skyBoxTexture1, skyBoxTexture2, skyBoxTexture3, skyBoxTexture4, skyBoxTexture5, skyBoxTexture6 };
-	skyBoxMaterial->CreateCubeMapTexture(textureArray);
 	shared_ptr<Texture> cubeMapTexture = make_shared<Texture>();
-	cubeMapTexture->SetShaderResourceView(skyBoxMaterial->GetCubeMapSRV());
+	cubeMapTexture->LoadTextureFromDDS(L"grasscube1024.dds");
 	skyBoxMaterial->SetTexture(cubeMapTexture);
 	skyBoxMaterial->SetShader(RESOURCE.GetResource<Shader>(L"SkyBox_Shader"));
 	skyBoxMaterial->SetName(L"SkyBoxMaterial");
 	RESOURCE.AddResource(skyBoxMaterial->GetName(), skyBoxMaterial);
+
+	terrainMaterial = make_shared<Material>();
+	terrainMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Terrain_Shader"));
+	terrainMaterial->SetName(L"TerrainMaterial");
+	RESOURCE.AddResource(terrainMaterial->GetName(), terrainMaterial);
 
 	shared_ptr<Material> tmp = RESOURCE.GetResource<Material>(L"DefaultMaterial");
 	lightMaterial = make_shared<Material>();
@@ -334,25 +399,22 @@ void ResourceManager::AddResource()
 	tower_model->SetName(L"TowerModel");
 	RESOURCE.AddResource(tower_model->GetName(), tower_model);
 
-	//anna_model->ReadModel(L"Anna/Anna");
-	//anna_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
-	//anna_model->ReadMaterial(L"Anna/Anna");
-	//anna_model->SetName(L"AnnaModel");
-	//RESOURCE.AddResource(anna_model->GetName(), anna_model);
-
-	house_model->ReadModel(L"House/House");
-	house_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
-	house_model->ReadMaterial(L"House/House");
-	house_model->SetName(L"HouseModel");
-	RESOURCE.AddResource(house_model->GetName(), house_model);
-
 	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
 	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
 	kachujin_Anim->ReadMaterial(L"Kachujin/Kachujin");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Idle");
+	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
 	kachujin_Anim->ReadAnimation(L"Kachujin/Run");
 	kachujin_Anim->ReadAnimation(L"Kachujin/Slash");
 	kachujin_Anim->CreateTexture();
 	kachujin_Anim->SetName(L"Kachujin");
 	RESOURCE.AddResource(kachujin_Anim->GetName(), kachujin_Anim);
+
+	Ely_Anim->ReadModel(L"Ely/Ely");
+	Ely_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
+	Ely_Anim->ReadMaterial(L"Ely/Ely");
+	Ely_Anim->ReadAnimation(L"Ely/Stab");
+	Ely_Anim->CreateTexture();
+	Ely_Anim->SetName(L"Ely");
+	RESOURCE.AddResource(Ely_Anim->GetName(), Ely_Anim);
+
 }

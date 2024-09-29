@@ -28,16 +28,25 @@
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\EnvironmentMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\InitParticleSystem.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Light.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Quad.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\RenderParticleSystem.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SkyBox.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\StaticMesh.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Terrain.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Tesselation.cso</FullPath>

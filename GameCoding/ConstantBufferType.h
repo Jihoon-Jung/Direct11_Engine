@@ -3,7 +3,9 @@ enum class InputLayoutType
 {
 	VertexTextureNormalTangentBlendData,
 	VertexTextureNormalBillboard,
-	VertexBillboard_Geometry
+	VertexBillboard_Geometry,
+	Terrain,
+	VertexParticle,
 };
 struct CameraBuffer
 {
@@ -115,4 +117,33 @@ struct BlendAnimDesc
 struct AnimationTransformBuffer
 {
 	Matrix transform[11][67];
+};
+
+struct TerrainBuffer
+{
+	float minDist;
+	float maxDist;
+	float minTess;
+	float maxTess;
+	float texelCellSpaceU;
+	float texelCellSpaceV;
+	float worldCellSpace;
+	float texScale; // 50.0f
+	Vec4 frustom[6];
+};
+
+struct ParticleBuffer
+{
+	Vec3 gEyePosW;
+	float padding1;
+	Vec3 gEmitPosW;
+	float padding2;
+	Vec3 gEmitDirW;
+	float padding3;
+	float gGameTime;
+	float gTimeStep;
+	float padding4;
+	float padding5;
+	Matrix gView;
+	Matrix gProj;
 };

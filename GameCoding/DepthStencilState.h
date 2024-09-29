@@ -4,7 +4,8 @@ enum class DSState
 {
 	NORMAL,
 	CUSTOM1,
-	CUStom2
+	CUSTOM2,
+	CUSTOM3,
 };
 
 class DepthStencilState

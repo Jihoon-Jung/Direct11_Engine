@@ -22,6 +22,8 @@ public:
 	void SetProjectionType(ProjectionType type) { _type = type; }
 	Matrix GetViewMatrix() { return _matView; }
 	Matrix GetProjectionMatrix() { return _matProjcetion; }
+	Matrix GetEnvViewMatrix() { return _envMatView; }
+	Matrix GetEnvProjectionMatrix() { return _envMatProjection; }
 	shared_ptr<Buffer> GetCameraBuffer() { return _cameraBuffer; }
 	shared_ptr<Buffer> GetEnvironmentCameraBuffer() { return _environmentCameraBuffer; }
 private:

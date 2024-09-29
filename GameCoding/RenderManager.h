@@ -38,6 +38,7 @@ private:
 	vector<shared_ptr<GameObject>> _renderObjects;
 	vector<shared_ptr<GameObject>> _envMappedObjects;
 	vector<shared_ptr<GameObject>> _billboardObjs;
+	shared_ptr<GameObject> _terrainObject;
 	KeyframeDesc _keyframeDesc;
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;

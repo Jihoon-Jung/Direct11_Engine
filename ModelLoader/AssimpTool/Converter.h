@@ -12,7 +12,7 @@ public:
 	void ExportModelData(wstring savePath);
 	void ExportMaterialData(wstring savePath);
 	void ExportAnimationData(wstring savePath, uint32 index = 0);
-
+	bool DetectRightHandedCoordinateSystem(const aiMatrix4x4& matrix);
 public:
 	//DX
 	void CreateDeviceAndSwapChain();

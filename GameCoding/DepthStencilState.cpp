@@ -48,7 +48,7 @@ void DepthStencilState::SetDepthStencilState(DSState state)
 		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
 		CHECK(hr);
 	}
-	else if (state == DSState::CUStom2)
+	else if (state == DSState::CUSTOM2)
 	{
 		D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
 		ZeroMemory(&depthStencilStateDesc, sizeof(depthStencilStateDesc));
@@ -70,6 +70,17 @@ void DepthStencilState::SetDepthStencilState(DSState state)
 		depthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 		depthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
 		depthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
+		CHECK(hr);
+	}
+	else if (state == DSState::CUSTOM3)
+	{
+		D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
+		ZeroMemory(&depthStencilStateDesc, sizeof(depthStencilStateDesc));
+		depthStencilStateDesc.DepthEnable = TRUE;
+		depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
+		depthStencilStateDesc.StencilEnable = FALSE;
 		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
 		CHECK(hr);
 	}

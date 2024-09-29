@@ -20,9 +20,9 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	GP.Initialize(hwnd, _rectWidth, _rectHeight);
 	INPUT.Init(hwnd);
 	TIME.Init();
-	RENDER.Init();
 	RESOURCE.Init();
 	SCENE.LoadScene(L"Test");
+	RENDER.Init();
 }
 
 void EngineBody::Update()

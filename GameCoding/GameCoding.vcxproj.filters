@@ -242,6 +242,12 @@
     <ClInclude Include="RasterizerStateInfo.h">
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
+    <ClInclude Include="MathHelper.h">
+      <Filter>소스 파일\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -419,6 +425,12 @@
     <ClCompile Include="RasterizerStateInfo.cpp">
       <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
+    <ClCompile Include="MathHelper.cpp">
+      <Filter>소스 파일\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>소스 파일\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
@@ -426,40 +438,49 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Default.hlsl">
+    <FxCompile Include="Shader\AnimatedMesh.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Light.hlsl">
+    <FxCompile Include="Shader\Billboard.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="StaticMesh.hlsl">
+    <FxCompile Include="Shader\ComputeShader_AdjustTexture.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="AnimatedMesh.hlsl">
+    <FxCompile Include="Shader\ComputeShader_GaussianBlurHorizontal.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SkyBox.hlsl">
+    <FxCompile Include="Shader\ComputeShader_GaussianBlurVertical.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ComputeShader_AdjustTexture.hlsl">
+    <FxCompile Include="Shader\Default.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Billboard.hlsl">
+    <FxCompile Include="Shader\EnvironmentMap.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ComputeShader_GaussianBlurHorizontal.hlsl">
+    <FxCompile Include="Shader\Light.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ComputeShader_GaussianBlurVertical.hlsl">
+    <FxCompile Include="Shader\Quad.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Quad.hlsl">
+    <FxCompile Include="Shader\SkyBox.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="EnvironmentMap.hlsl">
+    <FxCompile Include="Shader\StaticMesh.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Tesselation.hlsl">
+    <FxCompile Include="Shader\Tesselation.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\Terrain.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\InitParticleSystem.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\RenderParticleSystem.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

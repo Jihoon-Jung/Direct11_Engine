@@ -17,12 +17,13 @@ void Terrain::GetGridMesh(shared_ptr<Mesh> grid)
 	_sizeZ = grid->GetGridSizeZ();
 	
 	_mesh = grid;
-	_vertices = _mesh->GetGeometry()->GetVertices();
+	_vertices = _mesh->GetTerrainGeometry()->GetVertices();
 
 	Vec3 localPosition = GetGameObject()->transform()->GetLocalPosition();
 	for (int i = 0; i < _vertices.size(); i++)
 	{
-		_vertices[i].position += localPosition;
+        _vertices[i].position;// += localPosition;
+        _vertices[i].position.y = _vertices[i].BoundsY.y;
 	}
 }
 

@@ -19,7 +19,7 @@ private:
 	shared_ptr<Mesh> _mesh;
 	int32 _sizeX = 0;
 	int32 _sizeZ = 0;
-	vector<VertexTextureNormalTangentBlendData> _vertices;
+	vector<VertexTerrain> _vertices;
 };
 
 struct ExtendedRay : public Ray

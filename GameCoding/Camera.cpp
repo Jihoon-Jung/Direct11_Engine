@@ -41,6 +41,7 @@ void Camera::SetViewProjectionMatrix()
 	float fovAngleY = XM_PI / 4.f;
 	float nearZ = 0.1f;
 	float farZ = 1000.f;
+	
 	if (_type == ProjectionType::Perspective)
 		_matProjcetion = ::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
 	else

@@ -15,12 +15,13 @@ enum class ComponentType : uint8
 	UIImage,
 	Button,
 	Billboard,
+	Particle,
 	Script,
 	None
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 10
+	FIXED_COMPONENT_COUNT = 11
 };
 
 class Component

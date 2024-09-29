@@ -28,25 +28,13 @@ void AssimpTool::Init(HWND hwnd)
 
 	//	// CustomData (File) -> Memory
 	//}
-	{
-		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->init(hwnd);
-		// FBX -> Memory
-		converter->ReadAssetFile(L"Anna/Anna_FBX.FBX");
-
-		// Memory -> CustomData (File)
-		converter->ExportMaterialData(L"Anna/Anna");
-		converter->ExportModelData(L"Anna/Anna");
-
-		// CustomData (File) -> Memory
-	}
+	//{
+	//	shared_ptr<Converter> converter = make_shared<Converter>();
+	//	converter->ReadAssetFile(L"Kachujin/Mesh.fbx");
+	//	converter->ExportMaterialData(L"Kachujin/Kachujin");
+	//	converter->ExportModelData(L"Kachujin/Kachujin");
+	//}
 	/*{
-		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadAssetFile(L"Kachujin/Mesh.fbx");
-		converter->ExportMaterialData(L"Kachujin/Kachujin");
-		converter->ExportModelData(L"Kachujin/Kachujin");
-	}
-	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Idle.fbx");
 		converter->ExportAnimationData(L"Kachujin/Idle");
@@ -55,11 +43,27 @@ void AssimpTool::Init(HWND hwnd)
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Run.fbx");
 		converter->ExportAnimationData(L"Kachujin/Run");
-	}
+	}*/
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Slash.fbx");
 		converter->ExportAnimationData(L"Kachujin/Slash");
+	}
+	/*{
+		shared_ptr<Converter> converter = make_shared<Converter>();
+		converter->ReadAssetFile(L"Kachujin/Dismissing Gesture.fbx");
+		converter->ExportAnimationData(L"Kachujin/Dismissing");
+	}*/
+	/*{
+		shared_ptr<Converter> converter = make_shared<Converter>();
+		converter->ReadAssetFile(L"Ely/Ely By K.Atienza.fbx");
+		converter->ExportMaterialData(L"Ely/Ely");
+		converter->ExportModelData(L"Ely/Ely");
+	}
+	{
+		shared_ptr<Converter> converter = make_shared<Converter>();
+		converter->ReadAssetFile(L"Ely/Martelo 2.fbx");
+		converter->ExportAnimationData(L"Ely/Stab");
 	}*/
 }
 

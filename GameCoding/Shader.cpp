@@ -59,6 +59,14 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayou
 		{
 			_inputLayout->CreateInputLayout(VertexBillboard_GeometryShader::descs, _vsBlob);
 		}
+		else if (inputType == InputLayoutType::Terrain)
+		{
+			_inputLayout->CreateInputLayout(VertexTerrain::descs, _vsBlob);
+		}
+		else if (inputType == InputLayoutType::VertexParticle)
+		{
+			_inputLayout->CreateInputLayout(VertexParticle::descs, _vsBlob);
+		}
 	}
 	else if (type == ShaderType::PIXEL_SHADER)
 	{
@@ -76,6 +84,36 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayou
 	{
 		LoadShaderFromFile(shaderPath, "GS", "gs_5_0", _gsBlob);
 		HRESULT hr = DEVICE->CreateGeometryShader(_gsBlob->GetBufferPointer(), _gsBlob->GetBufferSize(), nullptr, &_geometryShader);
+		CHECK(hr);
+	}
+	else if (type == ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT)
+	{
+		LoadShaderFromFile(shaderPath, "GS", "gs_5_0", _gsBlob);
+
+		D3D11_SO_DECLARATION_ENTRY pDecl[] =
+		{
+			// 정의: 스트림 아웃할 버퍼의 구조를 정의합니다.
+			// 예시로 POSITION, VELOCITY, SIZE, AGE, TYPE 등을 스트림 아웃합니다.
+			{ 0, "POSITION", 0, 0, 3, 0 },
+			{ 0, "VELOCITY", 0, 0, 3, 0 },
+			{ 0, "SIZE", 0, 0, 2, 0 },
+			{ 0, "AGE", 0, 0, 1, 0 },
+			{ 0, "TYPE", 0, 0, 1, 0 },
+		};
+
+		UINT stride = sizeof(VertexParticle);
+		UINT strides[] = { stride }; // 스트라이드를 배열로 선언
+
+		HRESULT hr = DEVICE->CreateGeometryShaderWithStreamOutput(
+			_gsBlob->GetBufferPointer(),
+			_gsBlob->GetBufferSize(),
+			pDecl,
+			ARRAYSIZE(pDecl),
+			strides,                // pBufferStrides에 스트라이드 배열 전달
+			ARRAYSIZE(strides),     // NumStrides를 1로 설정
+			0,                      // RasterizedStream (사용하지 않음)
+			nullptr,                // pClassLinkage
+			_streamOutGS.GetAddressOf());
 		CHECK(hr);
 	}
 	else if (type == ShaderType::HULL_SHADER)
@@ -99,6 +137,10 @@ void Shader::PushConstantBufferToShader(ShaderType type, const wstring& name, UI
 		DEVICECONTEXT->VSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 	if (type == ShaderType::GEOMETRY_SHADER)
 		DEVICECONTEXT->GSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
+	if (type == ShaderType::DOMAIN_SHADER)
+		DEVICECONTEXT->DSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
+	else if (type == ShaderType::HULL_SHADER)
+		DEVICECONTEXT->HSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 	else
 		DEVICECONTEXT->PSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 }
@@ -108,6 +150,10 @@ void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UI
 	UINT slot = _shaderSlot->GetSlotNumber(name);
 	if (type == ShaderType::VERTEX_SHADER)
 		DEVICECONTEXT->VSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
+	if (type == ShaderType::DOMAIN_SHADER)
+		DEVICECONTEXT->DSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
+	if (type == ShaderType::GEOMETRY_SHADER)
+		DEVICECONTEXT->GSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
 	else
 		DEVICECONTEXT->PSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
 }

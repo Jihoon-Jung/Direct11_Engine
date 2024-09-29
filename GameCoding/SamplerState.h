@@ -5,6 +5,7 @@ public:
 	SamplerState();
 	~SamplerState();
 	void CreateSamplerState();
+	void CreateHeightMapSamplerState();
 	ComPtr<ID3D11SamplerState> GetSamplerState() { return _samplerState; }
 
 private:

@@ -10,6 +10,7 @@ enum class ShaderType
 	PIXEL_SHADER,
 	COMPUTE_SHADER,
 	GEOMETRY_SHADER,
+	GEOMETRY_SHADER_WITH_STREAMOUTPUT,
 	HULL_SHADER,
 	DOMAIN_SHADER
 };
@@ -30,6 +31,7 @@ public:
 	ComPtr<ID3D11PixelShader> GetPixelShader() { return _pixelShader; }
 	ComPtr<ID3D11ComputeShader> GetComputeShader() { return _computeShader; }
 	ComPtr<ID3D11GeometryShader> GetGeometryShader() { return _geometryShader; }
+	ComPtr<ID3D11GeometryShader> GetOutputStreamGeometryShader() { return _streamOutGS; }
 	ComPtr<ID3D11HullShader> GetHullShader() { return _hullShader; }
 	ComPtr<ID3D11DomainShader> GetDomainShader() { return _domainShader; }
 
@@ -50,6 +52,7 @@ private:
 	ComPtr<ID3D11PixelShader> _pixelShader;
 	ComPtr<ID3D11ComputeShader> _computeShader;
 	ComPtr<ID3D11GeometryShader> _geometryShader;
+	ComPtr<ID3D11GeometryShader> _streamOutGS;
 	ComPtr<ID3D11HullShader> _hullShader;
 	ComPtr<ID3D11DomainShader> _domainShader;
 	shared_ptr<InputLayout> _inputLayout;

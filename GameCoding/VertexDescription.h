@@ -53,3 +53,21 @@ struct VertexBillboard_GeometryShader
 	Vec3 position;
 	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
 };
+
+struct VertexTerrain
+{
+	Vec3 position;
+	Vec2 uv;
+	Vec2 BoundsY;
+	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
+};
+
+struct VertexParticle
+{
+	Vec3 position;
+	Vec3 velocity;
+	Vec2 size;
+	float age;
+	uint32 type;
+	static vector<D3D11_INPUT_ELEMENT_DESC> descs;
+};

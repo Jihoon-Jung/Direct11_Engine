@@ -61,10 +61,15 @@ using namespace Microsoft::WRL;
 #include "Terrain.h"
 #include "UIImage.h"
 #include "Button.h"
+#include "ParticleSystem.h"
+
 
 #include "ShaderSlot.h"
 #include "ConstantBufferType.h"
 #include "RasterizerStateInfo.h"
+
+
+#include "MathHelper.h"
 
 // Buffer
 #include "Buffer.h"

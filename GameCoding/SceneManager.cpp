@@ -28,7 +28,7 @@ void SceneManager::LoadTestScene()
 	
 	shared_ptr<GameObject> camera = make_shared<GameObject>();
 	shared_ptr<Transform> camera_transform = make_shared<Transform>();
-	camera_transform->SetLocalPosition(Vec3(0, 0, -3));
+	camera_transform->SetLocalPosition(Vec3(0, 2.f, 100));
 	camera->AddComponent(camera_transform);
 	shared_ptr<MoveObject> moveObject = make_shared<MoveObject>();
 	camera->AddComponent(moveObject);
@@ -63,6 +63,10 @@ void SceneManager::LoadTestScene()
 	cube->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> cube_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> tessellation_cylinder = make_shared<GameObject>();
+	tessellation_cylinder->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> tessellation_cylinder_transform = make_shared<Transform>();
+
 	shared_ptr<GameObject> testPlane = make_shared<GameObject>();
 	testPlane->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> testPlane_transform = make_shared<Transform>();
@@ -78,6 +82,10 @@ void SceneManager::LoadTestScene()
 	shared_ptr<GameObject> grid = make_shared<GameObject>();
 	grid->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> grid_transform = make_shared<Transform>();
+
+	shared_ptr<GameObject> terrain = make_shared<GameObject>();
+	terrain->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> terrain_tranform = make_shared<Transform>();
 
 	shared_ptr<GameObject> quard = make_shared<GameObject>();
 	quard->SetObjectType(GameObjectType::NormalObject);
@@ -95,16 +103,19 @@ void SceneManager::LoadTestScene()
 	tower->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> tower_transform = make_shared<Transform>();
 
-	shared_ptr<GameObject> anna = make_shared<GameObject>();
-	anna->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> anna_transform = make_shared<Transform>();
-
 	shared_ptr<GameObject> Kachujin = make_shared<GameObject>();
 	Kachujin->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> kachujin_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> Ely = make_shared<GameObject>();
+	Ely->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> Ely_transform = make_shared<Transform>();
+
+	shared_ptr<GameObject> particleSystem = make_shared<GameObject>();
+	particleSystem->SetObjectType(GameObjectType::NormalObject);
+	
 	{
-		sphere_transform->SetPosition(Vec3(4.0f, 0.f, 2.f));
+		sphere_transform->SetPosition(Vec3(4.0f, 1.f, 122.f));
 		sphere->AddComponent(sphere_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
@@ -130,7 +141,6 @@ void SceneManager::LoadTestScene()
 		skyBox_transform->SetPosition(Vec3(0.f, 0.f, 0.f));
 		skyBox->AddComponent(skyBox_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>(); 
-		//meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"TestMesh"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, true);
@@ -148,7 +158,7 @@ void SceneManager::LoadTestScene()
 		skyBox->SetName(L"skyBox");
 	}
 	{
-		cube_transform->SetPosition(Vec3(-6.5f, 0.f, 2.f));
+		cube_transform->SetPosition(Vec3(-6.5f, 0.6f, 122.f));
 		cube->AddComponent(cube_transform);
 		//cube->SetParent(sphere);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -168,7 +178,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
 		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
 		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
-		meshRenderer->SetUseEnvironmentMap(true);
+		//meshRenderer->SetUseEnvironmentMap(true);
 		/*meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[1]->SetPass(Pass::QUAD_RENDER);
 		meshRenderer->GetRenderPasses()[1]->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
@@ -181,6 +191,29 @@ void SceneManager::LoadTestScene()
 		cube->SetName(L"cube");
 	}
 	{
+		tessellation_cylinder_transform->SetPosition(Vec3(-10.0f, 1.5f, 120.0f));
+		tessellation_cylinder->AddComponent(tessellation_cylinder_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Tessellation_Material"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cylinder"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
+		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
+		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
+		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		meshRenderer->GetRenderPasses()[0]->SetTessellationFlag(true);
+
+		tessellation_cylinder->AddComponent(meshRenderer);
+		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		tessellation_cylinder->AddComponent(boxCollider);
+		tessellation_cylinder->SetName(L"tessellation_cube");
+	}
+	{
 		testPlane_transform->SetPosition(Vec3(7.0f, 0.f, 0.f));
 		testPlane_transform->SetRotation(Vec3(0.f, 90.f, 0.f));
 		testPlane->AddComponent(testPlane_transform);
@@ -191,6 +224,8 @@ void SceneManager::LoadTestScene()
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
 		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(testPlane_transform);
 		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
 		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
 		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
@@ -204,24 +239,34 @@ void SceneManager::LoadTestScene()
 	
 
 	{
-		stencil_cube1_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube1_transform->SetPosition(Vec3(-10.5f, 0.f, 120.f));
 		stencil_cube1_transform->SetLocalScale(Vec3(1.0f));
 		stencil_cube1->AddComponent(stencil_cube1_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::OUTLINE_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(stencil_cube1_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM1);
 		stencil_cube1->AddComponent(meshRenderer);
 		stencil_cube1->SetName(L"stencil_cube1");
 	}
 	{
-		stencil_cube2_transform->SetPosition(Vec3(0.5f, 0.f, 2.f));
+		stencil_cube2_transform->SetPosition(Vec3(-10.5f, 0.f, 120.f));
 		stencil_cube2_transform->SetScale(Vec3(1.1f));
 		stencil_cube2->AddComponent(stencil_cube2_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
 		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::OUTLINE_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(stencil_cube2_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM2);
 		stencil_cube2->AddComponent(meshRenderer);
 		stencil_cube2->SetName(L"stencil_cube2");
 	}
@@ -251,11 +296,34 @@ void SceneManager::LoadTestScene()
 
 
 		grid->AddComponent(meshRenderer);
-		shared_ptr<Terrain> terrain = make_shared<Terrain>();
-		grid->AddComponent(terrain);
-		grid->GetComponent<Terrain>()->GetGridMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
+		//shared_ptr<Terrain> terrain = make_shared<Terrain>();
+		//grid->AddComponent(terrain);
+		//grid->GetComponent<Terrain>()->GetGridMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
 		grid->SetName(L"grid");
 	}
+
+	{
+		terrain_tranform->SetPosition(Vec3(0.0f, 0.0f, 0.0f));
+		terrain->AddComponent(terrain_tranform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"TerrainMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Terrain"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::TERRAIN_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
+		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
+		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		meshRenderer->GetRenderPasses()[0]->SetTerrainFlag(true);
+		terrain->AddComponent(meshRenderer);
+		terrain->SetName(L"Terrain_obj");
+		/*shared_ptr<Terrain> terrainComponent = make_shared<Terrain>();
+		terrain->AddComponent(terrainComponent);
+		terrain->GetComponent<Terrain>()->GetGridMesh(RESOURCE.GetResource<Mesh>(L"Terrain"));*/
+
+	}
+
 	{
 		quard_transform->SetPosition(Vec3(0.0f, 0.f, 0.f));
 		quard->AddComponent(quard_transform);
@@ -336,19 +404,6 @@ void SceneManager::LoadTestScene()
 		tower->SetName(L"tower");
 	}
 	{
-		//anna_transform->SetPosition(Vec3(-7.0f, 0.0f, -1.0f));
-		//anna_transform->SetLocalScale(Vec3(0.01f));
-		//anna->AddComponent(anna_transform);
-		//shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		//meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"AnnaModel"));
-		//meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
-		//meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-		//anna->AddComponent(meshRenderer);
-		//shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		//anna->AddComponent(boxCollider);
-		//anna->SetName(L"Anna");
-	}
-	{
 		light_transform->SetPosition(Vec3(-5.f, 0.f, -2.f));
 		light->AddComponent(light_transform);
 		light->AddComponent(make_shared<Light>());
@@ -362,7 +417,7 @@ void SceneManager::LoadTestScene()
 		light->SetName(L"MainLight");
 	}
 	{
-		kachujin_transform->SetPosition(Vec3(0.0f, 0.0f, 0.0f));
+		kachujin_transform->SetPosition(Vec3(0.0f, 0.0f, 120.0f));
 		kachujin_transform->SetLocalScale(Vec3(0.01f));
 		Kachujin->AddComponent(kachujin_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -374,6 +429,25 @@ void SceneManager::LoadTestScene()
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
+	{
+		Ely_transform->SetPosition(Vec3(-9.0f, 5.0f, 0.0f));
+		Ely_transform->SetLocalScale(Vec3(0.1f));
+		Ely->AddComponent(Ely_transform);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"Ely"));
+		meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		Ely->AddComponent(meshRenderer);
+		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		Ely->AddComponent(boxCollider);
+		Ely->SetName(L"Ely_OBJ");
+	}
+	{
+		shared_ptr<ParticleSystem> particleComponent = make_shared<ParticleSystem>();
+		particleComponent->Init(RESOURCE.GetResource<Texture>(L"Fire_Particle")->GetShaderResourceView(), RESOURCE.GetResource<Texture>(L"Random_Texture")->GetShaderResourceView(), 500);
+		particleSystem->AddComponent(particleComponent);
+		particleSystem->SetName(L"FireParticle");
+	}
 	int parentCount = cube->transform()->ParentCount();
 	int childCount = sphere->transform()->ChildCount();
 
@@ -383,15 +457,18 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(skyBox);
 	_activeScene->AddGameObject(sphere);
 	_activeScene->AddGameObject(cube);
-
+	_activeScene->AddGameObject(tessellation_cylinder);
 	//_activeScene->AddGameObject(grid);
 	//_activeScene->AddGameObject(tower);
 	//_activeScene->AddGameObject(quard_ui);
 	//_activeScene->AddGameObject(uiButton);
-	//_activeScene->AddGameObject(stencil_cube1);
-	//_activeScene->AddGameObject(stencil_cube2);
+	_activeScene->AddGameObject(stencil_cube1);
+	_activeScene->AddGameObject(stencil_cube2);
 	//_activeScene->AddGameObject(quard);
 	_activeScene->AddGameObject(Kachujin);
+	_activeScene->AddGameObject(terrain);
+	_activeScene->AddGameObject(particleSystem);
+	//_activeScene->AddGameObject(Ch4);
 	//_activeScene->AddGameObject(anna);
 	//_activeScene->AddGameObject(house);
 	//_activeScene->AddGameObject(testPlane);

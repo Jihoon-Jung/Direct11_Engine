@@ -11,6 +11,7 @@
 #include "UIImage.h"
 #include "Button.h"
 #include "Billboard.h"
+#include "ParticleSystem.h"
 
 enum class GameObjectType
 {
@@ -55,6 +56,8 @@ public:
 			type = ComponentType::Button;
 		if (std::is_same_v<T, Billboard>)
 			type = ComponentType::Billboard;
+		if (std::is_same_v<T, ParticleSystem>)
+			type = ComponentType::Particle;
 		if (std::is_same_v<T, MonoBehaviour>)
 			type = ComponentType::Script;
 
