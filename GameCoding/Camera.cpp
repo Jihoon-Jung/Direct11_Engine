@@ -92,3 +92,33 @@ void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 look
 	_environmentCameraBuffer->CreateConstantBuffer<CameraBuffer>();
 	_environmentCameraBuffer->CopyData(_cameraBufferData);
 }
+
+void Camera::SetShadowMapViewProjectionMatrix()
+{
+	shared_ptr<GameObject> light = SCENE.GetActiveScene()->Find(L"MainLight");
+	Vec3 eye = light->transform()->GetWorldPosition();           //GetTransform()->GetWorldPosition();
+	Vec3 at = Vec3(3.0f, 0.0f, 117.0f);
+	Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
+	_shadowView = ::XMMatrixLookAtLH(eye, at, up);
+
+
+	int width = Graphics::GetInstance().GetViewWidth();
+	int height = Graphics::GetInstance().GetViewHeight();
+
+	float aspectRatio = (float)(width) / (float)(height);
+
+	float fovAngleY = XM_PI / 4.f;
+	float nearZ = 0.1f;
+	float farZ = 1000.f;
+
+	//_shadowProjection = ::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
+	_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
+
+
+	_shadowCameraBuffer = make_shared<Buffer>();
+	CameraBuffer _cameraBufferData;
+	_cameraBufferData.viewMatrix = _shadowView;
+	_cameraBufferData.projectionMatrix = _shadowProjection;
+	_shadowCameraBuffer->CreateConstantBuffer<CameraBuffer>();
+	_shadowCameraBuffer->CopyData(_cameraBufferData);
+}

@@ -1,3 +1,5 @@
+#include "LightHelper.hlsl"
+
 struct VertexIn
 {
     float3 PosL     : POSITION;
@@ -200,6 +202,61 @@ DomainOut DS(PatchTess patchTess,
 
 float4 PS(DomainOut pin) : SV_Target
 {
+    float4 ambientColor = 0;
+    float4 diffuseColor = 0;
+    float4 specularColor = 0;
+    float4 emissiveColor = 0;
+
+    float3 lightDirection = normalize(pin.PosW - lightPosition);
+    float3 viewDirection = normalize(cameraPosition - pin.PosW);
+    float3 normal = normalize(pin.NormalW);
     float4 textureColor = texture0.Sample(sampler0, pin.Tex);
-    return textureColor;
+
+    float3 n = normalMap.Sample(sampler0, pin.Tex).rgb;
+    float3 bumpedNormal = NormalSampleToWorldSpace(n, pin.NormalW, pin.TangentW);
+    //ComputeNormalMapping(normal, pin.TangentW, pin.Tex, normalMap, sampler0);
+
+    Material mat;
+    mat.Ambient = materialAmbient;
+    mat.Diffuse = materialDiffuse;
+    mat.Specular = materialSpecular;
+
+    DirectionalLight light;
+    light.Ambient = ambient;
+    light.Diffuse = diffuse;
+    light.Specular = specular;
+    light.Direction = lightDirection;
+
+    ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor);
+    //// Ambient
+    //{
+    //    float ambientStrength = 1.0;
+    //    float4 color = ambient * materialAmbient * ambientStrength;
+    //    ambientColor = textureColor * color;
+    //}
+    //// Diffuse
+    //{
+    //    float value = dot(lightDirection, normal);
+    //    diffuseColor = textureColor * value * diffuse * materialDiffuse;
+    //}
+    //// Specular
+    //{
+    //    float specularStrength = 1.0;
+
+    //    float3 reflectDir = reflect(-lightDirection, normal);
+    //    float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 10);
+    //    specularColor = spec * specular * materialSpecular * specularStrength;
+    //}
+    //// Emissive
+    //{
+    //    float value = saturate(dot(viewDirection, normal));
+    //    float e = 1.0f - value;
+
+    //    e = smoothstep(0.0f, 1.0f, e);
+    //    e = pow(e, 5);
+    //    emissiveColor = materialEmissive * emissive * e;
+    //}
+
+    //float4 textureColor = texture0.Sample(sampler0, pin.Tex);
+    return textureColor;// float4((textureColor + diffuseColor + specularColor).xyz, 1.0);// textureColor;
 }

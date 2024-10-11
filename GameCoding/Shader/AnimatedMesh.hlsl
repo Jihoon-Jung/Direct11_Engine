@@ -1,6 +1,7 @@
 
 #define MAX_MODEL_TRANSFORMS 250
 #define MAX_MODEL_KEYFRAMES 500
+#include "LightHelper.hlsl"
 
 struct VS_INPUT
 {
@@ -166,13 +167,34 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.uv = input.uv;
 
 	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+	output.tangent = input.tangent;// mul(input.tangent, (float3x3)worldMatrix);
 
 	return output;
 }
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
+	float3 lightDirection = -normalize(lightPosition);
+	float3 viewDirection = normalize(cameraPosition - input.worldPosition);
+	float3 normal = normalize(input.normal);
+	float4 textureColor = diffuseMap.Sample(sampler0, input.uv);
 
-	return  diffuseMap.Sample(sampler0, input.uv);
+	float3 n = normalMap.Sample(sampler0, input.uv).rgb;
+	float3 bumpedNormal = NormalSampleToWorldSpace(n, input.normal, input.tangent);
+
+
+	Material mat;
+	mat.Ambient = materialAmbient;
+	mat.Diffuse = materialDiffuse;
+	mat.Specular = materialSpecular;
+
+	DirectionalLight light;
+	light.Ambient = ambient;
+	light.Diffuse = diffuse;
+	light.Specular = specular;
+	light.Direction = lightDirection;
+
+	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor);
+
+	return textureColor;
 }

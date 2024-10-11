@@ -17,6 +17,8 @@ private:
 	ComPtr<ID3D11RenderTargetView> _offscreenRTV;
 	ComPtr<ID3D11Texture2D> _offScreenDepthStencilTexture;
 	ComPtr<ID3D11DepthStencilView> _offScreenDepthStencilView;
+	ComPtr<ID3D11ShaderResourceView> _depthMapSRV;
+	ComPtr<ID3D11DepthStencilView> _depthMapDSV;
 
 	//D3D11_VIEWPORT _viewport = { 0 };
 	Viewport _viewport;
@@ -60,12 +62,16 @@ public:
 	void SetViewport();
 	void SetRenderTarget();
 	void SetOffscreenRenderTarget();
+	void SetShadowMapRenderTarget();
 	void ClearDepthStencilView();
 	void SwapChain();
 	void RestoreRenderTarget();
 	void RenderQuad();
+	ComPtr<ID3D11ShaderResourceView> GetShadowMapSRV() { return _depthMapSRV; }
+	ComPtr<ID3D11DepthStencilView> GetShadowMapDSV() { return _depthMapDSV; }
 	ComPtr<ID3D11Device> GetDevice() { return _device; }
 	ComPtr<ID3D11DeviceContext> GetDeviceContext() { return _deviceContext; }
+	ComPtr<ID3D11ShaderResourceView> GetTestSRV() { return _offscreenSRV; }
 	int _viewWidth = 0;
 	int _viewHeight = 0;
 

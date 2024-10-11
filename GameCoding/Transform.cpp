@@ -38,19 +38,94 @@ Vec3 ToEulerAngles(Quaternion q)
 
 	return angles;
 }
+//void Transform::UpdateTransform()
+//{
+//	// 스케일 행렬 생성
+//	Matrix scale = Matrix::CreateScale(_localScale);
+//
+//	// 쿼터니언을 사용한 회전 행렬 생성
+//	Quaternion rotationQuat = Quaternion::CreateFromYawPitchRoll(
+//		DirectX::XMConvertToRadians(_localRotation.y),  // Yaw
+//		DirectX::XMConvertToRadians(_localRotation.x),  // Pitch
+//		DirectX::XMConvertToRadians(_localRotation.z)   // Roll
+//	);
+//	Matrix rotation = Matrix::CreateFromQuaternion(rotationQuat);  // 쿼터니언을 회전 행렬로 변환
+//
+//	// 위치 행렬 생성
+//	Matrix position = Matrix::CreateTranslation(_localPosition);
+//
+//	// 최종 변환 행렬
+//	_localMat = scale * rotation * position;
+//
+//	// 부모가 있으면 월드 행렬을 부모의 월드 행렬과 곱함
+//	if (HasParent())
+//	{
+//		_worldMat = _localMat * _parent->GetWorldMatrix();
+//	}
+//	else
+//	{
+//		_worldMat = _localMat;
+//	}
+//
+//	// 월드 행렬에서 스케일, 회전(쿼터니언), 위치 추출
+//	Quaternion worldQuat;
+//	_worldMat.Decompose(_worldScale, worldQuat, _worldPosition);  // world matrix로부터 s, r, t 분리
+//
+//	// 월드 회전 각도를 오일러 각도로 변환 (필요한 경우)
+//	_worldRotation = ToEulerAngles(worldQuat);  // 필요한 경우, 오일러 각으로 변환
+//
+//	// 자식들에 대해 재귀적으로 변환 적용
+//	for (const shared_ptr<Transform>& child : _children)
+//	{
+//		child->UpdateTransform();
+//	}
+//
+//	// 셰이더에 전달할 상수 버퍼 업데이트
+//	_transformBuffer = make_shared<Buffer>();
+//	TransformBuffer _transformBufferData;
+//
+//	// 월드 행렬의 역행렬과 전치 행렬 계산
+//	Matrix inverseWorld = _worldMat.Invert();
+//	_transformBufferData.worldMatrix = _worldMat;
+//	_transformBufferData.inverseTransposeWorldMatrix = inverseWorld.Transpose();
+//
+//	// 상수 버퍼 생성 및 데이터 복사
+//	_transformBuffer->CreateConstantBuffer<TransformBuffer>();
+//	_transformBuffer->CopyData(_transformBufferData);
+//}
 void Transform::UpdateTransform()
 {
-	//if (HasParent())
-	//{
-	//	_localPosition = Vec3::Transform(_worldPosition, _parent->GetWorldMatrix().Invert());
-	//}
+	// 스케일 행렬 생성
 	Matrix scale = Matrix::CreateScale(_localScale);
-	Matrix rotation = Matrix::CreateRotationX(DirectX::XMConvertToRadians(_localRotation.x));
-	rotation *= Matrix::CreateRotationY(DirectX::XMConvertToRadians(_localRotation.y));
-	rotation *= Matrix::CreateRotationZ(DirectX::XMConvertToRadians(_localRotation.z));
-	Matrix position = Matrix::CreateTranslation(_localPosition);
 
-	_localMat = scale * rotation * position;
+	// 자전 회전 행렬 생성
+	Quaternion rotationQuat = Quaternion::CreateFromYawPitchRoll(
+		XMConvertToRadians(_localRotation.y),
+		XMConvertToRadians(_localRotation.x),
+		XMConvertToRadians(_localRotation.z)
+	);
+	Matrix rotation = Matrix::CreateFromQuaternion(rotationQuat);
+
+	// 공전 변환 계산
+	Matrix translationToOrigin = Matrix::CreateTranslation(-_revolutionCenter);
+	Quaternion revolutionQuat = Quaternion::CreateFromYawPitchRoll(
+		XMConvertToRadians(_revolutionRotation.y),
+		XMConvertToRadians(_revolutionRotation.x),
+		XMConvertToRadians(_revolutionRotation.z)
+	);
+	Matrix revolutionRotation = Matrix::CreateFromQuaternion(revolutionQuat);
+	Matrix translationBack = Matrix::CreateTranslation(_revolutionCenter);
+
+	// 공전 변환 행렬 계산
+	Matrix revolutionMatrix = translationToOrigin * revolutionRotation * translationBack;
+
+	// 로컬 위치 이동 행렬
+	Matrix translationWithLocalPosition = Matrix::CreateTranslation(_localPosition);
+
+	// 전체 변환 행렬 계산
+	_localMat = scale * rotation * translationWithLocalPosition * revolutionMatrix;
+
+	// 부모 변환 적용
 	if (HasParent())
 	{
 		_worldMat = _localMat * _parent->GetWorldMatrix();
@@ -60,24 +135,35 @@ void Transform::UpdateTransform()
 		_worldMat = _localMat;
 	}
 
-	Quaternion quat;
-	_worldMat.Decompose(_worldScale, quat, _worldPosition); // world matrix로 부터 s r t를 분리 (r은 quaternion으로 변환)
-	_worldRotation = ToEulerAngles(quat);
+	// 월드 변환에서 스케일, 회전, 위치 추출
+	Quaternion worldQuat;
+	_worldMat.Decompose(_worldScale, worldQuat, _worldPosition);
 
+	// 월드 회전 정보 저장
+	_worldRotation = ToEulerAngles(worldQuat);
 
+	// 자식 노드들 업데이트
 	for (const shared_ptr<Transform>& child : _children)
+	{
 		child->UpdateTransform();
+	}
 
-	_transformBuffer = make_shared<Buffer>();
-	TransformBuffer _transformBufferData;
+    // 12. 셰이더에 전달할 상수 버퍼 업데이트
+    _transformBuffer = make_shared<Buffer>();
+    TransformBuffer _transformBufferData;
 
-	Matrix inverseWorld = _worldMat.Invert();
-	_transformBufferData.worldMatrix = _worldMat;
-	_transformBufferData.inverseTransposeWorldMatrix = inverseWorld.Transpose();
-	
-	_transformBuffer->CreateConstantBuffer<TransformBuffer>();
-	_transformBuffer->CopyData(_transformBufferData);
+    // 월드 행렬의 역행렬과 전치 행렬 계산
+    Matrix inverseWorld = _worldMat.Invert();
+    _transformBufferData.worldMatrix = _worldMat;
+    _transformBufferData.inverseTransposeWorldMatrix = inverseWorld.Transpose();
+
+    // 상수 버퍼 생성 및 데이터 복사
+    _transformBuffer->CreateConstantBuffer<TransformBuffer>();
+    _transformBuffer->CopyData(_transformBufferData);
 }
+
+
+
 
 bool Transform::HasParent()
 {

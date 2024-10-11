@@ -23,10 +23,14 @@ public:
 	Vec3 GetLocalPosition() { return _localPosition; }
 	Vec3 GetLocalRotation() { return _localRotation; }
 	Vec3 GetLocalScale() { return _localScale; }
+	Vec3 GetRevolutionRotation() { return _revolutionRotation; }
 
-	void SetLocalPosition(Vec3 position) { _localPosition = position; }
-	void SetLocalRotation(Vec3 rotation) { _localRotation = rotation; }
+	void SetLocalPosition(Vec3 position) { _localPosition = position; UpdateTransform();}
+	void SetLocalRotation(Vec3 rotation) { _localRotation = rotation; UpdateTransform();}
 	void SetLocalScale(Vec3 scale) { _localScale = scale; }
+
+	void SetRevolutionRotation(Vec3 rotation) { _revolutionRotation = rotation; UpdateTransform();}
+	void SetRevolutionCenter(Vec3 position) { _revolutionCenter = position; UpdateTransform();}
 
 	void SetPosition(const Vec3& position);
 	void SetRotation(const Vec3& rotation);
@@ -46,8 +50,14 @@ public:
 	int ParentCount() { return _parent == nullptr ? 0 : 1; }
 private:
 	Vec3 _localPosition = { 0, 0, 0 };
+	// 자전 회전 각도
 	Vec3 _localRotation = { 0, 0, 0 };
 	Vec3 _localScale = { 1,1,1 };
+
+	// 공전 회전 각도
+	Vec3 _revolutionRotation = { 0, 0, 0 };
+	// 공전 회전 중심
+	Vec3 _revolutionCenter = { 0, 0, 0 };
 
 	Matrix _localMat = Matrix::Identity;
 	Matrix _worldMat = Matrix::Identity;

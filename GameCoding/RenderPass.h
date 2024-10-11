@@ -15,7 +15,11 @@ enum class Pass
 	GAUSSIANBLUR_RENDER,
 	SHADOWMAP_RENDER,
 	QUAD_RENDER,
+	TESSELLATION_RENDER,
 	TERRAIN_RENDER,
+	ENVIRONMENTMAP_RENDER,
+	STATIC_MESH_RENDER,
+	ANIMATED_MESH_RENDER,
 	// TODO
 };
 
@@ -25,15 +29,19 @@ public:
 	RenderPass();
 	~RenderPass();
 
-	void Render();
-	void DefaultRender();
-	void OutlineRender();
-	void GaussianBlurRender();
-	void QuadRender();
-	void TerrainRender();
+	void Render(bool isEnv);
+	void DefaultRender(bool isEnv);
+	void EnvironmentMapRender();
+	void OutlineRender(bool isEnv);
+	void GaussianBlurRender(bool isEnv);
+	void QuadRender(bool isEnv);
+	void TessellationRender(bool isEnv);
+	void TerrainRender(bool isEnv);
+	void StaticMeshRencer(bool isEnv);
+	void AnimatedMeshRender(bool isEnv);
 	void SetRenderTarget(int width, int height);
 	void SetMesh(shared_ptr<Mesh> mesh) { _mesh = mesh; }
-	void SetTexture(shared_ptr<Texture> texture) { _texture = texture; }
+	void SetTexture(shared_ptr<Texture> texture) { _envTexture = texture; }
 	void SetDiffuseMap(shared_ptr<Texture> diffuseMap) { _diffuseMap = diffuseMap; }
 	void SetNormalMap(shared_ptr<Texture> normalMap) { _normalMap = normalMap; }
 	void SetSpecularMap(shared_ptr<Texture> specularMap) { _specularMap = specularMap; }
@@ -44,11 +52,6 @@ public:
 	void SaveRenderTargetToFile(ID3D11RenderTargetView* renderTargetView, const std::string& filename, int width, int height);
 	void SetRasterizerStates(RasterizerStateInfo states) { _rasterizerStates = states; }
 	void SetMeshRenderer(shared_ptr<MeshRenderer> meshRenderer) { _meshRenderer = meshRenderer; }
-	void SetTessellationFlag(bool flag) { isUseTessellation = flag; }
-	void SetEnvironmentMapFlag(bool flag) { isEnvironmentMap = flag; }
-	void SetTerrainFlag(bool flag) { isTerrain = flag; }
-	bool GetTessellationFlag() { return isUseTessellation; }
-	bool GetTerrainFlag() { return isTerrain; }
 	void SetTransform(shared_ptr<Transform> transform) { _transform = transform; }
 	void SetDepthStencilStateType(DSState state) { _dsStateType = state; }
 	ComPtr<ID3D11ShaderResourceView> GetOutputSRV() { return _outputSRV; }
@@ -58,7 +61,7 @@ public:
 public:
 	ComPtr<ID3D11RenderTargetView> _renderTargetView;
 	shared_ptr<Mesh> _mesh;
-	shared_ptr<Texture> _texture;
+	shared_ptr<Texture> _envTexture;
 	shared_ptr<Texture> _diffuseMap;
 	shared_ptr<Texture> _normalMap;
 	shared_ptr<Texture> _specularMap;
@@ -69,9 +72,6 @@ public:
 	shared_ptr<DepthStencilState> _depthStencilState;
 	shared_ptr<Shader> _shader;
 	shared_ptr<Transform> _transform;
-	bool isUseTessellation = false;
-	bool isTerrain = false;
-	bool isEnvironmentMap = false;
 	DSState _dsStateType;
 	Pass _pass;
 	RasterizerStateInfo _rasterizerStates;
@@ -79,5 +79,9 @@ public:
 	ComPtr<ID3D11RenderTargetView> _offscreenRTV;
 	ComPtr<ID3D11ShaderResourceView> _inputSRV;
 	ComPtr<ID3D11ShaderResourceView> _outputSRV;
+
+	KeyframeDesc _keyframeDesc;
+	BlendAnimDesc _blendAnimDesc;
+	float animationSumTime = 0.0f;
 };
 

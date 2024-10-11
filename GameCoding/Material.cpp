@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Material.h"
+#include "ScreenShot.h"
 #include <sstream>
-
 Material::Material()
 	:Super(ResourceType::Material)
 {
@@ -257,8 +257,11 @@ void Material::CreateEnvironmentMapTexture(shared_ptr<GameObject> gameObject)
         int envmapWidth = Graphics::GetInstance().GetEnvironmentMapWidth();
         int envmapHeight = Graphics::GetInstance().GetEnvironmentMapHeight();
         renderPass[i]->CreateAndSetOffscreenRenderTarget(envmapWidth, envmapHeight);
-        RENDER.RenderRenderableObject(true);
+        RENDER.DrawRenderableObject(true);
 
+        /*std::string filename = "environmentMap" + std::to_string(i + 1) + "_" + std::to_string(envmapWidth) + "x" + std::to_string(envmapHeight) + ".dump";
+        ScreenShot sc;
+        sc.SaveRenderTargetToFile(renderPass[i]->GetOffscreenRTV().Get(), filename, envmapWidth, envmapHeight);*/
         /*std::string filename = "environmentMap" + std::to_string(i + 1) + "_" + std::to_string(envmapWidth) + "x" + std::to_string(envmapHeight) + ".dump";
         renderPass[i]->SaveRenderTargetToFile(renderPass[i]->GetOffscreenRTV().Get(), filename, envmapWidth, envmapHeight);*/
     }

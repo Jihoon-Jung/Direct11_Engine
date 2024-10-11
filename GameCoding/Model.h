@@ -37,6 +37,8 @@ public:
 	shared_ptr<ModelAnimation> GetAnimationByName(wstring name);
 	ComPtr<ID3D11ShaderResourceView> GetAnimationTextureBuffer() { return _srv; }
 	vector<AnimTransform>& GetAnimTransforms() { return _animTransforms; };
+
+	void CalculateTangents(vector<VertexTextureNormalTangentBlendData>& vertices, const vector<unsigned int>& indices);
 	void CreateAnimationTransform(uint32 index);
 	void CreateTexture();
 	void SetIsAnimatedModel(bool value) { isAnimatedModel = value; }

@@ -248,6 +248,9 @@
     <ClInclude Include="ParticleSystem.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
+    <ClInclude Include="ScreenShot.h">
+      <Filter>소스 파일\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -431,6 +434,9 @@
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>소스 파일\Component</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenShot.cpp">
+      <Filter>소스 파일\Helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
@@ -481,6 +487,9 @@
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shader\RenderParticleSystem.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\LightHelper.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

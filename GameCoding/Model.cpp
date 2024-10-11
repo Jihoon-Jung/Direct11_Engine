@@ -155,7 +155,54 @@ void Model::ReadMaterial(wstring filename)
 
 	BindCacheInfo();
 }
+float Dot(const Vec3& a, const Vec3& b)
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+void Model::CalculateTangents(vector<VertexTextureNormalTangentBlendData>& vertices, const vector<unsigned int>& indices)
+{
+	// ≈∫¡®∆Æ √ ±‚»≠
+	for (auto& vertex : vertices)
+	{
+		vertex.tangent = Vec3::Zero;
+	}
 
+	// ªÔ∞¢«¸ ¥‹¿ß∑Œ ≈∫¡®∆Æ ∞ËªÍ
+	for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		VertexTextureNormalTangentBlendData& v0 = vertices[indices[i]];
+		VertexTextureNormalTangentBlendData& v1 = vertices[indices[i + 1]];
+		VertexTextureNormalTangentBlendData& v2 = vertices[indices[i + 2]];
+
+		Vec3 deltaPos1 = v1.position - v0.position;
+		Vec3 deltaPos2 = v2.position - v0.position;
+
+		Vec2 deltaUV1 = v1.uv - v0.uv;
+		Vec2 deltaUV2 = v2.uv - v0.uv;
+
+		float r = 1.0f;
+		float denominator = (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+		if (denominator != 0.0f)
+		{
+			r = 1.0f / denominator;
+		}
+
+		Vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+
+		v0.tangent += tangent;
+		v1.tangent += tangent;
+		v2.tangent += tangent;
+	}
+
+	// ≈∫¡®∆Æ ∫§≈Õ ¡§±‘»≠ π◊ ¡˜±≥»≠
+	for (auto& vertex : vertices)
+	{
+		
+		// ≥Î∏÷∞˙ ¡˜±≥»≠
+		vertex.tangent -= vertex.normal * Dot(vertex.normal, vertex.tangent);
+		vertex.tangent.Normalize();
+	}
+}
 void Model::ReadModel(wstring filename)
 {
 	wstring fullPath = _modelPath + filename + L".mesh";
@@ -201,21 +248,25 @@ void Model::ReadModel(wstring filename)
 
 				void* data = vertices.data();
 				file->Read(&data, sizeof(VertexTextureNormalTangentBlendData) * count);
-				mesh->geometry->AddVertices(vertices);
-			}
+				//mesh->geometry->AddVertices(vertices);
+			
 
 			//IndexData
-			{
-				const uint32 count = file->Read<uint32>();
+			
+				const uint32 indices_count = file->Read<uint32>();
 
 				vector<uint32> indices;
-				indices.resize(count);
+				indices.resize(indices_count);
 
-				void* data = indices.data();
-				file->Read(&data, sizeof(uint32) * count);
+				void* indices_data = indices.data();
+				file->Read(&indices_data, sizeof(uint32) * indices_count);
 				mesh->geometry->AddIndices(indices);
-			}
 
+				// test create tangnet
+				CalculateTangents(vertices, indices);
+				mesh->geometry->AddVertices(vertices);
+			}
+			
 			mesh->CreateBuffers();
 			vector<VertexTextureNormalTangentBlendData> v = mesh->geometry->GetVertices();
 			vector<uint32> u = mesh->geometry->GetIndices();

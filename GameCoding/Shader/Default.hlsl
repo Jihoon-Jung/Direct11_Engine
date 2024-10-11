@@ -1,4 +1,4 @@
-
+#include "LightHelper.hlsl"
 
 struct VS_INPUT
 {
@@ -75,68 +75,30 @@ VS_OUTPUT VS(VS_INPUT input)
 }
 
 
-void ComputeNormalMapping(inout float3 normal, float3 tangent, float2 uv)
-{
-	// [0,255] 범위에서 [0,1]로 변환
-	float4 map = normalMap.Sample(sampler0, uv);
-	if (any(map.rgb) == false)
-		return;
-
-	float3 N = normalize(normal); // z
-	float3 T = normalize(tangent); // x
-	float3 B = normalize(cross(N, T)); // y
-	float3x3 TBN = float3x3(T, B, N); // TS -> WS
-
-	// [0,1] 범위에서 [-1,1] 범위로 변환
-	float3 tangentSpaceNormal = (map.rgb * 2.0f - 1.0f);
-	float3 worldNormal = mul(tangentSpaceNormal, TBN);
-
-	normal = worldNormal;
-}
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-	float4 ambientColor = 0;
-	float4 diffuseColor = 0;
-	float4 specularColor = 0;
-	float4 emissiveColor = 0;
-
-	float3 lightDirection = normalize(lightPosition - input.worldPosition);
+	float3 lightDirection =  -normalize(lightPosition);
 	float3 viewDirection = normalize(cameraPosition - input.worldPosition);
-	float4 color = texture0.Sample(sampler0, input.uv);
 	float3 normal = normalize(input.normal);
 	float4 textureColor = texture0.Sample(sampler0, input.uv);
 
-	ComputeNormalMapping(normal, input.tangent, input.uv);
+	//ComputeNormalMapping(normal, input.tangent, input.uv, normalMap, sampler0);
+	float3 n = normalMap.Sample(sampler0, input.uv).rgb;
+	float3 bumpedNormal = NormalSampleToWorldSpace(n, input.normal, input.tangent);
 
-	// Ambient
-	{
-		float ambientStrength = 1.0;
-		float4 color = ambient * materialAmbient * ambientStrength;
-		ambientColor = textureColor * color;
-	}
-	// Diffuse
-	{
-		float4 color = texture0.Sample(sampler0, input.uv);
-		float value = dot(lightDirection, normal);
-		diffuseColor = color * value * diffuse * materialDiffuse;
-	}
-	// Specular
-	{
-		float specularStrength = 1.0;
+	Material mat;
+	mat.Ambient = materialAmbient;
+	mat.Diffuse = materialDiffuse;
+	mat.Specular = materialSpecular;
 
-		float3 reflectDir = reflect(-lightDirection, normal);
-		float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 10);
-		specularColor = spec * specular * materialSpecular * specularStrength;
-	}
-	// Emissive
-	{
-		float value = saturate(dot(viewDirection, normal));
-		float e = 1.0f - value;
+	DirectionalLight light;
+	light.Ambient = ambient;
+	light.Diffuse = diffuse;
+	light.Specular = specular;
+	light.Direction = lightDirection;
 
-		e = smoothstep(0.0f, 1.0f, e);
-		e = pow(e, 5);
-		emissiveColor = materialEmissive * emissive * e;
-	}
+	ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor);
+	
 
-	return textureColor;// float4((textureColor + diffuseColor + specularColor).xyz, 1.0);
+	return textureColor;
 }							 

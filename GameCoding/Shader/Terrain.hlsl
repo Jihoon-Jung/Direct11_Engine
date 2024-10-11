@@ -1,3 +1,5 @@
+#include "LightHelper.hlsl"
+
 struct VertexIn
 {
 	float3 PosL     : POSITION;
@@ -260,9 +262,7 @@ DomainOut DS(PatchTess patchTess,
 	return dout;
 }
 
-float4 PS(DomainOut pin,
-	uniform int gLightCount,
-	uniform bool gFogEnabled) : SV_Target
+float4 PS(DomainOut pin) : SV_Target
 {
 	//
 	// Estimate normal and tangent using central differences.
@@ -291,6 +291,9 @@ float4 PS(DomainOut pin,
 	// Normalize.
 	toEye /= distToEye;
 
+	float3 lightDirection = normalize(pin.PosW - lightPosition);
+	float3 viewDirection = normalize(cameraPosition - pin.PosW);
+
 	//
 	// Texturing
 	//
@@ -311,6 +314,20 @@ float4 PS(DomainOut pin,
 	texColor = lerp(texColor, c2, t.g); // snow?
 	texColor = lerp(texColor, c3, t.b); // lightDirt
 	texColor = lerp(texColor, c4, t.a);
+
+
+	Material mat;
+	mat.Ambient =  materialAmbient;
+	mat.Diffuse =  materialDiffuse;
+	mat.Specular =  materialSpecular;
+
+	DirectionalLight light;
+	light.Ambient = ambient;// float4(0.8f, 0.8f, 0.8f, 1.0f);
+	light.Diffuse = diffuse;// float4(1.0f, 1.0f, 1.0f, 1.0f);
+	light.Specular = specular;// float4(0.8f, 0.8f, 0.7f, 1.0f);
+	light.Direction = lightDirection;// float3(0.707f, -0.707f, 0.0f);
+
+	ComputeDirectionalLight(mat, light, normalW, viewDirection, texColor);
 
 
 	return texColor;

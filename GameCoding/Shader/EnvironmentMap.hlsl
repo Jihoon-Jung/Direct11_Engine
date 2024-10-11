@@ -1,4 +1,4 @@
-
+#include "LightHelper.hlsl"
 
 struct VS_INPUT
 {
@@ -109,13 +109,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	float4 specularColor = 0;
 	float4 emissiveColor = 0;
 
-	float3 lightDirection = normalize(lightPosition - input.worldPosition);
+	float3 lightDirection = -normalize(lightPosition);
 	float3 viewDirection = normalize(cameraPosition - input.worldPosition);
-	float4 color;// = texture0.Sample(sampler0, input.PosL);
 	float3 normal = normalize(input.normal);
 	float4 textureColor;// = texture0.Sample(sampler0, input.PosL);
 
-	
+	/*float3 n = normalMap.Sample(sampler0, input.uv).rgb;
+	float3 bumpedNormal = NormalSampleToWorldSpace(n, input.normal, input.tangent);*/
 
 	//ComputeNormalMapping(normal, input.tangent, input.uv);
 
@@ -131,38 +131,19 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	// Å¥ºê ¸Ê ÅØ½ºÃ³ »ùÇÃ¸µ
 	textureColor = texture0.Sample(sampler0, reflectionVector);
 
+	Material mat;
+	mat.Ambient = materialAmbient;
+	mat.Diffuse = materialDiffuse;
+	mat.Specular = materialSpecular;
+
+	DirectionalLight light;
+	light.Ambient = ambient;
+	light.Diffuse = diffuse;
+	light.Specular = specular;
+	light.Direction = lightDirection;
+
+	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor);
 
 	return textureColor;
 
-	//// Ambient
-	//{
-	//	float ambientStrength = 1.0;
-	//	float4 color = ambient * materialAmbient * ambientStrength;
-	//	ambientColor = textureColor * color;
-	//}
-	//// Diffuse
-	//{
-	//	float4 color = texture0.Sample(sampler0, input.uv);
-	//	float value = dot(lightDirection, normal);
-	//	diffuseColor = color * value * diffuse * materialDiffuse;
-	//}
-	//// Specular
-	//{
-	//	float specularStrength = 1.0;
-
-	//	float3 reflectDir = reflect(-lightDirection, normal);
-	//	float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 10);
-	//	specularColor = spec * specular * materialSpecular * specularStrength;
-	//}
-	//// Emissive
-	//{
-	//	float value = saturate(dot(viewDirection, normal));
-	//	float e = 1.0f - value;
-
-	//	e = smoothstep(0.0f, 1.0f, e);
-	//	e = pow(e, 5);
-	//	emissiveColor = materialEmissive * emissive * e;
-	//}
-
-	//return textureColor;// float4((textureColor + diffuseColor + specularColor).xyz, 1.0);
 }							 

@@ -106,7 +106,10 @@ void Billboard::DrawBillboard()
 
 	shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraPos", 1, cpBuffer);
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, GetGameObject()->GetTransformBuffer());
-	shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+	if (RENDER.GetShadowMapFlag())
+		shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
+	else
+		shader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
 
 
 	// inputAssembler

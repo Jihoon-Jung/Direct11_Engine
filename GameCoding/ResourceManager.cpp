@@ -120,7 +120,7 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(bricks_texture->GetName(), bricks_texture);
 
 	texture = make_shared<Texture>();
-	texture->CreateTexture(L"veigar.jpg");
+	texture->CreateTexture(L"bricks.jpg");
 	texture->SetName(L"Leather");
 	RESOURCE.AddResource(texture->GetName(), texture);
 
@@ -157,7 +157,7 @@ void ResourceManager::AddResource()
 	RESOURCE.AddResource(normalMap->GetName(), normalMap);
 
 	lightTexture = make_shared<Texture>();
-	lightTexture->CreateTexture(L"yellow.jpg");
+	lightTexture->CreateTexture(L"bricks_nmap.png");
 	lightTexture->SetName(L"lightTexture");
 	RESOURCE.AddResource(lightTexture->GetName(), lightTexture);
 
@@ -207,7 +207,7 @@ void ResourceManager::AddResource()
 	terrain_shader->SetName(L"Terrain_Shader");
 	{
 		terrain_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		terrain_shader->GetShaderSlot()->SetSlot(L"LightMaterial ", 1);
+		terrain_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 1);
 		terrain_shader->GetShaderSlot()->SetSlot(L"LightDesc", 2);
 		terrain_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 3);
 		terrain_shader->GetShaderSlot()->SetSlot(L"TerrainBuffer", 4);
@@ -356,6 +356,11 @@ void ResourceManager::AddResource()
 	material = make_shared<Material>();
 	material->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
 	material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
+	MaterialDesc matDesc;
+	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	material->SetMaterialDesc(matDesc);
 	material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
 	material->SetName(L"DefaultMaterial");
 	RESOURCE.AddResource(material->GetName(), material);
@@ -363,6 +368,10 @@ void ResourceManager::AddResource()
 	tessellation_material = make_shared<Material>();
 	tessellation_material->SetTexture(RESOURCE.GetResource<Texture>(L"Bricks"));
 	tessellation_material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
+	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	tessellation_material->SetMaterialDesc(matDesc);
 	tessellation_material->SetShader(RESOURCE.GetResource<Shader>(L"Tesselation_Shader"));
 	tessellation_material->SetName(L"Tessellation_Material");
 	RESOURCE.AddResource(tessellation_material->GetName(), tessellation_material);
@@ -383,6 +392,10 @@ void ResourceManager::AddResource()
 
 	terrainMaterial = make_shared<Material>();
 	terrainMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Terrain_Shader"));
+	matDesc.ambient = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 64.0f);
+	terrainMaterial->SetMaterialDesc(matDesc);
 	terrainMaterial->SetName(L"TerrainMaterial");
 	RESOURCE.AddResource(terrainMaterial->GetName(), terrainMaterial);
 

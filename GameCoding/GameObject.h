@@ -85,7 +85,12 @@ public:
 		shared_ptr<Camera> castedComponent = static_pointer_cast<Camera>(cameraComponent);
 		return castedComponent->GetEnvironmentCameraBuffer();
 	}
-
+	shared_ptr<Buffer> GetShadowCameraBuffer() {
+		uint8 index = static_cast<uint8>(ComponentType::Camera);
+		shared_ptr<Component> cameraComponent = _components[index];
+		shared_ptr<Camera> castedComponent = static_pointer_cast<Camera>(cameraComponent);
+		return castedComponent->GetShadowCameraBuffer();
+	}
 	shared_ptr<Buffer> GetLightBuffer() {
 		uint8 index = static_cast<uint8>(ComponentType::Light);
 		shared_ptr<Component> lightComponent = _components[index];
