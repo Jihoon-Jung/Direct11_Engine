@@ -28,43 +28,43 @@ void AssimpTool::Init(HWND hwnd)
 
 	//	// CustomData (File) -> Memory
 	//}
-	//{
-	//	shared_ptr<Converter> converter = make_shared<Converter>();
-	//	converter->ReadAssetFile(L"Kachujin/Mesh.fbx");
-	//	converter->ExportMaterialData(L"Kachujin/Kachujin");
-	//	converter->ExportModelData(L"Kachujin/Kachujin");
-	//}
 	/*{
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadAssetFile(L"Kachujin/Idle.fbx");
-		converter->ExportAnimationData(L"Kachujin/Idle");
+		converter->ReadAssetFile(L"Kachujin/Mesh.fbx");
+		converter->ExportMaterialData(L"Kachujin/Kachujin");
+		converter->ExportModelData(L"Kachujin/Kachujin");
 	}
 	{
+		shared_ptr<Converter> converter = make_shared<Converter>();
+		converter->ReadAssetFile(L"Kachujin/Unarmed Walk Forward.fbx");
+		converter->ExportAnimationData(L"Kachujin/Idle");
+	}*/
+	/*{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Run.fbx");
 		converter->ExportAnimationData(L"Kachujin/Run");
 	}*/
-	{
+	/*{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Slash.fbx");
 		converter->ExportAnimationData(L"Kachujin/Slash");
-	}
+	}*/
 	/*{
 		shared_ptr<Converter> converter = make_shared<Converter>();
 		converter->ReadAssetFile(L"Kachujin/Dismissing Gesture.fbx");
 		converter->ExportAnimationData(L"Kachujin/Dismissing");
 	}*/
-	/*{
+	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadAssetFile(L"Ely/Ely By K.Atienza.fbx");
-		converter->ExportMaterialData(L"Ely/Ely");
-		converter->ExportModelData(L"Ely/Ely");
+		converter->ReadAssetFile(L"Dreyar/scene.gltf");
+		converter->ExportMaterialData(L"Dreyar/Dreyar");
+		converter->ExportModelData(L"Dreyar/Dreyar");
 	}
 	{
 		shared_ptr<Converter> converter = make_shared<Converter>();
-		converter->ReadAssetFile(L"Ely/Martelo 2.fbx");
-		converter->ExportAnimationData(L"Ely/Stab");
-	}*/
+		converter->ReadAssetFile(L"Dreyar/scene.gltf");
+		converter->ExportAnimationData(L"Dreyar/Run");
+	}
 }
 
 void AssimpTool::Update()

@@ -173,6 +173,30 @@ void Graphics::SetOffscreenRenderTarget()
 
 void Graphics::SetShadowMapRenderTarget()
 {
+	// viewport 설정
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = GetViewWidth();
+	viewport.Height = GetViewHeight();
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	float _clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+
+	DEVICECONTEXT->RSSetViewports(1, &viewport);
+	// Set null render target because we are only going to draw to depth buffer.
+	// Setting a null render target will disable color writes.
+	ID3D11RenderTargetView* renderTargets[1] = { 0 };
+
+	DEVICECONTEXT->OMSetRenderTargets(1, renderTargets, _depthMapDSV.Get());
+	DEVICECONTEXT->ClearDepthStencilView(_depthMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+}
+
+void Graphics::CreateShadowMapRenderTarget()
+{
 	// Use typeless format because the DSV is going to interpret
 	// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going to interpret
 	// the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS.
@@ -211,26 +235,6 @@ void Graphics::SetShadowMapRenderTarget()
 	hr = DEVICE->CreateShaderResourceView(depthMap.Get(), &srvDesc, _depthMapSRV.GetAddressOf());
 
 	CHECK(hr);
-
-	// viewport 설정
-	D3D11_VIEWPORT viewport = {};
-	viewport.Width = GetViewWidth();
-	viewport.Height = GetViewHeight();
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-
-	float _clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-
-	DEVICECONTEXT->RSSetViewports(1, &viewport);
-	// Set null render target because we are only going to draw to depth buffer.
-	// Setting a null render target will disable color writes.
-	ID3D11RenderTargetView* renderTargets[1] = { 0 };
-
-	DEVICECONTEXT->OMSetRenderTargets(1, renderTargets, _depthMapDSV.Get());
-	DEVICECONTEXT->ClearDepthStencilView(_depthMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void Graphics::ClearDepthStencilView()
@@ -261,7 +265,7 @@ void Graphics::RenderQuad()
 	RestoreRenderTarget();
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	shared_ptr<Mesh> mesh = RESOURCE.GetResource<Mesh>(L"Quard");
+	shared_ptr<Mesh> mesh = RESOURCE.GetResource<Mesh>(L"Quad");
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"Quad_Shader");
 	shared_ptr<Buffer> buffer = mesh->GetBuffer();
 	uint32 stride = buffer->GetStride();

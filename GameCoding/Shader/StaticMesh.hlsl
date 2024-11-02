@@ -14,6 +14,7 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float4 lightSpacePosition : LIGHT_POSITION;
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
@@ -62,13 +63,19 @@ cbuffer BonIndex : register(b6)
 	uint BoneIndex;
 	float3 padding;
 }
+cbuffer LightSpaceTransformBuffer : register(b7)
+{
+	row_major matrix light_viewMatrix;
+	row_major matrix light_projectionMatrix;
+};
 
 SamplerState sampler0 : register(s0);
+SamplerState shadowSampler : register(s1);
 Texture2D texture0 : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D specularMap : register(t2);
 Texture2D diffuseMap : register(t3);
-
+Texture2D shadowMap : register(t4);
 
 VS_OUTPUT VS(VS_INPUT input)
 {
@@ -79,6 +86,11 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.worldPosition = output.position.xyz;
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
+
+	output.lightSpacePosition = mul(input.position, BoneTransforms[BoneIndex]);
+	output.lightSpacePosition = mul(output.lightSpacePosition, worldMatrix);
+	output.lightSpacePosition = mul(output.lightSpacePosition, light_viewMatrix);
+	output.lightSpacePosition = mul(output.lightSpacePosition, light_projectionMatrix);
 	output.uv = input.uv;
 
 	output.normal = mul(input.normal, (float3x3)worldMatrix);
@@ -116,7 +128,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	light.Specular = specular;
 	light.Direction = lightDirection;
 
-	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor);
+	Shadow shadow;
+	shadow.lightPosition = input.lightSpacePosition;
+	shadow.shadowSampler = shadowSampler;
+	shadow.shadowMap = shadowMap;
+	float shadowFactor = CalculateShadowFactor(shadow);
+
+	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor, shadowFactor);
 
 
 	return  textureColor;

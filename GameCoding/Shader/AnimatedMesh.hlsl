@@ -16,6 +16,7 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float4 lightPosition : LIGHT_POSITION;
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
@@ -80,10 +81,18 @@ cbuffer BlendBuffer : register(b5)
 	blendFrameDesc blendFrames;
 };
 
+cbuffer LightSpaceTransformBuffer : register(b6)
+{
+	row_major matrix light_viewMatrix;
+	row_major matrix light_projectionMatrix;
+};
+
 SamplerState sampler0 : register(s0);
+SamplerState shadowSampler : register(s1);
 Texture2D normalMap : register(t0);
 Texture2D specularMap : register(t1);
 Texture2D diffuseMap : register(t2);
+Texture2D shadowMap : register(t3);
 Texture2DArray TransformMap : register(t3);
 
 matrix GetAnimationMatrix(VS_INPUT input)
@@ -155,26 +164,35 @@ matrix GetAnimationMatrix(VS_INPUT input)
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	matrix m = 0;
-	m = GetAnimationMatrix(input);
+	matrix m = GetAnimationMatrix(input); // 애니메이션 행렬
 
-
+	// 정점 변환
 	output.position = mul(input.position, m);
 	output.position = mul(output.position, worldMatrix);
+
+	// light space 변환
+	output.lightPosition = mul(output.position, light_viewMatrix);
+	output.lightPosition = mul(output.lightPosition, light_projectionMatrix);
+
 	output.worldPosition = output.position.xyz;
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 	output.uv = input.uv;
 
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.tangent = input.tangent;// mul(input.tangent, (float3x3)worldMatrix);
+	// 노멀과 탄젠트에 애니메이션 행렬 적용 (회전 성분만 추출해서 곱함)
+	float3x3 rotationMatrix = (float3x3)m; // 애니메이션 매트릭스의 회전 부분만 사용
+	output.normal = mul(input.normal, rotationMatrix); // 노멀 변환
+	output.normal = mul(output.normal, (float3x3)worldMatrix); // 월드 변환
+
+	output.tangent = mul(input.tangent, rotationMatrix); // 탄젠트 변환
+	output.tangent = mul(output.tangent, (float3x3)worldMatrix); // 월드 변환
 
 	return output;
 }
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-	float3 lightDirection = -normalize(lightPosition);
+	float3 lightDirection = normalize(lightPosition);
 	float3 viewDirection = normalize(cameraPosition - input.worldPosition);
 	float3 normal = normalize(input.normal);
 	float4 textureColor = diffuseMap.Sample(sampler0, input.uv);
@@ -189,12 +207,18 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	mat.Specular = materialSpecular;
 
 	DirectionalLight light;
-	light.Ambient = ambient;
-	light.Diffuse = diffuse;
-	light.Specular = specular;
+	light.Ambient = ambient + float4(0.3, 0.3, 0.3, 1.0);
+	light.Diffuse = diffuse + float4(0.3, 0.3, 0.3, 1.0);
+	light.Specular = specular + float4(0.3, 0.3, 0.3, 1.0);
 	light.Direction = lightDirection;
 
-	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor);
+	Shadow shadow;  
+	shadow.lightPosition = input.lightPosition;
+	shadow.shadowSampler = shadowSampler;
+	shadow.shadowMap = shadowMap;
+	float shadowFactor = CalculateShadowFactor(shadow);
+
+	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor, 1.0);
 
 	return textureColor;
 }

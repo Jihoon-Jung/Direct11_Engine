@@ -16,6 +16,7 @@ struct VS_OUTPUT
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
+	float4 lightSpacePosition : LIGHT_POSITION;
 	float3 worldPosition : POSITION1;
 };
 
@@ -52,11 +53,19 @@ cbuffer LightAndCameraPos : register(b4)
 	float padding2;
 }
 
+cbuffer LightSpaceTransformBuffer : register(b5)
+{
+	row_major matrix light_viewMatrix;
+	row_major matrix light_projectionMatrix;
+};
+
 SamplerState sampler0 : register(s0);
+SamplerState shadowSampler : register(s1);
 Texture2D texture0 : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D specularMap : register(t2);
 Texture2D diffuseMap : register(t3);
+Texture2D shadowMap : register(t4);
 
 VS_OUTPUT VS(VS_INPUT input)
 {
@@ -66,8 +75,12 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.worldPosition = output.position.xyz;
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
-	output.uv = input.uv;
 
+	output.lightSpacePosition = mul(input.position, worldMatrix);
+	output.lightSpacePosition = mul(output.lightSpacePosition, light_viewMatrix);
+	output.lightSpacePosition = mul(output.lightSpacePosition, light_projectionMatrix);
+
+	output.uv = input.uv;
 	output.normal = mul(input.normal, (float3x3)worldMatrix);
 	output.tangent = mul(input.tangent, (float3x3)worldMatrix);
 
@@ -77,7 +90,7 @@ VS_OUTPUT VS(VS_INPUT input)
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-	float3 lightDirection =  -normalize(lightPosition);
+	float3 lightDirection = normalize(lightPosition);
 	float3 viewDirection = normalize(cameraPosition - input.worldPosition);
 	float3 normal = normalize(input.normal);
 	float4 textureColor = texture0.Sample(sampler0, input.uv);
@@ -97,8 +110,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	light.Specular = specular;
 	light.Direction = lightDirection;
 
-	ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor);
-	
+	Shadow shadow;
+	shadow.lightPosition = input.lightSpacePosition;
+	shadow.shadowSampler = shadowSampler;
+	shadow.shadowMap = shadowMap;
+	float shadowFactor = CalculateShadowFactor(shadow);
+
+	ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor, shadowFactor);
 
 	return textureColor;
 }							 

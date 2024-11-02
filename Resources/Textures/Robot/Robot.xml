@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>Alpha_Body_MAT</Name>
+        <DiffuseFile></DiffuseFile>
+        <SpecularFile></SpecularFile>
+        <NormalFile></NormalFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.077256009" G="0.33729586" B="0.41760001" A="1"/>
+        <Specular R="0.47862974" G="0.47862974" B="0.47862974" A="3.6752136"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+    </Material>
+    <Material>
+        <Name>Alpha_Joints_MAT</Name>
+        <DiffuseFile></DiffuseFile>
+        <SpecularFile></SpecularFile>
+        <NormalFile></NormalFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.12284123" G="0.1703151" B="0.17777371" A="1"/>
+        <Specular R="0.28204775" G="0.28204775" B="0.28204775" A="2"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+    </Material>
+</Materials>

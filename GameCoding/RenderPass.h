@@ -20,6 +20,7 @@ enum class Pass
 	ENVIRONMENTMAP_RENDER,
 	STATIC_MESH_RENDER,
 	ANIMATED_MESH_RENDER,
+	DEBUG_2D_RENDER,
 	// TODO
 };
 
@@ -39,6 +40,7 @@ public:
 	void TerrainRender(bool isEnv);
 	void StaticMeshRencer(bool isEnv);
 	void AnimatedMeshRender(bool isEnv);
+	void DebugQuadRender();
 	void SetRenderTarget(int width, int height);
 	void SetMesh(shared_ptr<Mesh> mesh) { _mesh = mesh; }
 	void SetTexture(shared_ptr<Texture> texture) { _envTexture = texture; }

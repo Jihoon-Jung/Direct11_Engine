@@ -12,7 +12,12 @@ public:
 	void ExportModelData(wstring savePath);
 	void ExportMaterialData(wstring savePath);
 	void ExportAnimationData(wstring savePath, uint32 index = 0);
-	bool DetectRightHandedCoordinateSystem(const aiMatrix4x4& matrix);
+	void NormalizeBoneNames();
+	void NormalizeAnimationBoneNames(shared_ptr<asAnimation> animation);
+	void SaveMeshDataToCSV();
+	void SaveAnimationDataToCSV(shared_ptr<asAnimation> animation);
+	void NormalizeSkinWeights();
+	void CheckAndFixBoneHierarchy();
 public:
 	//DX
 	void CreateDeviceAndSwapChain();
@@ -55,5 +60,7 @@ private:
 	ComPtr<ID3D11Device> _device = nullptr;
 	ComPtr<ID3D11DeviceContext> _deviceContext = nullptr;
 	ComPtr<IDXGISwapChain> _swapChain = nullptr;
+
+	
 };
 

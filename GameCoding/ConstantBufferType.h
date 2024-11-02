@@ -12,7 +12,11 @@ struct CameraBuffer
 	Matrix viewMatrix = Matrix::Identity;
 	Matrix projectionMatrix = Matrix::Identity;
 };
-
+struct LightSpaceTransformBuffer
+{
+	Matrix light_viewMatrix = Matrix::Identity;
+	Matrix light_projectionMatrix = Matrix::Identity;
+};
 struct TransformBuffer
 {
 	Matrix worldMatrix = Matrix::Identity;

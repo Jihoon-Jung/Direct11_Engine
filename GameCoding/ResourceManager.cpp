@@ -11,7 +11,7 @@ void ResourceManager::AddResource()
 	shared_ptr<Mesh> sphere_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> cube_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> grid_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> quard_mesh = make_shared<Mesh>();
+	shared_ptr<Mesh> quad_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> cylinder_mesh = make_shared<Mesh>();
 	shared_ptr<Mesh> terrain_mesh = make_shared<Mesh>();
 
@@ -23,6 +23,8 @@ void ResourceManager::AddResource()
 	shared_ptr<Texture> texture = make_shared<Texture>();
 	shared_ptr<Texture> normalMap = make_shared<Texture>();
 	shared_ptr<Texture> lightTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> gridTexture = make_shared<Texture>();
 
 	shared_ptr<Texture> bricks_texture = make_shared<Texture>();
 
@@ -66,7 +68,13 @@ void ResourceManager::AddResource()
 
 	shared_ptr<Shader> renderParticle_shader = make_shared<Shader>();
 
+	shared_ptr<Shader> debuge_UI_shader = make_shared<Shader>();
+
 	shared_ptr<Material> material = make_shared<Material>();
+
+	shared_ptr<Material> grid_material = make_shared<Material>();
+
+	shared_ptr<Material> debug_UI_material = make_shared <Material>();
 
 	shared_ptr<Material> tessellation_material = make_shared<Material>();
 
@@ -86,7 +94,7 @@ void ResourceManager::AddResource()
 	cube_mesh->SetName(L"Cube");
 	RESOURCE.AddResource(cube_mesh->GetName(), cube_mesh);
 
-	grid_mesh->CreateGrid_NormalTangent(10, 10);
+	grid_mesh->CreateGrid_NormalTangent(100, 100);
 	grid_mesh->SetName(L"Grid");
 	RESOURCE.AddResource(grid_mesh->GetName(), grid_mesh);
 
@@ -106,9 +114,9 @@ void ResourceManager::AddResource()
 	terrain_mesh->SetName(L"Terrain");
 	RESOURCE.AddResource(terrain_mesh->GetName(), terrain_mesh);
 
-	quard_mesh->CreateQuad_NormalTangent();
-	quard_mesh->SetName(L"Quard");
-	RESOURCE.AddResource(quard_mesh->GetName(), quard_mesh);
+	quad_mesh->CreateQuad_NormalTangent();
+	quad_mesh->SetName(L"Quad");
+	RESOURCE.AddResource(quad_mesh->GetName(), quad_mesh);
 
 	cylinder_mesh->CreateCylinder_NormalTangent();
 	cylinder_mesh->SetName(L"Cylinder");
@@ -123,6 +131,11 @@ void ResourceManager::AddResource()
 	texture->CreateTexture(L"bricks.jpg");
 	texture->SetName(L"Leather");
 	RESOURCE.AddResource(texture->GetName(), texture);
+
+	gridTexture = make_shared<Texture>();
+	gridTexture->CreateTexture(L"yellow.jpg");
+	gridTexture->SetName(L"Grid_Texture");
+	RESOURCE.AddResource(gridTexture->GetName(), gridTexture);
 
 	grassTexture = make_shared<Texture>();
 	grassTexture->CreateTexture(L"Golem.png");
@@ -171,12 +184,25 @@ void ResourceManager::AddResource()
 		defaultShader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
 		defaultShader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
 		defaultShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
+		defaultShader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
 		defaultShader->GetShaderSlot()->SetSlot(L"texture0", 0);
 		defaultShader->GetShaderSlot()->SetSlot(L"normalMap", 1);
 		defaultShader->GetShaderSlot()->SetSlot(L"specularMap", 2);
 		defaultShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+		defaultShader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
 	}
 	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
+
+	debuge_UI_shader = make_shared<Shader>();
+	debuge_UI_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Debug_UI_Shader.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	debuge_UI_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Debug_UI_Shader.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
+	debuge_UI_shader->SetName(L"Debug_UI_Shader");
+	{
+		debuge_UI_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
+		debuge_UI_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
+		debuge_UI_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
+	}
+	RESOURCE.AddResource(debuge_UI_shader->GetName(), debuge_UI_shader);
 
 	initParticle_shader = make_shared<Shader>();
 	initParticle_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/InitParticleSystem.hlsl", InputLayoutType::VertexParticle);
@@ -211,9 +237,11 @@ void ResourceManager::AddResource()
 		terrain_shader->GetShaderSlot()->SetSlot(L"LightDesc", 2);
 		terrain_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 3);
 		terrain_shader->GetShaderSlot()->SetSlot(L"TerrainBuffer", 4);
+		terrain_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
 		terrain_shader->GetShaderSlot()->SetSlot(L"gLayerMapArray", 0);
 		terrain_shader->GetShaderSlot()->SetSlot(L"gBlendMap", 1);
 		terrain_shader->GetShaderSlot()->SetSlot(L"gHeightMap", 2);
+		terrain_shader->GetShaderSlot()->SetSlot(L"shadowMap", 3);
 	}
 	RESOURCE.AddResource(terrain_shader->GetName(), terrain_shader);
 
@@ -230,10 +258,12 @@ void ResourceManager::AddResource()
 		tessellation_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"normalMap", 1);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"specularMap", 2);
 		tessellation_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+		tessellation_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
 	}
 	RESOURCE.AddResource(tessellation_shader->GetName(), tessellation_shader);
 
@@ -248,10 +278,12 @@ void ResourceManager::AddResource()
 		environmentMapShader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"texture0", 0);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"normalMap", 1);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"specularMap", 2);
 		environmentMapShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+		environmentMapShader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
 	}
 	RESOURCE.AddResource(environmentMapShader->GetName(), environmentMapShader);
 
@@ -326,10 +358,13 @@ void ResourceManager::AddResource()
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"BoneBuffer", 5);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"BonIndex", 6);
+		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 7);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"normalMap", 1);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"specularMap", 2);
 		staticMesh_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
+		staticMesh_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
+
 	}
 	RESOURCE.AddResource(staticMesh_shader->GetName(), staticMesh_shader);
 
@@ -345,10 +380,12 @@ void ResourceManager::AddResource()
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"BlendBuffer", 5);
+		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 6);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"normalMap", 0);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"specularMap", 1);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 2);
 		animatedMesh_shader->GetShaderSlot()->SetSlot(L"TransformMap", 3);
+		animatedMesh_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
 	}
 	RESOURCE.AddResource(animatedMesh_shader->GetName(), animatedMesh_shader);
 
@@ -364,6 +401,23 @@ void ResourceManager::AddResource()
 	material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
 	material->SetName(L"DefaultMaterial");
 	RESOURCE.AddResource(material->GetName(), material);
+
+	grid_material = make_shared<Material>();
+	grid_material->SetTexture(RESOURCE.GetResource<Texture>(L"Grid_Texture"));
+	matDesc;
+	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	grid_material->SetMaterialDesc(matDesc);
+	grid_material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
+	grid_material->SetName(L"GridMaterial");
+	RESOURCE.AddResource(grid_material->GetName(), grid_material);
+
+	debug_UI_material = make_shared<Material>();
+	debug_UI_material->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
+	debug_UI_material->SetShader(RESOURCE.GetResource<Shader>(L"Debug_UI_Shader"));
+	debug_UI_material->SetName(L"Debug_UI_Material");
+	RESOURCE.AddResource(debug_UI_material->GetName(), debug_UI_material);
 
 	tessellation_material = make_shared<Material>();
 	tessellation_material->SetTexture(RESOURCE.GetResource<Texture>(L"Bricks"));
@@ -412,6 +466,7 @@ void ResourceManager::AddResource()
 	tower_model->SetName(L"TowerModel");
 	RESOURCE.AddResource(tower_model->GetName(), tower_model);
 
+
 	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
 	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
 	kachujin_Anim->ReadMaterial(L"Kachujin/Kachujin");
@@ -422,10 +477,12 @@ void ResourceManager::AddResource()
 	kachujin_Anim->SetName(L"Kachujin");
 	RESOURCE.AddResource(kachujin_Anim->GetName(), kachujin_Anim);
 
-	Ely_Anim->ReadModel(L"Ely/Ely");
+	Ely_Anim->ReadModel(L"Dreyar/Dreyar");
 	Ely_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
-	Ely_Anim->ReadMaterial(L"Ely/Ely");
-	Ely_Anim->ReadAnimation(L"Ely/Stab");
+	Ely_Anim->ReadMaterial(L"Dreyar/Dreyar");
+	Ely_Anim->ReadAnimation(L"Dreyar/Kick");
+	Ely_Anim->ReadAnimation(L"Dreyar/Fall");
+	Ely_Anim->ReadAnimation(L"Dreyar/Dance");
 	Ely_Anim->CreateTexture();
 	Ely_Anim->SetName(L"Ely");
 	RESOURCE.AddResource(Ely_Anim->GetName(), Ely_Anim);

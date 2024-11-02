@@ -57,12 +57,20 @@ cbuffer TerrainBuffer : register(b4)
 	
 };
 
+cbuffer LightSpaceTransformBuffer : register(b5)
+{
+	row_major matrix light_viewMatrix;
+	row_major matrix light_projectionMatrix;
+};
+
 SamplerState sampler0 : register(s0); // PS
-SamplerState samHeightmap : register(s1); // VS, DS, PS
+SamplerState shadowSampler : register(s1); // PS
+SamplerState samHeightmap : register(s2); // VS, DS, PS
 
 Texture2DArray gLayerMapArray	: register(t0); // PS
 Texture2D gBlendMap				: register(t1); // PS
 Texture2D gHeightMap			: register(t2); // VS, DS, PS
+Texture2D shadowMap				: register(t3);
 
 VertexOut VS(VertexIn vin)
 {
@@ -221,6 +229,7 @@ struct DomainOut
 {
 	float4 PosH     : SV_POSITION;
 	float3 PosW     : POSITION;
+	float4 LPosH	: LIGHT_POSITION;
 	float2 Tex      : TEXCOORD0;
 	float2 TiledTex : TEXCOORD1;
 };
@@ -258,7 +267,7 @@ DomainOut DS(PatchTess patchTess,
 
 	// Project to homogeneous clip space.
 	dout.PosH = mul(mul(float4(dout.PosW, 1.0f), viewMatrix), projectionMatrix);
-
+	dout.LPosH = mul(mul(float4(dout.PosW, 1.0f), light_viewMatrix), light_projectionMatrix);
 	return dout;
 }
 
@@ -291,7 +300,7 @@ float4 PS(DomainOut pin) : SV_Target
 	// Normalize.
 	toEye /= distToEye;
 
-	float3 lightDirection = normalize(pin.PosW - lightPosition);
+	float3 lightDirection = normalize(lightPosition);
 	float3 viewDirection = normalize(cameraPosition - pin.PosW);
 
 	//
@@ -310,9 +319,9 @@ float4 PS(DomainOut pin) : SV_Target
 
 	// Blend the layers on top of each other.
 	float4 texColor = c0;
-	texColor = lerp(texColor, c1, t.r); // dirt?
-	texColor = lerp(texColor, c2, t.g); // snow?
-	texColor = lerp(texColor, c3, t.b); // lightDirt
+	texColor = lerp(texColor, c1, t.r); 
+	texColor = lerp(texColor, c2, t.g);
+	texColor = lerp(texColor, c3, t.b);
 	texColor = lerp(texColor, c4, t.a);
 
 
@@ -322,13 +331,42 @@ float4 PS(DomainOut pin) : SV_Target
 	mat.Specular =  materialSpecular;
 
 	DirectionalLight light;
-	light.Ambient = ambient;// float4(0.8f, 0.8f, 0.8f, 1.0f);
-	light.Diffuse = diffuse;// float4(1.0f, 1.0f, 1.0f, 1.0f);
-	light.Specular = specular;// float4(0.8f, 0.8f, 0.7f, 1.0f);
-	light.Direction = lightDirection;// float3(0.707f, -0.707f, 0.0f);
+	light.Ambient = ambient;
+	light.Diffuse = diffuse;
+	light.Specular = specular;
+	light.Direction = lightDirection;
 
-	ComputeDirectionalLight(mat, light, normalW, viewDirection, texColor);
+	Shadow shadow;
+	shadow.lightPosition = pin.LPosH;
+	shadow.shadowSampler = shadowSampler;
+	shadow.shadowMap = shadowMap;
+	float shadowFactor = CalculateShadowFactor(shadow);
 
+	ComputeDirectionalLight(mat, light, normalW, viewDirection, texColor, shadowFactor);
 
+	//// perform perspective divide
+	//float2 projCoords;
+	//projCoords.x = pin.LPosH.x / pin.LPosH.w / 2.0f + 0.5f;
+	//projCoords.y = -pin.LPosH.y / pin.LPosH.w / 2.0f + 0.5f;
+
+	//if (projCoords.x < 0.0f || projCoords.x > 1.0f || projCoords.y < 0.0f || projCoords.y > 1.0f)
+	//{
+	//	// 그림자 계산을 하지 않고 원래 조명값으로 리턴
+	//	return texColor;
+	//}
+
+	//// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+	//float closestDepth = shadowMap.Sample(shadowSampler, projCoords).r;
+
+	//// get depth of current fragment from light's perspective
+	//float currentDepth = pin.LPosH.z / pin.LPosH.w;
+
+	//float shadowBias = 0.001; // 바이어스 값
+	//float shadow = (currentDepth - shadowBias) < closestDepth ? 1.0 : 0.0;
+
+	//if (currentDepth >= 0.99f)
+	//	shadow = 1.0;
+	//texColor = float4(texColor.r * (shadow), texColor.g * (shadow), texColor.b * (shadow), texColor.a);
 	return texColor;
+
 }

@@ -46,6 +46,7 @@ public:
 		CreateDeviceAndSwapChain();
 		CreateRenderTarget();
 		CreateOffscreenRenderTarget();
+		CreateShadowMapRenderTarget();
 		CreateDepthStencilView();
 		CreateViewport(width, height, 0, 0, 0, 1);
 		
@@ -63,6 +64,7 @@ public:
 	void SetRenderTarget();
 	void SetOffscreenRenderTarget();
 	void SetShadowMapRenderTarget();
+	void CreateShadowMapRenderTarget();
 	void ClearDepthStencilView();
 	void SwapChain();
 	void RestoreRenderTarget();
@@ -79,5 +81,6 @@ public:
 	int _environmentMapHeight = 256;
 
 	uint32    _4xMsaaQuality = 0;
+	Vec3 centerPos = { 3.0f, 0.0f, 117.0f };
 };
 

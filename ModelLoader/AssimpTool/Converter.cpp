@@ -4,7 +4,8 @@
 #include "Utils.h"
 #include "tinyxml2.h"
 #include "FileUtils.h"
-
+#include <regex>
+#include <unordered_set>
 Converter::Converter()
 {
 	_importer = make_shared<Assimp::Importer>();
@@ -46,38 +47,19 @@ void Converter::ExportModelData(wstring savePath)
 	wstring finalPath = _modelPath + savePath + L".mesh";
 	ReadModelData(_scene->mRootNode, -1, -1);
 	ReadSkinData();
-	//Write CSV File
-	{
-		FILE* file;
-		::fopen_s(&file, "../Vertices2.csv", "w");
 
-		for (shared_ptr<asBone>& bone : _bones)
-		{
-			string name = bone->name;
-			::fprintf(file, "%d,%s\n", bone->index, bone->name.c_str());
-		}
+	// Normalize bone names to ensure compatibility with animation data
+	NormalizeBoneNames();
 
-		::fprintf(file, "\n");
+	// Check and log bone hierarchy consistency
+	CheckAndFixBoneHierarchy();
 
-		for (shared_ptr<asMesh>& mesh : _meshes)
-		{
-			string name = mesh->name;
-			::printf("%s\n", name.c_str());
+	// Normalize skin weights to ensure proper animation
+	NormalizeSkinWeights();
 
-			for (UINT i = 0; i < mesh->vertices.size(); i++)
-			{
-				Vec3 p = mesh->vertices[i].position;
-				Vec4 indices = mesh->vertices[i].blendIndices;
-				Vec4 weights = mesh->vertices[i].blendWeights;
+	// Save mesh data to CSV for debugging purposes
+	SaveMeshDataToCSV();
 
-				::fprintf(file, "%f,%f,%f,", p.x, p.y, p.z);
-				::fprintf(file, "%f,%f,%f,%f,", indices.x, indices.y, indices.z, indices.w);
-				::fprintf(file, "%f,%f,%f,%f\n", weights.x, weights.y, weights.z, weights.w);
-			}
-		}
-
-		::fclose(file);
-	}
 	WriteModelFile(finalPath);
 }
 
@@ -93,8 +75,317 @@ void Converter::ExportAnimationData(wstring savePath, uint32 index)
 	wstring finalPath = _modelPath + savePath + L".clip";
 	assert(index < _scene->mNumAnimations);
 	shared_ptr<asAnimation> animation = ReadAnimationData(_scene->mAnimations[index]);
+
+	// Normalize bone names to ensure compatibility with mesh data
+	NormalizeAnimationBoneNames(animation);
+
+	//// Save animation data to CSV for debugging purposes
+	//SaveAnimationDataToCSV(animation);
+
+	// Save animation keyframe data to a log file for further debugging
+	string logFileName = "../AnimationKeyframeLog.txt";
+	FILE* logFile;
+	::fopen_s(&logFile, logFileName.c_str(), "w");
+	for (shared_ptr<asKeyframe> keyframe : animation->keyframes)
+	{
+		::fprintf(logFile, "Bone: %s\n", keyframe->boneName.c_str());
+		for (const auto& transform : keyframe->transforms)
+		{
+			::fprintf(logFile, "Time: %f\n", transform.time);
+			::fprintf(logFile, "Translation: [%f, %f, %f]\n", transform.translation.x, transform.translation.y, transform.translation.z);
+			::fprintf(logFile, "Rotation: [%f, %f, %f, %f]\n", transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w);
+			::fprintf(logFile, "Scale: [%f, %f, %f]\n", transform.scale.x, transform.scale.y, transform.scale.z);
+			::fprintf(logFile, "\n");
+		}
+	}
+	::fclose(logFile);
+
 	WriteAnimationData(animation, finalPath);
 }
+
+void Converter::NormalizeBoneNames()
+{
+	// List of possible prefixes and suffixes to remove
+	std::vector<std::string> prefixes = { "mixamorig:", "Bone_", "Root_", "Bip01_", "Dummy_", "_joint" };
+	std::vector<std::string> suffixes = { "_End", "$AssimpFbx$_PreRotation", "$AssimpFbx$_Translation", "$AssimpFbx$_Scaling" };
+
+	auto removePrefixesAndSuffixes = [&](std::string& name) {
+		// Repeatedly remove known prefixes
+		bool modified = true;
+		while (modified)
+		{
+			modified = false;
+			for (const auto& prefix : prefixes)
+			{
+				if (name.find(prefix) == 0)
+				{
+					name.erase(0, prefix.size());
+					modified = true;
+					break;
+				}
+			}
+		}
+
+		// Repeatedly remove known suffixes
+		modified = true;
+		while (modified)
+		{
+			modified = false;
+			for (const auto& suffix : suffixes)
+			{
+				if (name.size() >= suffix.size() && name.compare(name.size() - suffix.size(), suffix.size(), suffix) == 0)
+				{
+					name.erase(name.size() - suffix.size());
+					modified = true;
+					break;
+				}
+			}
+		}
+	};
+
+	// Normalize bone names in the _bones vector
+	for (shared_ptr<asBone>& bone : _bones)
+	{
+		removePrefixesAndSuffixes(bone->name);
+
+		// Remove any remaining non-alphanumeric characters
+		bone->name.erase(std::remove_if(bone->name.begin(), bone->name.end(), [](char c) { return !std::isalnum(c) && c != '_'; }), bone->name.end());
+	}
+
+	// Normalize bone names in the _meshes vector
+	for (shared_ptr<asMesh>& mesh : _meshes)
+	{
+		removePrefixesAndSuffixes(mesh->name);
+
+		// Remove any remaining non-alphanumeric characters
+		mesh->name.erase(std::remove_if(mesh->name.begin(), mesh->name.end(), [](char c) { return !std::isalnum(c) && c != '_'; }), mesh->name.end());
+
+		// Update bone index based on normalized name
+		mesh->boneIndex = GetBoneIndex(mesh->name);
+	}
+}
+void Converter::NormalizeAnimationBoneNames(shared_ptr<asAnimation> animation)
+{
+	// List of possible prefixes and suffixes to remove
+	std::vector<std::string> prefixes = { "mixamorig:", "Bone_", "Root_", "Bip01_", "Dummy_", "_joint" };
+	std::vector<std::string> suffixes = { "_End", "$AssimpFbx$_PreRotation", "$AssimpFbx$_Translation", "$AssimpFbx$_Scaling" };
+
+	auto removePrefixesAndSuffixes = [&](std::string& name) {
+		// Repeatedly remove known prefixes
+		bool modified = true;
+		while (modified)
+		{
+			modified = false;
+			for (const auto& prefix : prefixes)
+			{
+				if (name.find(prefix) == 0)
+				{
+					name.erase(0, prefix.size());
+					modified = true;
+					break;
+				}
+			}
+		}
+
+		// Repeatedly remove known suffixes
+		modified = true;
+		while (modified)
+		{
+			modified = false;
+			for (const auto& suffix : suffixes)
+			{
+				if (name.size() >= suffix.size() && name.compare(name.size() - suffix.size(), suffix.size(), suffix) == 0)
+				{
+					name.erase(name.size() - suffix.size());
+					modified = true;
+					break;
+				}
+			}
+		}
+	};
+
+	// Normalize bone names in the animation keyframes
+	for (shared_ptr<asKeyframe> keyframe : animation->keyframes)
+	{
+		removePrefixesAndSuffixes(keyframe->boneName);
+
+		// Remove any remaining non-alphanumeric characters
+		keyframe->boneName.erase(std::remove_if(keyframe->boneName.begin(), keyframe->boneName.end(), [](char c) { return !std::isalnum(c) && c != '_'; }), keyframe->boneName.end());
+	}
+}
+
+
+void Converter::SaveMeshDataToCSV()
+{
+	//// CSV file path for mesh data
+	//string csvFileName = "../NormalizedMeshData.csv";
+	//FILE* csvFile;
+	//::fopen_s(&csvFile, csvFileName.c_str(), "w");
+
+	//// Header for CSV
+	//::fprintf(csvFile, "BoneIndex,BoneName,ParentIndex\n");
+	//for (shared_ptr<asBone>& bone : _bones)
+	//{
+	//	::fprintf(csvFile, "%d,%s,%d\n", bone->index, bone->name.c_str(), bone->parent);
+	//}
+
+	//::fprintf(csvFile, "\n");
+	//for (shared_ptr<asMesh>& mesh : _meshes)
+	//{
+	//	::fprintf(csvFile, "MeshName,%s\n", mesh->name.c_str());
+	//	::fprintf(csvFile, "VertexIndex,PositionX,PositionY,PositionZ,BlendIndex0,BlendIndex1,BlendIndex2,BlendIndex3,BlendWeight0,BlendWeight1,BlendWeight2,BlendWeight3\n");
+
+	//	for (UINT i = 0; i < mesh->vertices.size(); i++)
+	//	{
+	//		const VertexTextureNormalTangentBlendData& vertex = mesh->vertices[i];
+	//		Vec3 p = vertex.position;
+	//		Vec4 indices = vertex.blendIndices;
+	//		Vec4 weights = vertex.blendWeights;
+
+	//		::fprintf(csvFile, "%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+	//			i, p.x, p.y, p.z,
+	//			indices.x, indices.y, indices.z, indices.w,
+	//			weights.x, weights.y, weights.z, weights.w);
+	//	}
+
+	//	::fprintf(csvFile, "\n");
+	//}
+
+	//::fclose(csvFile);
+	// CSV file path for mesh data
+	string csvFileName = "../SimplifiedNormalizedMeshData.csv";
+	FILE* csvFile;
+	::fopen_s(&csvFile, csvFileName.c_str(), "w");
+
+	// Header for CSV
+	::fprintf(csvFile, "BoneIndex,BoneName\n");
+	for (shared_ptr<asBone>& bone : _bones)
+	{
+		::fprintf(csvFile, "%d,%s\n", bone->index, bone->name.c_str());
+	}
+
+	::fclose(csvFile);
+}
+
+void Converter::SaveAnimationDataToCSV(shared_ptr<asAnimation> animation)
+{
+	//// CSV file path for animation data
+	//string csvFileName = "../NormalizedAnimationData.csv";
+	//FILE* csvFile;
+	//::fopen_s(&csvFile, csvFileName.c_str(), "w");
+
+	//// Header for CSV
+	//::fprintf(csvFile, "Frame,BoneName,Time,TranslationX,TranslationY,TranslationZ,RotationX,RotationY,RotationZ,RotationW,ScaleX,ScaleY,ScaleZ\n");
+
+	//for (shared_ptr<asKeyframe> keyframe : animation->keyframes)
+	//{
+	//	string boneName = keyframe->boneName;
+	//	uint32 transformCount = keyframe->transforms.size();
+
+	//	for (uint32 i = 0; i < transformCount; ++i)
+	//	{
+	//		asKeyframeData& frameData = keyframe->transforms[i];
+	//		float time = frameData.time;
+	//		Vec3& translation = frameData.translation;
+	//		Quaternion& rotation = frameData.rotation;
+	//		Vec3& scale = frameData.scale;
+
+	//		::fprintf(csvFile, "%d,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+	//			i, boneName.c_str(), time,
+	//			translation.x, translation.y, translation.z,
+	//			rotation.x, rotation.y, rotation.z, rotation.w,
+	//			scale.x, scale.y, scale.z);
+	//	}
+	//}
+
+	//::fclose(csvFile);
+	// CSV file path for animation data
+	string csvFileName = "../SimplifiedNormalizedAnimationData.csv";
+	FILE* csvFile;
+	::fopen_s(&csvFile, csvFileName.c_str(), "w");
+
+	// Header for CSV
+	::fprintf(csvFile, "BoneName\n");
+
+	for (shared_ptr<asKeyframe> keyframe : animation->keyframes)
+	{
+		string boneName = keyframe->boneName;
+		::fprintf(csvFile, "%s\n", boneName.c_str());
+	}
+
+	::fclose(csvFile);
+}
+
+void Converter::CheckAndFixBoneHierarchy()
+{
+	// Verify bone hierarchy consistency by logging discrepancies and saving to a text file
+	string logFileName = "../BoneHierarchyCheckLog.txt";
+	FILE* logFile;
+	::fopen_s(&logFile, logFileName.c_str(), "w");
+
+	for (shared_ptr<asBone>& bone : _bones)
+	{
+		if (bone->parent >= 0 && bone->parent < _bones.size())
+		{
+			auto parentBone = _bones[bone->parent];
+			if (parentBone == nullptr || parentBone->index != bone->parent)
+			{
+				// Log any discrepancies found
+				::fprintf(logFile, "Discrepancy found in bone hierarchy for bone: %s with parent index: %d\n", bone->name.c_str(), bone->parent);
+			}
+		}
+		else if (bone->parent >= 0)
+		{
+			// Log if the parent index is out of bounds
+			::fprintf(logFile, "Invalid parent index for bone: %s, parent index: %d is out of bounds\n", bone->name.c_str(), bone->parent);
+		}
+		else
+		{
+			// Log the bone's transform matrix for debugging purposes
+			::fprintf(logFile, "Bone: %s, Index: %d, Parent Index: %d\n", bone->name.c_str(), bone->index, bone->parent);
+			::fprintf(logFile, "Transform Matrix:\n");
+			for (int i = 0; i < 4; ++i)
+			{
+				::fprintf(logFile, "[%f, %f, %f, %f]\n", bone->transform.m[i][0], bone->transform.m[i][1], bone->transform.m[i][2], bone->transform.m[i][3]);
+			}
+			::fprintf(logFile, "\n");
+		}
+	}
+
+	::fclose(logFile);
+}
+
+void Converter::NormalizeSkinWeights()
+{
+	// Ensure skin weights are properly normalized
+	string logFileName = "../SkinWeightNormalizationLog.txt";
+	FILE* logFile;
+	::fopen_s(&logFile, logFileName.c_str(), "w");
+
+	for (shared_ptr<asMesh>& mesh : _meshes)
+	{
+		for (auto& vertex : mesh->vertices)
+		{
+			float totalWeight = vertex.blendWeights.x + vertex.blendWeights.y + vertex.blendWeights.z + vertex.blendWeights.w;
+			if (totalWeight > 0.0f)
+			{
+				vertex.blendWeights.x /= totalWeight;
+				vertex.blendWeights.y /= totalWeight;
+				vertex.blendWeights.z /= totalWeight;
+				vertex.blendWeights.w /= totalWeight;
+			}
+			else
+			{
+				::fprintf(logFile, "Vertex at position (%f, %f, %f) has zero total weight.\n", vertex.position.x, vertex.position.y, vertex.position.z);
+			}
+			// Log the final normalized weights for each vertex
+			::fprintf(logFile, "Vertex at position (%f, %f, %f) - Weights: [%f, %f, %f, %f]\n", vertex.position.x, vertex.position.y, vertex.position.z, vertex.blendWeights.x, vertex.blendWeights.y, vertex.blendWeights.z, vertex.blendWeights.w);
+		}
+	}
+
+	::fclose(logFile);
+}
+
 
 void Converter::CreateDeviceAndSwapChain()
 {
@@ -146,7 +437,7 @@ void Converter::ReadModelData(aiNode* node, int32 index, int32 parent)
 
 	// Relative Transform
 	Matrix transform(node->mTransformation[0]);
-	bone->transform = transform.Transpose();
+	bone->transform = transform.Transpose(); // 직속 부모를 기준으로한 위치 
 
 	// 2) Root (Local)
 	Matrix matParent = Matrix::Identity;
@@ -154,7 +445,7 @@ void Converter::ReadModelData(aiNode* node, int32 index, int32 parent)
 		matParent = _bones[parent]->transform;
 
 	// Local (Root) Transform
-	bone->transform = bone->transform * matParent;
+	bone->transform = bone->transform * matParent; // 이 과정이 반복되면 사실상 bone의 transform은 직속 부모를 기준으로 한게 아닌 root기준의 위치가 됨
 
 	_bones.push_back(bone);
 
@@ -168,7 +459,7 @@ void Converter::ReadModelData(aiNode* node, int32 index, int32 parent)
 
 void Converter::ReadMeshData(aiNode* node, int32 bone)
 {
-	if (node->mNumMeshes < 1)
+	if (node->mNumMeshes < 1) // node가 항상 뼈와 관련된 정보만 들어있는게 아니기 때문에 mesh 정보가 있는경우만 체크
 		return;
 
 	shared_ptr<asMesh> mesh = make_shared<asMesh>();
@@ -177,7 +468,7 @@ void Converter::ReadMeshData(aiNode* node, int32 bone)
 
 	for (uint32 i = 0; i < node->mNumMeshes; i++)
 	{
-		uint32 index = node->mMeshes[i];
+		uint32 index = node->mMeshes[i]; // scene이 가지고 있는 Meshes의 인덱스 번호
 		const aiMesh* srcMesh = _scene->mMeshes[index];
 
 		// Material Name

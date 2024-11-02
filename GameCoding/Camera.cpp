@@ -58,6 +58,8 @@ void Camera::SetViewProjectionMatrix()
 	_cameraBufferData.projectionMatrix = _matProjcetion;
 	_cameraBuffer->CreateConstantBuffer<CameraBuffer>();
 	_cameraBuffer->CopyData(_cameraBufferData);
+
+	SetShadowMapViewProjectionMatrix();
 }
 
 void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 lookVector, Vec3 upVector)
@@ -96,23 +98,53 @@ void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 look
 void Camera::SetShadowMapViewProjectionMatrix()
 {
 	shared_ptr<GameObject> light = SCENE.GetActiveScene()->Find(L"MainLight");
-	Vec3 eye = light->transform()->GetWorldPosition();           //GetTransform()->GetWorldPosition();
-	Vec3 at = Vec3(3.0f, 0.0f, 117.0f);
+	Vec3 eye = light->transform()->GetWorldPosition();
+	Vec3 at = GP.centerPos;
 	Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
 	_shadowView = ::XMMatrixLookAtLH(eye, at, up);
 
+	_sceneBounds.Radius = 20.0f;
 
-	int width = Graphics::GetInstance().GetViewWidth();
-	int height = Graphics::GetInstance().GetViewHeight();
+	// Transform bounding sphere to light space.
+	XMFLOAT3 sphereCenterLS;
+	::XMStoreFloat3(&sphereCenterLS, ::XMVector3TransformCoord(at, _shadowView));
 
-	float aspectRatio = (float)(width) / (float)(height);
+	// Ortho frustum in light space encloses scene.
+	float l = sphereCenterLS.x - _sceneBounds.Radius;
+	float b = sphereCenterLS.y - _sceneBounds.Radius;
+	float n = sphereCenterLS.z - _sceneBounds.Radius;
+	float r = sphereCenterLS.x + _sceneBounds.Radius;
+	float t = sphereCenterLS.y + _sceneBounds.Radius;
+	float f = sphereCenterLS.z + _sceneBounds.Radius;
 
-	float fovAngleY = XM_PI / 4.f;
-	float nearZ = 0.1f;
-	float farZ = 1000.f;
+	_shadowProjection = ::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+
+	//int width = 100; //Graphics::GetInstance().GetViewWidth();
+	//int height = 100;// Graphics::GetInstance().GetViewHeight();
+	//float nearZ = 0.1f;
+	//float farZ = 1000.f;
+	//nearZ = 1.f;
+	//farZ = 100.f;
+
+	//float width = 20.0f;  // 좌우 클립 범위 (right - left = 20.0f)
+	//float height = 20.0f; // 상하 클립 범위 (top - bottom = 20.0f)
+	//float nearZ = 1.0f;   // near_plane
+	//float farZ = 7.5f;    // far_plane
+	//_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
+	
+
+	//int width = Graphics::GetInstance().GetViewWidth();
+	//int height = Graphics::GetInstance().GetViewHeight();
+
+	//float aspectRatio = (float)(width) / (float)(height);
+
+	//float fovAngleY = XM_PI / 4.f;
+	//float nearZ = 0.1f;
+	//float farZ = 1000.f;
 
 	//_shadowProjection = ::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
-	_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
+	////_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
 
 
 	_shadowCameraBuffer = make_shared<Buffer>();

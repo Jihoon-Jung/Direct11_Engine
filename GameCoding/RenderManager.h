@@ -29,6 +29,7 @@ public:
 
 	void GetRenderableObject();
 	void DrawRenderableObject(bool isEnv);
+	void DrawUIObject(ComPtr<ID3D11ShaderResourceView> srv);
 	void RenderEnvironmentMappedObjects(shared_ptr<GameObject> gameObject, shared_ptr<Texture> envTexture);
 	void Render();
 	void RenderAllGameObject();
@@ -40,8 +41,11 @@ private:
 	vector<shared_ptr<GameObject>> _renderObjects;
 	vector<shared_ptr<GameObject>> _envMappedObjects;
 	vector<shared_ptr<GameObject>> _billboardObjs;
+	vector<shared_ptr<GameObject>> _UIObjects;
+
 	shared_ptr<GameObject> _terrainObject;
 	shared_ptr<GameObject> _lightObject;
+
 	float _lightRotationAngle;
 	float tmp;
 	KeyframeDesc _keyframeDesc;

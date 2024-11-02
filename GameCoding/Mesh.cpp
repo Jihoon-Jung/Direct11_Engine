@@ -111,8 +111,8 @@ void Mesh::CreateCube_NormalTangent()
 	vtx[6] = VertexTextureNormalTangentBlendData(Vec3(+w2, +h2, +d2), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
 	vtx[7] = VertexTextureNormalTangentBlendData(Vec3(-w2, +h2, +d2), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
 	// À­¸é
-	vtx[8] = VertexTextureNormalTangentBlendData(Vec3(-w2, +h2, -d2), Vec2(0.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
-	vtx[9] = VertexTextureNormalTangentBlendData(Vec3(-w2, +h2, +d2), Vec2(0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
+	vtx[8] = VertexTextureNormalTangentBlendData(Vec3(-w2, +h2, -d2), Vec2(0.0f, 1.0f),  Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
+	vtx[9] = VertexTextureNormalTangentBlendData(Vec3(-w2, +h2, +d2), Vec2(0.0f, 0.0f),  Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
 	vtx[10] = VertexTextureNormalTangentBlendData(Vec3(+w2, +h2, +d2), Vec2(1.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
 	vtx[11] = VertexTextureNormalTangentBlendData(Vec3(+w2, +h2, -d2), Vec2(1.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec4(1.0f), Vec4(1.0f));
 	// ¾Æ·§¸é

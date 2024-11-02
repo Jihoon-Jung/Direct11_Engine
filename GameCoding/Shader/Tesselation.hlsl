@@ -52,13 +52,19 @@ cbuffer LightAndCameraPos : register(b4)
     float3 cameraPosition;
     float padding2;
 }
+cbuffer LightSpaceTransformBuffer : register(b5)
+{
+    row_major matrix light_viewMatrix;
+    row_major matrix light_projectionMatrix;
+};
 
 SamplerState sampler0 : register(s0);
+SamplerState shadowSampler : register(s1);
 Texture2D texture0 : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D specularMap : register(t2);
 Texture2D diffuseMap : register(t3);
-
+Texture2D shadowMap	: register(t4);
 
 // Vertex Shader (VS)
 VertexOut VS(VertexIn vin)
@@ -151,6 +157,7 @@ HullOut HS(InputPatch<VertexOut, 3> p,
 struct DomainOut
 {
     float4 PosH     : SV_POSITION;
+    float4 LPosH	: LIGHT_POSITION;
     float3 PosW     : POSITION;
     float3 NormalW  : NORMAL;
     float3 TangentW : TANGENT;
@@ -196,7 +203,7 @@ DomainOut DS(PatchTess patchTess,
 
     // Project to homogeneous clip space.
     dout.PosH = mul(mul(float4(dout.PosW, 1.0f), viewMatrix), projectionMatrix);
-
+    dout.LPosH = mul(mul(float4(dout.PosW, 1.0f), light_viewMatrix), light_projectionMatrix);
     return dout;
 }
 
@@ -207,7 +214,7 @@ float4 PS(DomainOut pin) : SV_Target
     float4 specularColor = 0;
     float4 emissiveColor = 0;
 
-    float3 lightDirection = normalize(pin.PosW - lightPosition);
+    float3 lightDirection = normalize(lightPosition);
     float3 viewDirection = normalize(cameraPosition - pin.PosW);
     float3 normal = normalize(pin.NormalW);
     float4 textureColor = texture0.Sample(sampler0, pin.Tex);
@@ -227,7 +234,13 @@ float4 PS(DomainOut pin) : SV_Target
     light.Specular = specular;
     light.Direction = lightDirection;
 
-    ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor);
+    Shadow shadow;
+    shadow.lightPosition = pin.LPosH;
+    shadow.shadowSampler = shadowSampler;
+    shadow.shadowMap = shadowMap;
+    float shadowFactor = CalculateShadowFactor(shadow);
+
+    ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor, shadowFactor);
     //// Ambient
     //{
     //    float ambientStrength = 1.0;

@@ -28,7 +28,7 @@ void SceneManager::LoadTestScene()
 	
 	shared_ptr<GameObject> camera = make_shared<GameObject>();
 	shared_ptr<Transform> camera_transform = make_shared<Transform>();
-	camera_transform->SetLocalPosition(Vec3(0, 2.f, 100));  
+	camera_transform->SetLocalPosition(GP.centerPos + Vec3(-2.0f, 2.f, -10.0f));
 	camera->AddComponent(camera_transform);
 	shared_ptr<MoveObject> moveObject = make_shared<MoveObject>();
 	camera->AddComponent(moveObject);
@@ -91,13 +91,13 @@ void SceneManager::LoadTestScene()
 	terrain->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> terrain_tranform = make_shared<Transform>();
 
-	shared_ptr<GameObject> quard = make_shared<GameObject>();
-	quard->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> quard_transform = make_shared<Transform>();
+	shared_ptr<GameObject> quad = make_shared<GameObject>();
+	quad->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> quad_transform = make_shared<Transform>();
 
-	shared_ptr<GameObject> quard_ui = make_shared<GameObject>();
-	quard_ui->SetObjectType(GameObjectType::UIObject);
-	shared_ptr<Transform> quard_ui_transform = make_shared<Transform>();
+	shared_ptr<GameObject> quad_ui = make_shared<GameObject>();
+	quad_ui->SetObjectType(GameObjectType::UIObject);
+	shared_ptr<Transform> quad_ui_transform = make_shared<Transform>();
 
 	shared_ptr<GameObject> uiButton = make_shared<GameObject>();
 	uiButton->SetObjectType(GameObjectType::UIObject);
@@ -191,7 +191,7 @@ void SceneManager::LoadTestScene()
 		//meshRenderer->SetUseEnvironmentMap(true);
 		/*meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[1]->SetPass(Pass::QUAD_RENDER);
-		meshRenderer->GetRenderPasses()[1]->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->GetRenderPasses()[1]->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 		meshRenderer->GetRenderPasses()[1]->SetShader(RESOURCE.GetResource<Shader>(L"Quad_Shader"));*/
 
 
@@ -224,7 +224,7 @@ void SceneManager::LoadTestScene()
 		testPlane->AddComponent(testPlane_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
@@ -277,10 +277,10 @@ void SceneManager::LoadTestScene()
 	}
 
 	{
-		grid_transform->SetPosition(Vec3(5.0f, 0.0f, 0.0f));
+		grid_transform->SetPosition(Vec3(-50.0f, 0.0f, 80.0f));
 		grid->AddComponent(grid_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"GridMaterial"));
 		// change color by compute shader
 		/*shared_ptr<Shader> computeShader = RESOURCE.GetResource<Shader>(L"AdjustTexture_Shader");
 		shared_ptr<Texture> inputTexture = meshRenderer->GetMaterial()->GetTexture();
@@ -291,13 +291,9 @@ void SceneManager::LoadTestScene()
 		
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
-		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
-		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
-		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
-		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
-		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
-		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(grid_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 
 
 		grid->AddComponent(meshRenderer);
@@ -329,11 +325,11 @@ void SceneManager::LoadTestScene()
 	}
 
 	{
-		quard_transform->SetPosition(Vec3(0.0f, 0.f, 0.f));
-		quard->AddComponent(quard_transform);
+		quad_transform->SetPosition(Vec3(0.0f, 0.f, 0.f));
+		quad->AddComponent(quad_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Billboard_Material"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
@@ -344,31 +340,27 @@ void SceneManager::LoadTestScene()
 		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
 		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
 		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
-		quard->AddComponent(meshRenderer);
-		quard->SetName(L"Quard_Billboard");
+		quad->AddComponent(meshRenderer);
+		quad->SetName(L"Quad_Billboard");
 	}
 	{
 		shared_ptr<UIImage> uiImageComponent = make_shared<UIImage>();
-		uiImageComponent->SetTransformAndRect(Vec2(700, 100), Vec2(100, 100));
-		quard_ui->AddComponent(uiImageComponent);
-		quard_ui_transform->SetPosition(uiImageComponent->GetNDCPosition());
-		quard_ui_transform->SetLocalScale(uiImageComponent->GetSize());
-		quard_ui->AddComponent(quard_ui_transform);
+		uiImageComponent->SetTransformAndRect(Vec2(900, 200), Vec2(240, 180));
+		quad_ui->AddComponent(uiImageComponent);
+		quad_ui_transform->SetPosition(uiImageComponent->GetNDCPosition());
+		quad_ui_transform->SetLocalScale(uiImageComponent->GetSize());
+		quad_ui->AddComponent(quad_ui_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		meshRenderer->AddRenderPass();
-		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-		meshRenderer->GetRenderPasses()[0]->SetRasterizerStates(meshRenderer->GetRasterzerStates());
-		meshRenderer->GetRenderPasses()[0]->SetMesh(meshRenderer->GetMesh());
-		meshRenderer->GetRenderPasses()[0]->SetTexture(meshRenderer->GetMaterial()->GetTexture());
-		meshRenderer->GetRenderPasses()[0]->SetNormalMap(meshRenderer->GetMaterial()->GetNormalMap());
-		meshRenderer->GetRenderPasses()[0]->SetSpecularMap(meshRenderer->GetMaterial()->GetSpecularMap());
-		meshRenderer->GetRenderPasses()[0]->SetDiffuseMap(meshRenderer->GetMaterial()->GetDiffuseMap());
-		meshRenderer->GetRenderPasses()[0]->SetShader(meshRenderer->GetMaterial()->GetShader());
-		quard_ui->AddComponent(meshRenderer);
-		quard_ui->SetName(L"UI_Quard");
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEBUG_2D_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(quad_ui_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		quad_ui->AddComponent(meshRenderer);
+		quad_ui->SetName(L"UI_Quad");
 	}
 	{
 		shared_ptr<Button> buttonComponent = make_shared<Button>();
@@ -380,7 +372,7 @@ void SceneManager::LoadTestScene()
 		uiButton->AddComponent(uiButton_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quard"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
@@ -412,38 +404,9 @@ void SceneManager::LoadTestScene()
 		tower->AddComponent(boxCollider);
 		tower->SetName(L"tower");
 	}
+	
 	{
-		float angle = 50.0f; // 각도 단위는 도(degrees)
-		float r = 18.0277557f; // Bounding Sphere의 반지름을 250으로 설정함. (너무 크면 shadow map에 문제가 생겨서 임의로 작게 만듬)
-		float x, y, z;
-
-		// 각도를 라디안으로 변환
-		float angleRad = angle * XM_PI / 180.0f;
-
-		// 변 x와 y를 계산
-		x = r * cos(angleRad);
-		y = r * sin(angleRad);
-		z = 0.0f;
-		light_transform->SetPosition(Vec3(x, y, z));//SetPosition(Vec3(-500.0f, 400.0f, 420.0f));
-		light_transform->SetScale(Vec3(10.0f, 10.0f, 10.0f));
-		light->AddComponent(light_transform);
-		light->AddComponent(make_shared<Light>());
-		/*shared_ptr<MoveObject> moveObject = make_shared<MoveObject>();
-		light->AddComponent(moveObject);*/
-		/*shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
-		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"TestMesh"));
-		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-		meshRenderer->AddRenderPass();
-		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
-		meshRenderer->GetRenderPasses()[0]->SetTransform(light_transform);
-		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-		light->AddComponent(meshRenderer);*/
-		light->SetName(L"MainLight");
-	}
-	{
-		kachujin_transform->SetPosition(Vec3(3.0f, 0.0f, 117.0f));
+		kachujin_transform->SetPosition(GP.centerPos - Vec3(2.0f, 0.0f, 0.0f));
 		kachujin_transform->SetLocalScale(Vec3(0.01f));
 		Kachujin->AddComponent(kachujin_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -461,16 +424,49 @@ void SceneManager::LoadTestScene()
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
 	{
-		Ely_transform->SetPosition(Vec3(-9.0f, 5.0f, 0.0f));
-		Ely_transform->SetLocalScale(Vec3(0.1f));
+		float angle = 50.0f; // 각도 단위는 도(degrees)
+		float r = 50.0f; // Bounding Sphere의 반지름을 250으로 설정함. (너무 크면 shadow map에 문제가 생겨서 임의로 작게 만듬)
+		float x, y, z;
+
+		// 각도를 라디안으로 변환
+		float angleRad = angle * XM_PI / 180.0f;
+
+		// 변 x와 y를 계산
+		x = GP.centerPos.x + (r * cos(angleRad));
+		y = GP.centerPos.y + (r * sin(angleRad));
+		z = GP.centerPos.z + 0.0f;
+		light_transform->SetPosition(Vec3(x, y, z));//SetPosition(Vec3(-500.0f, 400.0f, 420.0f));
+		light_transform->SetScale(Vec3(10.0f, 10.0f, 10.0f));
+		light->AddComponent(light_transform);
+		light->AddComponent(make_shared<Light>());
+		/*shared_ptr<MoveObject> moveObject = make_shared<MoveObject>();
+		light->AddComponent(moveObject);*/
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"LightMaterial"));
+		meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"TestMesh"));
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(light_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		//light->AddComponent(meshRenderer);
+		light->SetName(L"MainLight");
+	}
+	{
+		Ely_transform->SetPosition(GP.centerPos);
+		Ely_transform->SetLocalScale(Vec3(0.001f));
 		Ely->AddComponent(Ely_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 		meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"Ely"));
 		meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(Ely_transform);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 		Ely->AddComponent(meshRenderer);
-		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
-		Ely->AddComponent(boxCollider);
 		Ely->SetName(L"Ely_OBJ");
 	}
 	{
@@ -492,12 +488,13 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(tessellation_cylinder);
 	//_activeScene->AddGameObject(grid);
 	_activeScene->AddGameObject(tower);
-	//_activeScene->AddGameObject(quard_ui);
+	_activeScene->AddGameObject(quad_ui);
 	//_activeScene->AddGameObject(uiButton);
 	_activeScene->AddGameObject(stencil_cube1);
 	_activeScene->AddGameObject(stencil_cube2);
-	//_activeScene->AddGameObject(quard);
+	//_activeScene->AddGameObject(quad);
 	_activeScene->AddGameObject(Kachujin);
+	_activeScene->AddGameObject(Ely);
 	_activeScene->AddGameObject(terrain);
 	_activeScene->AddGameObject(particleSystem);
 	//_activeScene->AddGameObject(Ch4);

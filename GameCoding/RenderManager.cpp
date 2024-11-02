@@ -30,6 +30,7 @@ void RenderManager::Init()
 		{
 			_lightObject = gameObject;
 		}
+
 	}
 }
 
@@ -41,9 +42,11 @@ void RenderManager::Update()
 	lightLocalRotation.y += _lightRotationAngle;
 	Vec3 lightR = _lightObject->transform()->GetLocalRotation();
 	lightR.y += tmp;
-	_lightObject->transform()->SetRotation(lightR);
-	_lightObject->transform()->SetRevolutionRotation(lightLocalRotation);
 
+	_lightObject->transform()->SetRevolutionRotation(lightLocalRotation);
+	_lightObject->transform()->SetRevolutionCenter(GP.centerPos);
+	_lightObject->transform()->SetRotation(lightR);
+	
 	ClearRenderObject();
 
 	GP.SetRenderTarget();
@@ -64,12 +67,16 @@ void RenderManager::GetRenderableObject()
 	{
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<ParticleSystem> particleSystem = gameObject->GetComponent<ParticleSystem>();
+		shared_ptr<UIImage> uiImage = gameObject->GetComponent<UIImage>();
 		if (meshRenderer != nullptr)
 		{
-			if (!meshRenderer->CheckUseEnvironmentMap())
+			if (uiImage != nullptr)
+				_UIObjects.push_back(gameObject);
+			else if (!meshRenderer->CheckUseEnvironmentMap())
 				_renderObjects.push_back(gameObject);
 			else
 				_envMappedObjects.push_back(gameObject);
+			
 		}
 		else if (particleSystem != nullptr)
 			_renderObjects.push_back(gameObject);
@@ -102,7 +109,12 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 				particle->Update(TIME.GetDeltaTime() / 7.0f, TIME.GetTotalTime(), isEnv);
 			continue;
 		}
-			
+		
+		if (_drawShadowMapFlag && gameObject->GetName() == L"skyBox")
+			continue;
+		if (_drawShadowMapFlag && gameObject->GetName() == L"MainLight")
+			continue;
+
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<Model> model = meshRenderer->GetModel();
 
@@ -115,6 +127,31 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 			{
 				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
 				renderPass->Render(isEnv);
+				if (i + 1 < meshRenderer->GetRenderPasses().size())
+				{
+					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
+					nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
+				}
+			}
+		}
+	}
+}
+
+void RenderManager::DrawUIObject(ComPtr<ID3D11ShaderResourceView> srv)
+{
+	for (const shared_ptr<GameObject>& gameObject : _UIObjects)
+	{
+		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
+		shared_ptr<Model> model = meshRenderer->GetModel();
+
+		if (meshRenderer->GetRenderPasses().size() > 0)
+		{
+			int count = meshRenderer->GetRenderPasses().size();
+			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
+			{
+				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
+				renderPass->SetInputSRV(srv);
+				renderPass->Render(false);
 				if (i + 1 < meshRenderer->GetRenderPasses().size())
 				{
 					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
@@ -158,20 +195,22 @@ void RenderManager::Render()
 
 	if (_filterType == FilterType::SHADOW_MAP)
 	{
-		/*GP.SetShadowMapRenderTarget();*/
-		GP.SetOffscreenRenderTarget();
+		GP.SetShadowMapRenderTarget();
+		
 		_drawShadowMapFlag = true;
-		SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->SetShadowMapViewProjectionMatrix();
+		
 		RenderAllGameObject();
-		std::string filename = "shadowMap2" + std::to_string(GP.GetViewWidth()) + "x" + std::to_string(GP.GetViewHeight()) + ".dump";
+		/*std::string filename = "shadowMap2" + std::to_string(GP.GetViewWidth()) + "x" + std::to_string(GP.GetViewHeight()) + ".dump";
 		ScreenShot sc;
-		sc.SaveShaderResourceViewToFile(GP.GetTestSRV().Get(), filename, GP.GetViewWidth(), GP.GetViewHeight());
+		sc.SaveShaderResourceViewToFile(GP.GetShadowMapSRV().Get(), filename, GP.GetViewWidth(), GP.GetViewHeight());*/
 		_drawShadowMapFlag = false;
 		GP.RestoreRenderTarget();
 	}
 	
 
 	RenderAllGameObject();
+
+	//DrawUIObject(GP.GetShadowMapSRV());
 
 	if (_filterType == FilterType::GAUSSIAN_BLUR)
 		GP.RenderQuad();
@@ -180,7 +219,7 @@ void RenderManager::Render()
 
 void RenderManager::RenderAllGameObject()
 {
-	if (_billboardObjs.size() > 0)
+	if (!_drawShadowMapFlag && _billboardObjs.size() > 0)
 	{
 		for (const shared_ptr<GameObject>& gameObject : _billboardObjs)
 		{
