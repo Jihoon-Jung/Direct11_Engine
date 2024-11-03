@@ -28,7 +28,6 @@ void GUIManager::Update()
 
 void GUIManager::RenderUI_Start()
 {
-	int a = 1;
 	// Start the Dear ImGui frame
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
