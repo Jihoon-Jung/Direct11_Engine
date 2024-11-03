@@ -63,6 +63,12 @@
     <Filter Include="소스 파일\Component\Collider">
       <UniqueIdentifier>{899f0e05-fc64-4c93-9930-7911c359b3fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Uitls">
+      <UniqueIdentifier>{007ab274-6809-42ac-8569-1eafa6e61b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Uitls\imGUI">
+      <UniqueIdentifier>{c3a6af36-7200-4fd8-b99e-be99ed766d6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -251,6 +257,33 @@
     <ClInclude Include="ScreenShot.h">
       <Filter>소스 파일\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_dx11.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_win32.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIManager.h">
+      <Filter>소스 파일\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -437,10 +470,37 @@
     <ClCompile Include="ScreenShot.cpp">
       <Filter>소스 파일\Helper</Filter>
     </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_dx11.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_win32.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIManager.cpp">
+      <Filter>소스 파일\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
       <Filter>소스 파일\Headers\Utils</Filter>
+    </None>
+    <None Include="imgui.ini">
+      <Filter>소스 파일\Uitls\imGUI</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

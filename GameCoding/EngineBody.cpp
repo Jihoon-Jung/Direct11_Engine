@@ -23,6 +23,7 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	RESOURCE.Init();
 	SCENE.LoadScene(L"Test");
 	RENDER.Init();
+	GUI.Init();
 }
 
 void EngineBody::Update()
@@ -35,6 +36,8 @@ void EngineBody::Update()
 void EngineBody::Render()
 {
 	RENDER.Update();
+	GUI.Update();
+	GP.SwapChain();
 }
 
 

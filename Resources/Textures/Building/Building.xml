@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material>
+        <Name>ground</Name>
+        <DiffuseFile>Steel_C.jpg</DiffuseFile>
+        <SpecularFile>Steel_S.jpg</SpecularFile>
+        <NormalFile>Steel_N.jpg</NormalFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.64000005" G="0.64000005" B="0.64000005" A="1"/>
+        <Specular R="1" G="1" B="1" A="9.6078434"/>
+        <Emissive R="0" G="0" B="0" A="1"/>
+    </Material>
+    <Material>
+        <Name>hotel_glas</Name>
+        <DiffuseFile>REF 1.jpg</DiffuseFile>
+        <SpecularFile>REF 1.jpg</SpecularFile>
+        <NormalFile>REF 1.jpg</NormalFile>
+        <Ambient R="0" G="0" B="0" A="1"/>
+        <Diffuse R="0.64000005" G="0.64000005" B="0.64000005" A="1"/>
+        <Specular R="0" G="0" B="0" A="9.6078434"/>
+        <Emissive R="0.34399998" G="0.34399998" B="0.34399998" A="1"/>
+    </Material>
+</Materials>

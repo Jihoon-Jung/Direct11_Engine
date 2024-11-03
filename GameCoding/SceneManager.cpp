@@ -107,13 +107,17 @@ void SceneManager::LoadTestScene()
 	tower->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> tower_transform = make_shared<Transform>();
 
+	shared_ptr<GameObject> house = make_shared<GameObject>();
+	house->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> house_transfrom = make_shared<Transform>();
+
 	shared_ptr<GameObject> Kachujin = make_shared<GameObject>();
 	Kachujin->SetObjectType(GameObjectType::NormalObject);
 	shared_ptr<Transform> kachujin_transform = make_shared<Transform>();
 
-	shared_ptr<GameObject> Ely = make_shared<GameObject>();
-	Ely->SetObjectType(GameObjectType::NormalObject);
-	shared_ptr<Transform> Ely_transform = make_shared<Transform>();
+	shared_ptr<GameObject> Dreyar = make_shared<GameObject>();
+	Dreyar->SetObjectType(GameObjectType::NormalObject);
+	shared_ptr<Transform> Dreyar_transform = make_shared<Transform>();
 
 	shared_ptr<GameObject> particleSystem = make_shared<GameObject>();
 	particleSystem->SetObjectType(GameObjectType::NormalObject);
@@ -404,7 +408,24 @@ void SceneManager::LoadTestScene()
 		tower->AddComponent(boxCollider);
 		tower->SetName(L"tower");
 	}
-	
+	{
+		house_transfrom->SetPosition(Vec3(0.f, 0.f, 130.f));
+		house_transfrom->SetLocalScale(Vec3(0.005f));
+		house->AddComponent(house_transfrom);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"HouseModel"));
+		meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
+		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		meshRenderer->AddRenderPass();
+		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::STATIC_MESH_RENDER);
+		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(house_transfrom);
+		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		house->AddComponent(meshRenderer);
+		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		house->AddComponent(boxCollider);
+		house->SetName(L"house");
+	}
 	{
 		kachujin_transform->SetPosition(GP.centerPos - Vec3(2.0f, 0.0f, 0.0f));
 		kachujin_transform->SetLocalScale(Vec3(0.01f));
@@ -454,20 +475,20 @@ void SceneManager::LoadTestScene()
 		light->SetName(L"MainLight");
 	}
 	{
-		Ely_transform->SetPosition(GP.centerPos);
-		Ely_transform->SetLocalScale(Vec3(0.001f));
-		Ely->AddComponent(Ely_transform);
+		Dreyar_transform->SetPosition(GP.centerPos);
+		Dreyar_transform->SetLocalScale(Vec3(0.001f));
+		Dreyar->AddComponent(Dreyar_transform);
 		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-		meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"Ely"));
+		meshRenderer->SetModel(RESOURCE.GetResource<Model>(L"Dreyar"));
 		meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
 		meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 		meshRenderer->AddRenderPass();
 		meshRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
 		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
-		meshRenderer->GetRenderPasses()[0]->SetTransform(Ely_transform);
+		meshRenderer->GetRenderPasses()[0]->SetTransform(Dreyar_transform);
 		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-		Ely->AddComponent(meshRenderer);
-		Ely->SetName(L"Ely_OBJ");
+		Dreyar->AddComponent(meshRenderer);
+		Dreyar->SetName(L"Dreyar_OBJ");
 	}
 	{
 		shared_ptr<ParticleSystem> particleComponent = make_shared<ParticleSystem>();
@@ -487,14 +508,14 @@ void SceneManager::LoadTestScene()
 	_activeScene->AddGameObject(cube);
 	_activeScene->AddGameObject(tessellation_cylinder);
 	//_activeScene->AddGameObject(grid);
-	_activeScene->AddGameObject(tower);
+	_activeScene->AddGameObject(house);
 	_activeScene->AddGameObject(quad_ui);
 	//_activeScene->AddGameObject(uiButton);
 	_activeScene->AddGameObject(stencil_cube1);
 	_activeScene->AddGameObject(stencil_cube2);
 	//_activeScene->AddGameObject(quad);
 	_activeScene->AddGameObject(Kachujin);
-	_activeScene->AddGameObject(Ely);
+	_activeScene->AddGameObject(Dreyar);
 	_activeScene->AddGameObject(terrain);
 	_activeScene->AddGameObject(particleSystem);
 	//_activeScene->AddGameObject(Ch4);

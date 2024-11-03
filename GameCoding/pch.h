@@ -18,6 +18,11 @@ using namespace std;
 #include <windows.h>
 #include <assert.h>
 
+// ImGUI
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+
 // DX
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -46,6 +51,7 @@ using namespace Microsoft::WRL;
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "RenderManager.h"
+#include "GUIManager.h"
 
 // COMPONENT (have to add when create new Monobehaviour)
 #include "Component.h"
@@ -84,3 +90,4 @@ using namespace Microsoft::WRL;
 #define RESOURCE					ResourceManager::GetInstance()
 #define SCENE						SceneManager::GetInstance()
 #define RENDER						RenderManager::GetInstance()
+#define GUI							GUIManager::GetInstance()

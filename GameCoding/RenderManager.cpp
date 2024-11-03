@@ -57,7 +57,7 @@ void RenderManager::Update()
 	GetRenderableObject();
 	Render();
 
-	GP.SwapChain();
+	/*GP.SwapChain();*/
 }
 
 void RenderManager::GetRenderableObject()

@@ -16,18 +16,27 @@ Converter::~Converter()
 
 }
 
-void Converter::init(HWND hwnd)
+void Converter::init(HWND hwnd, ComPtr<ID3D11Device> device, ComPtr<ID3D11DeviceContext> deviceContext)
 {
 	_hwnd = hwnd;
-	CreateDeviceAndSwapChain();
+	_device = device;
+	_deviceContext = deviceContext;
 }
 
 void Converter::ReadAssetFile(wstring file)
 {
 	wstring fileStr = _assetPath + file;
 
+	char buffer[512];
+	sprintf_s(buffer, "Trying to load file: %s\n", Utils::ToString(fileStr).c_str());
+	OutputDebugStringA(buffer);
+
 	auto p = std::filesystem::path(fileStr);
-	assert(std::filesystem::exists(p));
+	if (!std::filesystem::exists(p)) {
+		sprintf_s(buffer, "File does not exist: %s\n", Utils::ToString(fileStr).c_str());
+		OutputDebugStringA(buffer);
+		return;
+	}
 
 	_scene = _importer->ReadFile(
 		Utils::ToString(fileStr),
@@ -37,6 +46,12 @@ void Converter::ReadAssetFile(wstring file)
 		aiProcess_GenNormals |
 		aiProcess_CalcTangentSpace
 	);
+
+	if (!_scene) {
+		sprintf_s(buffer, "Assimp error: %s\n", _importer->GetErrorString());
+		OutputDebugStringA(buffer);
+		return;
+	}
 
 	assert(_scene != nullptr);
 }
@@ -94,47 +109,6 @@ void Converter::ExportAnimationData(wstring savePath, uint32 index)
 	assert(index < _scene->mNumAnimations);
 	shared_ptr<asAnimation> animation = ReadAnimationData(_scene->mAnimations[index]);
 	WriteAnimationData(animation, finalPath);
-}
-
-void Converter::CreateDeviceAndSwapChain()
-{
-	DXGI_SWAP_CHAIN_DESC desc;
-	ZeroMemory(&desc, sizeof(desc));
-	{
-		int32 _width = 800;
-		int32 _height = 600;
-		desc.BufferDesc.Width = _width;
-		desc.BufferDesc.Height = _height;
-		desc.BufferDesc.RefreshRate.Numerator = 60;
-		desc.BufferDesc.RefreshRate.Denominator = 1;
-		desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
-		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		desc.BufferCount = 1;
-		desc.OutputWindow = _hwnd;
-		desc.Windowed = true;
-		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	}
-
-	HRESULT hr = ::D3D11CreateDeviceAndSwapChain(
-		nullptr,
-		D3D_DRIVER_TYPE_HARDWARE,
-		nullptr,
-		0,
-		nullptr,
-		0,
-		D3D11_SDK_VERSION,
-		&desc,
-		_swapChain.GetAddressOf(),
-		_device.GetAddressOf(),
-		nullptr,
-		_deviceContext.GetAddressOf()
-	);
-
-	CHECK(hr);
 }
 
 void Converter::ReadModelData(aiNode* node, int32 index, int32 parent)

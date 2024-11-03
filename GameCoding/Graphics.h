@@ -74,6 +74,7 @@ public:
 	ComPtr<ID3D11Device> GetDevice() { return _device; }
 	ComPtr<ID3D11DeviceContext> GetDeviceContext() { return _deviceContext; }
 	ComPtr<ID3D11ShaderResourceView> GetTestSRV() { return _offscreenSRV; }
+	HWND GetWindowHandle() { return _hwnd; }
 	int _viewWidth = 0;
 	int _viewHeight = 0;
 

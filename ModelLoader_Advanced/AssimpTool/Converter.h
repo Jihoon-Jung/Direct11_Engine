@@ -6,16 +6,13 @@ class Converter
 public:
 	Converter();
 	~Converter();
-	void init(HWND hwnd);
+	void init(HWND hwnd, ComPtr<ID3D11Device> device, ComPtr<ID3D11DeviceContext> deviceContext);
 public:
 	void ReadAssetFile(wstring file);
 	void ExportModelData(wstring savePath);
 	void ExportMaterialData(wstring savePath);
 	void ExportAnimationData(wstring savePath, uint32 index = 0);
-	bool DetectRightHandedCoordinateSystem(const aiMatrix4x4& matrix);
-public:
-	//DX
-	void CreateDeviceAndSwapChain();
+
 private:
 	void ReadModelData(aiNode* node, int32 index, int32 parent);
 	void ReadMeshData(aiNode* node, int32 bone);

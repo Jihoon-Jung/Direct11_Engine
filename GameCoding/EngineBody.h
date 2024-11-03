@@ -32,6 +32,5 @@ private:
 	TimeManager& _timeManager;
 	SceneManager& _sceneManager;
 	ResourceManager& _resourceManager;
-	shared_ptr<RenderManager> _renderManager;
 
 };

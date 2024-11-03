@@ -8,11 +8,13 @@
 // 전역 변수:
 HINSTANCE hInst;
 HWND hWnd;
-
+AssimpTool tool;
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -26,9 +28,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance(hInstance, nCmdShow))
         return FALSE;
 
-    //EngineMain engine;
-    //Engine engine;
-    AssimpTool tool;
     tool.Init(hWnd);
 
 
@@ -74,7 +73,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = L"GameCoding";
+    wcex.lpszClassName = L"FBX_CONVERTER";
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
@@ -92,13 +91,41 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+    /*hInst = hInstance;
 
     RECT windowRect = { 0, 0, 800, 600 };
-    ::AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, false);
+    DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    ::AdjustWindowRect(&windowRect, style, false);
 
-    hWnd = CreateWindowW(L"GameCoding", L"Client", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, nullptr, nullptr, hInstance, nullptr);
+    hWnd = CreateWindowW(L"FBX_CONVERTER", L"FBX_CONVERTER", style,
+        CW_USEDEFAULT, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
+        nullptr, nullptr, hInstance, nullptr);
+
+    if (!hWnd)
+    {
+        return FALSE;
+    }
+
+    ::ShowWindow(hWnd, nCmdShow);
+    ::UpdateWindow(hWnd);
+
+    return TRUE;*/
+    hInst = hInstance;
+
+    // 작업 영역(작업 표시줄 제외) 크기 가져오기
+    RECT workArea;
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+    int workWidth = workArea.right - workArea.left;
+    int workHeight = workArea.bottom - workArea.top;
+
+    tool.SetScreenSize(workWidth, workHeight);
+    RECT windowRect = { 0, 0, workWidth, workHeight };
+    DWORD style = WS_OVERLAPPEDWINDOW;
+    ::AdjustWindowRect(&windowRect, style, false);
+
+    hWnd = CreateWindowW(L"FBX_CONVERTER", L"FBX_CONVERTER", style,
+        workArea.left, workArea.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
+        nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
     {
@@ -110,6 +137,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     return TRUE;
 }
+
 
 //
 //  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -123,6 +151,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        return true;
+
     switch (message)
     {
     case WM_COMMAND:

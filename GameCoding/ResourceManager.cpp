@@ -16,9 +16,9 @@ void ResourceManager::AddResource()
 	shared_ptr<Mesh> terrain_mesh = make_shared<Mesh>();
 
 	shared_ptr<Model> tower_model = make_shared<Model>();
+	shared_ptr<Model> house_model = make_shared<Model>();
 	shared_ptr<Model> kachujin_Anim = make_shared<Model>();
-
-	shared_ptr<Model> Ely_Anim = make_shared<Model>();
+	shared_ptr<Model> Dreyar_Anim = make_shared<Model>();
 
 	shared_ptr<Texture> texture = make_shared<Texture>();
 	shared_ptr<Texture> normalMap = make_shared<Texture>();
@@ -466,6 +466,12 @@ void ResourceManager::AddResource()
 	tower_model->SetName(L"TowerModel");
 	RESOURCE.AddResource(tower_model->GetName(), tower_model);
 
+	house_model->ReadModel(L"House/House");
+	house_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
+	house_model->ReadMaterial(L"House/House");
+	house_model->SetName(L"HouseModel");
+	RESOURCE.AddResource(house_model->GetName(), house_model);
+
 
 	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
 	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
@@ -477,14 +483,14 @@ void ResourceManager::AddResource()
 	kachujin_Anim->SetName(L"Kachujin");
 	RESOURCE.AddResource(kachujin_Anim->GetName(), kachujin_Anim);
 
-	Ely_Anim->ReadModel(L"Dreyar/Dreyar");
-	Ely_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
-	Ely_Anim->ReadMaterial(L"Dreyar/Dreyar");
-	Ely_Anim->ReadAnimation(L"Dreyar/Kick");
-	Ely_Anim->ReadAnimation(L"Dreyar/Fall");
-	Ely_Anim->ReadAnimation(L"Dreyar/Dance");
-	Ely_Anim->CreateTexture();
-	Ely_Anim->SetName(L"Ely");
-	RESOURCE.AddResource(Ely_Anim->GetName(), Ely_Anim);
+	Dreyar_Anim->ReadModel(L"Dreyar/Dreyar");
+	Dreyar_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
+	Dreyar_Anim->ReadMaterial(L"Dreyar/Dreyar");
+	Dreyar_Anim->ReadAnimation(L"Dreyar/Kick");
+	Dreyar_Anim->ReadAnimation(L"Dreyar/Fall");
+	Dreyar_Anim->ReadAnimation(L"Dreyar/Dance");
+	Dreyar_Anim->CreateTexture();
+	Dreyar_Anim->SetName(L"Dreyar");
+	RESOURCE.AddResource(Dreyar_Anim->GetName(), Dreyar_Anim);
 
 }
