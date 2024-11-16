@@ -45,6 +45,11 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::Picking()
 {
+	// ImGui 윈도우가 마우스 입력을 캡처하고 있는지 확인
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse)
+		return;
+
 	Matrix worldMatrix;
 	shared_ptr<GameObject> camera = Find(L"MainCamera");
 	shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
@@ -53,7 +58,7 @@ void Scene::Picking()
 	Matrix viewMatrix = cameraComponent->GetViewMatrix();
 	shared_ptr<GameObject> billboard_Terrain;
 
-	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON))
+	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON) && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
 	{
 		firstClickedMouseX = INPUT.GetMousePos().x;
 		firstClickedMouseY = INPUT.GetMousePos().y;
@@ -61,7 +66,7 @@ void Scene::Picking()
 		const auto& gameObjects = GetGameObjects();
 
 		float minDistance = FLT_MAX;
-		
+		picked = nullptr;
 
 		for (auto& gameObject : gameObjects)
 		{
@@ -119,40 +124,45 @@ void Scene::Picking()
 			}
 			
 		}
-		if (Find(L"Billboard") == nullptr)
-			AddGameObject(_billboard_obj);
+		/*if (Find(L"Billboard") == nullptr)
+			AddGameObject(_billboard_obj);*/
 	}
 
-	if (INPUT.GetButton(KEY_TYPE::LBUTTON))
-	{
-		if (picked != nullptr)
-		{
-			int32 currentMouseX = INPUT.GetMousePos().x;
-			int32 currentMouseY = INPUT.GetMousePos().y;
+	//if (INPUT.GetButton(KEY_TYPE::LBUTTON))
+	//{
+	//	if (picked != nullptr)
+	//	{
+	//		int32 currentMouseX = INPUT.GetMousePos().x;
+	//		int32 currentMouseY = INPUT.GetMousePos().y;
 
-			Vec3 startScreenPos = Vec3(firstClickedMouseX, firstClickedMouseY, 0.0f);
-			Vec3 endScreenPos = Vec3(currentMouseX, currentMouseY, 0.0f);
+	//		Vec3 startScreenPos = Vec3(firstClickedMouseX, firstClickedMouseY, 0.0f);
+	//		Vec3 endScreenPos = Vec3(currentMouseX, currentMouseY, 0.0f);
 
-			Vec3 startWorldPos = GP.GetViewport().Unproject(startScreenPos, worldMatrix, viewMatrix, projectionMatrix);
-			Vec3 endWorldPos = GP.GetViewport().Unproject(endScreenPos, worldMatrix, viewMatrix, projectionMatrix);
-			Vec3 worldMoveRatio = endWorldPos - startWorldPos;
+	//		Vec3 startWorldPos = GP.GetViewport().Unproject(startScreenPos, worldMatrix, viewMatrix, projectionMatrix);
+	//		Vec3 endWorldPos = GP.GetViewport().Unproject(endScreenPos, worldMatrix, viewMatrix, projectionMatrix);
+	//		Vec3 worldMoveRatio = endWorldPos - startWorldPos;
 
-			picked->transform()->SetLocalPosition(picked->transform()->GetLocalPosition() + worldMoveRatio * 50.0f);
+	//		picked->transform()->SetLocalPosition(picked->transform()->GetLocalPosition() + worldMoveRatio * 50.0f);
 
-			// Update first clicked position for next frame
-			firstClickedMouseX = currentMouseX;
-			firstClickedMouseY = currentMouseY;
-		}
-			
+	//		// Update first clicked position for next frame
+	//		firstClickedMouseX = currentMouseX;
+	//		firstClickedMouseY = currentMouseY;
+	//	}
+	//		
 
-	}
+	//}
 	
 	if (INPUT.GetButtonUp(KEY_TYPE::LBUTTON))
 	{
 		firstClickedMouseX = 0;
 		firstClickedMouseY = 0;
-		picked = nullptr;
+		//picked = nullptr;
 	}
+	// ESC 키를 누르면 선택 해제하도록 추가 (선택사항)
+    if (INPUT.GetButtonDown(KEY_TYPE::ESC))
+    {
+        picked = nullptr;
+    }
 }
 
 void Scene::UIPicking()

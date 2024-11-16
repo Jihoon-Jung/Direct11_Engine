@@ -36,17 +36,23 @@ void RenderManager::Init()
 
 void RenderManager::Update()
 {
-	_lightRotationAngle += 0.01f * TIME.GetDeltaTime();
-	tmp += 0.5f * TIME.GetDeltaTime();
-	Vec3 lightLocalRotation = _lightObject->transform()->GetRevolutionRotation();
-	lightLocalRotation.y += _lightRotationAngle;
-	Vec3 lightR = _lightObject->transform()->GetLocalRotation();
-	lightR.y += tmp;
+	const float ROTATION_SPEED = 30.0f;  // 초당 회전 각도
+	float deltaAngle = ROTATION_SPEED * TIME.GetDeltaTime();
 
-	_lightObject->transform()->SetRevolutionRotation(lightLocalRotation);
+	// 공전 중심점과 회전 각도 설정
 	_lightObject->transform()->SetRevolutionCenter(GP.centerPos);
-	_lightObject->transform()->SetRotation(lightR);
+	_lightObject->transform()->RotateAround(
+		GP.centerPos,         // 공전 중심
+		Vec3::Up,            // 회전 축 (Y축)
+		deltaAngle           // 이번 프레임의 회전 각도
+	);
+
+	//// 자전
+	//Vec3 localRotation(0.0f, deltaAngle, 0.0f);
+	//_lightObject->transform()->SetLocalRotation(localRotation);
+
 	
+
 	ClearRenderObject();
 
 	GP.SetRenderTarget();

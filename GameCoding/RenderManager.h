@@ -35,6 +35,7 @@ public:
 	void RenderAllGameObject();
 	void ClearRenderObject();
 	bool GetShadowMapFlag() { return _drawShadowMapFlag; }
+
 private:
 	shared_ptr<Pipeline> _pipeline;
 	PipelineInfo _pipelineInfo;
@@ -45,13 +46,13 @@ private:
 
 	shared_ptr<GameObject> _terrainObject;
 	shared_ptr<GameObject> _lightObject;
+	float _totalRotationTime = 0.0f;
 
-	float _lightRotationAngle;
-	float tmp;
 	KeyframeDesc _keyframeDesc;
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
 	FilterType _filterType = FilterType::SHADOW_MAP;
 	bool _drawShadowMapFlag = false;
+
 };
 

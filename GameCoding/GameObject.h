@@ -32,7 +32,7 @@ public:
 	void SetParent(shared_ptr<GameObject> parent);
 	void AddChild(shared_ptr<GameObject> child);
 	void SetObjectType(GameObjectType type) { _type = type; }
-	
+	vector<shared_ptr<Component>>& GetComponents() { return _components; }
 	GameObjectType GetObjectType() { return _type; }
 	template <typename T>
 	shared_ptr<T> GetComponent()

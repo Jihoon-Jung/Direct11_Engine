@@ -48,7 +48,7 @@ public:
 		CreateOffscreenRenderTarget();
 		CreateShadowMapRenderTarget();
 		CreateDepthStencilView();
-		CreateViewport(width, height, 0, 0, 0, 1);
+		CreateViewport(width * (7.0f/10.0f), height * (6.0f/10.0f), width * (1.0f/10.0f), height * (3.0f/100.0f), 0, 1);
 		
 	}
 	int GetViewWidth() { return _viewWidth; }

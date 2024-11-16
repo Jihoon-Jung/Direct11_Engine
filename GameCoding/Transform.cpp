@@ -17,7 +17,7 @@ void Transform::Update()
 {
 	UpdateTransform();
 }
-Vec3 ToEulerAngles(Quaternion q)
+Vec3 Transform::ToEulerAngles(Quaternion q)
 {
 	Vec3 angles;
 
@@ -38,117 +38,52 @@ Vec3 ToEulerAngles(Quaternion q)
 
 	return angles;
 }
-//void Transform::UpdateTransform()
-//{
-//	// 스케일 행렬 생성
-//	Matrix scale = Matrix::CreateScale(_localScale);
-//
-//	// 쿼터니언을 사용한 회전 행렬 생성
-//	Quaternion rotationQuat = Quaternion::CreateFromYawPitchRoll(
-//		DirectX::XMConvertToRadians(_localRotation.y),  // Yaw
-//		DirectX::XMConvertToRadians(_localRotation.x),  // Pitch
-//		DirectX::XMConvertToRadians(_localRotation.z)   // Roll
-//	);
-//	Matrix rotation = Matrix::CreateFromQuaternion(rotationQuat);  // 쿼터니언을 회전 행렬로 변환
-//
-//	// 위치 행렬 생성
-//	Matrix position = Matrix::CreateTranslation(_localPosition);
-//
-//	// 최종 변환 행렬
-//	_localMat = scale * rotation * position;
-//
-//	// 부모가 있으면 월드 행렬을 부모의 월드 행렬과 곱함
-//	if (HasParent())
-//	{
-//		_worldMat = _localMat * _parent->GetWorldMatrix();
-//	}
-//	else
-//	{
-//		_worldMat = _localMat;
-//	}
-//
-//	// 월드 행렬에서 스케일, 회전(쿼터니언), 위치 추출
-//	Quaternion worldQuat;
-//	_worldMat.Decompose(_worldScale, worldQuat, _worldPosition);  // world matrix로부터 s, r, t 분리
-//
-//	// 월드 회전 각도를 오일러 각도로 변환 (필요한 경우)
-//	_worldRotation = ToEulerAngles(worldQuat);  // 필요한 경우, 오일러 각으로 변환
-//
-//	// 자식들에 대해 재귀적으로 변환 적용
-//	for (const shared_ptr<Transform>& child : _children)
-//	{
-//		child->UpdateTransform();
-//	}
-//
-//	// 셰이더에 전달할 상수 버퍼 업데이트
-//	_transformBuffer = make_shared<Buffer>();
-//	TransformBuffer _transformBufferData;
-//
-//	// 월드 행렬의 역행렬과 전치 행렬 계산
-//	Matrix inverseWorld = _worldMat.Invert();
-//	_transformBufferData.worldMatrix = _worldMat;
-//	_transformBufferData.inverseTransposeWorldMatrix = inverseWorld.Transpose();
-//
-//	// 상수 버퍼 생성 및 데이터 복사
-//	_transformBuffer->CreateConstantBuffer<TransformBuffer>();
-//	_transformBuffer->CopyData(_transformBufferData);
-//}
+
 void Transform::UpdateTransform()
 {
-	// 스케일 행렬 생성
-	Matrix scale = Matrix::CreateScale(_localScale);
+	// 1. 로컬 변환 계산
+    Matrix scale = Matrix::CreateScale(_localScale);
+    Matrix rotation = Matrix::CreateFromQuaternion(_qtLocalRotation);
+    Matrix localTranslation = Matrix::CreateTranslation(_localPosition);
+    Matrix localTransform = scale * rotation * localTranslation;
+    _localMat = localTransform;
 
-	// 자전 회전 행렬 생성
-	Quaternion rotationQuat = Quaternion::CreateFromYawPitchRoll(
-		XMConvertToRadians(_localRotation.y),
-		XMConvertToRadians(_localRotation.x),
-		XMConvertToRadians(_localRotation.z)
-	);
-	Matrix rotation = Matrix::CreateFromQuaternion(rotationQuat);
+    // 2. 기본 월드 변환 계산
+    if (HasParent())
+    {
+        _worldMat = _localMat * _parent->GetWorldMatrix();
+    }
+    else
+    {
+        _worldMat = _localMat;
+    }
 
-	// 공전 변환 계산
-	Matrix translationToOrigin = Matrix::CreateTranslation(-_revolutionCenter);
-	Quaternion revolutionQuat = Quaternion::CreateFromYawPitchRoll(
-		XMConvertToRadians(_revolutionRotation.y),
-		XMConvertToRadians(_revolutionRotation.x),
-		XMConvertToRadians(_revolutionRotation.z)
-	);
-	Matrix revolutionRotation = Matrix::CreateFromQuaternion(revolutionQuat);
-	Matrix translationBack = Matrix::CreateTranslation(_revolutionCenter);
+    // 3. 공전이 있다면 월드 공간에서 적용
+    if (_revolutionInfo.isActive)
+    {
+        Matrix toOrigin = Matrix::CreateTranslation(-_revolutionInfo.center);
+        Matrix rotation = Matrix::CreateFromAxisAngle(
+            _revolutionInfo.axis,
+            XMConvertToRadians(_revolutionInfo.angle)
+        );
+        Matrix fromOrigin = Matrix::CreateTranslation(_revolutionInfo.center);
 
-	// 공전 변환 행렬 계산
-	Matrix revolutionMatrix = translationToOrigin * revolutionRotation * translationBack;
+        // 공전은 월드 공간에서 적용
+        _worldMat = _worldMat * toOrigin * rotation * fromOrigin;
+    }
 
-	// 로컬 위치 이동 행렬
-	Matrix translationWithLocalPosition = Matrix::CreateTranslation(_localPosition);
+    // 4. 최종 월드 변환값 추출
+    Quaternion worldQuat;
+    _worldMat.Decompose(_worldScale, worldQuat, _worldPosition);
+    _worldRotation = ToEulerAngles(worldQuat);
 
-	// 전체 변환 행렬 계산
-	_localMat = scale * rotation * translationWithLocalPosition * revolutionMatrix;
+    // 자식 업데이트
+    for (const shared_ptr<Transform>& child : _children)
+    {
+        child->UpdateTransform();
+    }
 
-	// 부모 변환 적용
-	if (HasParent())
-	{
-		_worldMat = _localMat * _parent->GetWorldMatrix();
-	}
-	else
-	{
-		_worldMat = _localMat;
-	}
-
-	// 월드 변환에서 스케일, 회전, 위치 추출
-	Quaternion worldQuat;
-	_worldMat.Decompose(_worldScale, worldQuat, _worldPosition);
-
-	// 월드 회전 정보 저장
-	_worldRotation = ToEulerAngles(worldQuat);
-
-	// 자식 노드들 업데이트
-	for (const shared_ptr<Transform>& child : _children)
-	{
-		child->UpdateTransform();
-	}
-
-    // 12. 셰이더에 전달할 상수 버퍼 업데이트
+	// 12. 셰이더에 전달할 상수 버퍼 업데이트
     _transformBuffer = make_shared<Buffer>();
     TransformBuffer _transformBufferData;
 
@@ -163,13 +98,45 @@ void Transform::UpdateTransform()
 }
 
 
-
-
 bool Transform::HasParent()
 {
 	if (_parent != nullptr)
 		return true;
 	return false;
+}
+
+void Transform::RotateAround(const Vec3& center, const Vec3& axis, float angle)
+{
+    // 1. 현재 월드 위치 저장
+    Vec3 worldPos = GetWorldPosition();
+
+    // 2. 중심점 기준 회전 행렬 생성
+    Matrix toOrigin = Matrix::CreateTranslation(-center);
+    Matrix rotation = Matrix::CreateFromAxisAngle(axis, XMConvertToRadians(angle));
+    Matrix fromOrigin = Matrix::CreateTranslation(center);
+
+    // 3. 위치에 회전 적용
+    Matrix transform = toOrigin * rotation * fromOrigin;
+    Vec3 newWorldPos = Vec3::Transform(worldPos, transform);
+
+    // 4. 새로운 위치를 로컬 공간으로 변환
+    if (HasParent())
+    {
+        Matrix parentInverse = _parent->GetWorldMatrix().Invert();
+        _localPosition = Vec3::Transform(newWorldPos, parentInverse);
+    }
+    else
+    {
+        _localPosition = newWorldPos;  // 부모가 없으면 월드 위치가 곧 로컬 위치
+    }
+
+    // 5. 회전도 적용
+    Quaternion currentRotation = _qtLocalRotation;
+    Quaternion additionalRotation = Quaternion::CreateFromAxisAngle(axis, XMConvertToRadians(angle));
+    _qtLocalRotation = currentRotation * additionalRotation;
+
+    // 6. Transform 업데이트
+    UpdateTransform();
 }
 
 void Transform::SetPosition(const Vec3& position)
@@ -193,12 +160,27 @@ void Transform::SetRotation(const Vec3& rotation)
 	{
 		Matrix inverseWorldMatrix = _parent->GetWorldMatrix().Invert();
 		Vec3 convertedRotation = Vec3::TransformNormal(rotation, inverseWorldMatrix);
-		_localRotation = convertedRotation;
+
+		// 변환된 오일러 각도를 쿼터니언으로 변환
+		float pitch = XMConvertToRadians(convertedRotation.x);
+		float yaw = XMConvertToRadians(convertedRotation.y);
+		float roll = XMConvertToRadians(convertedRotation.z);
+
+		_qtLocalRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 	}
 	else
 	{
-		_localRotation = rotation;
+		float pitch = XMConvertToRadians(rotation.x);
+		float yaw = XMConvertToRadians(rotation.y);
+		float roll = XMConvertToRadians(rotation.z);
+
+		_qtLocalRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 	}
+	UpdateTransform();
+}
+void Transform::SetQTRotation(const Quaternion& rotation)
+{
+	_qtLocalRotation = rotation;
 	UpdateTransform();
 }
 

@@ -12,10 +12,19 @@ SphereCollider::~SphereCollider()
 
 void SphereCollider::Update()
 {
-	_boundingSphere.Center = GetTransform()->GetWorldPosition();
+	/*_boundingSphere.Center = GetTransform()->GetWorldPosition();
 
 	Vec3 scale = GetTransform()->GetWorldScale();
-	_boundingSphere.Radius = _radius * max(max(scale.x, scale.y),scale.z);
+	_boundingSphere.Radius = _radius * max(max(scale.x, scale.y),scale.z);*/
+	shared_ptr<Transform> transform = GetTransform();
+
+	// 중심점 업데이트
+	_boundingSphere.Center = transform->GetWorldPosition();
+
+	// 크기 업데이트 (로컬 스케일 * 콜라이더 스케일)
+	Vec3 scale = transform->GetWorldScale() * _scale;
+	// 구체는 가장 큰 스케일 값을 반지름으로 사용
+	_boundingSphere.Radius = max(max(scale.x, scale.y), scale.z) * 0.5f;
 }
 
 bool SphereCollider::Intersects(Ray& ray, OUT float& distance)

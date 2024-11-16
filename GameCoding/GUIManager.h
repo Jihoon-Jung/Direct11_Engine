@@ -16,5 +16,31 @@ public:
 	void RenderUI_Start();
 	void RenderUI();
 	void RenderUI_End();
+	void RenderGuizmo();
+
+private:
+	shared_ptr<GameObject> _selectedObject = nullptr;
+	bool _isColliderEditMode = false;  // 콜라이더 편집 모드인지 여부
+	bool _isCameraMoving = false;
+	Vec3 _cameraStartPos;
+	Vec3 _cameraTargetPos;
+	Vec3 _cameraStartRot;
+	Vec3 _cameraTargetRot;
+	float _cameraMoveTime = 0.0f;
+	const float _cameraMoveSpeed = 3.0f;  // 이동 속도 (값이 클수록 빠름)
+
+	// 현재 회전 중인 축을 추적
+	enum RotationAxis
+	{
+		NONE = -1,
+		X_AXIS = 0,
+		Y_AXIS = 1,
+		Z_AXIS = 2
+	};
+	ImGuizmo::OPERATION currentGizmoOperation = ImGuizmo::TRANSLATE;
+	ImGuizmo::MODE currentGizmoMode = ImGuizmo::LOCAL;
+	RotationAxis currentRotationAxis = NONE;
+
+	bool _rotationUpdated = false;
 };
 

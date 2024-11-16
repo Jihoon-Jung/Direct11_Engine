@@ -38,8 +38,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance(hInstance, nCmdShow))
         return FALSE;
 
-    EngineBody engine;
-    engine.Init(hWnd, GWinSizeX, GWinSizeY);
+    
+    //EngineBody engine;
+    ENGINE.Init(hWnd, GWinSizeX, GWinSizeY);
 
     MSG msg = {};
 
@@ -76,8 +77,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 elapsedTime = 0.0f;
             }
 
-            engine.Update();
-            engine.Render();
+            ENGINE.Update();
+            ENGINE.Render();
         }
     }
 
@@ -109,6 +110,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
     hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
+    InitializeWindowSize();
     RECT windowRect = { 0, 0, GWinSizeX, GWinSizeY };
     ::AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, false);
 

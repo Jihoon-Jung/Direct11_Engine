@@ -15,7 +15,7 @@ void MoveObject::Start()
 
 void MoveObject::Update()
 {
-    if (INPUT.GetButton(KEY_TYPE::RBUTTON) && INPUT.GetButton(KEY_TYPE::KEY_CTRL))
+    if (INPUT.GetButton(KEY_TYPE::RBUTTON))
     {
         if (!_isResetMouse)
         {
@@ -45,36 +45,31 @@ void MoveObject::Update()
         POINT cursorPos;
         if (GetCursorPos(&cursorPos))
         {
-            // 마우스 이동 차이 계산
             float deltaX = static_cast<float>(cursorPos.x - _prevMousePos.x);
             float deltaY = static_cast<float>(cursorPos.y - _prevMousePos.y);
 
             if (abs(deltaX) > 1000.f || abs(deltaY) > 1000.f)
             {
-                // 이전 마우스 위치 업데이트만 하고 return
                 _prevMousePos = cursorPos;
                 return;
             }
 
-            // 마우스 움직임에 따른 회전 적용 (Yaw 및 Pitch)
-            Vec3 rotation = GetTransform()->GetLocalRotation();
+            float MOUSE_SENSITIVITY = 0.3f;
 
-            float MOUSE_SENSITIVITY_X = 10.1f;
-            float MOUSE_SENSITIVITY_Y = 10.1f;
+            // 현재 누적된 각도 업데이트
+            _accumulatedRotX += deltaY * MOUSE_SENSITIVITY;
+            _accumulatedRotY += deltaX * MOUSE_SENSITIVITY;
 
-            // Yaw 회전 적용 (좌우 회전)
-            rotation.y += deltaX * MOUSE_SENSITIVITY_X * dt;
-
-            // Pitch 회전 적용 (상하 회전)
-            rotation.x += deltaY * MOUSE_SENSITIVITY_Y * dt;
-
-            // 피치 값 제한하여 카메라가 뒤집히지 않도록 함
-            //rotation.x = clamp(rotation.x, -XM_PIDIV2, XM_PIDIV2);
+            // X축 회전(Pitch) 제한
+            _accumulatedRotX = Clamp(_accumulatedRotX, -89.0f, 89.0f);
 
             // 회전 적용
-            GetTransform()->SetRotation(rotation);
+            float pitch = XMConvertToRadians(_accumulatedRotX);
+            float yaw = XMConvertToRadians(_accumulatedRotY);
 
-            // 이전 마우스 위치 업데이트
+            Quaternion newRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
+            GetTransform()->SetQTRotation(newRotation);
+
             _prevMousePos = cursorPos;
         }
         else
@@ -85,7 +80,10 @@ void MoveObject::Update()
         }
     }
     else
+    {
         _isResetMouse = false;
+        _isFirstMove = true;
+    }
 }
 
 void MoveObject::ResetMouse()
@@ -95,6 +93,13 @@ void MoveObject::ResetMouse()
     _prevMousePos = cursorPos;
 }
 
+void MoveObject::InitializeRotationFromTransform()
+{
+    // 현재 Transform의 회전값을 가져와서 누적값 초기화
+    Quaternion currentRotation = GetTransform()->GetQTRotation();
+    Vec3 eulerAngles = GetTransform()->ToEulerAngles(currentRotation);
 
-
-
+    // 라디안을 도(degree)로 변환
+    _accumulatedRotX = XMConvertToDegrees(eulerAngles.x);
+    _accumulatedRotY = XMConvertToDegrees(eulerAngles.y);
+}

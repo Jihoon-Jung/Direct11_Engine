@@ -441,18 +441,19 @@ void SceneManager::LoadTestScene()
 		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 		Kachujin->AddComponent(meshRenderer);
 		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 		Kachujin->AddComponent(boxCollider);
 		Kachujin->SetName(L"Kachujin_OBJ");
 	}
 	{
-		float angle = 50.0f; // °¢µµ ´ÜÀ§´Â µµ(degrees)
-		float r = 50.0f; // Bounding SphereÀÇ ¹ÝÁö¸§À» 250À¸·Î ¼³Á¤ÇÔ. (³Ê¹« Å©¸é shadow map¿¡ ¹®Á¦°¡ »ý°Ü¼­ ÀÓÀÇ·Î ÀÛ°Ô ¸¸µë)
+		float angle = 50.0f; // ê°ë„ ë‹¨ìœ„ëŠ” ë„(degrees)
+		float r = 50.0f; // Bounding Sphereì˜ ë°˜ì§€ë¦„ì„ 250ìœ¼ë¡œ ì„¤ì •í•¨. (ë„ˆë¬´ í¬ë©´ shadow mapì— ë¬¸ì œê°€ ìƒê²¨ì„œ ìž„ì˜ë¡œ ìž‘ê²Œ ë§Œë“¬)
 		float x, y, z;
 
-		// °¢µµ¸¦ ¶óµð¾ÈÀ¸·Î º¯È¯
+		// ê°ë„ë¥¼ ë¼ë””ì•ˆìœ¼ë¡œ ë³€í™˜
 		float angleRad = angle * XM_PI / 180.0f;
 
-		// º¯ x¿Í y¸¦ °è»ê
+		// ë³€ xì™€ yë¥¼ ê³„ì‚°
 		x = GP.centerPos.x + (r * cos(angleRad));
 		y = GP.centerPos.y + (r * sin(angleRad));
 		z = GP.centerPos.z + 0.0f;
@@ -471,7 +472,7 @@ void SceneManager::LoadTestScene()
 		meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
 		meshRenderer->GetRenderPasses()[0]->SetTransform(light_transform);
 		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-		//light->AddComponent(meshRenderer);
+		light->AddComponent(meshRenderer);
 		light->SetName(L"MainLight");
 	}
 	{
@@ -488,6 +489,9 @@ void SceneManager::LoadTestScene()
 		meshRenderer->GetRenderPasses()[0]->SetTransform(Dreyar_transform);
 		meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 		Dreyar->AddComponent(meshRenderer);
+		shared_ptr<BoxCollider> boxCollider = make_shared<BoxCollider>();
+		boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
+		Dreyar->AddComponent(boxCollider);
 		Dreyar->SetName(L"Dreyar_OBJ");
 	}
 	{

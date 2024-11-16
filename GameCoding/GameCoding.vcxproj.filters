@@ -69,6 +69,9 @@
     <Filter Include="소스 파일\Uitls\imGUI">
       <UniqueIdentifier>{c3a6af36-7200-4fd8-b99e-be99ed766d6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Uitls\imGuizmo">
+      <UniqueIdentifier>{e40fc3a6-a0fa-436e-a527-467f5e1f37da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -284,6 +287,24 @@
     <ClInclude Include="GUIManager.h">
       <Filter>소스 파일\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="GraphEditor.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImCurveEdit.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGradient.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuizmo.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImSequencer.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="ImZoomSlider.h">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -493,6 +514,21 @@
     </ClCompile>
     <ClCompile Include="GUIManager.cpp">
       <Filter>소스 파일\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphEditor.cpp">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ImCurveEdit.cpp">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGradient.cpp">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuizmo.cpp">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="ImSequencer.cpp">
+      <Filter>소스 파일\Uitls\imGuizmo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

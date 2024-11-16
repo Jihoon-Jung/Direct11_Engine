@@ -15,22 +15,52 @@
 
 class EngineBody
 {
+private:
+    EngineBody();
+    ~EngineBody();
+
+protected:
+    EngineBody(const EngineBody&) = delete;
+    EngineBody& operator=(const EngineBody&) = delete;
+
 public:
-	EngineBody();
-	~EngineBody();
-	void Init(HWND hwnd, int width, int height);
-	void Update();
-	void Render();
+    static EngineBody& GetInstance()
+    {
+        static EngineBody instance;
+        return instance;
+    }
+
+    void Init(HWND hwnd, int width, int height);
+    void Update();
+    void Render();
+
+    /*void Play() { isStop = false; }
+    void Stop() { isStop = true; }*/
+    void Play();
+
+    //void Stop() { isStop = true; }
+    void Stop();
+    void Pause() { isPaused = true; }
+    void Resume() { isPaused = false; }
+    bool IsPlaying() const { return !isStop && !isPaused; }
+    bool IsPaused() const { return isPaused; }
+    bool IsStopped() const { return isStop; }
+    void RenderInitialScreen();
+private:
+    void UpdateGame();    // 게임 로직 업데이트
+    void UpdateEditor();  // 에디터(GUI) 업데이트
 
 private:
-	int _rectWidth = 0;
-	int _rectHeight = 0;
-	HWND _hwnd;
+    int _rectWidth = 0;
+    int _rectHeight = 0;
+    HWND _hwnd;
 
-	Graphics& _graphics;
-	InputManager& _inputManager;
-	TimeManager& _timeManager;
-	SceneManager& _sceneManager;
-	ResourceManager& _resourceManager;
+    Graphics& _graphics;
+    InputManager& _inputManager;
+    TimeManager& _timeManager;
+    SceneManager& _sceneManager;
+    ResourceManager& _resourceManager;
 
+    bool isStop = false;
+    bool isPaused = false;
 };

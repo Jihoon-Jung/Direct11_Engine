@@ -27,8 +27,6 @@ void Texture::CreateTexture(const wstring& path)
 
 	_size.x = md.width;
 	_size.y = md.height;
-
-	
 }
 ComPtr<ID3D11ShaderResourceView> Texture::LoadTextureFromDDS(const wstring& path)
 {

@@ -22,6 +22,8 @@ using namespace std;
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
+// ImGuizmo
+#include "ImGuizmo.h"
 
 // DX
 #include <d3d11.h>
@@ -91,3 +93,4 @@ using namespace Microsoft::WRL;
 #define SCENE						SceneManager::GetInstance()
 #define RENDER						RenderManager::GetInstance()
 #define GUI							GUIManager::GetInstance()
+#define ENGINE                      EngineBody::GetInstance()

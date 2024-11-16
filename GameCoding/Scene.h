@@ -14,10 +14,12 @@ public:
 	void Picking();
 	void UIPicking();
 	void CheckCollision();
+	void AddPickedObject(shared_ptr<GameObject> pickedObject) { picked = pickedObject; }
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 	shared_ptr<GameObject> Find(const wstring& name);
 
 	shared_ptr<GameObject> FindWithComponent(ComponentType type);
+	shared_ptr<GameObject> GetPickedObject() const { return picked; }
 
 	Vec3 GetCameraPos();
 private:
@@ -25,6 +27,7 @@ private:
 	shared_ptr<GameObject> _billboard_obj = make_shared<GameObject>();
 	shared_ptr<Transform> _billboard_Terrain_transform = make_shared<Transform>();
 	shared_ptr<Billboard> _billboard = make_shared<Billboard>();
+	
 	Vec3 hitPoint;
 
 	shared_ptr<GameObject> picked = nullptr;

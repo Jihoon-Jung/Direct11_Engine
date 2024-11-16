@@ -38,6 +38,12 @@ void ResourceManager::AddResource()
 
 	shared_ptr<Texture> randomTexture = make_shared<Texture>();
 
+	shared_ptr<Texture> startButtonTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> pauseButtonTexture = make_shared<Texture>();
+
+	shared_ptr<Texture> stopButtonTexture = make_shared<Texture>();
+
 	shared_ptr<Shader> ligthRenderShader = make_shared<Shader>();
 
 	shared_ptr<Shader> defaultShader = make_shared<Shader>();
@@ -163,6 +169,21 @@ void ResourceManager::AddResource()
 	treeTexture->CreateTexture(L"tree.png");
 	treeTexture->SetName(L"tree");
 	RESOURCE.AddResource(treeTexture->GetName(), treeTexture);
+
+	startButtonTexture = make_shared<Texture>();
+	startButtonTexture->CreateTexture(L"start.png");
+	startButtonTexture->SetName(L"startButton");
+	RESOURCE.AddResource(startButtonTexture->GetName(), startButtonTexture);
+
+	pauseButtonTexture = make_shared<Texture>();
+	pauseButtonTexture->CreateTexture(L"pause.png");
+	pauseButtonTexture->SetName(L"pauseButton");
+	RESOURCE.AddResource(pauseButtonTexture->GetName(), pauseButtonTexture);
+
+	stopButtonTexture = make_shared<Texture>();
+	stopButtonTexture->CreateTexture(L"stop.png");
+	stopButtonTexture->SetName(L"stopButton");
+	RESOURCE.AddResource(stopButtonTexture->GetName(), stopButtonTexture);
 
 	normalMap = make_shared<Texture>();
 	normalMap->CreateTexture(L"bricks_nmap.png");
@@ -472,13 +493,14 @@ void ResourceManager::AddResource()
 	house_model->SetName(L"HouseModel");
 	RESOURCE.AddResource(house_model->GetName(), house_model);
 
-
 	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
 	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
 	kachujin_Anim->ReadMaterial(L"Kachujin/Kachujin");
 	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Run");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Slash");
+	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
+	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
+	/*kachujin_Anim->ReadAnimation(L"Kachujin/Run");
+	kachujin_Anim->ReadAnimation(L"Kachujin/Slash");*/
 	kachujin_Anim->CreateTexture();
 	kachujin_Anim->SetName(L"Kachujin");
 	RESOURCE.AddResource(kachujin_Anim->GetName(), kachujin_Anim);

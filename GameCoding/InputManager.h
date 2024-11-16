@@ -16,6 +16,7 @@ enum class KEY_TYPE
 	E = 'E',
 	Z = 'Z',
 	C = 'C',
+	R = 'R',
 
 	KEY_1 = '1',
 	KEY_2 = '2',
@@ -25,7 +26,8 @@ enum class KEY_TYPE
 	LBUTTON = VK_LBUTTON,
 	RBUTTON = VK_RBUTTON,
 
-	KEY_CTRL = VK_CONTROL
+	KEY_CTRL = VK_CONTROL,
+	ESC = VK_ESCAPE
 };
 
 enum class KEY_STATE
