@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>Billboard_Shader</Name>
+    <Path>Shader/Billboard.hlsl</Path>
+    <ShaderTypes>
+        <Type>0</Type>
+        <Type>1</Type>
+        <Type>3</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>2</Layout>
+        <Layout>2</Layout>
+        <Layout>2</Layout>
+    </InputLayouts>
+    <Slots>
+        <Slot name="CameraBuffer" index="0"/>
+        <Slot name="CameraPos" index="2"/>
+        <Slot name="TransformBuffer" index="1"/>
+        <Slot name="texture0" index="0"/>
+    </Slots>
+</Shader>

@@ -24,6 +24,22 @@ public:
 	
 	void Init();
 	void AddResource();
+	void WriteMeshToXML(const wstring& meshName, const wstring& meshType, const wstring& finalPath);
+	void WriteTextureToXML(const wstring& imagePath, const wstring& textureNamae, const wstring& finalPath);
+	void WriteShaderToXML(const wstring& shaderPath, const wstring& shaderName,
+		const vector<ShaderType>& shaderTypes, const vector<InputLayoutType>& inputLayouts,
+		const map<wstring, uint32>& slots, const wstring& finalPath);
+	void WriteMaterialToXML(const wstring& textureName, const wstring& normalMapName,
+		const MaterialDesc& matDesc, const wstring& shaderName, const wstring& materialName, const wstring& finalPath);
+	void WriteModelToXML(const wstring& modelPath, const wstring& shaderName,
+		const wstring& materialPath, const wstring& modelName, const vector<wstring>& animPaths, const wstring& finalPath);
+
+	void LoadMeshData(wstring path);
+	void LoadTextureData(wstring path);
+	void LoadShaderData(wstring path);
+	void LoadMaterialData(const wstring& path);
+	void LoadModelData(const wstring& path);
+
 	template<typename T>
 	ResourceType GetResourceType()
 	{
@@ -74,6 +90,23 @@ public:
 			result = static_pointer_cast<T>(it->second);
 		}
 		return result;// static_pointer_cast<T>(it->second);
+	}
+
+	template <typename T>
+	wstring GetResourceName(const shared_ptr<T>& resource)
+	{
+		ResourceType type = GetResourceType<T>();
+		ResourecMap& map = _resources[static_cast<uint8>(type)];
+
+		for (const auto& pair : map)
+		{
+			if (pair.second == resource)
+			{
+				return pair.first;
+			}
+		}
+
+		return L"";  // 리소스를 찾지 못한 경우
 	}
 private:
 	using ResourecMap = map<wstring, shared_ptr<ResourceBase>>;

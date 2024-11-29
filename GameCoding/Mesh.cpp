@@ -281,9 +281,22 @@ void Mesh::CreateSphere_NormalTangent()
 	_buffer->CreateBuffer(BufferType::INDEX_BUFFER, _geometry->GetIndices());
 }
 
-void Mesh::CreateTerrain(TerrainInfo info)
+void Mesh::CreateTerrain()
 {
-	_info = info;
+	TerrainInfo tmpInfo;
+	tmpInfo.heightMapFilename = L"Terrain/terrain.raw";
+	tmpInfo.layerMapFilename0 = L"Terrain/grass.dds";
+	tmpInfo.layerMapFilename1 = L"Terrain/darkdirt.dds";
+	tmpInfo.layerMapFilename2 = L"Terrain/stone.dds";
+	tmpInfo.layerMapFilename3 = L"Terrain/lightdirt.dds";
+	tmpInfo.layerMapFilename4 = L"Terrain/snow.dds";
+	tmpInfo.blendMapFilename = L"Terrain/blend.dds";
+	tmpInfo.heightScale = 50.0f;
+	tmpInfo.heightmapWidth = 2049;
+	tmpInfo.heightmapHeight = 2049;
+	tmpInfo.cellSpacing = 0.5f;
+
+	_info = tmpInfo;
 
 	// Divide heightmap into patches such that each patch has CellsPerPatch.
 	// heightmapHeight = 2049, CellsPerPatch = 64

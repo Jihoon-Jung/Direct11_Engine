@@ -17,6 +17,12 @@ cbuffer ParticleBuffer : register(b0)
     row_major float4x4 gProj;
 }
 
+cbuffer TransformBuffer : register(b1)
+{
+    row_major matrix worldMatrix;
+    row_major matrix worldInvTranspose;
+}
+
 //cbuffer CameraBuffer : register(b0)
 //{
 //    row_major matrix viewMatrix;
@@ -88,10 +94,11 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
     // do not draw emitter particles.
     if (gin[0].Type != PT_EMITTER)
     {
+        float4 worldPosW = mul(float4(gin[0].PosW, 1.0f), worldMatrix);
         //
         // Compute world matrix so that billboard faces the camera.
         //
-        float3 look = normalize(gEyePosW - gin[0].PosW);
+        float3 look = normalize(gEyePosW - worldPosW.xyz);
         float3 right = normalize(cross(float3(0, 1, 0), look));
         float3 up = cross(look, right);
 
@@ -102,10 +109,10 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
         float halfHeight = 0.5f * gin[0].SizeW.y;
 
         float4 v[4];
-        v[0] = float4(gin[0].PosW + halfWidth * right - halfHeight * up, 1.0f);
-        v[1] = float4(gin[0].PosW + halfWidth * right + halfHeight * up, 1.0f);
-        v[2] = float4(gin[0].PosW - halfWidth * right - halfHeight * up, 1.0f);
-        v[3] = float4(gin[0].PosW - halfWidth * right + halfHeight * up, 1.0f);
+        v[0] = float4(worldPosW.xyz + halfWidth * right - halfHeight * up, 1.0f);
+        v[1] = float4(worldPosW.xyz + halfWidth * right + halfHeight * up, 1.0f);
+        v[2] = float4(worldPosW.xyz - halfWidth * right - halfHeight * up, 1.0f);
+        v[3] = float4(worldPosW.xyz - halfWidth * right + halfHeight * up, 1.0f);
 
         //
         // Transform quad vertices to world space and output 

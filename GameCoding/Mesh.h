@@ -41,7 +41,7 @@ public:
 	shared_ptr<Geometry<VertexTextureNormalTangentBlendData>> GetGeometry() { return _geometry; }
 	shared_ptr <Geometry<VertexTerrain>> GetTerrainGeometry() { return _geometryForTerrain; }
 	// for terrain
-	void CreateTerrain(TerrainInfo info);
+	void CreateTerrain();
 	float GetWidth() const;
 	float GetDepth() const;
 	float GetHeight(float x, float z) const;
@@ -52,13 +52,16 @@ public:
 	void CalcAllPatchBoundsY();
 	void CalcPatchBoundsY(uint32 i, uint32 j);
 	void BuildQuadPatchVB();
-	vector<uint32> BuildQuadPatchIB();
 	void BuildHeightmapSRV();
+	void SetMeshName(wstring name) { _meshName = name; }
+
+	vector<uint32> BuildQuadPatchIB();
 	ComPtr<ID3D11ShaderResourceView> GetLayerMapArraySRV() { return _layerMapArraySRV; }
 	ComPtr<ID3D11ShaderResourceView> GetBlendMapSRV(){ return _blendMapSRV; }
 	ComPtr<ID3D11ShaderResourceView> GetHeightMapSRV() { return _heightMapSRV; }
 	TerrainInfo GetTerrainInfo() { return _info; }
-
+	wstring GetMeshName() { return _meshName; }
+	
 private:
 	shared_ptr<Geometry<VertexTextureNormalTangentBlendData>> _geometry;
 	shared_ptr<Geometry<VertexTerrain>> _geometryForTerrain;
@@ -82,5 +85,6 @@ private:
 	// and CellsPerPatch+1 vertices.  Use 64 so that if we tessellate all the way 
 	// to 64, we use all the data from the heightmap.  
 	static const int CellsPerPatch = 64;
+	wstring _meshName = L"None";
 };
 

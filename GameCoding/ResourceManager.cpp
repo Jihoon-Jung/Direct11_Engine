@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "ResourceManager.h"
+#include "tinyxml2.h"
+#include <filesystem>
+#include "Utils.h"
 
 void ResourceManager::Init()
 {
@@ -8,511 +11,857 @@ void ResourceManager::Init()
 
 void ResourceManager::AddResource()
 {
-	shared_ptr<Mesh> sphere_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> cube_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> grid_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> quad_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> cylinder_mesh = make_shared<Mesh>();
-	shared_ptr<Mesh> terrain_mesh = make_shared<Mesh>();
+	// just for particle system
+	{
+		shared_ptr<Texture> fireParticleTexture = make_shared<Texture>();
 
-	shared_ptr<Model> tower_model = make_shared<Model>();
-	shared_ptr<Model> house_model = make_shared<Model>();
-	shared_ptr<Model> kachujin_Anim = make_shared<Model>();
-	shared_ptr<Model> Dreyar_Anim = make_shared<Model>();
+		shared_ptr<Texture> randomTexture = make_shared<Texture>();
 
-	shared_ptr<Texture> texture = make_shared<Texture>();
-	shared_ptr<Texture> normalMap = make_shared<Texture>();
-	shared_ptr<Texture> lightTexture = make_shared<Texture>();
+		vector<wstring> textureVector;
+		textureVector.push_back(L"flare0.dds");
+		fireParticleTexture->CreateTexture2DArraySRV(textureVector);
+		fireParticleTexture->SetName(L"Fire_Particle");
+		RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
 
-	shared_ptr<Texture> gridTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> bricks_texture = make_shared<Texture>();
-
-	shared_ptr<Texture> treeTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> grassTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> pandaTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> fireParticleTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> randomTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> startButtonTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> pauseButtonTexture = make_shared<Texture>();
-
-	shared_ptr<Texture> stopButtonTexture = make_shared<Texture>();
-
-	shared_ptr<Shader> ligthRenderShader = make_shared<Shader>();
-
-	shared_ptr<Shader> defaultShader = make_shared<Shader>();
+		randomTexture->CreateRandomTexture1DSRV();
+		randomTexture->SetName(L"Random_Texture");
+		RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
+	}
 	
-	shared_ptr<Shader> environmentMapShader = make_shared<Shader>();
 
-	shared_ptr<Shader> quadShader = make_shared<Shader>();
-
-	shared_ptr<Shader> billBoardShader = make_shared<Shader>();
-
-	shared_ptr<Shader> skyboxShader = make_shared<Shader>();
-
-	shared_ptr<Shader> staticMesh_shader = make_shared<Shader>();
-
-	shared_ptr<Shader> animatedMesh_shader = make_shared<Shader>();
-
-	shared_ptr<Shader> adjustTexture_shader = make_shared<Shader>();
-
-	shared_ptr<Shader> tessellation_shader = make_shared<Shader>();
-
-	shared_ptr<Shader> gaussianBlur_csShaderHorizontal = make_shared<Shader>();
-
-	shared_ptr<Shader> gaussianBlur_csShaderVertical = make_shared<Shader>();
-
-	shared_ptr<Shader> terrain_shader = make_shared<Shader>();
 	
-	shared_ptr<Shader> initParticle_shader = make_shared<Shader>();
 
-	shared_ptr<Shader> renderParticle_shader = make_shared<Shader>();
+	WriteMeshToXML(L"Sphere", L"Sphere", L"Resource/Mesh/Sphere.xml");
+	WriteMeshToXML(L"Cube", L"Cube", L"Resource/Mesh/Cube.xml");
+	WriteMeshToXML(L"Grid", L"Grid", L"Resource/Mesh/Grid.xml");
+	WriteMeshToXML(L"Terrain", L"Terrain", L"Resource/Mesh/Terrain.xml");
+	WriteMeshToXML(L"Quad", L"Quad", L"Resource/Mesh/Quad.xml");
+	WriteMeshToXML(L"Cylinder", L"Cylinder", L"Resource/Mesh/Cylinder.xml");
+	LoadMeshData(L"Resource/Mesh/Sphere.xml");
+	LoadMeshData(L"Resource/Mesh/Cube.xml");
+	LoadMeshData(L"Resource/Mesh/Grid.xml");
+	LoadMeshData(L"Resource/Mesh/Terrain.xml");
+	LoadMeshData(L"Resource/Mesh/Quad.xml");
+	LoadMeshData(L"Resource/Mesh/Cylinder.xml");
 
-	shared_ptr<Shader> debuge_UI_shader = make_shared<Shader>();
 
-	shared_ptr<Material> material = make_shared<Material>();
+	WriteTextureToXML(L"bricks.jpg", L"Bricks", L"Resource/Texture/Bricks.xml");
+	WriteTextureToXML(L"Leather.jpg", L"Leather", L"Resource/Texture/Leather.xml");
+	WriteTextureToXML(L"yellow.jpg", L"Yellow", L"Resource/Texture/Yellow.xml");
+	WriteTextureToXML(L"Grass.png", L"Grass", L"Resource/Texture/Grass.xml");
+	WriteTextureToXML(L"panda.jpg", L"Panda", L"Resource/Texture/Panda.xml");
+	WriteTextureToXML(L"tree.png", L"Tree", L"Resource/Texture/Tree.xml");
+	WriteTextureToXML(L"start.png", L"startButton", L"Resource/Texture/startButton.xml");
+	WriteTextureToXML(L"pause.png", L"pauseButton", L"Resource/Texture/pauseButton.xml");
+	WriteTextureToXML(L"stop.png", L"stopButton", L"Resource/Texture/stopButton.xml");
+	WriteTextureToXML(L"grasscube1024.dds", L"skyboxTexture", L"Resource/Texture/skyboxTexture.xml");
+	WriteTextureToXML(L"bricks_nmap.png", L"NormalMap", L"Resource/Texture/NormalMap.xml");
 
-	shared_ptr<Material> grid_material = make_shared<Material>();
+	WriteTextureToXML(L"Material_Icon.png", L"Material_Icon", L"Resource/Texture/Material_Icon.xml");
+	WriteTextureToXML(L"Mesh_Icon.png", L"Mesh_Icon", L"Resource/Texture/Mesh_Icon.xml");
+	WriteTextureToXML(L"Model_Icon.png", L"Model_Icon", L"Resource/Texture/Model_Icon.xml");
+	WriteTextureToXML(L"Shader_Icon.png", L"Shader_Icon", L"Resource/Texture/Shader_Icon.xml");
 
-	shared_ptr<Material> debug_UI_material = make_shared <Material>();
-
-	shared_ptr<Material> tessellation_material = make_shared<Material>();
-
-	shared_ptr<Material> billboardMaterial = make_shared<Material>();
-
-	shared_ptr<Material> lightMaterial = make_shared<Material>();
-
-	shared_ptr<Material> skyBoxMaterial = make_shared<Material>();
-
-	shared_ptr<Material> terrainMaterial = make_shared<Material>();
-
-	sphere_mesh->CreateSphere_NormalTangent();
-	sphere_mesh->SetName(L"TestMesh");
-	RESOURCE.AddResource(sphere_mesh->GetName(), sphere_mesh);
+	LoadTextureData(L"Resource/Texture/Bricks.xml");
+	LoadTextureData(L"Resource/Texture/Leather.xml");
+	LoadTextureData(L"Resource/Texture/Yellow.xml");
+	LoadTextureData(L"Resource/Texture/Grass.xml");
+	LoadTextureData(L"Resource/Texture/Panda.xml");
+	LoadTextureData(L"Resource/Texture/Tree.xml");
+	LoadTextureData(L"Resource/Texture/startButton.xml");
+	LoadTextureData(L"Resource/Texture/pauseButton.xml");
+	LoadTextureData(L"Resource/Texture/stopButton.xml");
+	LoadTextureData(L"Resource/Texture/skyboxTexture.xml");
+	LoadTextureData(L"Resource/Texture/NormalMap.xml");
 	
-	cube_mesh->CreateCube_NormalTangent();
-	cube_mesh->SetName(L"Cube");
-	RESOURCE.AddResource(cube_mesh->GetName(), cube_mesh);
+	LoadTextureData(L"Resource/Texture/Material_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Mesh_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Model_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Shader_Icon.xml");
 
-	grid_mesh->CreateGrid_NormalTangent(100, 100);
-	grid_mesh->SetName(L"Grid");
-	RESOURCE.AddResource(grid_mesh->GetName(), grid_mesh);
+	
+	vector<ShaderType> types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	vector<InputLayoutType> layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	map<wstring, uint32> slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4},
+	};
 
-	TerrainInfo info;
-	info.heightMapFilename = L"Terrain/terrain.raw";
-	info.layerMapFilename0 = L"Terrain/grass.dds";
-	info.layerMapFilename1 = L"Terrain/darkdirt.dds";
-	info.layerMapFilename2 = L"Terrain/stone.dds";
-	info.layerMapFilename3 = L"Terrain/lightdirt.dds";
-	info.layerMapFilename4 = L"Terrain/snow.dds";
-	info.blendMapFilename = L"Terrain/blend.dds";
-	info.heightScale = 50.0f;
-	info.heightmapWidth = 2049;
-	info.heightmapHeight = 2049;
-	info.cellSpacing = 0.5f;
-	terrain_mesh->CreateTerrain(info);
-	terrain_mesh->SetName(L"Terrain");
-	RESOURCE.AddResource(terrain_mesh->GetName(), terrain_mesh);
+	WriteShaderToXML(L"Shader/Default.hlsl", L"Default_Shader", types, layouts, slots, L"Resource/Shader/DefaultShader.xml");
+	LoadShaderData(L"Resource/Shader/DefaultShader.xml");
 
-	quad_mesh->CreateQuad_NormalTangent();
-	quad_mesh->SetName(L"Quad");
-	RESOURCE.AddResource(quad_mesh->GetName(), quad_mesh);
+	types = {
+	ShaderType::VERTEX_SHADER,
+	ShaderType::HULL_SHADER,
+	ShaderType::DOMAIN_SHADER,
+	ShaderType::PIXEL_SHADER
+	};
 
-	cylinder_mesh->CreateCylinder_NormalTangent();
-	cylinder_mesh->SetName(L"Cylinder");
-	RESOURCE.AddResource(cylinder_mesh->GetName(), cylinder_mesh);
+	layouts = {
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain
+	};
 
-	bricks_texture = make_shared<Texture>();
-	bricks_texture->CreateTexture(L"bricks.jpg");
-	bricks_texture->SetName(L"Bricks");
-	RESOURCE.AddResource(bricks_texture->GetName(), bricks_texture);
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"LightMaterial", 1},
+		{L"LightDesc", 2},
+		{L"LightAndCameraPos", 3},
+		{L"TerrainBuffer", 4},
+		{L"LightSpaceTransform", 5},
+		{L"TransformBuffer", 6},
+		{L"gLayerMapArray", 0},
+		{L"gBlendMap", 1},
+		{L"gHeightMap", 2},
+		{L"shadowMap", 3}
+	};
 
-	texture = make_shared<Texture>();
-	texture->CreateTexture(L"bricks.jpg");
-	texture->SetName(L"Leather");
-	RESOURCE.AddResource(texture->GetName(), texture);
+	WriteShaderToXML(L"Shader/Terrain.hlsl", L"Terrain_Shader", types, layouts, slots, L"Resource/Shader/TerrainShader.xml");
+	LoadShaderData(L"Resource/Shader/TerrainShader.xml");
 
-	gridTexture = make_shared<Texture>();
-	gridTexture->CreateTexture(L"yellow.jpg");
-	gridTexture->SetName(L"Grid_Texture");
-	RESOURCE.AddResource(gridTexture->GetName(), gridTexture);
+	// Debug UI Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Debug_UI_Shader.hlsl", L"Debug_UI_Shader", types, layouts, slots, L"Resource/Shader/DebugUIShader.xml");
+	LoadShaderData(L"Resource/Shader/DebugUIShader.xml");
 
-	grassTexture = make_shared<Texture>();
-	grassTexture->CreateTexture(L"Golem.png");
-	grassTexture->SetName(L"Grass");
-	RESOURCE.AddResource(grassTexture->GetName(), grassTexture);
+	// Init Particle Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT };
+	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
+	slots = {
+		{L"ParticleBuffer", 0},
+		{L"gRandomTex", 0}
+	};
+	WriteShaderToXML(L"Shader/InitParticleSystem.hlsl", L"InitParticle_Shader", types, layouts, slots, L"Resource/Shader/InitParticleShader.xml");
+	LoadShaderData(L"Resource/Shader/InitParticleShader.xml");
 
-	pandaTexture = make_shared<Texture>();
-	pandaTexture->CreateTexture(L"website.jpg");
-	pandaTexture->SetName(L"Panda");
-	RESOURCE.AddResource(pandaTexture->GetName(), pandaTexture);
+	// Render Particle Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
+	slots = {
+		{L"ParticleBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"gTexArray", 0}
+	};
+	WriteShaderToXML(L"Shader/RenderParticleSystem.hlsl", L"RenderParticle_Shader", types, layouts, slots, L"Resource/Shader/RenderParticleShader.xml");
+	LoadShaderData(L"Resource/Shader/RenderParticleShader.xml");
 
-	fireParticleTexture = make_shared<Texture>();
-	vector<wstring> textureVector;
-	textureVector.push_back(L"flare0.dds");
-	fireParticleTexture->CreateTexture2DArraySRV(textureVector);
-	fireParticleTexture->SetName(L"Fire_Particle");
-	RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
+	// Tessellation Shader
+	types = {
+		ShaderType::VERTEX_SHADER,
+		ShaderType::PIXEL_SHADER,
+		ShaderType::HULL_SHADER,
+		ShaderType::DOMAIN_SHADER
+	};
+	layouts = {
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData
+	};
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/Tesselation.hlsl", L"Tesselation_Shader", types, layouts, slots, L"Resource/Shader/TessellationShader.xml");
+	LoadShaderData(L"Resource/Shader/TessellationShader.xml");
 
-	randomTexture = make_shared<Texture>();
-	randomTexture->CreateRandomTexture1DSRV();
-	randomTexture->SetName(L"Random_Texture");
-	RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
+	// Environment Map Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/EnvironmentMap.hlsl", L"EnvironmentMap_Shader", types, layouts, slots, L"Resource/Shader/EnvironmentMapShader.xml");
+	LoadShaderData(L"Resource/Shader/EnvironmentMapShader.xml");
 
-	treeTexture = make_shared<Texture>();
-	treeTexture->CreateTexture(L"tree.png");
-	treeTexture->SetName(L"tree");
-	RESOURCE.AddResource(treeTexture->GetName(), treeTexture);
+	// Quad Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Quad.hlsl", L"Quad_Shader", types, layouts, slots, L"Resource/Shader/QuadShader.xml");
+	LoadShaderData(L"Resource/Shader/QuadShader.xml");
 
-	startButtonTexture = make_shared<Texture>();
-	startButtonTexture->CreateTexture(L"start.png");
-	startButtonTexture->SetName(L"startButton");
-	RESOURCE.AddResource(startButtonTexture->GetName(), startButtonTexture);
+	// Billboard Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER, ShaderType::GEOMETRY_SHADER };
+	layouts = {
+		InputLayoutType::VertexBillboard_Geometry,
+		InputLayoutType::VertexBillboard_Geometry,
+		InputLayoutType::VertexBillboard_Geometry
+	};
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"CameraPos", 2},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Billboard.hlsl", L"Billboard_Shader", types, layouts, slots, L"Resource/Shader/BillboardShader.xml");
+	LoadShaderData(L"Resource/Shader/BillboardShader.xml");
 
-	pauseButtonTexture = make_shared<Texture>();
-	pauseButtonTexture->CreateTexture(L"pause.png");
-	pauseButtonTexture->SetName(L"pauseButton");
-	RESOURCE.AddResource(pauseButtonTexture->GetName(), pauseButtonTexture);
+	// Adjust Texture Shader
+	types = { ShaderType::COMPUTE_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots.clear();
+	WriteShaderToXML(L"Shader/ComputeShader_AdjustTexture.hlsl", L"AdjustTexture_Shader", types, layouts, slots, L"Resource/Shader/AdjustTextureShader.xml");
+	LoadShaderData(L"Resource/Shader/AdjustTextureShader.xml");
 
-	stopButtonTexture = make_shared<Texture>();
-	stopButtonTexture->CreateTexture(L"stop.png");
-	stopButtonTexture->SetName(L"stopButton");
-	RESOURCE.AddResource(stopButtonTexture->GetName(), stopButtonTexture);
+	// Gaussian Blur Horizontal Shader
+	types = { ShaderType::COMPUTE_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
+	WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurHorizontal.hlsl", L"Gaussian_Horizontal", types, layouts, slots, L"Resource/Shader/GaussianHorizontalShader.xml");
+	LoadShaderData(L"Resource/Shader/GaussianHorizontalShader.xml");
 
-	normalMap = make_shared<Texture>();
-	normalMap->CreateTexture(L"bricks_nmap.png");
-	normalMap->SetName(L"NormalMap");
-	RESOURCE.AddResource(normalMap->GetName(), normalMap);
+	// Gaussian Blur Vertical Shader
+	WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurVertical.hlsl", L"Gaussian_Vertical", types, layouts, slots, L"Resource/Shader/GaussianVerticalShader.xml");
+	LoadShaderData(L"Resource/Shader/GaussianVerticalShader.xml");
 
-	lightTexture = make_shared<Texture>();
-	lightTexture->CreateTexture(L"bricks_nmap.png");
-	lightTexture->SetName(L"lightTexture");
-	RESOURCE.AddResource(lightTexture->GetName(), lightTexture);
+	// Skybox Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/SkyBox.hlsl", L"SkyBox_Shader", types, layouts, slots, L"Resource/Shader/SkyboxShader.xml");
+	LoadShaderData(L"Resource/Shader/SkyboxShader.xml");
 
-	defaultShader = make_shared<Shader>();
-	defaultShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	defaultShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Default.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	defaultShader->SetName(L"Default_Shader");
-	{
-		defaultShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		defaultShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		defaultShader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
-		defaultShader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
-		defaultShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
-		defaultShader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
-		defaultShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-		defaultShader->GetShaderSlot()->SetSlot(L"normalMap", 1);
-		defaultShader->GetShaderSlot()->SetSlot(L"specularMap", 2);
-		defaultShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
-		defaultShader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
-	}
-	RESOURCE.AddResource(defaultShader->GetName(), defaultShader);
+	// Simple Render Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/SimpleShader.hlsl", L"Simple_Render_Shader", types, layouts, slots, L"Resource/Shader/SimpleShader.xml");
+	LoadShaderData(L"Resource/Shader/SimpleShader.xml");
 
-	debuge_UI_shader = make_shared<Shader>();
-	debuge_UI_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Debug_UI_Shader.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	debuge_UI_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Debug_UI_Shader.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	debuge_UI_shader->SetName(L"Debug_UI_Shader");
-	{
-		debuge_UI_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		debuge_UI_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		debuge_UI_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
-	}
-	RESOURCE.AddResource(debuge_UI_shader->GetName(), debuge_UI_shader);
+	// Static Mesh Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"BoneBuffer", 5},
+		{L"BonIndex", 6},
+		{L"LightSpaceTransform", 7},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/StaticMesh.hlsl", L"StaticMesh_Shader", types, layouts, slots, L"Resource/Shader/StaticMeshShader.xml");
+	LoadShaderData(L"Resource/Shader/StaticMeshShader.xml");
 
-	initParticle_shader = make_shared<Shader>();
-	initParticle_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/InitParticleSystem.hlsl", InputLayoutType::VertexParticle);
-	initParticle_shader->CreateShader(ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT, L"Shader/InitParticleSystem.hlsl", InputLayoutType::VertexParticle);
-	initParticle_shader->SetName(L"InitParticle_Shader");
-	{
-		initParticle_shader->GetShaderSlot()->SetSlot(L"ParticleBuffer", 0);
-		initParticle_shader->GetShaderSlot()->SetSlot(L"gRandomTex", 0);
-	}
-	RESOURCE.AddResource(initParticle_shader->GetName(), initParticle_shader);
+	// Animated Mesh Shader
+	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"BlendBuffer", 5},
+		{L"LightSpaceTransform", 6},
+		{L"normalMap", 0},
+		{L"specularMap", 1},
+		{L"diffuseMap", 2},
+		{L"TransformMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/AnimatedMesh.hlsl", L"AnimatedMesh_Shader", types, layouts, slots, L"Resource/Shader/AnimatedMeshShader.xml");
+	LoadShaderData(L"Resource/Shader/AnimatedMeshShader.xml");
 
-	renderParticle_shader = make_shared<Shader>();
-	renderParticle_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
-	renderParticle_shader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
-	renderParticle_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/RenderParticleSystem.hlsl", InputLayoutType::VertexParticle);
-	renderParticle_shader->SetName(L"RenderParticle_Shader");
-	{
-		renderParticle_shader->GetShaderSlot()->SetSlot(L"ParticleBuffer", 0);
-		renderParticle_shader->GetShaderSlot()->SetSlot(L"gTexArray", 0);
-	}
-	RESOURCE.AddResource(renderParticle_shader->GetName(), renderParticle_shader);
-
-	terrain_shader = make_shared<Shader>();
-	terrain_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
-	terrain_shader->CreateShader(ShaderType::HULL_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
-	terrain_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
-	terrain_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Terrain.hlsl", InputLayoutType::Terrain);
-	terrain_shader->SetName(L"Terrain_Shader");
-	{
-		terrain_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		terrain_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 1);
-		terrain_shader->GetShaderSlot()->SetSlot(L"LightDesc", 2);
-		terrain_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 3);
-		terrain_shader->GetShaderSlot()->SetSlot(L"TerrainBuffer", 4);
-		terrain_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
-		terrain_shader->GetShaderSlot()->SetSlot(L"gLayerMapArray", 0);
-		terrain_shader->GetShaderSlot()->SetSlot(L"gBlendMap", 1);
-		terrain_shader->GetShaderSlot()->SetSlot(L"gHeightMap", 2);
-		terrain_shader->GetShaderSlot()->SetSlot(L"shadowMap", 3);
-	}
-	RESOURCE.AddResource(terrain_shader->GetName(), terrain_shader);
-
-
-	tessellation_shader = make_shared<Shader>();
-	tessellation_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::HULL_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->CreateShader(ShaderType::DOMAIN_SHADER, L"Shader/Tesselation.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	tessellation_shader->SetName(L"Tesselation_Shader");
-	{
-		tessellation_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"normalMap", 1);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"specularMap", 2);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
-		tessellation_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
-	}
-	RESOURCE.AddResource(tessellation_shader->GetName(), tessellation_shader);
-
-
-	environmentMapShader = make_shared<Shader>();
-	environmentMapShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	environmentMapShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/EnvironmentMap.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	environmentMapShader->SetName(L"EnvironmentMap_Shader");
-	{
-		environmentMapShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 5);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"normalMap", 1);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"specularMap", 2);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
-		environmentMapShader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
-	}
-	RESOURCE.AddResource(environmentMapShader->GetName(), environmentMapShader);
-
-	quadShader = make_shared<Shader>();
-	quadShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	quadShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Quad.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	quadShader->SetName(L"Quad_Shader");
-	{
-		quadShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-	}
-	RESOURCE.AddResource(quadShader->GetName(), quadShader);
-
-	billBoardShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
-	billBoardShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
-	billBoardShader->CreateShader(ShaderType::GEOMETRY_SHADER, L"Shader/Billboard.hlsl", InputLayoutType::VertexBillboard_Geometry);
-	billBoardShader->SetName(L"Billboard_Shader");
-	{
-		billBoardShader->GetShaderSlot()->SetSlot(L"CameraBuffer",0);
-		billBoardShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		billBoardShader->GetShaderSlot()->SetSlot(L"CameraPos", 2);
-		billBoardShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-	}
-	RESOURCE.AddResource(billBoardShader->GetName(), billBoardShader);
-
-	adjustTexture_shader = make_shared<Shader>();
-	adjustTexture_shader->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_AdjustTexture.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	adjustTexture_shader->SetName(L"AdjustTexture_Shader");
-	RESOURCE.AddResource(adjustTexture_shader->GetName(), adjustTexture_shader);
-
-	gaussianBlur_csShaderHorizontal = make_shared<Shader>();
-	gaussianBlur_csShaderHorizontal->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_GaussianBlurHorizontal.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	gaussianBlur_csShaderHorizontal->SetName(L"Gaussian_Horizontal");
-	RESOURCE.AddResource(gaussianBlur_csShaderHorizontal->GetName(), gaussianBlur_csShaderHorizontal);
-
-	gaussianBlur_csShaderVertical = make_shared<Shader>();
-	gaussianBlur_csShaderVertical->CreateShader(ShaderType::COMPUTE_SHADER, L"Shader/ComputeShader_GaussianBlurVertical.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	gaussianBlur_csShaderVertical->SetName(L"Gaussian_Vertical");
-	RESOURCE.AddResource(gaussianBlur_csShaderVertical->GetName(), gaussianBlur_csShaderVertical);
-
-	skyboxShader = make_shared<Shader>();
-	skyboxShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	skyboxShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/SkyBox.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	skyboxShader->SetName(L"SkyBox_Shader");
-	{
-		skyboxShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		skyboxShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-	}
-	RESOURCE.AddResource(skyboxShader->GetName(), skyboxShader);
-
-
-	ligthRenderShader = make_shared<Shader>();
-	ligthRenderShader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	ligthRenderShader->SetName(L"Light_Render_Shader");
-	ligthRenderShader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/Light.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	{
-		ligthRenderShader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		ligthRenderShader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		ligthRenderShader->GetShaderSlot()->SetSlot(L"texture0", 0);
-	}
-	RESOURCE.AddResource(ligthRenderShader->GetName(), ligthRenderShader);
-
-
-	staticMesh_shader = make_shared<Shader>();
-	staticMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	staticMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/StaticMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	staticMesh_shader->SetName(L"StaticMesh_Shader");
-	{
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"BoneBuffer", 5);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"BonIndex", 6);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 7);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"texture0", 0);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"normalMap", 1);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"specularMap", 2);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 3);
-		staticMesh_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
-
-	}
-	RESOURCE.AddResource(staticMesh_shader->GetName(), staticMesh_shader);
-
-
-	animatedMesh_shader = make_shared<Shader>();
-	animatedMesh_shader->CreateShader(ShaderType::VERTEX_SHADER, L"Shader/AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	animatedMesh_shader->CreateShader(ShaderType::PIXEL_SHADER, L"Shader/AnimatedMesh.hlsl", InputLayoutType::VertexTextureNormalTangentBlendData);
-	animatedMesh_shader->SetName(L"AnimatedMesh_Shader");
-	{
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"CameraBuffer", 0);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"TransformBuffer", 1);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightMaterial", 2);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightDesc", 3);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightAndCameraPos", 4);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"BlendBuffer", 5);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"LightSpaceTransform", 6);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"normalMap", 0);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"specularMap", 1);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"diffuseMap", 2);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"TransformMap", 3);
-		animatedMesh_shader->GetShaderSlot()->SetSlot(L"shadowMap", 4);
-	}
-	RESOURCE.AddResource(animatedMesh_shader->GetName(), animatedMesh_shader);
-
-
-	material = make_shared<Material>();
-	material->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
-	material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
+	// Default Material
 	MaterialDesc matDesc;
 	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	material->SetMaterialDesc(matDesc);
-	material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
-	material->SetName(L"DefaultMaterial");
-	RESOURCE.AddResource(material->GetName(), material);
+	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Default_Shader", L"DefaultMaterial", L"Resource/Material/DefaultMaterial.xml");
+	LoadMaterialData(L"Resource/Material/DefaultMaterial.xml");
 
-	grid_material = make_shared<Material>();
-	grid_material->SetTexture(RESOURCE.GetResource<Texture>(L"Grid_Texture"));
-	matDesc;
+	// Particle Material
+	WriteMaterialToXML(L"Fire_Particle", L"", MaterialDesc(), L"RenderParticle_Shader", L"ParticleMaterial", L"Resource/Material/ParticleMaterial.xml");
+	LoadMaterialData(L"Resource/Material/ParticleMaterial.xml");
+
+	// Grid Material
+	WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Default_Shader", L"GridMaterial", L"Resource/Material/GridMaterial.xml");
+	LoadMaterialData(L"Resource/Material/GridMaterial.xml");
+
+	// Debug UI Material
+	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Debug_UI_Shader", L"Debug_UI_Material", L"Resource/Material/DebugUIMaterial.xml");
+	LoadMaterialData(L"Resource/Material/DebugUIMaterial.xml");
+
+	// Tessellation Material
 	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	grid_material->SetMaterialDesc(matDesc);
-	grid_material->SetShader(RESOURCE.GetResource<Shader>(L"Default_Shader"));
-	grid_material->SetName(L"GridMaterial");
-	RESOURCE.AddResource(grid_material->GetName(), grid_material);
+	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Tesselation_Shader", L"Tessellation_Material", L"Resource/Material/TessellationMaterial.xml");
+	LoadMaterialData(L"Resource/Material/TessellationMaterial.xml");
 
-	debug_UI_material = make_shared<Material>();
-	debug_UI_material->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
-	debug_UI_material->SetShader(RESOURCE.GetResource<Shader>(L"Debug_UI_Shader"));
-	debug_UI_material->SetName(L"Debug_UI_Material");
-	RESOURCE.AddResource(debug_UI_material->GetName(), debug_UI_material);
+	// Billboard Material
+	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Billboard_Shader", L"Billboard_Material", L"Resource/Material/BillboardMaterial.xml");
+	LoadMaterialData(L"Resource/Material/BillboardMaterial.xml");
 
-	tessellation_material = make_shared<Material>();
-	tessellation_material->SetTexture(RESOURCE.GetResource<Texture>(L"Bricks"));
-	tessellation_material->SetNormalMap(RESOURCE.GetResource<Texture>(L"NormalMap"));
-	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
-	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	tessellation_material->SetMaterialDesc(matDesc);
-	tessellation_material->SetShader(RESOURCE.GetResource<Shader>(L"Tesselation_Shader"));
-	tessellation_material->SetName(L"Tessellation_Material");
-	RESOURCE.AddResource(tessellation_material->GetName(), tessellation_material);
+	// Skybox Material
+	WriteMaterialToXML(L"skyboxTexture", L"", MaterialDesc(), L"SkyBox_Shader", L"SkyBoxMaterial", L"Resource/Material/SkyboxMaterial.xml");
+	LoadMaterialData(L"Resource/Material/SkyboxMaterial.xml");
 
-	billboardMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"Leather"));
-	billboardMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Billboard_Shader"));
-	billboardMaterial->SetName(L"Billboard_Material");
-	RESOURCE.AddResource(billboardMaterial->GetName(), billboardMaterial);
-
-
-	skyBoxMaterial = make_shared<Material>();
-	shared_ptr<Texture> cubeMapTexture = make_shared<Texture>();
-	cubeMapTexture->LoadTextureFromDDS(L"grasscube1024.dds");
-	skyBoxMaterial->SetTexture(cubeMapTexture);
-	skyBoxMaterial->SetShader(RESOURCE.GetResource<Shader>(L"SkyBox_Shader"));
-	skyBoxMaterial->SetName(L"SkyBoxMaterial");
-	RESOURCE.AddResource(skyBoxMaterial->GetName(), skyBoxMaterial);
-
-	terrainMaterial = make_shared<Material>();
-	terrainMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Terrain_Shader"));
+	// Terrain Material
 	matDesc.ambient = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 64.0f);
-	terrainMaterial->SetMaterialDesc(matDesc);
-	terrainMaterial->SetName(L"TerrainMaterial");
-	RESOURCE.AddResource(terrainMaterial->GetName(), terrainMaterial);
+	WriteMaterialToXML(L"", L"", matDesc, L"Terrain_Shader", L"TerrainMaterial", L"Resource/Material/TerrainMaterial.xml");
+	LoadMaterialData(L"Resource/Material/TerrainMaterial.xml");
 
-	shared_ptr<Material> tmp = RESOURCE.GetResource<Material>(L"DefaultMaterial");
-	lightMaterial = make_shared<Material>();
-	lightMaterial->SetTexture(RESOURCE.GetResource<Texture>(L"lightTexture"));
-	lightMaterial->SetShader(RESOURCE.GetResource<Shader>(L"Light_Render_Shader"));
-	lightMaterial->SetName(L"LightMaterial");
-	RESOURCE.AddResource(lightMaterial->GetName(), lightMaterial);
+	// Simple Material
+	WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Simple_Render_Shader", L"SimpleMaterial", L"Resource/Material/SimpleMaterial.xml");
+	LoadMaterialData(L"Resource/Material/SimpleMaterial.xml");
 
-	tower_model->ReadModel(L"Tower/Tower");
-	tower_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
-	tower_model->ReadMaterial(L"Tower/Tower");
-	tower_model->SetName(L"TowerModel");
-	RESOURCE.AddResource(tower_model->GetName(), tower_model);
+	// Tower Model (Static Mesh)
+	WriteModelToXML(L"Tower/Tower", L"StaticMesh_Shader", L"Tower/Tower", L"TowerModel",
+		vector<wstring>(), L"Resource/Model/TowerModel.xml");
+	LoadModelData(L"Resource/Model/TowerModel.xml");
 
-	house_model->ReadModel(L"House/House");
-	house_model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"StaticMesh_Shader"));
-	house_model->ReadMaterial(L"House/House");
-	house_model->SetName(L"HouseModel");
-	RESOURCE.AddResource(house_model->GetName(), house_model);
+	// House Model (Static Mesh)
+	WriteModelToXML(L"House/House", L"StaticMesh_Shader", L"House/House", L"HouseModel",
+		vector<wstring>(), L"Resource/Model/HouseModel.xml");
+	LoadModelData(L"Resource/Model/HouseModel.xml");
 
-	kachujin_Anim->ReadModel(L"Kachujin/Kachujin");
-	kachujin_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
-	kachujin_Anim->ReadMaterial(L"Kachujin/Kachujin");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Dismissing");
-	/*kachujin_Anim->ReadAnimation(L"Kachujin/Run");
-	kachujin_Anim->ReadAnimation(L"Kachujin/Slash");*/
-	kachujin_Anim->CreateTexture();
-	kachujin_Anim->SetName(L"Kachujin");
-	RESOURCE.AddResource(kachujin_Anim->GetName(), kachujin_Anim);
+	// Kachujin Model (Animated Mesh)
+	vector<wstring> kachujinAnims = { L"Kachujin/Run", L"Kachujin/Slash", L"Kachujin/Dismissing"};
+	WriteModelToXML(L"Kachujin/Kachujin", L"AnimatedMesh_Shader", L"Kachujin/Kachujin", L"Kachujin",
+		kachujinAnims, L"Resource/Model/KachujinModel.xml");
+	LoadModelData(L"Resource/Model/KachujinModel.xml");
 
-	Dreyar_Anim->ReadModel(L"Dreyar/Dreyar");
-	Dreyar_Anim->SetShaderForMaterial(RESOURCE.GetResource<Shader>(L"AnimatedMesh_Shader"));
-	Dreyar_Anim->ReadMaterial(L"Dreyar/Dreyar");
-	Dreyar_Anim->ReadAnimation(L"Dreyar/Kick");
-	Dreyar_Anim->ReadAnimation(L"Dreyar/Fall");
-	Dreyar_Anim->ReadAnimation(L"Dreyar/Dance");
-	Dreyar_Anim->CreateTexture();
-	Dreyar_Anim->SetName(L"Dreyar");
-	RESOURCE.AddResource(Dreyar_Anim->GetName(), Dreyar_Anim);
+	// Dreyar Model (Animated Mesh)
+	vector<wstring> dreyarAnims = { L"Dreyar/Kick", L"Dreyar/Fall", L"Dreyar/Dance" };
+	WriteModelToXML(L"Dreyar/Dreyar", L"AnimatedMesh_Shader", L"Dreyar/Dreyar", L"Dreyar",
+		dreyarAnims, L"Resource/Model/DreyarModel.xml");
+	LoadModelData(L"Resource/Model/DreyarModel.xml");
 
 }
+
+
+void ResourceManager::WriteMeshToXML(const wstring& meshName, const wstring& meshType, const wstring& finalPath)
+{
+	auto path = filesystem::path(finalPath);
+	filesystem::create_directory(path.parent_path());
+
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+
+	// XML 선언 추가
+	tinyxml2::XMLDeclaration* decl = document->NewDeclaration();
+	document->LinkEndChild(decl);
+
+	// 루트 요소 생성
+	tinyxml2::XMLElement* root = document->NewElement("Mesh");
+	document->LinkEndChild(root);
+
+	// 메시 이름 저장
+	tinyxml2::XMLElement* nameElement = document->NewElement("Name");
+	nameElement->SetText(Utils::ToString(meshName).c_str());
+	root->LinkEndChild(nameElement);
+
+	// 메시 타입 저장
+	tinyxml2::XMLElement* typeElement = document->NewElement("Type");
+	typeElement->SetText(Utils::ToString(meshType).c_str());
+	root->LinkEndChild(typeElement);
+
+	document->SaveFile(Utils::ToString(finalPath).c_str());
+}
+
+void ResourceManager::WriteTextureToXML(const wstring& imagePath, const wstring& textureNamae, const wstring& finalPath)
+{
+	auto path = filesystem::path(finalPath);
+	filesystem::create_directory(path.parent_path());
+
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+
+	// XML 선언 추가
+	tinyxml2::XMLDeclaration* decl = document->NewDeclaration();
+	document->LinkEndChild(decl);
+
+	// 루트 요소 생성
+	tinyxml2::XMLElement* root = document->NewElement("Texture");
+	document->LinkEndChild(root);
+
+	// 메시 이름 저장
+	tinyxml2::XMLElement* fileElement = document->NewElement("File");
+	fileElement->SetText(Utils::ToString(imagePath).c_str());
+	root->LinkEndChild(fileElement);
+
+	// 메시 타입 저장
+	tinyxml2::XMLElement* nameElement = document->NewElement("Name");
+	nameElement->SetText(Utils::ToString(textureNamae).c_str());
+	root->LinkEndChild(nameElement);
+
+	document->SaveFile(Utils::ToString(finalPath).c_str());
+}
+
+void ResourceManager::WriteShaderToXML(const wstring& shaderPath, const wstring& shaderName, const vector<ShaderType>& shaderTypes, const vector<InputLayoutType>& inputLayouts, const map<wstring, uint32>& slots, const wstring& finalPath)
+{
+	auto path = filesystem::path(finalPath);
+	filesystem::create_directory(path.parent_path());
+
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+
+	// XML 선언 추가
+	tinyxml2::XMLDeclaration* decl = document->NewDeclaration();
+	document->LinkEndChild(decl);
+
+	// 루트 요소 생성
+	tinyxml2::XMLElement* root = document->NewElement("Shader");
+	document->LinkEndChild(root);
+
+	// 셰이더 이름 저장
+	tinyxml2::XMLElement* nameElement = document->NewElement("Name");
+	nameElement->SetText(Utils::ToString(shaderName).c_str());
+	root->LinkEndChild(nameElement);
+
+	// 셰이더 파일 경로 저장
+	tinyxml2::XMLElement* pathElement = document->NewElement("Path");
+	pathElement->SetText(Utils::ToString(shaderPath).c_str());
+	root->LinkEndChild(pathElement);
+
+	// ShaderTypes 저장
+	tinyxml2::XMLElement* typesElement = document->NewElement("ShaderTypes");
+	root->LinkEndChild(typesElement);
+
+	for (const auto& type : shaderTypes)
+	{
+		tinyxml2::XMLElement* typeElement = document->NewElement("Type");
+		typeElement->SetText(static_cast<int>(type));
+		typesElement->LinkEndChild(typeElement);
+	}
+
+	// InputLayouts 저장
+	tinyxml2::XMLElement* layoutsElement = document->NewElement("InputLayouts");
+	root->LinkEndChild(layoutsElement);
+
+	for (const auto& layout : inputLayouts)
+	{
+		tinyxml2::XMLElement* layoutElement = document->NewElement("Layout");
+		layoutElement->SetText(static_cast<int>(layout));
+		layoutsElement->LinkEndChild(layoutElement);
+	}
+
+	// Slots 저장
+	tinyxml2::XMLElement* slotsElement = document->NewElement("Slots");
+	root->LinkEndChild(slotsElement);
+
+	for (const auto& slot : slots)
+	{
+		tinyxml2::XMLElement* slotElement = document->NewElement("Slot");
+		slotElement->SetAttribute("name", Utils::ToString(slot.first).c_str());
+		slotElement->SetAttribute("index", slot.second);
+		slotsElement->LinkEndChild(slotElement);
+	}
+
+	document->SaveFile(Utils::ToString(finalPath).c_str());
+}
+
+void ResourceManager::WriteMaterialToXML(const wstring& textureName, const wstring& normalMapName,
+	const MaterialDesc& matDesc, const wstring& shaderName, const wstring& materialName, const wstring& finalPath)
+{
+	auto path = filesystem::path(finalPath);
+	filesystem::create_directory(path.parent_path());
+
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	tinyxml2::XMLDeclaration* decl = document->NewDeclaration();
+	document->LinkEndChild(decl);
+
+	tinyxml2::XMLElement* root = document->NewElement("Material");
+	document->LinkEndChild(root);
+
+	// Material 이름 저장
+	tinyxml2::XMLElement* nameElement = document->NewElement("Name");
+	nameElement->SetText(Utils::ToString(materialName).c_str());
+	root->LinkEndChild(nameElement);
+
+	// Texture 이름 저장 (있을 경우만)
+	if (!textureName.empty())
+	{
+		tinyxml2::XMLElement* textureElement = document->NewElement("Texture");
+		textureElement->SetText(Utils::ToString(textureName).c_str());
+		root->LinkEndChild(textureElement);
+	}
+
+	// NormalMap 이름 저장 (있을 경우만)
+	if (!normalMapName.empty())
+	{
+		tinyxml2::XMLElement* normalMapElement = document->NewElement("NormalMap");
+		normalMapElement->SetText(Utils::ToString(normalMapName).c_str());
+		root->LinkEndChild(normalMapElement);
+	}
+
+	// Shader 이름 저장
+	tinyxml2::XMLElement* shaderElement = document->NewElement("Shader");
+	shaderElement->SetText(Utils::ToString(shaderName).c_str());
+	root->LinkEndChild(shaderElement);
+
+	// MaterialDesc 저장
+	tinyxml2::XMLElement* descElement = document->NewElement("MaterialDesc");
+	root->LinkEndChild(descElement);
+
+	// Ambient
+	tinyxml2::XMLElement* ambientElement = document->NewElement("Ambient");
+	ambientElement->SetAttribute("r", matDesc.ambient.x);
+	ambientElement->SetAttribute("g", matDesc.ambient.y);
+	ambientElement->SetAttribute("b", matDesc.ambient.z);
+	ambientElement->SetAttribute("a", matDesc.ambient.w);
+	descElement->LinkEndChild(ambientElement);
+
+	// Diffuse
+	tinyxml2::XMLElement* diffuseElement = document->NewElement("Diffuse");
+	diffuseElement->SetAttribute("r", matDesc.diffuse.x);
+	diffuseElement->SetAttribute("g", matDesc.diffuse.y);
+	diffuseElement->SetAttribute("b", matDesc.diffuse.z);
+	diffuseElement->SetAttribute("a", matDesc.diffuse.w);
+	descElement->LinkEndChild(diffuseElement);
+
+	// Specular
+	tinyxml2::XMLElement* specularElement = document->NewElement("Specular");
+	specularElement->SetAttribute("r", matDesc.specular.x);
+	specularElement->SetAttribute("g", matDesc.specular.y);
+	specularElement->SetAttribute("b", matDesc.specular.z);
+	specularElement->SetAttribute("a", matDesc.specular.w);
+	descElement->LinkEndChild(specularElement);
+
+	document->SaveFile(Utils::ToString(finalPath).c_str());
+}
+
+void ResourceManager::WriteModelToXML(const wstring& modelPath, const wstring& shaderName, const wstring& materialPath, const wstring& modelName, const vector<wstring>& animPaths, const wstring& finalPath)
+{
+	auto path = filesystem::path(finalPath);
+	filesystem::create_directory(path.parent_path());
+
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	tinyxml2::XMLDeclaration* decl = document->NewDeclaration();
+	document->LinkEndChild(decl);
+
+	tinyxml2::XMLElement* root = document->NewElement("Model");
+	document->LinkEndChild(root);
+
+	// Model 이름 저장
+	tinyxml2::XMLElement* nameElement = document->NewElement("Name");
+	nameElement->SetText(Utils::ToString(modelName).c_str());
+	root->LinkEndChild(nameElement);
+
+	// Model 경로 저장
+	tinyxml2::XMLElement* pathElement = document->NewElement("Path");
+	pathElement->SetText(Utils::ToString(modelPath).c_str());
+	root->LinkEndChild(pathElement);
+
+	// Shader 이름 저장
+	tinyxml2::XMLElement* shaderElement = document->NewElement("Shader");
+	shaderElement->SetText(Utils::ToString(shaderName).c_str());
+	root->LinkEndChild(shaderElement);
+
+	// Material 경로 저장
+	tinyxml2::XMLElement* materialElement = document->NewElement("Material");
+	materialElement->SetText(Utils::ToString(materialPath).c_str());
+	root->LinkEndChild(materialElement);
+
+	// Animation 경로들 저장
+	if (!animPaths.empty())
+	{
+		tinyxml2::XMLElement* animationsElement = document->NewElement("Animations");
+		root->LinkEndChild(animationsElement);
+
+		for (const auto& animPath : animPaths)
+		{
+			tinyxml2::XMLElement* animElement = document->NewElement("Animation");
+			animElement->SetText(Utils::ToString(animPath).c_str());
+			animationsElement->LinkEndChild(animElement);
+		}
+	}
+
+	document->SaveFile(Utils::ToString(finalPath).c_str());
+}
+
+void ResourceManager::LoadMeshData(wstring path)
+{
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	string pathStr = Utils::ToString(path);
+	document->LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = document->FirstChildElement("Mesh");  // "Mesh" 루트 요소를 찾음
+	if (root == nullptr)
+	{
+		// XML 파일 구조가 잘못됐을 경우 처리
+		return;
+	}
+
+	tinyxml2::XMLElement* nameElement = root->FirstChildElement("Name");
+	tinyxml2::XMLElement* typeElement = root->FirstChildElement("Type");
+
+	if (nameElement == nullptr || typeElement == nullptr)
+	{
+		// 필수 요소가 없을 경우 처리
+		return;
+	}
+
+	string name = nameElement->GetText();
+	string type = typeElement->GetText();
+
+	shared_ptr<Mesh> mesh = make_shared<Mesh>();
+
+	// 메시 타입에 따라 적절한 생성 함수 호출
+	if (type == "Sphere")
+		mesh->CreateSphere_NormalTangent();
+	else if (type == "Cube")
+		mesh->CreateCube_NormalTangent();
+	else if (type == "Grid")
+		mesh->CreateGrid_NormalTangent(100, 100);
+	else if (type == "Terrain")
+		mesh->CreateTerrain();
+	else if (type == "Quad")
+		mesh->CreateQuad_NormalTangent();
+	else if (type == "Cylinder")
+		mesh->CreateCylinder_NormalTangent();
+
+	mesh->SetName(Utils::ToWString(name));
+	AddResource(mesh->GetName(), mesh);
+}
+
+void ResourceManager::LoadTextureData(wstring path)
+{
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	string pathStr = Utils::ToString(path);
+	document->LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = document->FirstChildElement("Texture");  // "Mesh" 루트 요소를 찾음
+	if (root == nullptr)
+	{
+		// XML 파일 구조가 잘못됐을 경우 처리
+		return;
+	}
+
+	tinyxml2::XMLElement* fileElement = root->FirstChildElement("File");
+	tinyxml2::XMLElement* nameElement = root->FirstChildElement("Name");
+
+	if (fileElement == nullptr || nameElement == nullptr)
+	{
+		// 필수 요소가 없을 경우 처리
+		return;
+	}
+
+	string file = fileElement->GetText();
+	string name = nameElement->GetText();
+	
+
+	shared_ptr<Texture> texture = make_shared<Texture>();
+	texture->CreateTexture(Utils::ToWString(file));
+	texture->SetName(Utils::ToWString(name));
+	RESOURCE.AddResource(texture->GetName(), texture);
+
+}
+
+void ResourceManager::LoadShaderData(wstring path)
+{
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	string pathStr = Utils::ToString(path);
+	document->LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = document->FirstChildElement("Shader");
+	if (root == nullptr)
+		return;
+
+	// 기본 정보 읽기
+	string name = root->FirstChildElement("Name")->GetText();
+	string shaderPath = root->FirstChildElement("Path")->GetText();
+
+	shared_ptr<Shader> shader = make_shared<Shader>();
+
+	// ShaderTypes 읽기
+	tinyxml2::XMLElement* typesElement = root->FirstChildElement("ShaderTypes");
+	tinyxml2::XMLElement* typeElement = typesElement->FirstChildElement("Type");
+
+	// InputLayouts 읽기
+	tinyxml2::XMLElement* layoutsElement = root->FirstChildElement("InputLayouts");
+	tinyxml2::XMLElement* layoutElement = layoutsElement->FirstChildElement("Layout");
+
+	// ShaderTypes와 InputLayouts 매칭하여 Shader 생성
+	while (typeElement && layoutElement)
+	{
+		ShaderType type = static_cast<ShaderType>(atoi(typeElement->GetText()));
+		InputLayoutType layout = static_cast<InputLayoutType>(atoi(layoutElement->GetText()));
+
+		shader->CreateShader(type, Utils::ToWString(shaderPath), layout);
+
+		typeElement = typeElement->NextSiblingElement("Type");
+		layoutElement = layoutElement->NextSiblingElement("Layout");
+	}
+
+	// Slots 읽기
+	tinyxml2::XMLElement* slotsElement = root->FirstChildElement("Slots");
+	tinyxml2::XMLElement* slotElement = slotsElement->FirstChildElement("Slot");
+
+	while (slotElement)
+	{
+		const char* slotName = slotElement->Attribute("name");
+		int slotIndex = 0;
+		slotElement->QueryIntAttribute("index", &slotIndex);
+
+		shader->GetShaderSlot()->SetSlot(Utils::ToWString(slotName), slotIndex);
+
+		slotElement = slotElement->NextSiblingElement("Slot");
+	}
+
+	shader->SetName(Utils::ToWString(name));
+	AddResource(shader->GetName(), shader);
+}
+
+void ResourceManager::LoadMaterialData(const wstring& path)
+{
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	string pathStr = Utils::ToString(path);
+	document->LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = document->FirstChildElement("Material");
+	if (root == nullptr)
+		return;
+
+	// 기본 정보 읽기
+	string name = root->FirstChildElement("Name")->GetText();
+	string shaderName = root->FirstChildElement("Shader")->GetText();
+
+	// Material 생성 및 설정
+	shared_ptr<Material> material = make_shared<Material>();
+
+	// Texture 설정 (있을 경우만)
+	tinyxml2::XMLElement* textureElement = root->FirstChildElement("Texture");
+	if (textureElement)
+	{
+		string textureName = textureElement->GetText();
+		material->SetTexture(RESOURCE.GetResource<Texture>(Utils::ToWString(textureName)));
+	}
+
+	// NormalMap 설정 (있을 경우만)
+	tinyxml2::XMLElement* normalMapElement = root->FirstChildElement("NormalMap");
+	if (normalMapElement)
+	{
+		string normalMapName = normalMapElement->GetText();
+		material->SetNormalMap(RESOURCE.GetResource<Texture>(Utils::ToWString(normalMapName)));
+	}
+
+	// MaterialDesc 읽기
+	MaterialDesc matDesc;
+	tinyxml2::XMLElement* descElement = root->FirstChildElement("MaterialDesc");
+	if (descElement)
+	{
+		tinyxml2::XMLElement* ambientElement = descElement->FirstChildElement("Ambient");
+		matDesc.ambient.x = ambientElement->FloatAttribute("r");
+		matDesc.ambient.y = ambientElement->FloatAttribute("g");
+		matDesc.ambient.z = ambientElement->FloatAttribute("b");
+		matDesc.ambient.w = ambientElement->FloatAttribute("a");
+
+		tinyxml2::XMLElement* diffuseElement = descElement->FirstChildElement("Diffuse");
+		matDesc.diffuse.x = diffuseElement->FloatAttribute("r");
+		matDesc.diffuse.y = diffuseElement->FloatAttribute("g");
+		matDesc.diffuse.z = diffuseElement->FloatAttribute("b");
+		matDesc.diffuse.w = diffuseElement->FloatAttribute("a");
+
+		tinyxml2::XMLElement* specularElement = descElement->FirstChildElement("Specular");
+		matDesc.specular.x = specularElement->FloatAttribute("r");
+		matDesc.specular.y = specularElement->FloatAttribute("g");
+		matDesc.specular.z = specularElement->FloatAttribute("b");
+		matDesc.specular.w = specularElement->FloatAttribute("a");
+	}
+	else
+	{
+		matDesc.ambient = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		matDesc.specular = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	material->SetMaterialDesc(matDesc);
+	material->SetShader(RESOURCE.GetResource<Shader>(Utils::ToWString(shaderName)));
+	material->SetName(Utils::ToWString(name));
+
+	RESOURCE.AddResource(material->GetName(), material);
+}
+
+void ResourceManager::LoadModelData(const wstring& path)
+{
+	shared_ptr<tinyxml2::XMLDocument> document = make_shared<tinyxml2::XMLDocument>();
+	string pathStr = Utils::ToString(path);
+	document->LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = document->FirstChildElement("Model");
+	if (root == nullptr)
+		return;
+
+	// 기본 정보 읽기
+	string name = root->FirstChildElement("Name")->GetText();
+	string modelPath = root->FirstChildElement("Path")->GetText();
+	string shaderName = root->FirstChildElement("Shader")->GetText();
+	string materialPath = root->FirstChildElement("Material")->GetText();
+
+	// Model 생성 및 설정
+	shared_ptr<Model> model = make_shared<Model>();
+	model->ReadModel(Utils::ToWString(modelPath));
+	model->SetShaderForMaterial(RESOURCE.GetResource<Shader>(Utils::ToWString(shaderName)));
+	model->ReadMaterial(Utils::ToWString(materialPath));
+
+	// Animation 읽기 (있는 경우)
+	tinyxml2::XMLElement* animationsElement = root->FirstChildElement("Animations");
+	if (animationsElement)
+	{
+		tinyxml2::XMLElement* animElement = animationsElement->FirstChildElement("Animation");
+		while (animElement)
+		{
+			string animPath = animElement->GetText();
+			model->ReadAnimation(Utils::ToWString(animPath));
+			animElement = animElement->NextSiblingElement("Animation");
+		}
+		model->CreateTexture();
+	}
+
+	model->SetName(Utils::ToWString(name));
+	RESOURCE.AddResource(model->GetName(), model);
+}
+

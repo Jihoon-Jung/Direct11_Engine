@@ -20,6 +20,7 @@ enum class Pass
 	ENVIRONMENTMAP_RENDER,
 	STATIC_MESH_RENDER,
 	ANIMATED_MESH_RENDER,
+	PARTICLE_RENDER,
 	DEBUG_2D_RENDER,
 	// TODO
 };
@@ -40,6 +41,7 @@ public:
 	void TerrainRender(bool isEnv);
 	void StaticMeshRencer(bool isEnv);
 	void AnimatedMeshRender(bool isEnv);
+	void ParticleRender(bool isEnv);
 	void DebugQuadRender();
 	void SetRenderTarget(int width, int height);
 	void SetMesh(shared_ptr<Mesh> mesh) { _mesh = mesh; }
@@ -56,6 +58,10 @@ public:
 	void SetMeshRenderer(shared_ptr<MeshRenderer> meshRenderer) { _meshRenderer = meshRenderer; }
 	void SetTransform(shared_ptr<Transform> transform) { _transform = transform; }
 	void SetDepthStencilStateType(DSState state) { _dsStateType = state; }
+
+	Pass GetPass() const { return _pass; }
+	DSState GetDepthStencilStateType() const { return _dsStateType; }
+
 	ComPtr<ID3D11ShaderResourceView> GetOutputSRV() { return _outputSRV; }
 	ComPtr<ID3D11ShaderResourceView> GetOffscreenSRV() { return _offscreenSRV; }
 	ComPtr<ID3D11RenderTargetView> GetOffscreenRTV() { return _offscreenRTV; }
@@ -73,7 +79,7 @@ public:
 	shared_ptr<SamplerState> _samplerState;
 	shared_ptr<DepthStencilState> _depthStencilState;
 	shared_ptr<Shader> _shader;
-	shared_ptr<Transform> _transform;
+	weak_ptr<Transform> _transform;
 	DSState _dsStateType;
 	Pass _pass;
 	RasterizerStateInfo _rasterizerStates;
@@ -85,5 +91,7 @@ public:
 	KeyframeDesc _keyframeDesc;
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
+
+	shared_ptr<Transform> _transformPtr;
 };
 

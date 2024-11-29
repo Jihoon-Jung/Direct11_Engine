@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>Quad_Shader</Name>
+    <Path>Shader/Quad.hlsl</Path>
+    <ShaderTypes>
+        <Type>0</Type>
+        <Type>1</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>0</Layout>
+        <Layout>0</Layout>
+    </InputLayouts>
+    <Slots>
+        <Slot name="texture0" index="0"/>
+    </Slots>
+</Shader>

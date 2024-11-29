@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Dreyar</Name>
+    <Path>Dreyar/Dreyar</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Dreyar/Dreyar</Material>
+    <Animations>
+        <Animation>Dreyar/Kick</Animation>
+        <Animation>Dreyar/Fall</Animation>
+        <Animation>Dreyar/Dance</Animation>
+    </Animations>
+</Model>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Kachujin</Name>
+    <Path>Kachujin/Kachujin</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Kachujin/Kachujin</Material>
+    <Animations>
+        <Animation>Kachujin/Run</Animation>
+        <Animation>Kachujin/Slash</Animation>
+        <Animation>Kachujin/Dismissing</Animation>
+    </Animations>
+</Model>

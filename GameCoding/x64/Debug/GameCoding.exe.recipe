@@ -43,6 +43,9 @@
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\RenderParticleSystem.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SimpleShader.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SkyBox.cso</FullPath>
     </ContentFile>
     <ContentFile>

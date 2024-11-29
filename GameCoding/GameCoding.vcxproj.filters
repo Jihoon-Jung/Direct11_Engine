@@ -591,5 +591,8 @@
     <FxCompile Include="Shader\Debug_UI_Shader.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\SimpleShader.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

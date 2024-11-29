@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>Gaussian_Vertical</Name>
+    <Path>Shader/ComputeShader_GaussianBlurVertical.hlsl</Path>
+    <ShaderTypes>
+        <Type>2</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>0</Layout>
+    </InputLayouts>
+    <Slots/>
+</Shader>

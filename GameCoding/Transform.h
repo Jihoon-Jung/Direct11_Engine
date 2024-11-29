@@ -22,8 +22,15 @@ public:
 
 	Vec3 GetLocalPosition() { return _localPosition; }
 	Vec3 GetLocalRotation() { 
+		//Vec3 rotation = ToEulerAngles(_qtLocalRotation);
+		//return rotation;
 		Vec3 rotation = ToEulerAngles(_qtLocalRotation);
-		return rotation;
+		// 라디안을 도(degree)로 변환
+		return Vec3(
+			XMConvertToDegrees(rotation.x),
+			XMConvertToDegrees(rotation.y),
+			XMConvertToDegrees(rotation.z)
+		);
 	}
 	Vec3 GetLocalScale() { return _localScale; }
 	Vec3 GetRevolutionRotation() { return _revolutionRotation; }
@@ -31,6 +38,7 @@ public:
 
 	void SetLocalPosition(Vec3 position) { _localPosition = position; UpdateTransform();}
 	void SetLocalRotation(Vec3 rotation) { 
+
 		float pitch = XMConvertToRadians(rotation.x);
 		float yaw = XMConvertToRadians(rotation.y);
 		float roll = XMConvertToRadians(rotation.z);
@@ -38,7 +46,7 @@ public:
 		_qtLocalRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 		UpdateTransform();
 	}
-	void SetLocalScale(Vec3 scale) { _localScale = scale; }
+	void SetLocalScale(Vec3 scale) { _localScale = scale; UpdateTransform();}
 
 	// 월드 공간에서 공전을 수행하는 함수 추가
 	void RotateAround(const Vec3& center, const Vec3& axis, float angle);

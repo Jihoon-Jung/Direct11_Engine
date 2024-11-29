@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>Terrain_Shader</Name>
+    <Path>Shader/Terrain.hlsl</Path>
+    <ShaderTypes>
+        <Type>0</Type>
+        <Type>5</Type>
+        <Type>6</Type>
+        <Type>1</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>3</Layout>
+        <Layout>3</Layout>
+        <Layout>3</Layout>
+        <Layout>3</Layout>
+    </InputLayouts>
+    <Slots>
+        <Slot name="CameraBuffer" index="0"/>
+        <Slot name="LightAndCameraPos" index="3"/>
+        <Slot name="LightDesc" index="2"/>
+        <Slot name="LightMaterial" index="1"/>
+        <Slot name="LightSpaceTransform" index="5"/>
+        <Slot name="TerrainBuffer" index="4"/>
+        <Slot name="TransformBuffer" index="6"/>
+        <Slot name="gBlendMap" index="1"/>
+        <Slot name="gHeightMap" index="2"/>
+        <Slot name="gLayerMapArray" index="0"/>
+        <Slot name="shadowMap" index="3"/>
+    </Slots>
+</Shader>

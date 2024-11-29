@@ -1,6 +1,7 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include <string>
 #include "GUIManager.h"
+#include "MoveObject.h"
 #include <algorithm>
 
 void GUIManager::Init()
@@ -15,13 +16,13 @@ void GUIManager::Init()
 	// Setup Dear ImGui style
 	ImGui::StyleColorsLight();
 
-    // Å¸ÀÌÆ²¹Ù »ö»ó ¼³Á¤
+    // íƒ€ì´í‹€ë°” ìƒ‰ìƒ ì„¤ì •
     ImGuiStyle& style = ImGui::GetStyle();
     style.Colors[ImGuiCol_TitleBg] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
     style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
 
-    // ÆùÆ® ¼³Á¤
+    // í°íŠ¸ ì„¤ì •
     ImFont* font = io.Fonts->AddFontFromFileTTF("Roboto-Bold.ttf", 13.0f);
     io.FontDefault = font;
 
@@ -29,9 +30,13 @@ void GUIManager::Init()
 	ImGui_ImplWin32_Init(GP.GetWindowHandle());
 	ImGui_ImplDX11_Init(GP.GetDevice().Get(), GP.GetDeviceContext().Get());
 
-    // ImGuizmo ÃÊ±âÈ­
-    ImGuizmo::Enable(true);  // ImGuizmo È°¼ºÈ­
+    // ImGuizmo ì´ˆê¸°í™”
+    ImGuizmo::Enable(true);  // ImGuizmo í™œì„±í™”
     ImGuizmo::SetGizmoSizeClipSpace(0.14f);
+
+    // ì´ˆê¸° ì„ íƒ í´ë”ë¥¼ Resource í´ë”ë¡œ ì„¤ì •
+    _selectedFolder = "Resource/";
+    _isFirstFrame = true;
 }
 
 float EaseInOutCubic(float t)
@@ -53,13 +58,13 @@ void GUIManager::Update()
         shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
         if (camera)
         {
-            // ºÎµå·¯¿î º¸°£À» À§ÇØ easeInOutCubic ÇÔ¼ö »ç¿ë
+            // ë¶€ë“œëŸ¬ìš´ ë³´ê°„ì„ ìœ„í•´ easeInOutCubic í•¨ìˆ˜ ì‚¬ìš©
             float t = EaseInOutCubic(_cameraMoveTime);
 
-            // À§Ä¡ º¸°£
+            // ìœ„ì¹˜ ë³´ê°„
             Vec3 newPos = Vec3::Lerp(_cameraStartPos, _cameraTargetPos, t);
 
-            // È¸Àü º¸°£ (ÄõÅÍ´Ï¿Â »ç¿ë)
+            // íšŒì „ ë³´ê°„ (ì¿¼í„°ë‹ˆì˜¨ ì‚¬ìš©)
             Quaternion startRot = Quaternion::CreateFromYawPitchRoll(
                 XMConvertToRadians(_cameraStartRot.y),
                 XMConvertToRadians(_cameraStartRot.x),
@@ -74,7 +79,7 @@ void GUIManager::Update()
 
             Quaternion newRot = Quaternion::Slerp(startRot, targetRot, t);
 
-            // º¯È¯µÈ °ª Àû¿ë
+            // ë³€í™˜ëœ ê°’ ì ìš©
             camera->transform()->SetLocalPosition(newPos);
             camera->transform()->SetQTRotation(newRot);
         }
@@ -92,7 +97,7 @@ void GUIManager::RenderUI_Start()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-    ImGuizmo::BeginFrame();  // ImGuizmo ÇÁ·¹ÀÓ ½ÃÀÛ
+    ImGuizmo::BeginFrame();  // ImGuizmo í”„ë ˆì„ ì‹œì‘
 }
 
 std::string WStringToString(const std::wstring& wstr)
@@ -112,7 +117,7 @@ void GUIManager::RenderUI()
     // controller
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     {
-        // Ã¢ Å×µÎ¸® ½ºÅ¸ÀÏ ¼³Á¤
+        // ì°½ í…Œë‘ë¦¬ ìŠ¤íƒ€ì¼ ì„¤ì •
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
 
@@ -127,28 +132,28 @@ void GUIManager::RenderUI()
             ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);
 
-        // ¹öÆ° Å©±â¿Í °£°İ ¼³Á¤
+        // ë²„íŠ¼ í¬ê¸°ì™€ ê°„ê²© ì„¤ì •
         float buttonWidth = windowSizeX * (0.2f / 10.0f);
         float buttonHeight = windowSizeY * (6.0f / 10.0f);
         float spacing = windowSizeX * (0.1f / 100.0f);
         float totalWidth = (buttonWidth * 3) + (spacing * 2);
 
-        // Ã¢ÀÇ Áß¾Ó À§Ä¡ °è»ê
+        // ì°½ì˜ ì¤‘ì•™ ìœ„ì¹˜ ê³„ì‚°
         float windowWidth = ImGui::GetWindowSize().x;
         float windowHeight = ImGui::GetWindowSize().y;
         float startX = (windowWidth - totalWidth) * 0.5f;
         float startY = (windowHeight - buttonHeight) * 0.5f;
 
-        // Ä¿¼­ À§Ä¡ ¼³Á¤
+        // ì»¤ì„œ ìœ„ì¹˜ ì„¤ì •
         ImGui::SetCursorPos(ImVec2(startX, startY));
 
-        // ¹öÆ° ½ºÅ¸ÀÏ ¼³Á¤
+        // ë²„íŠ¼ ìŠ¤íƒ€ì¼ ì„¤ì •
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7.0f);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.65f, 0.65f, 0.65f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.75f, 0.75f, 1.0f));
 
-        // ÀÌ¹ÌÁö ¹öÆ° »ı¼º
+        // ì´ë¯¸ì§€ ë²„íŠ¼ ìƒì„±
         if (ImGui::ImageButton("Play", (ImTextureID)(RESOURCE.GetResource<Texture>(L"startButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
         {
             if (ENGINE.IsStopped() || ENGINE.IsPaused())
@@ -176,13 +181,14 @@ void GUIManager::RenderUI()
             ENGINE.Stop();
         }
 
-        // ½ºÅ¸ÀÏ º¹¿ø
+        // ìŠ¤íƒ€ì¼ ë³µì›
         ImGui::PopStyleColor(3);
         ImGui::PopStyleVar();
+        
 
         ImGui::End();
 
-        // Ã¢ Å×µÎ¸® ½ºÅ¸ÀÏ º¹¿ø
+        // ì°½ í…Œë‘ë¦¬ ìŠ¤íƒ€ì¼ ë³µì›
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
     }
@@ -198,103 +204,42 @@ void GUIManager::RenderUI()
 
         vector<shared_ptr<GameObject>> gameObjects = SCENE.GetActiveScene()->GetGameObjects();
 
-        // Scene TreeNode¸¦ ±âº»ÀûÀ¸·Î ¿­¸° »óÅÂ·Î ¼³Á¤
+        // Scene TreeNodeë¥¼ ê¸°ë³¸ì ìœ¼ë¡œ ì—´ë¦° ìƒíƒœë¡œ ì„¤ì •
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
         if (ImGui::TreeNode("Scene"))
         {
-            for (int i = 0; i < gameObjects.size(); i++)
+            for (const auto& gameObject : gameObjects)
             {
-                std::string objectName;
-                objectName.assign(gameObjects[i]->GetName().begin(), gameObjects[i]->GetName().end());
-
-                ImGuiTreeNodeFlags tree_flags = ImGuiTreeNodeFlags_Leaf |
-                    ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                    ImGuiTreeNodeFlags_SpanAvailWidth;
-
-                // ÇöÀç ¼±ÅÃµÈ ¿ÀºêÁ§Æ®ÀÎ °æ¿ì Selected ÇÃ·¡±× Ãß°¡
-                if (_selectedObject == gameObjects[i])
+                if (gameObject->GetParent() == nullptr)
                 {
-                    tree_flags |= ImGuiTreeNodeFlags_Selected;
-                }
-
-                ImGui::TreeNodeEx((void*)(intptr_t)i, tree_flags, objectName.c_str());
-
-                // ´ÜÀÏ Å¬¸¯ Ã³¸®
-                if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen())
-                {
-                    _selectedObject = gameObjects[i];  // ¼±ÅÃµÈ ¿ÀºêÁ§Æ® ÀúÀå
-                    SCENE.GetActiveScene()->AddPickedObject(_selectedObject);
-                }
-
-                // ´õºí Å¬¸¯ Ã³¸®
-                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                {
-                    shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
-                    Vec3 targetPos = _selectedObject->transform()->GetWorldPosition();
-                    Vec3 offset = Vec3(0.0f, 2.0f, -5.0f);
-                    Vec3 cameraTargetPos = targetPos + offset;
-
-                    // Ä«¸Ş¶ó°¡ Å¸°ÙÀ» ¹Ù¶óº¸µµ·Ï È¸Àü °è»ê
-                    Vec3 dirToTarget = targetPos - cameraTargetPos;
-                    float length = dirToTarget.Length();
-                    dirToTarget.Normalize();
-
-                    float yaw = atan2(dirToTarget.x, dirToTarget.z);
-                    float pitch = -atan2(dirToTarget.y, sqrt(dirToTarget.x * dirToTarget.x + dirToTarget.z * dirToTarget.z));
-
-                    Vec3 targetRotation = Vec3(
-                        XMConvertToDegrees(pitch),
-                        XMConvertToDegrees(yaw),
-                        0.0f
-                    );
-
-                    // º¸°£ ½ÃÀÛ ¼³Á¤
-                    _isCameraMoving = true;
-                    _cameraMoveTime = 0.0f;
-                    _cameraStartPos = camera->transform()->GetLocalPosition();
-                    _cameraTargetPos = cameraTargetPos;
-                    _cameraStartRot = camera->transform()->GetLocalRotation();
-                    _cameraTargetRot = targetRotation;
-                }
-
-                if (ImGui::BeginPopupContextItem())
-                {
-                    if (ImGui::MenuItem("Delete"))
-                    {
-                        char buffer[100];
-                        sprintf_s(buffer, "Delete.\n");
-                        OutputDebugStringA(buffer);
-                        // TODO: Delete GameObject ±â´É ±¸Çö
-                    }
-                    ImGui::EndPopup();
+                    RenderGameObjectHierarchy(gameObject);
                 }
             }
             ImGui::TreePop();
         }
 
-        // Hierarchy Ã¢ ºó °ø°£¿¡ ´ëÇÑ ¿ìÅ¬¸¯ ¸Ş´º
+        // Hierarchy ì°½ ë‚´ ìš°í´ë¦­ ë©”ë‰´
         if (ImGui::BeginPopupContextWindow("HierarchyContextMenu", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
         {
-            if (ImGui::MenuItem("Create Empty Object"))
+            if (ImGui::BeginMenu("Create"))
             {
-                // TODO: Create Empty Object ±â´É ±¸Çö
-            }
-            if (ImGui::MenuItem("NULL1"))
-            {
-                // TODO: NULL1 ±â´É ±¸Çö
-            }
-            if (ImGui::MenuItem("NULL2"))
-            {
-                // TODO: NULL2 ±â´É ±¸Çö
-            }
-            if (ImGui::MenuItem("NULL3"))
-            {
-                // TODO: NULL3 ±â´É ±¸Çö
+                if (ImGui::MenuItem("EmptyObject##CreateMenu1"))  // ##ë’¤ì˜ ë¬¸ìì—´ë¡œ ê³ ìœ  ID ë¶€ì—¬
+                {
+                    // TODO: NULL1 êµ¬í˜„ ì˜ˆì •
+                }
+                if (ImGui::MenuItem("NULL2##CreateMenu2"))
+                {
+                    // TODO: NULL2 êµ¬í˜„ ì˜ˆì •
+                }
+                if (ImGui::MenuItem("NULL3##CreateMenu3"))
+                {
+                    // TODO: NULL3 êµ¬í˜„ ì˜ˆì •
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndPopup();
         }
-
         ImGui::End();
     }
 
@@ -309,11 +254,11 @@ void GUIManager::RenderUI()
 
         if (_selectedObject != nullptr)
         {
-            // ¿ÀºêÁ§Æ® ÀÌ¸§ Ç¥½Ã
+            // ì˜¤ë¸Œì íŠ¸ ì´ë¦„ í‘œì‹œ
             ImGui::Text("Name: %s", WStringToString(_selectedObject->GetName()).c_str());
             ImGui::Separator();
 
-            // TransformÀº Ç×»ó ¸ÕÀú Ç¥½Ã
+            // Transformì€ í•­ìƒ ë¨¼ì € í‘œì‹œ
             shared_ptr<Transform> transform = _selectedObject->GetComponent<Transform>();
 
             if (transform && ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
@@ -323,15 +268,15 @@ void GUIManager::RenderUI()
                 static GameObject* lastObject = nullptr;
                 static Vec3 lastRotation = Vec3::Zero;
 
-                // ÇöÀç È¸Àü »óÅÂ °¡Á®¿À±â
+                // í˜„ì¬ íšŒì „ ìƒíƒœ ê°€ì ¸ì˜¤ê¸°
                 Matrix currentRotationMatrix = Matrix::CreateFromQuaternion(transform->GetQTRotation());
 
-                // ÇöÀç ·ÎÄÃ Ãà °è»ê
+                // í˜„ì¬ ë¡œì»¬ ì¶• ê³„ì‚°
                 Vec3 localRight = Vec3::TransformNormal(Vec3::Right, currentRotationMatrix);
                 Vec3 localUp = Vec3::TransformNormal(Vec3::Up, currentRotationMatrix);
                 Vec3 localForward = Vec3::TransformNormal(Vec3::Forward, currentRotationMatrix);
 
-                // ÇöÀç È¸Àü°ªÀ» ¿ÀÀÏ·¯°¢À¸·Î º¯È¯
+                // í˜„ì¬ íšŒì „ê°’ì„ ì˜¤ì¼ëŸ¬ê°ìœ¼ë¡œ ë³€í™˜
                 Vec3 angles = transform->ToEulerAngles(transform->GetQTRotation());
                 currentEulerAngles.x = XMConvertToDegrees(angles.x);
                 currentEulerAngles.y = XMConvertToDegrees(angles.y);
@@ -349,51 +294,103 @@ void GUIManager::RenderUI()
 
                 Vec3 tempRotation = currentEulerAngles;
 
-                // XÃà È¸Àü
+                // Xì¶• íšŒì „
                 if (ImGui::DragFloat("Rotation X", &tempRotation.x, 0.1f))
                 {
-                    float angle = XMConvertToRadians(tempRotation.x - lastRotation.x);
-                    Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localRight, angle);
-                    Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                    transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
-                    lastRotation.x = tempRotation.x;
-                    currentEulerAngles.x = tempRotation.x;
+                    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+                    {
+                        float deltaAngle = tempRotation.x - lastRotation.x;
+                        // ë¸íƒ€ ê°ë„ê°€ ë„ˆë¬´ í¬ë©´ ì œí•œ
+                        if (abs(deltaAngle) > 10.0f) {
+                            deltaAngle = (deltaAngle > 0) ? 10.0f : -10.0f;
+                            tempRotation.x = lastRotation.x + deltaAngle;
+                        }
+
+                        float angle = XMConvertToRadians(deltaAngle);
+                        Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localRight, angle);
+                        Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
+                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        lastRotation.x = tempRotation.x;
+                        currentEulerAngles.x = tempRotation.x;
+                    }
+                    else if (!ImGui::IsItemActive() && ImGui::IsItemDeactivatedAfterEdit())  // ì§ì ‘ ì…ë ¥ í›„ í¬ì»¤ìŠ¤ë¥¼ ìƒì—ˆì„ ë•Œ
+                    {
+                        transform->SetLocalRotation(tempRotation);
+                        lastRotation = tempRotation;
+                        currentEulerAngles = tempRotation;
+                    }
                 }
 
-                // YÃà È¸Àü
+                // Yì¶• íšŒì „
                 if (ImGui::DragFloat("Rotation Y", &tempRotation.y, 0.1f))
                 {
-                    float angle = XMConvertToRadians(tempRotation.y - lastRotation.y);
-                    Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localUp, angle);
-                    Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                    transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
-                    lastRotation.y = tempRotation.y;
-                    currentEulerAngles.y = tempRotation.y;
+                    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+                    {
+                        float deltaAngle = tempRotation.y - lastRotation.y;
+                        // ë¸íƒ€ ê°ë„ê°€ ë„ˆë¬´ í¬ë©´ ì œí•œ
+                        if (abs(deltaAngle) > 10.0f) {
+                            deltaAngle = (deltaAngle > 0) ? 10.0f : -10.0f;
+                            tempRotation.y = lastRotation.y + deltaAngle;
+                        }
+
+                        float angle = XMConvertToRadians(deltaAngle);
+                        Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localUp, angle);
+                        Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
+                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        lastRotation.y = tempRotation.y;
+                        currentEulerAngles.y = tempRotation.y;
+                    }
+                    else if (!ImGui::IsItemActive() && ImGui::IsItemDeactivatedAfterEdit())  // ì§ì ‘ ì…ë ¥ í›„ í¬ì»¤ìŠ¤ë¥¼ ìƒì—ˆì„ ë•Œ
+                    {
+                        transform->SetLocalRotation(tempRotation);
+                        lastRotation = tempRotation;
+                        currentEulerAngles = tempRotation;
+                    }
                 }
 
-                // ZÃà È¸Àü
+                // Zì¶• íšŒì „
                 if (ImGui::DragFloat("Rotation Z", &tempRotation.z, 0.1f))
                 {
-                    float angle = XMConvertToRadians(tempRotation.z - lastRotation.z);
-                    Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localForward, angle);
-                    Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                    transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
-                    lastRotation.z = tempRotation.z;
-                    currentEulerAngles.z = tempRotation.z;
+                    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+                    {
+                        float deltaAngle = tempRotation.z - lastRotation.z;
+                        // ë¸íƒ€ ê°ë„ê°€ ë„ˆë¬´ í¬ë©´ ì œí•œ
+                        if (abs(deltaAngle) > 10.0f) {
+                            deltaAngle = (deltaAngle > 0) ? 10.0f : -10.0f;
+                            tempRotation.z = lastRotation.z + deltaAngle;
+                        }
+
+                        float angle = XMConvertToRadians(deltaAngle);
+                        Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localForward, angle);
+                        Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
+                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        lastRotation.z = tempRotation.z;
+                        currentEulerAngles.z = tempRotation.z;
+                    }
+                    else if (!ImGui::IsItemActive() && ImGui::IsItemDeactivatedAfterEdit())  // ì§ì ‘ ì…ë ¥ í›„ í¬ì»¤ìŠ¤ë¥¼ ìƒì—ˆì„ ë•Œ
+                    {
+                        transform->SetLocalRotation(tempRotation);
+                        lastRotation = tempRotation;
+                        currentEulerAngles = tempRotation;
+                    }
                 }
 
                 if (ImGui::DragFloat3("Scale", &scale.x, 0.1f))
                     transform->SetLocalScale(scale);
+                SCENE.UpdateGameObjectTransformInXML(L"test_scene", _selectedObject->GetName(),
+                    position, transform->GetLocalRotation(), transform->GetLocalScale());
+
+                ImGui::Separator();
             }
-            // ³ª¸ÓÁö ÄÄÆ÷³ÍÆ®µé Ç¥½Ã
+            // ë‚˜ë¨¸ì§€ ì»´í¬ë„ŒíŠ¸ë“¤ í‘œì‹œ
             const vector<shared_ptr<Component>>& components = _selectedObject->GetComponents();
             for (const auto& component : components)
             {
-                // TransformÀº ÀÌ¹Ì Ç¥½ÃÇßÀ¸¹Ç·Î ½ºÅµ
+                // Transformì€ ì´ë¯¸ í‘œì‹œí–ˆìœ¼ë¯€ë¡œ ìŠ¤í‚µ
                 if (dynamic_pointer_cast<Transform>(component))
                     continue;
 
-                // ÄÄÆ÷³ÍÆ® Å¸ÀÔ¿¡ µû¸¥ ÀÌ¸§ ¼³Á¤
+                // ì»´í¬ë„ŒíŠ¸ íƒ€ì…ì— ë”°ë¥¸ ì´ë¦„ ì„¤ì •
                 string componentName;
                 if (dynamic_pointer_cast<MeshRenderer>(component))
                     componentName = "Mesh Renderer";
@@ -401,14 +398,200 @@ void GUIManager::RenderUI()
                     componentName = "Camera";
                 else if (dynamic_pointer_cast<Light>(component))
                     componentName = "Light";
-                else if (dynamic_pointer_cast<BaseCollider>(component))
-                    componentName = "Collider";
-                // ... ´Ù¸¥ ÄÄÆ÷³ÍÆ® Å¸ÀÔµé Ãß°¡ ...
+                else if (dynamic_pointer_cast<BoxCollider>(component))
+                    componentName = "BoxCollider";
+                else if (dynamic_pointer_cast<SphereCollider>(component))
+                    componentName = "SphereCollider";
+                else if (dynamic_pointer_cast<MoveObject>(component))
+                    componentName = "MoveObject";
+                // ... ë‹¤ë¥¸ ì»´í¬ë„ŒíŠ¸ íƒ€ì…ë“¤ ì¶”ê°€ ...
 
-                if (!componentName.empty() && ImGui::CollapsingHeader(componentName.c_str()))
+                if (!componentName.empty())
                 {
-                    // °¢ ÄÄÆ÷³ÍÆ® Å¸ÀÔº° ¼Ó¼º Ç¥½Ã
-                    // TODO: ÄÄÆ÷³ÍÆ®º° ¼¼ºÎ ¼Ó¼º Ç¥½Ã ·ÎÁ÷ Ãß°¡
+                    if (ImGui::CollapsingHeader(componentName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                    {
+                        // ê° ì»´í¬ë„ŒíŠ¸ íƒ€ì…ë³„ ì†ì„± í‘œì‹œ
+                        // TODO: ì»´í¬ë„ŒíŠ¸ë³„ ì„¸ë¶€ ì†ì„± í‘œì‹œ ë¡œì§ ì¶”ê°€
+
+                        if (auto boxCollider = dynamic_pointer_cast<BoxCollider>(component))
+                        {
+                            // Center
+                            Vec3 center = boxCollider->GetCenter();
+                            if (ImGui::DragFloat3("Center", &center.x, 0.1f))
+                            {
+                                boxCollider->SetCenter(center);
+                                SCENE.UpdateGameObjectColliderInXML(L"test_scene", _selectedObject->GetName(),
+                                    center, boxCollider->GetScale(), true);
+                            }
+
+                            // Size
+                            Vec3 scale = boxCollider->GetScale();
+                            if (ImGui::DragFloat3("Size", &scale.x, 0.1f))
+                            {
+                                boxCollider->SetScale(scale);
+                                SCENE.UpdateGameObjectColliderInXML(L"test_scene", _selectedObject->GetName(),
+                                    boxCollider->GetCenter(), scale, true);
+                            }
+
+                            // Edit Mode Toggle
+                            if (ImGui::Button(_isColliderEditMode ? "Exit Edit Mode" : "Edit Mode"))
+                            {
+                                _isColliderEditMode = !_isColliderEditMode;
+                            }
+                        }
+                        else if (auto sphereCollider = dynamic_pointer_cast<SphereCollider>(component))
+                        {
+                            // Center
+                            Vec3 center = sphereCollider->GetCenter();
+                            if (ImGui::DragFloat3("Center", &center.x, 0.1f))
+                            {
+                                sphereCollider->SetCenter(center);
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectSphereColliderInXML(currentSceneName, _selectedObject->GetName(),
+                                    center, sphereCollider->GetRadius());
+                            }
+
+                            // Radius - ì‹¤ì œ í¬ê¸° ë°˜ì˜ì„ ìœ„í•´ ìˆ˜ì •
+                            float radius = sphereCollider->GetRadius();
+                            if (ImGui::DragFloat("Radius", &radius, 0.1f))
+                            {
+                                sphereCollider->SetRadius(radius);
+                                sphereCollider->SetScale(Vec3(radius, radius, radius)); // Scale ì„¤ì • ì¶”ê°€
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectSphereColliderInXML(currentSceneName, _selectedObject->GetName(),
+                                    center, radius);
+                            }
+
+                            // Edit Mode Toggle
+                            if (ImGui::Button(_isColliderEditMode ? "Exit Edit Mode" : "Edit Mode"))
+                            {
+                                _isColliderEditMode = !_isColliderEditMode;
+                            }
+                        }
+
+                        else if (auto meshRenderer = dynamic_pointer_cast<MeshRenderer>(component))
+                        {
+                            // ìŠ¤íƒ€ì¼ ì„¤ì •
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+                            float labelWidth = 100.0f;
+                            float valueWidth = ImGui::GetContentRegionAvail().x - labelWidth - 20.0f;
+
+                            // ì…ë ¥ í•„ë“œ ìŠ¤íƒ€ì¼ ì„¤ì •
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+                            // RenderPass
+                            ImGui::Text("RenderPass"); ImGui::SameLine(labelWidth);
+                            if (ImGui::Button("..##RenderPass", ImVec2(20, 0))) ImGui::OpenPopup("RenderPassSelectPopup");
+                            ImGui::SameLine();
+                            Pass passType = _selectedObject->GetComponent<MeshRenderer>()->GetRenderPasses()[0]->GetPass();
+                            wstring passName = L"";
+                            switch (passType)
+                            {
+                            case Pass::DEFAULT_RENDER:
+                                passName = L"DEFAULT_RENDER";
+                                break;
+                            case Pass::OUTLINE_RENDER:
+                                passName = L"OUTLINE_RENDER";
+                                break;
+                            case Pass::GAUSSIANBLUR_RENDER:
+                                passName = L"GAUSSIANBLUR_RENDER";
+                                break;
+                            case Pass::SHADOWMAP_RENDER:
+                                passName = L"SHADOWMAP_RENDER";
+                                break;
+                            case Pass::QUAD_RENDER:
+                                passName = L"QUAD_RENDER";
+                                break;
+                            case Pass::TESSELLATION_RENDER:
+                                passName = L"TESSELLATION_RENDER";
+                                break;
+                            case Pass::TERRAIN_RENDER:
+                                passName = L"TERRAIN_RENDER";
+                                break;
+                            case Pass::ENVIRONMENTMAP_RENDER:
+                                passName = L"ENVIRONMENTMAP_RENDER";
+                                break;
+                            case Pass::STATIC_MESH_RENDER:
+                                passName = L"STATIC_MESH_RENDER";
+                                break;
+                            case Pass::ANIMATED_MESH_RENDER:
+                                passName = L"ANIMATED_MESH_RENDER";
+                                break;
+                            case Pass::PARTICLE_RENDER:
+                                passName = L"PARTICLE_RENDER";
+                                break;
+                            case Pass::DEBUG_2D_RENDER:
+                                passName = L"DEBUG_2D_RENDER";
+                                break;
+                            default:
+                                break;
+                            }
+                            string passNameStr = WStringToString(passName);
+
+                            ImGui::SetNextItemWidth(valueWidth);
+                            ImGui::InputText("##RenderPassValue", (char*)passNameStr.c_str(), passNameStr.size(), ImGuiInputTextFlags_ReadOnly);
+
+                            // Mesh
+                            ImGui::Text("Mesh"); ImGui::SameLine(labelWidth);
+                            if (ImGui::Button("..##Mesh", ImVec2(20, 0))) ImGui::OpenPopup("MeshSelectPopup");
+                            ImGui::SameLine();
+
+                            wstring meshName = L"None";
+                            shared_ptr<Mesh> mesh = _selectedObject->GetComponent<MeshRenderer>()->GetMesh();
+                            if (mesh != nullptr)
+                                meshName = mesh->GetMeshName();
+                            string meshNameStr = WStringToString(meshName);
+
+                            ImGui::SetNextItemWidth(valueWidth);
+                            ImGui::InputText("##MeshValue", (char*)meshNameStr.c_str(), meshNameStr.size(), ImGuiInputTextFlags_ReadOnly);
+
+                            // Model
+                            ImGui::Text("Model"); ImGui::SameLine(labelWidth);
+                            if (ImGui::Button("..##Model", ImVec2(20, 0))) ImGui::OpenPopup("ModelSelectPopup");
+                            ImGui::SameLine();
+
+                            wstring modelName = L"None";
+                            shared_ptr<Model> model = _selectedObject->GetComponent<MeshRenderer>()->GetModel();
+                            if (model != nullptr)
+                                modelName = model->GetModelName();
+                            string modelNameStr = WStringToString(modelName);
+
+                            ImGui::SetNextItemWidth(valueWidth);
+                            ImGui::InputText("##ModelValue", (char*)modelNameStr.c_str(), modelNameStr.size(), ImGuiInputTextFlags_ReadOnly);
+
+                            // Material
+                            ImGui::Text("Material"); ImGui::SameLine(labelWidth);
+                            if (ImGui::Button("..##Material", ImVec2(20, 0))) ImGui::OpenPopup("MaterialSelectPopup");
+                            ImGui::SameLine();
+
+                            wstring materialName = L"None";
+                            shared_ptr<Material> material = _selectedObject->GetComponent<MeshRenderer>()->GetMaterial();
+                            if (material != nullptr)
+                                materialName = _selectedObject->GetComponent<MeshRenderer>()->GetMaterial()->GetMaterialName();
+                            string materialNameStr = WStringToString(materialName);
+
+                            ImGui::SetNextItemWidth(valueWidth);
+                            ImGui::InputText("##MaterialValue", (char*)materialNameStr.c_str(), materialNameStr.size(), ImGuiInputTextFlags_ReadOnly);
+
+
+                            // íŒì—… ì²˜ë¦¬
+                            if (ImGui::BeginPopup("MeshSelectPopup")) {
+                                ImGui::Text("Mesh List");
+                                ImGui::EndPopup();
+                            }
+                            // ... ë‹¤ë¥¸ íŒì—…ë“¤
+
+                            // ìŠ¤íƒ€ì¼ ë³µì›
+                            ImGui::PopStyleColor(2);
+                            ImGui::PopStyleVar();
+                            ImGui::Separator();
+                        }
+
+                        ImGui::Separator();
+                    }
+                    
                 }
             }
         }
@@ -418,15 +601,235 @@ void GUIManager::RenderUI()
 
     // project
     {
-        ImGui::SetNextWindowPos(ImVec2(0, GP.GetViewHeight() * (63.0f / 100.0f)), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetViewWidth(), GP.GetViewHeight() * (37.0f / 100.0f)));
         ImGui::Begin("Project", nullptr,
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse);
+
+        float windowWidth = ImGui::GetContentRegionAvail().x;
+        float leftPanelWidth = windowWidth * 0.12f;
+
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        ImVec2 windowSize = ImGui::GetWindowSize();
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
+            ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
+            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
+        );
+
+        // ì™¼ìª½ íŒ¨ë„ (í´ë” íŠ¸ë¦¬)
+        {
+            // í´ë¦¬í•‘ ì˜ì—­ ì„¤ì •
+            ImGui::PushClipRect(
+                ImVec2(windowPos.x, windowPos.y),
+                ImVec2(windowPos.x + leftPanelWidth - 1, windowPos.y + windowSize.y),
+                true
+            );
+
+            ImGui::BeginChild("FolderTree", ImVec2(leftPanelWidth - 1, 0), false);
+
+            // íŠ¸ë¦¬ ìŠ¤íƒ€ì¼ ì„¤ì •
+            ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
+
+            static filesystem::path currentPath = "Resource/";
+            RenderFolderTree(currentPath, _selectedFolder);
+
+            ImGui::PopStyleVar(3);
+            ImGui::EndChild();
+            ImGui::PopClipRect();
+        }
+
+        ImGui::SameLine(0, 1);
+
+        // ì˜¤ë¥¸ìª½ íŒ¨ë„
+        ImGui::SameLine(0, 1);
+        ImGui::BeginChild("FilePanel", ImVec2(0, 0), false);
+
+        // ê²½ë¡œ í‘œì‹œ ë°”
+        ImGui::BeginChild("PathBar", ImVec2(0, 25), false);
+        string relativePath = _selectedFolder.string();
+        if (relativePath.find("Resource/") == 0) {
+            relativePath = relativePath.substr(9);
+        }
+        ImGui::Text(" %s", relativePath.c_str());
+        ImGui::EndChild();
+
+        // ê°€ë¡œ êµ¬ë¶„ì„ 
+        ImVec2 panelPos = ImGui::GetWindowPos();
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(windowPos.x + leftPanelWidth, panelPos.y + 15),
+            ImVec2(panelPos.x + ImGui::GetWindowWidth(), panelPos.y + 15),
+            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.5f))
+        );
+
+        // ì„¸ë¡œ êµ¬ë¶„ì„ 
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
+            ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
+            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
+        );
+
+        // íŒŒì¼ ê·¸ë¦¬ë“œ
+        ImGui::BeginChild("FileGrid", ImVec2(0, 0), false);
+        RenderFileGrid(_selectedFolder);
+        ImGui::EndChild();
+
+        ImGui::EndChild();
         ImGui::End();
     }
     RenderGuizmo();
+}
+
+void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
+{
+    string objectName = WStringToString(gameObject->GetName());
+    const vector<shared_ptr<GameObject>>& children = gameObject->GetChildren();
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+
+    // ìì‹ì´ ìˆìœ¼ë©´ OpenOnArrow, ì—†ìœ¼ë©´ Leaf í”Œë˜ê·¸ ì¶”ê°€
+    if (!children.empty())
+    {
+        flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+    }
+    else
+    {
+        flags |= ImGuiTreeNodeFlags_Leaf;
+    }
+
+    // í˜„ì¬ ì„ íƒëœ ì˜¤ë¸Œì íŠ¸ë©´ Selected í”Œë˜ê·¸ ì¶”ê°€
+    if (_selectedObject == gameObject)
+    {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    // ì´ì „ì— ì €ì¥ëœ íŠ¸ë¦¬ ë…¸ë“œ ìƒíƒœë¥¼ ì„¤ì •
+    if (gameObject->IsTreeNodeOpen())
+    {
+        ImGui::SetNextItemOpen(true);
+    }
+
+    bool nodeOpen = ImGui::TreeNodeEx((void*)gameObject.get(), flags, objectName.c_str());
+
+    // íŠ¸ë¦¬ ë…¸ë“œ ìƒíƒœ ì €ì¥
+    gameObject->SetTreeNodeOpen(nodeOpen);
+
+    // ë“œë˜ê·¸ ì†ŒìŠ¤ ì„¤ì •
+    if (ImGui::BeginDragDropSource())
+    {
+        ImGui::SetDragDropPayload("GAMEOBJECT_DRAG", &gameObject, sizeof(gameObject));
+        ImGui::Text("Move %s", objectName.c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    // ë“œë˜ê·¸ íƒ€ê²Ÿ ì„¤ì •
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GAMEOBJECT_DRAG"))
+        {
+            shared_ptr<GameObject>* sourceObj = (shared_ptr<GameObject>*)payload->Data;
+            if (*sourceObj != gameObject) // ìê¸° ìì‹ ì—ê²Œ ë“œë¡­í•˜ëŠ” ê²ƒ ë°©ì§€
+            {
+                // í˜„ì¬ ì›”ë“œ ìœ„ì¹˜/íšŒì „/ìŠ¤ì¼€ì¼ ì €ì¥
+                Vec3 worldPos = (*sourceObj)->transform()->GetWorldPosition();
+                Quaternion worldRot = (*sourceObj)->transform()->GetQTRotation();
+                Vec3 worldScale = (*sourceObj)->transform()->GetWorldScale();
+
+                // ë¶€ëª¨ ì„¤ì •
+                (*sourceObj)->SetParent(gameObject);
+
+                // ìƒˆë¡œìš´ ë¶€ëª¨ì˜ ì—­í–‰ë ¬ë¡œ ë¡œì»¬ ë³€í™˜ ê³„ì‚°
+                Matrix parentWorldMatrix = gameObject->transform()->GetWorldMatrix();
+                Matrix parentWorldInverse = parentWorldMatrix.Invert();
+
+                // ì›”ë“œ ìœ„ì¹˜ë¥¼ ìƒˆë¡œìš´ ë¶€ëª¨ì˜ ë¡œì»¬ ê³µê°„ìœ¼ë¡œ ë³€í™˜
+                Vec3 newLocalPos = Vec3::Transform(worldPos, parentWorldInverse);
+                (*sourceObj)->transform()->SetLocalPosition(newLocalPos);
+
+                // ì›”ë“œ íšŒì „ì„ ìƒˆë¡œìš´ ë¶€ëª¨ì˜ ë¡œì»¬ ê³µê°„ìœ¼ë¡œ ë³€í™˜
+                Quaternion parentRot = gameObject->transform()->GetQTRotation();
+                XMVECTOR parentRotVec = XMLoadFloat4(&parentRot);
+                XMVECTOR worldRotVec = XMLoadFloat4(&worldRot);
+                XMVECTOR parentRotInvVec = XMQuaternionInverse(parentRotVec);
+                XMVECTOR newLocalRotVec = XMQuaternionMultiply(parentRotInvVec, worldRotVec);
+
+                Quaternion newLocalRot;
+                XMStoreFloat4(&newLocalRot, newLocalRotVec);
+                (*sourceObj)->transform()->SetQTRotation(newLocalRot);
+
+                // ì›”ë“œ ìŠ¤ì¼€ì¼ì„ ìƒˆë¡œìš´ ë¶€ëª¨ì˜ ë¡œì»¬ ê³µê°„ìœ¼ë¡œ ë³€í™˜
+                Vec3 parentScale = gameObject->transform()->GetWorldScale();
+                Vec3 newLocalScale = Vec3(
+                    worldScale.x / parentScale.x,
+                    worldScale.y / parentScale.y,
+                    worldScale.z / parentScale.z
+                );
+                (*sourceObj)->transform()->SetLocalScale(newLocalScale);
+
+                // ë¶€ëª¨ ë…¸ë“œë¥¼ ìë™ìœ¼ë¡œ í¼ì¹¨
+                gameObject->SetTreeNodeOpen(true);
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // í´ë¦­ ì²˜ë¦¬
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen())
+    {
+        _selectedObject = gameObject;
+        SCENE.GetActiveScene()->AddPickedObject(gameObject);
+    }
+
+    // ë”ë¸” í´ë¦­ ì²˜ë¦¬ (ì¹´ë©”ë¼ í¬ì»¤ìŠ¤)
+    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+    {
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+        Vec3 targetPos = gameObject->transform()->GetWorldPosition();
+        Vec3 offset = Vec3(0.0f, 2.0f, -5.0f);
+        Vec3 cameraTargetPos = targetPos + offset;
+
+        Vec3 dirToTarget = targetPos - cameraTargetPos;
+        float length = dirToTarget.Length();
+        dirToTarget.Normalize();
+
+        float yaw = atan2(dirToTarget.x, dirToTarget.z);
+        float pitch = -atan2(dirToTarget.y, sqrt(dirToTarget.x * dirToTarget.x + dirToTarget.z * dirToTarget.z));
+
+        Vec3 targetRotation = Vec3(
+            XMConvertToDegrees(pitch),
+            XMConvertToDegrees(yaw),
+            0.0f
+        );
+
+        _isCameraMoving = true;
+        _cameraMoveTime = 0.0f;
+        _cameraStartPos = camera->transform()->GetLocalPosition();
+        _cameraTargetPos = cameraTargetPos;
+        _cameraStartRot = camera->transform()->GetLocalRotation();
+        _cameraTargetRot = targetRotation;
+    }
+
+    // ìš°í´ë¦­ ë©”ë‰´
+    if (ImGui::BeginPopupContextItem())
+    {
+        if (ImGui::MenuItem("Delete"))
+        {
+            // TODO: Delete GameObject êµ¬í˜„ ì˜ˆì •
+        }
+        ImGui::EndPopup();
+    }
+
+    // ë…¸ë“œê°€ ì—´ë ¤ìˆìœ¼ë©´ ìì‹ë“¤ë„ ì¬ê·€ì ìœ¼ë¡œ ë Œë”ë§
+    if (nodeOpen)
+    {
+        for (const auto& child : children)
+        {
+            RenderGameObjectHierarchy(child);
+        }
+        ImGui::TreePop();
+    }
 }
 
 void GUIManager::RenderUI_End()
@@ -453,46 +856,41 @@ void GUIManager::RenderGuizmo()
             float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
             float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
             
-            // Frustum »ı¼º
+            // Frustum ìƒì„±
             BoundingFrustum frustum;
             BoundingFrustum::CreateFromMatrix(frustum, proj);
 
-            // View °ø°£ÀÇ FrustumÀ» ¿ùµå °ø°£À¸·Î º¯È¯
+            // View ê³µê°„ì˜ Frustumì„ ì›”ë“œ ê³µê°„ìœ¼ë¡œ ë³€í™˜
             Matrix invView = view.Invert();
             frustum.Transform(frustum, invView);
 
             ImGuizmo::SetRect(viewportX, viewportY, viewportWidth, viewportHeight);
             ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
-            // CÅ°·Î Äİ¶óÀÌ´õ ÆíÁı ¸ğµå Åä±Û
-            if (INPUT.GetButtonDown(KEY_TYPE::C))
-            {
-                _isColliderEditMode = !_isColliderEditMode;
-                // Äİ¶óÀÌ´õ ±âÁî¸ğ »ö»ó ¼³Á¤(ÃÊ·Ï»ö °è¿­)
-                ImGuizmo::SetGizmoSizeClipSpace(0.08f);  // ±âÁî¸ğ Å©±â¸¦ Á» ´õ Å©°Ô
-                ImGuizmo::AllowAxisFlip(false);  // Ãà ¹İÀü ºñÈ°¼ºÈ­
+            // ì½œë¼ì´ë” ê¸°ì¦ˆëª¨ ìƒ‰ìƒ ì„¤ì •(ì´ˆë¡ìƒ‰ ê³„ì—´)
+            ImGuizmo::SetGizmoSizeClipSpace(0.08f);  // ê¸°ì¦ˆëª¨ í¬ê¸°ë¥¼ ì¢€ ë” í¬ê²Œ
+            ImGuizmo::AllowAxisFlip(false);  // ì¶• ë°˜ì „ ë¹„í™œì„±í™”
 
-                // ±âÁî¸ğ »ö»ó Ä¿½ºÅÍ¸¶ÀÌÂ¡
-                ImGuizmo::Style& style = ImGuizmo::GetStyle();
-                style.Colors[ImGuizmo::TRANSLATE_X] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // XÃà ÃÊ·Ï»ö
-                style.Colors[ImGuizmo::TRANSLATE_Y] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // YÃà ÃÊ·Ï»ö
-                style.Colors[ImGuizmo::TRANSLATE_Z] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // ZÃà ÃÊ·Ï»ö
-                style.Colors[ImGuizmo::BOUNDS] = ImVec4(0.0f, 0.6f, 0.0f, 0.3f);  // °æ°è ÃÊ·Ï»ö (¹İÅõ¸í)
-            }
+            // ê¸°ì¦ˆëª¨ ìƒ‰ìƒ ì»¤ìŠ¤í„°ë§ˆì´ì§•
+            ImGuizmo::Style& style = ImGuizmo::GetStyle();
+            style.Colors[ImGuizmo::TRANSLATE_X] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // Xì¶• ì´ˆë¡ìƒ‰
+            style.Colors[ImGuizmo::TRANSLATE_Y] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // Yì¶• ì´ˆë¡ìƒ‰
+            style.Colors[ImGuizmo::TRANSLATE_Z] = ImVec4(0.0f, 0.8f, 0.0f, 1.0f);  // Zì¶• ì´ˆë¡ìƒ‰
+            style.Colors[ImGuizmo::BOUNDS] = ImVec4(0.0f, 0.6f, 0.0f, 0.3f);  // ê²½ê³„ ì´ˆë¡ìƒ‰ (ë°˜íˆ¬ëª…)
                 
 
-            // Transform Gizmo Á¶ÀÛ (Äİ¶óÀÌ´õ ÆíÁı ¸ğµå°¡ ¾Æ´Ò ¶§¸¸)
+            // Transform Gizmo ì¡°ì‘ (ì½œë¼ì´ë” í¸ì§‘ ëª¨ë“œê°€ ì•„ë‹ ë•Œë§Œ)
             if (!_isColliderEditMode)
             {
-                // ÀÏ¹İ Transform ±âÁî¸ğ ½ºÅ¸ÀÏ º¹¿ø
-                ImGuizmo::SetGizmoSizeClipSpace(0.14f);  // ±âº» Å©±â
+                // ì¼ë°˜ Transform ê¸°ì¦ˆëª¨ ìŠ¤íƒ€ì¼ ë³µì›
+                ImGuizmo::SetGizmoSizeClipSpace(0.14f);  // ê¸°ë³¸ í¬ê¸°
                 ImGuizmo::AllowAxisFlip(true);
 
-                // ±âº» »ö»óÀ¸·Î º¹¿ø
+                // ê¸°ë³¸ ìƒ‰ìƒìœ¼ë¡œ ë³µì›
                 ImGuizmo::Style& style = ImGuizmo::GetStyle();
-                style.Colors[ImGuizmo::TRANSLATE_X] = ImVec4(0.9f, 0.2f, 0.2f, 1.0f);  // XÃà »¡°£»ö
-                style.Colors[ImGuizmo::TRANSLATE_Y] = ImVec4(0.2f, 0.9f, 0.2f, 1.0f);  // YÃà ÃÊ·Ï»ö
-                style.Colors[ImGuizmo::TRANSLATE_Z] = ImVec4(0.2f, 0.2f, 0.9f, 1.0f);  // ZÃà ÆÄ¶õ»ö
+                style.Colors[ImGuizmo::TRANSLATE_X] = ImVec4(0.9f, 0.2f, 0.2f, 1.0f);  // Xì¶• ë¹¨ê°„ìƒ‰
+                style.Colors[ImGuizmo::TRANSLATE_Y] = ImVec4(0.2f, 0.9f, 0.2f, 1.0f);  // Yì¶• ì´ˆë¡ìƒ‰
+                style.Colors[ImGuizmo::TRANSLATE_Z] = ImVec4(0.2f, 0.2f, 0.9f, 1.0f);  // Zì¶• íŒŒë€ìƒ‰
 
                 ImGui::PushID("TransformGizmo");
 
@@ -539,19 +937,19 @@ void GUIManager::RenderGuizmo()
 
                         if (pickedObj->transform()->HasParent())
                         {
-                            // ºÎ¸ğ°¡ ÀÖ´Â °æ¿ì ¿ùµå º¯È¯À» ·ÎÄÃ º¯È¯À¸·Î º¯È¯
+                            // ë¶€ëª¨ê°€ ìˆëŠ” ê²½ìš° ì›”ë“œ ë³€í™˜ì„ ë¡œì»¬ ë³€í™˜ìœ¼ë¡œ ë³€í™˜
                             Matrix parentWorldMatrix = pickedObj->transform()->GetParent()->GetWorldMatrix();
                             Matrix parentWorldInverse = parentWorldMatrix.Invert();
 
                             if (currentGizmoOperation == ImGuizmo::TRANSLATE)
                             {
-                                // ÀÌµ¿: ¿ùµå À§Ä¡¸¦ ºÎ¸ğ ·ÎÄÃ °ø°£À¸·Î º¯È¯
+                                // ì´ë™: ì›”ë“œ ìœ„ì¹˜ë¥¼ ë¶€ëª¨ ë¡œì»¬ ê³µê°„ìœ¼ë¡œ ë³€í™˜
                                 Vec3 localPos = Vec3::Transform(position, parentWorldInverse);
                                 pickedObj->transform()->SetLocalPosition(localPos);
                             }
                             else if (currentGizmoOperation == ImGuizmo::SCALE)
                             {
-                                // ½ºÄÉÀÏ: ºÎ¸ğÀÇ ½ºÄÉÀÏÀ» °í·ÁÇÏ¿© ·ÎÄÃ ½ºÄÉÀÏ °è»ê
+                                // ìŠ¤ì¼€ì¼: ë¶€ëª¨ì˜ ìŠ¤ì¼€ì¼ì„ ê³ ë ¤í•˜ì—¬ ë¡œì»¬ ìŠ¤ì¼€ì¼ ê³„ì‚°
                                 Vec3 parentScale = pickedObj->transform()->GetParent()->GetWorldScale();
                                 Vec3 localScale = Vec3(
                                     scale.x / parentScale.x,
@@ -563,7 +961,7 @@ void GUIManager::RenderGuizmo()
                         }
                         else
                         {
-                            // ºÎ¸ğ°¡ ¾ø´Â °æ¿ì Á÷Á¢ Àû¿ë
+                            // ë¶€ëª¨ê°€ ì—†ëŠ” ê²½ìš° ì§ì ‘ ì ìš©
                             if (currentGizmoOperation == ImGuizmo::TRANSLATE)
                             {
                                 pickedObj->transform()->SetLocalPosition(position);
@@ -583,9 +981,9 @@ void GUIManager::RenderGuizmo()
                 ImGui::PopID();
             }
 
-            // Collider ½Ã°¢È­ ¹× Gizmo
+            // Collider ì‹œê°í™” ë° Gizmo
             shared_ptr<BaseCollider> collider = pickedObj->GetComponent<BaseCollider>();
-            if (collider)
+            if (collider && _isColliderEditMode)
             {
                 ImDrawList* drawList = ImGui::GetForegroundDrawList();
                 const ImU32 colliderColor = IM_COL32(0, 255, 0, 255);
@@ -597,18 +995,18 @@ void GUIManager::RenderGuizmo()
 
                     if (frustum.Intersects(box))
                     {
-                        // Collider Gizmo (Äİ¶óÀÌ´õ ÆíÁı ¸ğµåÀÏ ¶§¸¸)
+                        // Collider Gizmo (ì½œë¼ì´ë” í¸ì§‘ ëª¨ë“œì¼ ë•Œë§Œ)
                         if (_isColliderEditMode)
                         {
-                            // ¿ÀºêÁ§Æ®ÀÇ ¿ùµå Transform Á¤º¸ °¡Á®¿À±â
+                            // ì˜¤ë¸Œì íŠ¸ì˜ ì›”ë“œ Transform ì •ë³´ ê°€ì ¸ì˜¤ê¸°
                             Vec3 worldPos = pickedObj->transform()->GetWorldPosition();
                             Quaternion worldRot = pickedObj->transform()->GetQTRotation();
 
-                            // ÇöÀç Äİ¶óÀÌ´õÀÇ ½ÇÁ¦ Å©±â¸¦ °¡Á®¿È
+                            // í˜„ì¬ ì½œë¼ì´ë”ì˜ ì‹¤ì œ í¬ê¸°ë¥¼ ê°€ì ¸ì˜´
                             Vec3 currentScale = boxCollider->GetScale();
                             Vec3 objectScale = pickedObj->transform()->GetWorldScale();
 
-                            // Collider Matrix »ı¼º
+                            // Collider Matrix ìƒì„±
                             Matrix colliderMatrix = Matrix::CreateScale(currentScale * objectScale);
                             colliderMatrix *= Matrix::CreateFromQuaternion(worldRot);
                             colliderMatrix.Translation(worldPos);
@@ -627,13 +1025,17 @@ void GUIManager::RenderGuizmo()
                             {
                                 Vec3 position, rotation, scale;
                                 ImGuizmo::DecomposeMatrixToComponents(colliderMatrix.m[0], &position.x, &rotation.x, &scale.x);
-                                // ¿ÀºêÁ§Æ®ÀÇ ¿ùµå ½ºÄÉÀÏÀ» °í·ÁÇÏ¿© Äİ¶óÀÌ´õ ½ºÄÉÀÏ ¼³Á¤
+                                // ì˜¤ë¸Œì íŠ¸ì˜ ì›”ë“œ ìŠ¤ì¼€ì¼ì„ ê³ ë ¤í•˜ì—¬ ì½œë¼ì´ë” ìŠ¤ì¼€ì¼ ì„¤ì •
                                 boxCollider->SetScale(scale / objectScale);
+
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectColliderInXML(currentSceneName, pickedObj->GetName(),
+                                    boxCollider->GetCenter(), scale / objectScale, true);
                             }
                         }
 
 
-                        // ¿ÍÀÌ¾îÇÁ·¹ÀÓ ·»´õ¸µ
+                        // ì™€ì´ì–´í”„ë ˆì„ ë Œë”ë§
                         Vec3 corners[8];
                         box.GetCorners(corners);
                         Matrix viewProj = view * proj;
@@ -656,7 +1058,7 @@ void GUIManager::RenderGuizmo()
                             );
                         }
 
-                        // ¹Ú½º ¶óÀÎ ±×¸®±â
+                        // ë°•ìŠ¤ ë¼ì¸ ê·¸ë¦¬ê¸°
                         drawList->AddLine(screenPoints[0], screenPoints[1], colliderColor);
                         drawList->AddLine(screenPoints[1], screenPoints[2], colliderColor);
                         drawList->AddLine(screenPoints[2], screenPoints[3], colliderColor);
@@ -684,11 +1086,11 @@ void GUIManager::RenderGuizmo()
                         Vec3 worldPos = pickedObj->transform()->GetWorldPosition();
                         Quaternion worldRot = pickedObj->transform()->GetQTRotation();
 
-                        // ÇöÀç Äİ¶óÀÌ´õÀÇ ½ÇÁ¦ Å©±â¸¦ °¡Á®¿È
+                        // í˜„ì¬ ì½œë¼ì´ë”ì˜ ì‹¤ì œ í¬ê¸°ë¥¼ ê°€ì ¸ì˜´
                         Vec3 currentScale = sphereCollider->GetScale();
                         Vec3 objectScale = pickedObj->transform()->GetWorldScale();
 
-                        // Collider Matrix »ı¼º
+                        // Collider Matrix ìƒì„±
                         Matrix colliderMatrix = Matrix::CreateScale(currentScale * objectScale);
                         colliderMatrix *= Matrix::CreateFromQuaternion(worldRot);
                         colliderMatrix.Translation(worldPos);
@@ -705,17 +1107,29 @@ void GUIManager::RenderGuizmo()
 
                         if (ImGuizmo::IsUsing())
                         {
+                            //Vec3 position, rotation, scale;
+                            //ImGuizmo::DecomposeMatrixToComponents(colliderMatrix.m[0], &position.x, &rotation.x, &scale.x);
+                            //// ì˜¤ë¸Œì íŠ¸ì˜ ì›”ë“œ ìŠ¤ì¼€ì¼ì„ ê³ ë ¤í•˜ì—¬ ì½œë¼ì´ë” ìŠ¤ì¼€ì¼ ì„¤ì •
+                            //sphereCollider->SetScale(scale / objectScale);
                             Vec3 position, rotation, scale;
                             ImGuizmo::DecomposeMatrixToComponents(colliderMatrix.m[0], &position.x, &rotation.x, &scale.x);
-                            // ¿ÀºêÁ§Æ®ÀÇ ¿ùµå ½ºÄÉÀÏÀ» °í·ÁÇÏ¿© Äİ¶óÀÌ´õ ½ºÄÉÀÏ ¼³Á¤
-                            sphereCollider->SetScale(scale / objectScale);
+
+                            // í‰ê·  ìŠ¤ì¼€ì¼ì„ ë°˜ì§€ë¦„ìœ¼ë¡œ ì‚¬ìš©
+                            float newRadius = (scale.x + scale.y + scale.z) / (3.0f * objectScale.x);
+                            sphereCollider->SetRadius(newRadius);
+                            sphereCollider->SetScale(Vec3(newRadius, newRadius, newRadius));
+
+                            // XML ì €ì¥ ì¶”ê°€
+                            wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                            SCENE.UpdateGameObjectSphereColliderInXML(currentSceneName, pickedObj->GetName(),
+                                sphereCollider->GetCenter(), newRadius);
                         }
                     }
                     
 
                     ImGui::PopID();
 
-                    // ¿ÍÀÌ¾îÇÁ·¹ÀÓ ·»´õ¸µ
+                    // ì™€ì´ì–´í”„ë ˆì„ ë Œë”ë§
                     Vec4 center = Vec4(sphere.Center.x, sphere.Center.y, sphere.Center.z, 1.0f);
                     Matrix viewProj = view * proj;
                     center = XMVector4Transform(center, viewProj);
@@ -739,4 +1153,173 @@ void GUIManager::RenderGuizmo()
     }
     else
         _selectedObject = nullptr;
+}
+
+void GUIManager::RenderFolderTree(const filesystem::path& path, filesystem::path& selectedFolder)
+{
+    // íŠ¸ë¦¬ í•­ëª©ì˜ ë°°ê²½ìƒ‰ ì„¤ì •
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.7f, 0.5f));  // ì„ íƒëœ í•­ëª© ìƒ‰ìƒ
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.3f, 0.5f, 0.8f, 0.5f));  // í˜¸ë²„ ìƒ‰ìƒ
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth |
+        ImGuiTreeNodeFlags_DefaultOpen |
+        ImGuiTreeNodeFlags_Leaf;  // Leaf í”Œë˜ê·¸ ì¶”ê°€í•˜ì—¬ í™”ì‚´í‘œ ì œê±°
+
+    // í˜„ì¬ í´ë”ê°€ ì„ íƒëœ í´ë”ì¸ ê²½ìš° Selected í”Œë˜ê·¸ ì¶”ê°€
+    if (path == _selectedFolder)
+        flags |= ImGuiTreeNodeFlags_Selected;
+
+    bool isDirectory = filesystem::is_directory(path);
+    string folderName = path.filename().string();
+    if (folderName.empty()) // root í´ë”ì¸ ê²½ìš°
+    {
+        folderName = "Resource";
+        flags &= ~ImGuiTreeNodeFlags_Leaf;  // Resource í´ë”ë§Œ í™”ì‚´í‘œ í‘œì‹œ
+        flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+    }
+
+    bool opened = ImGui::TreeNodeEx(folderName.c_str(), flags);
+
+    // í´ë¦­ ì²˜ë¦¬
+    if (ImGui::IsItemClicked())
+        _selectedFolder = path;
+
+    if (opened && isDirectory)
+    {
+        for (const auto& entry : filesystem::directory_iterator(path))
+        {
+            if (filesystem::is_directory(entry))
+            {
+                RenderFolderTree(entry.path(), selectedFolder);
+            }
+        }
+        ImGui::TreePop();
+    }
+
+    ImGui::PopStyleColor(2);
+}
+
+void GUIManager::RenderFileGrid(const filesystem::path& path)
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+    if (_isFirstFrame)
+    {
+        for (const auto& entry : filesystem::directory_iterator("Resource/"))
+        {
+            if (filesystem::is_directory(entry))
+            {
+                _selectedFolder = entry.path();
+                break;
+            }
+        }
+        _isFirstFrame = false;
+    }
+
+    float cellSize = 120.0f;  // ì…€ í¬ê¸°ë¥¼ ë” ëŠ˜ë¦¼
+    float iconSize = 50.0f;
+    float padding = 10.0f;
+    float maxTextWidth = cellSize - padding * 2;  // ìµœëŒ€ í…ìŠ¤íŠ¸ ë„ˆë¹„
+
+    float panelWidth = ImGui::GetContentRegionAvail().x;
+    int columnCount = static_cast<int>(panelWidth / cellSize);
+    if (columnCount < 1) columnCount = 1;
+
+    ImGui::Columns(columnCount, 0, false);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.7f, 0.7f, 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 0.3f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
+
+    for (const auto& entry : filesystem::directory_iterator(path))
+    {
+        if (!filesystem::is_directory(entry))
+        {
+            string filename = entry.path().filename().string();
+            string filenameWithoutExt = filename.substr(0, filename.find_last_of("."));
+            string parentFolder = entry.path().parent_path().filename().string();
+            shared_ptr<Texture> icon = nullptr;
+
+            // í´ë”ë³„ë¡œ ë‹¤ë¥¸ ì•„ì´ì½˜ ì ìš©
+            if (parentFolder == "Texture")
+            {
+                string nameWithoutExt = filename.substr(0, filename.find_last_of("."));
+                wstring textureName(nameWithoutExt.begin(), nameWithoutExt.end());
+                icon = RESOURCE.GetResource<Texture>(textureName);
+            }
+            else if (parentFolder == "Material")
+            {
+                icon = RESOURCE.GetResource<Texture>(L"Material_Icon");
+            }
+            else if (parentFolder == "Mesh")
+            {
+                icon = RESOURCE.GetResource<Texture>(L"Mesh_Icon");
+            }
+            else if (parentFolder == "Model")
+            {
+                icon = RESOURCE.GetResource<Texture>(L"Model_Icon");
+            }
+            else if (parentFolder == "Shader")
+            {
+                icon = RESOURCE.GetResource<Texture>(L"Shader_Icon");
+            }
+
+            if (icon)
+            {
+                // ì•„ì´ì½˜ ì¤‘ì•™ ë°°ì¹˜
+                float cursorPosX = ImGui::GetCursorPosX();
+                float iconPosX = cursorPosX + (cellSize - iconSize) * 0.5f;
+                ImGui::SetCursorPosX(iconPosX);
+
+                ImGui::ImageButton(filename.c_str(),
+                    (ImTextureID)icon->GetShaderResourceView().Get(),
+                    ImVec2(iconSize, iconSize));
+
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+                {
+                    string fullPath = entry.path().string();
+                    ImGui::SetDragDropPayload("RESOURCE_FILE", fullPath.c_str(), fullPath.size() + 1);
+                    ImGui::Text("%s", filenameWithoutExt.c_str());
+                    ImGui::EndDragDropSource();
+                }
+
+                // í…ìŠ¤íŠ¸ ì²˜ë¦¬ - í•œ ì¤„ë¡œ í‘œì‹œ
+                string displayText = filenameWithoutExt;
+                float textWidth = ImGui::CalcTextSize(displayText.c_str()).x;
+
+                // í…ìŠ¤íŠ¸ê°€ ë„ˆë¬´ ê¸¸ ê²½ìš° ì¤„ì„
+                if (textWidth > maxTextWidth)
+                {
+                    // í…ìŠ¤íŠ¸ì™€ "..." ê¸¸ì´ë¥¼ ê³ ë ¤í•˜ì—¬ ì ì ˆí•œ ê¸¸ì´ë¡œ ìë¦„
+                    int maxChars = 0;
+                    string tempText;
+                    for (int i = 0; i < displayText.length(); i++)
+                    {
+                        tempText = displayText.substr(0, i) + "...";
+                        if (ImGui::CalcTextSize(tempText.c_str()).x > maxTextWidth)
+                        {
+                            maxChars = i - 1;
+                            break;
+                        }
+                    }
+                    displayText = displayText.substr(0, maxChars) + "...";
+                    textWidth = ImGui::CalcTextSize(displayText.c_str()).x;
+                }
+
+                // í…ìŠ¤íŠ¸ ì¤‘ì•™ ì •ë ¬í•˜ì—¬ í•œ ì¤„ë¡œ í‘œì‹œ
+                float textPosX = cursorPosX + (cellSize - textWidth) * 0.5f;
+                ImGui::SetCursorPosX(textPosX);
+                ImGui::Text("%s", displayText.c_str());  // TextWrapped ëŒ€ì‹  Text ì‚¬ìš©
+
+                // í•­ëª© ê°„ ì—¬ë°±
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding);
+            }
+
+            ImGui::NextColumn();
+        }
+    }
+
+    ImGui::PopStyleColor(3);
+    ImGui::Columns(1);
+
+    ImGui::PopStyleVar();
 }

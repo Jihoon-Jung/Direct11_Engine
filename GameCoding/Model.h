@@ -44,6 +44,8 @@ public:
 	void SetIsAnimatedModel(bool value) { isAnimatedModel = value; }
 	bool HasAnimation() { return isAnimatedModel; }
 
+	void SetModelName(wstring name) { _modelName = name; }
+	wstring GetModelName() { return _modelName; }
 
 private:
 	void BindCacheInfo();
@@ -66,6 +68,6 @@ private:
 	vector<AnimTransform> _animTransforms;
 	ComPtr<ID3D11Texture2D> _texture;
 	ComPtr<ID3D11ShaderResourceView> _srv;
-
+	wstring _modelName = L"None";
 };
 

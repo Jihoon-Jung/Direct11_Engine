@@ -13,6 +13,7 @@ public:
 
 	void SetRadius(float radius) { _radius = radius; }
 	BoundingSphere& GetBoundingSphere() { return _boundingSphere; }
+	float GetRadius() { return _radius; }
 	
 private:
 	float _radius = 1.0f;

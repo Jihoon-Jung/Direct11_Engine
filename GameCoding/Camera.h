@@ -27,6 +27,8 @@ public:
 	shared_ptr<Buffer> GetCameraBuffer() { return _cameraBuffer; }
 	shared_ptr<Buffer> GetEnvironmentCameraBuffer() { return _environmentCameraBuffer; }
 	shared_ptr<Buffer> GetShadowCameraBuffer() { return _shadowCameraBuffer; }
+
+	ProjectionType GetProjectionType() { return _type; }
 private:
 
 	Matrix _matView;

@@ -19,6 +19,10 @@ public:
 		map<wstring, int> map;
 		map[name] = slot;
 		slots.push_back(map);
+
+		if (slot > maxSlotNumber) {
+			maxSlotNumber = slot;
+		}
 	}
 	int GetSlotNumber(wstring name)
 	{
@@ -31,8 +35,9 @@ public:
 			}
 		}
 	}
-
+	int GetMaxSlotNumber() { return maxSlotNumber; }
 private:
 	vector<map<wstring, int>> slots;
+	int maxSlotNumber = -1;
 };
 

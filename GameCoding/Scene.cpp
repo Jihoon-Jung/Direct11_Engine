@@ -25,7 +25,7 @@ void Scene::LateUpdate()
 	}
 	Picking();
 	UIPicking();
-	CheckCollision();
+	//CheckCollision();
 	
 }
 

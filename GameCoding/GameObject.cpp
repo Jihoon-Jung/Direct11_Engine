@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameObject.h"
+#include "tinyxml2.h"
 
 GameObject::GameObject()
 {

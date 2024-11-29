@@ -22,6 +22,7 @@ public:
 	shared_ptr<GameObject> GetPickedObject() const { return picked; }
 
 	Vec3 GetCameraPos();
+	wstring GetSceneName() { return _sceneName; }
 private:
 	vector<shared_ptr<GameObject>> _gameObjects;
 	shared_ptr<GameObject> _billboard_obj = make_shared<GameObject>();
@@ -33,5 +34,7 @@ private:
 	shared_ptr<GameObject> picked = nullptr;
 	int32 firstClickedMouseX = 0;
 	int32 firstClickedMouseY = 0;
+
+	wstring _sceneName = L"test_scene";
 };
 

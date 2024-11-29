@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+    <Name>TerrainMaterial</Name>
+    <Shader>Terrain_Shader</Shader>
+    <MaterialDesc>
+        <Ambient r="1" g="1" b="1" a="1"/>
+        <Diffuse r="1" g="1" b="1" a="1"/>
+        <Specular r="0" g="0" b="0" a="64"/>
+    </MaterialDesc>
+</Material>

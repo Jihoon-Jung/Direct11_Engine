@@ -14,6 +14,8 @@ RenderPass::~RenderPass()
 
 void RenderPass::Render(bool isEnv)
 {
+	_transformPtr = _transform.lock();
+
 	if (_pass == Pass::DEFAULT_RENDER)
 		DefaultRender(isEnv);
 	else if (_pass == Pass::GAUSSIANBLUR_RENDER)
@@ -32,6 +34,8 @@ void RenderPass::Render(bool isEnv)
 		StaticMeshRencer(isEnv);
 	else if (_pass == Pass::ANIMATED_MESH_RENDER)
 		AnimatedMeshRender(isEnv);
+	else if (_pass == Pass::PARTICLE_RENDER)
+		ParticleRender(isEnv);
 	else if (_pass == Pass::DEBUG_2D_RENDER)
 		DebugQuadRender();
 }
@@ -40,7 +44,12 @@ void RenderPass::DefaultRender(bool isEnv)
 {
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+
+	if (_transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	else
+		assert(0);
+
 	if (isEnv)
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 	else if (RENDER.GetShadowMapFlag())
@@ -159,7 +168,11 @@ void RenderPass::EnvironmentMapRender()
 {
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"EnvironmentMap_Shader");
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+
+	if (_transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	else
+		assert(0);
 	/*if (isEnv)
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 	else*/
@@ -274,7 +287,11 @@ void RenderPass::TessellationRender(bool isEnv)
 {
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+	if (_transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	else
+		assert(0);
+
 	if (isEnv)
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 	else if (RENDER.GetShadowMapFlag())
@@ -402,121 +419,152 @@ void RenderPass::TessellationRender(bool isEnv)
 
 void RenderPass::OutlineRender(bool isEnv)
 {
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
-	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
-	if (isEnv)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
-	else if (RENDER.GetShadowMapFlag())
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
-	else
+	Vec3 firstObjectScale = _transformPtr->GetLocalScale();
+	Vec3 secondObjectScale = firstObjectScale * 1.1f;
+	DSState firstObjectDStype = _dsStateType;
+	shared_ptr<Material> firstObjectMaterial = _meshRenderer->GetMaterial();
+	for (int i = 0; i < 2; i++)
 	{
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-	}
+		if (i > 0)
+		{
+			_transformPtr->SetLocalScale(secondObjectScale);
+			_dsStateType = DSState::CUSTOM2;
+			_meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SimpleMaterial"));
+		}
+			
+
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+		
+		shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
+		shader = _meshRenderer->GetMaterial()->GetShader();
+		if (_transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		else
+			assert(0);
+
+		if (isEnv)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
+		else if (RENDER.GetShadowMapFlag())
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
+		else
+		{
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
+		}
+
+
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+		if (lightObject != nullptr)
+		{
+			lightObject->GetLightBuffer();
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		}
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+
+		LightAndCameraPos lightDirection;
+		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
+		Vec3 pos = cameraObject->transform()->GetLocalPosition();
+
+		shared_ptr<Buffer> light = make_shared<Buffer>();
+		light->CreateConstantBuffer<LightAndCameraPos>();
+		light->CopyData(lightDirection);
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+
+
+
+		D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+		shared_ptr<Buffer> buffer = _meshRenderer->GetMesh()->GetBuffer();
+		uint32 stride = buffer->GetStride();
+		uint32 offset = 0;
+
+		shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
+		shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+
+		RasterizerStateInfo rasterzerStateInfo = _meshRenderer->GetRasterzerStates();
+		/*if (isUseTessellation)
+			rasterzerStateInfo.fillMode = D3D11_FILL_WIREFRAME;*/
+		rasterizerState->CreateRasterizerState(rasterzerStateInfo);
+
+		// inputAssembler
+		DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+		DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+
+		DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
+		DEVICECONTEXT->IASetPrimitiveTopology(topology);
+
+		// VertexShader
+		ComPtr<ID3D11VertexShader> vertexShader = shader->GetVertexShader();
+		ComPtr<ID3D11PixelShader> pixelShader = shader->GetPixelShader();
+		ComPtr<ID3D11HullShader> hullShader = shader->GetHullShader();
+		ComPtr<ID3D11DomainShader> domainShader = shader->GetDomainShader();
+
+		if (vertexShader != nullptr)
+			DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
+
+		if (pixelShader != nullptr)
+			DEVICECONTEXT->PSSetShader(pixelShader.Get(), nullptr, 0);
+
+
+		// Rasterizer
+		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+		shared_ptr<Texture> defaultTexture = _meshRenderer->GetMaterial()->GetTexture();
+		shared_ptr<Texture> normalMap = _meshRenderer->GetMaterial()->GetNormalMap();
+		shared_ptr<Texture> specularMap = _meshRenderer->GetMaterial()->GetSpecularMap();
+		shared_ptr<Texture> diffuseMap = _meshRenderer->GetMaterial()->GetDiffuseMap();
+		// Set Default Texture
+		if (i > 0)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, RESOURCE.GetResource<Texture>(L"Yellow")->GetShaderResourceView());
+		else
+		{
+			if (defaultTexture != nullptr)
+				shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
+		}
+
 		
 
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
-	if (lightObject != nullptr)
-	{
-		lightObject->GetLightBuffer();
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		// Set NormalMap
+		if (normalMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, normalMap->GetShaderResourceView());
+
+		// Set SpecularMap
+		if (specularMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
+
+		// Set DiffuseMap
+		if (diffuseMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
+
+
+		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+		depthStencilState->SetDepthStencilState(_dsStateType);
+
+		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+		samplerState->CreateSamplerState();
+
+		shared_ptr<SamplerState> shadow_SamplerState = make_shared<SamplerState>();
+		shadow_SamplerState->CreateShadowSamplerState();
+
+		shared_ptr<BlendState> blendState = make_shared<BlendState>();
+		blendState->CreateBlendState();
+
+		DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+		DEVICECONTEXT->PSSetSamplers(1, 1, shadow_SamplerState->GetSamplerState().GetAddressOf());
+
+		// OutputMerger
+		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+		DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
 	}
-
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
-
-	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
-	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
-	Vec3 pos = cameraObject->transform()->GetLocalPosition();
-
-	shared_ptr<Buffer> light = make_shared<Buffer>();
-	light->CreateConstantBuffer<LightAndCameraPos>();
-	light->CopyData(lightDirection);
-
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
-
-
-
-	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	shared_ptr<Buffer> buffer = _meshRenderer->GetMesh()->GetBuffer();
-	uint32 stride = buffer->GetStride();
-	uint32 offset = 0;
-
-	shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
-	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
-
-	RasterizerStateInfo rasterzerStateInfo = _meshRenderer->GetRasterzerStates();
-	/*if (isUseTessellation)
-		rasterzerStateInfo.fillMode = D3D11_FILL_WIREFRAME;*/
-	rasterizerState->CreateRasterizerState(rasterzerStateInfo);
-
-	// inputAssembler
-	DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
-	DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
-	DEVICECONTEXT->IASetPrimitiveTopology(topology);
-
-	// VertexShader
-	ComPtr<ID3D11VertexShader> vertexShader = shader->GetVertexShader();
-	ComPtr<ID3D11PixelShader> pixelShader = shader->GetPixelShader();
-	ComPtr<ID3D11HullShader> hullShader = shader->GetHullShader();
-	ComPtr<ID3D11DomainShader> domainShader = shader->GetDomainShader();
-
-	if (vertexShader != nullptr)
-		DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
-
-	if (pixelShader != nullptr)
-		DEVICECONTEXT->PSSetShader(pixelShader.Get(), nullptr, 0);
-
-
-	// Rasterizer
-	DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
-
-	shared_ptr<Texture> defaultTexture = _meshRenderer->GetMaterial()->GetTexture();
-	shared_ptr<Texture> normalMap = _meshRenderer->GetMaterial()->GetNormalMap();
-	shared_ptr<Texture> specularMap = _meshRenderer->GetMaterial()->GetSpecularMap();
-	shared_ptr<Texture> diffuseMap = _meshRenderer->GetMaterial()->GetDiffuseMap();
-	// Set Default Texture
-	if (defaultTexture != nullptr)
-		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
-
-	// Set NormalMap
-	if (normalMap != nullptr)
-		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, normalMap->GetShaderResourceView());
-
-	// Set SpecularMap
-	if (specularMap != nullptr)
-		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
-
-	// Set DiffuseMap
-	if (diffuseMap != nullptr)
-		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
-
-
-	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(_dsStateType);
-
-	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
-	samplerState->CreateSamplerState();
-
-	shared_ptr<SamplerState> shadow_SamplerState = make_shared<SamplerState>();
-	shadow_SamplerState->CreateShadowSamplerState();
-
-	shared_ptr<BlendState> blendState = make_shared<BlendState>();
-	blendState->CreateBlendState();
-
-	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
-	DEVICECONTEXT->PSSetSamplers(1, 1, shadow_SamplerState->GetSamplerState().GetAddressOf());
-
-	// OutputMerger
-	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
-	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
-	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
-
-
+	
+	// Restore
+	_transformPtr->SetLocalScale(firstObjectScale);
+	_dsStateType = firstObjectDStype;
+	_meshRenderer->SetMaterial(firstObjectMaterial);
 }
 
 void RenderPass::GaussianBlurRender(bool isEnv)
@@ -550,7 +598,7 @@ void RenderPass::QuadRender(bool isEnv)
 	RasterizerStateInfo rasterzerStates;
 	rasterzerStates.fillMode = D3D11_FILL_SOLID;
 	rasterzerStates.cullMode = D3D11_CULL_BACK;
-	rasterzerStates.frontCouterClockWise = false;
+	rasterzerStates.frontCounterClockwise = false;
 	rasterizerState->CreateRasterizerState(rasterzerStates);
 
 	// inputAssembler
@@ -594,7 +642,11 @@ void RenderPass::TerrainRender(bool isEnv)
 {
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+	if (_transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	else
+		assert(0);
+
 	if (isEnv)
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 	else if (RENDER.GetShadowMapFlag())
@@ -793,7 +845,11 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+		if (_transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		else
+			assert(0);
+
 		if (isEnv)
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 		else if (RENDER.GetShadowMapFlag())
@@ -983,7 +1039,11 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+		if (_transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		else
+			assert(0);
+
 		if (isEnv)
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
 		else if (RENDER.GetShadowMapFlag())
@@ -1091,11 +1151,156 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 	}
 }
 
+void RenderPass::ParticleRender(bool isEnv)
+{
+	shared_ptr<Shader> initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticle_Shader");
+	shared_ptr<Shader> renderParticleShader = _meshRenderer->GetShader();// RESOURCE.GetResource<Shader>(L"RenderParticle_Shader");
+
+	Matrix viewMat;
+	Matrix projMat;
+	if (isEnv)
+	{
+		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvViewMatrix();
+		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvProjectionMatrix();
+	}
+	else
+	{
+		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetViewMatrix();
+		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetProjectionMatrix();
+	}
+
+
+	shared_ptr<ParticleSystem> particleComponent = _transformPtr->GetGameObject()->GetComponent<ParticleSystem>();
+	Vec3 _eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	Vec3 _emitPosW = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	Vec3 _emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+	Matrix viewProj = viewMat * projMat;
+
+	ParticleBuffer pBuffer;
+	pBuffer.gView = viewMat;
+	pBuffer.gProj = projMat;
+	pBuffer.gGameTime = TIME.GetTotalTime();
+	pBuffer.gTimeStep = TIME.GetDeltaTime() / 7.0f;
+	pBuffer.gEyePosW = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
+	pBuffer.gEmitPosW = _emitPosW;
+	pBuffer.gEmitDirW = _emitDirW;
+
+	shared_ptr<Buffer> particleBuffer = make_shared<Buffer>();
+	particleBuffer->CreateConstantBuffer<ParticleBuffer>();
+	particleBuffer->CopyData(pBuffer);
+
+	static_assert(sizeof(ParticleBuffer) % 16 == 0, "Constant buffer size must be a multiple of 16 bytes.");
+
+	initParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"ParticleBuffer", 1, particleBuffer);
+	initParticleShader->PushShaderResourceToShader(ShaderType::GEOMETRY_SHADER, L"gRandomTex", 1, RESOURCE.GetResource<Texture>(L"Random_Texture")->GetShaderResourceView());
+
+	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+	samplerState->CreateSamplerState();
+
+	// make particle vertex
+	DEVICECONTEXT->IASetInputLayout(initParticleShader->GetInputLayout()->GetInputLayout().Get());
+	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	uint32 stride = sizeof(VertexParticle);
+	uint32 offset = 0;
+
+	if (particleComponent->GetFirstRunFlag())
+		DEVICECONTEXT->IASetVertexBuffers(0, 1, particleComponent->GetinitVB().GetAddressOf(), &stride, &offset);
+	else
+		DEVICECONTEXT->IASetVertexBuffers(0, 1, particleComponent->GetDrawVB().GetAddressOf(), &stride, &offset);
+
+	// VertexShader
+	DEVICECONTEXT->VSSetShader(initParticleShader->GetVertexShader().Get(), nullptr, 0);
+
+	// GeometryShader
+	DEVICECONTEXT->GSSetShader(initParticleShader->GetOutputStreamGeometryShader().Get(), nullptr, 0);
+
+	DEVICECONTEXT->GSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+	// PixelShader (not use)
+	DEVICECONTEXT->PSSetShader(nullptr, nullptr, 0);
+
+	DEVICECONTEXT->SOSetTargets(1, particleComponent->GetStreamOutVB().GetAddressOf(), &offset);
+
+	if (particleComponent->GetFirstRunFlag())
+	{
+		DEVICECONTEXT->Draw(1, 0);
+		particleComponent->SetFirstRunFlag(false);
+	}
+	else
+	{
+		DEVICECONTEXT->DrawAuto();
+	}
+
+	// 스트림 아웃 타겟 해제
+	ID3D11Buffer* bufferArray[1] = { 0 };
+	DEVICECONTEXT->SOSetTargets(1, bufferArray, &offset);
+
+	// 버퍼 스왑
+	std::swap(particleComponent->GetDrawVB(), particleComponent->GetStreamOutVB());
+
+
+	// Render Particle
+
+
+
+	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+	RasterizerStateInfo states;
+	states.fillMode = D3D11_FILL_SOLID;
+	states.cullMode = D3D11_CULL_BACK;
+	states.frontCounterClockwise = false;
+	rasterizerState->CreateRasterizerState(states);
+
+	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+	depthStencilState->SetDepthStencilState(DSState::CUSTOM3);
+
+	shared_ptr<BlendState> blendState = make_shared<BlendState>();
+	blendState->CreateAdditiveBlendState();
+
+
+
+	// inputAssembler
+	DEVICECONTEXT->IASetVertexBuffers(0, 1, particleComponent->GetDrawVB().GetAddressOf(), &stride, &offset);
+
+	DEVICECONTEXT->IASetInputLayout(renderParticleShader->GetInputLayout()->GetInputLayout().Get());
+	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	// VertexShader
+	DEVICECONTEXT->VSSetShader(renderParticleShader->GetVertexShader().Get(), nullptr, 0);
+
+	// GeometryShader
+	DEVICECONTEXT->GSSetShader(renderParticleShader->GetGeometryShader().Get(), nullptr, 0);
+
+	// Rasterizer
+	DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+	// PixelShader
+	DEVICECONTEXT->PSSetShader(renderParticleShader->GetPixelShader().Get(), nullptr, 0);
+
+	shared_ptr<Texture> fireParticleTexture = _meshRenderer->GetMaterial()->GetTexture();
+	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"ParticleBuffer", 1, particleBuffer);
+	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	renderParticleShader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"gTexArray", 1, fireParticleTexture->GetShaderResourceView());
+
+	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+
+
+	// OutputMerger
+	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+
+
+	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+
+	DEVICECONTEXT->DrawAuto();
+
+	DEVICECONTEXT->GSSetShader(nullptr, nullptr, 0);
+}
+
 void RenderPass::DebugQuadRender()
 {
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"UICamera");
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transform->GetTransformBuffer());
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
 
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

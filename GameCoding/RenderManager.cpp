@@ -84,8 +84,7 @@ void RenderManager::GetRenderableObject()
 				_envMappedObjects.push_back(gameObject);
 			
 		}
-		else if (particleSystem != nullptr)
-			_renderObjects.push_back(gameObject);
+
 
 		if (gameObject->GetComponent<Billboard>() != nullptr)
 			_billboardObjs.push_back(gameObject);
@@ -108,13 +107,6 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 {
 	for (const shared_ptr<GameObject>& gameObject : _renderObjects)
 	{
-		shared_ptr<ParticleSystem> particle = gameObject->GetComponent<ParticleSystem>();
-		if (particle != nullptr)
-		{
-			if (!_drawShadowMapFlag)
-				particle->Update(TIME.GetDeltaTime() / 7.0f, TIME.GetTotalTime(), isEnv);
-			continue;
-		}
 		
 		if (_drawShadowMapFlag && gameObject->GetName() == L"skyBox")
 			continue;
@@ -124,7 +116,6 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<Model> model = meshRenderer->GetModel();
 
-		shared_ptr<Shader> shader = meshRenderer->GetShader();
 
 		if (meshRenderer->GetRenderPasses().size() > 0)
 		{

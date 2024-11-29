@@ -21,7 +21,7 @@ public:
 	}
 
 	void InitializeRotationFromTransform();
-
+	float GetSpeed() const { return _speed; }
 private:
 
 	bool _isFirstMove = true;

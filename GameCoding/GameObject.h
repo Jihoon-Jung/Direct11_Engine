@@ -12,6 +12,8 @@
 #include "Button.h"
 #include "Billboard.h"
 #include "ParticleSystem.h"
+#include "BoxCollider.h"
+#include "SphereCollider.h"
 
 enum class GameObjectType
 {
@@ -32,12 +34,22 @@ public:
 	void SetParent(shared_ptr<GameObject> parent);
 	void AddChild(shared_ptr<GameObject> child);
 	void SetObjectType(GameObjectType type) { _type = type; }
+	shared_ptr<GameObject> GetParent() { return _parent; }
+	const vector<shared_ptr<GameObject>>& GetChildren() { return _children; }
 	vector<shared_ptr<Component>>& GetComponents() { return _components; }
 	GameObjectType GetObjectType() { return _type; }
+	void SetTreeNodeOpen(bool open) { _isTreeNodeOpen = open; }
+	bool IsTreeNodeOpen() const { return _isTreeNodeOpen; }
+
+
 	template <typename T>
 	shared_ptr<T> GetComponent()
 	{
 		ComponentType type = ComponentType::None;
+		// MonoBehaviour를 상속받는 클래스인지 먼저 확인
+		if (std::is_base_of_v<MonoBehaviour, T>)
+			type = ComponentType::Script;
+
 		if (std::is_same_v<T, Transform>)
 			type = ComponentType::Transform;
 		if (std::is_same_v<T, MeshRenderer>)
@@ -60,6 +72,10 @@ public:
 			type = ComponentType::Particle;
 		if (std::is_same_v<T, MonoBehaviour>)
 			type = ComponentType::Script;
+		if (std::is_same_v<T, BoxCollider>)
+			type = ComponentType::BoxCollider;
+		if (std::is_same_v<T, SphereCollider>)
+			type = ComponentType::SphereCollider;
 
 
 		uint8 index = static_cast<uint8>(type);
@@ -112,5 +128,6 @@ private:
 	wstring _name;
 	GameObjectType _type;
 	shared_ptr<GameObject> _parent;
+	bool _isTreeNodeOpen = false;  // 트리 노드의 펼침 상태를 저장
 };
 

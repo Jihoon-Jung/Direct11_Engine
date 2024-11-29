@@ -38,19 +38,21 @@ public:
 	ComPtr<ID3D11ShaderResourceView> GaussainBlur(shared_ptr<Shader> verticalBlurShader, shared_ptr<Shader> horizontalBlurShader, ComPtr<ID3D11ShaderResourceView> texture);
 
 	void PushMaterialDesc();
-	MaterialDesc GetMaterialDesc() { return _materialDesc; }
+	
 	void SetMaterialDesc(MaterialDesc materialDesc);
 	void CreateCubeMapTexture(shared_ptr<Texture> textureArray[6]);
 	void CreateEnvironmentMapTexture(shared_ptr<GameObject> gameObject);
-	ComPtr<ID3D11ShaderResourceView> GetCubeMapSRV() { return _cubeMapSRV; }
+	void SetMaterialName(wstring name) { _materialName = name; }
 
+	ComPtr<ID3D11ShaderResourceView> GetCubeMapSRV() { return _cubeMapSRV; }
+	MaterialDesc GetMaterialDesc() { return _materialDesc; }
 	shared_ptr<Shader> GetShader() { return _shader; }
 	shared_ptr<Texture> GetTexture() { return _texture; }
 	shared_ptr<Texture> GetNormalMap() { return _normalMap; }
 	shared_ptr<Texture> GetSpecularMap() { return _specularMap; }
 	shared_ptr<Texture> GetDiffuseMap() { return _diffuseMap; }
 	shared_ptr<Buffer> GetMaterialBuffer() { return _materialBuffer; }
-	
+	wstring GetMaterialName() { return _materialName; }
 
 private:
 	shared_ptr<Shader> _shader;
@@ -62,6 +64,6 @@ private:
 	ComPtr<ID3D11ShaderResourceView> _cubeMapSRV;
 	ComPtr<ID3D11ShaderResourceView> _environmentMapSRV;
 	MaterialDesc _materialDesc;
-	
+	wstring _materialName = L"None";
 };
 

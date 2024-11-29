@@ -9,24 +9,27 @@ ParticleSystem::ParticleSystem()
 	_timeStep = 0.0f;
 	_age = 0.0f;
 
-	_eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	_emitPosW = XMFLOAT3(0.0f, 1.0f, 120.0f);
-	_emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);
-}
+	/*_eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	_emitPosW = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	_emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);*/
 
-ParticleSystem::~ParticleSystem()
-{
-}
+	ComPtr<ID3D11ShaderResourceView> texArraySRV = RESOURCE.GetResource<Texture>(L"Fire_Particle")->GetShaderResourceView();
+	ComPtr<ID3D11ShaderResourceView> randomTexSRV = RESOURCE.GetResource<Texture>(L"Random_Texture")->GetShaderResourceView();
+	uint32 maxParticles = 500;
 
-void ParticleSystem::Init(ComPtr<ID3D11ShaderResourceView> texArraySRV, ComPtr<ID3D11ShaderResourceView> randomTexSRV, uint32 maxParticles)
-{
 	_maxParticles = maxParticles;
 
 	_texArraySRV = texArraySRV;
 	_randomTexSRV = randomTexSRV;
 
 	BuildVB();
+
 }
+
+ParticleSystem::~ParticleSystem()
+{
+}
+
 
 #include <iostream>
 using namespace std;
@@ -104,153 +107,11 @@ void ParticleSystem::Reset()
 	_age = 0.0f;
 }
 
-void ParticleSystem::Update(float dt, float gameTime, bool isEnv)
+void ParticleSystem::Update()
 {
-	_gameTime = gameTime;
-	_timeStep = dt;
 
-	_age += dt;
-	_isEnv = isEnv;
-	Draw();
 }
 
-void ParticleSystem::Draw()
-{
-	shared_ptr<Shader> initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticle_Shader");
-	shared_ptr<Shader> renderParticleShader = RESOURCE.GetResource<Shader>(L"RenderParticle_Shader");
-
-	Matrix viewMat;
-	Matrix projMat;
-	if (_isEnv)
-	{
-		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvViewMatrix();
-		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvProjectionMatrix();
-	}
-	else
-	{
-		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetViewMatrix();
-		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetProjectionMatrix();
-	}
-	
-	Matrix viewProj = viewMat * projMat;
-
-	ParticleBuffer pBuffer;
-	pBuffer.gView = viewMat;
-	pBuffer.gProj = projMat;
-	pBuffer.gGameTime = _gameTime;
-	pBuffer.gTimeStep = _timeStep;
-	pBuffer.gEyePosW = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
-	pBuffer.gEmitPosW = _emitPosW;
-	pBuffer.gEmitDirW = _emitDirW;
-
-	shared_ptr<Buffer> particleBuffer = make_shared<Buffer>();
-	particleBuffer->CreateConstantBuffer<ParticleBuffer>();
-	particleBuffer->CopyData(pBuffer);
-
-	static_assert(sizeof(ParticleBuffer) % 16 == 0, "Constant buffer size must be a multiple of 16 bytes.");
-
-	initParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"ParticleBuffer", 1, particleBuffer);
-	initParticleShader->PushShaderResourceToShader(ShaderType::GEOMETRY_SHADER, L"gRandomTex", 1, _randomTexSRV);
-
-	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
-	samplerState->CreateSamplerState();
-
-	// make particle vertex
-	DEVICECONTEXT->IASetInputLayout(initParticleShader->GetInputLayout()->GetInputLayout().Get());
-	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-	uint32 stride = sizeof(VertexParticle);
-	uint32 offset = 0;
-
-	if (_firstRun)
-		DEVICECONTEXT->IASetVertexBuffers(0, 1, _initVB.GetAddressOf(), &stride, &offset);
-	else
-		DEVICECONTEXT->IASetVertexBuffers(0, 1, _drawVB.GetAddressOf(), &stride, &offset);
-
-	// VertexShader
-	DEVICECONTEXT->VSSetShader(initParticleShader->GetVertexShader().Get(), nullptr, 0);
-
-	// GeometryShader
-	DEVICECONTEXT->GSSetShader(initParticleShader->GetOutputStreamGeometryShader().Get(), nullptr, 0);
-
-	DEVICECONTEXT->GSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
-	// PixelShader (not use)
-	DEVICECONTEXT->PSSetShader(nullptr, nullptr, 0);
-
-	DEVICECONTEXT->SOSetTargets(1, _streamOutVB.GetAddressOf(), &offset);
-
-	if (_firstRun)
-	{
-		DEVICECONTEXT->Draw(1, 0);
-		_firstRun = false;
-	}
-	else
-	{
-		DEVICECONTEXT->DrawAuto();
-	}
-
-	// 스트림 아웃 타겟 해제
-	ID3D11Buffer* bufferArray[1] = { 0 };
-	DEVICECONTEXT->SOSetTargets(1, bufferArray, &offset);
-
-	// 버퍼 스왑
-	std::swap(_drawVB, _streamOutVB);
-
-
-	// Render Particle
-	
-	
-
-	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
-	RasterizerStateInfo states;
-	states.fillMode = D3D11_FILL_SOLID;
-	states.cullMode = D3D11_CULL_BACK;
-	states.frontCouterClockWise = false;
-	rasterizerState->CreateRasterizerState(states);
-
-	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::CUSTOM3);
-
-	shared_ptr<BlendState> blendState = make_shared<BlendState>();
-	blendState->CreateAdditiveBlendState();
-
-	
-
-	// inputAssembler
-	DEVICECONTEXT->IASetVertexBuffers(0, 1, _drawVB.GetAddressOf(), &stride, &offset);
-
-	DEVICECONTEXT->IASetInputLayout(renderParticleShader->GetInputLayout()->GetInputLayout().Get());
-	DEVICECONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-	// VertexShader
-	DEVICECONTEXT->VSSetShader(renderParticleShader->GetVertexShader().Get(), nullptr, 0);
-
-	// GeometryShader
-	DEVICECONTEXT->GSSetShader(renderParticleShader->GetGeometryShader().Get(), nullptr, 0);
-
-	// Rasterizer
-	DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
-
-	// PixelShader
-	DEVICECONTEXT->PSSetShader(renderParticleShader->GetPixelShader().Get(), nullptr, 0);
-
-	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"ParticleBuffer", 1, particleBuffer);
-
-	renderParticleShader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"gTexArray", 1, _texArraySRV);
-
-	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
-
-
-	// OutputMerger
-	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
-
-
-	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
-
-	DEVICECONTEXT->DrawAuto();
-
-	DEVICECONTEXT->GSSetShader(nullptr, nullptr, 0);
-}
 
 void ParticleSystem::BuildVB()
 {

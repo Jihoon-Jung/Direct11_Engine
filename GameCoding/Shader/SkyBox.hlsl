@@ -10,15 +10,6 @@ struct VS_INPUT
 	float4 blendWeights : BLENDWEIGHTS;
 };
 
-//struct VS_OUTPUT
-//{
-//	float4 position : SV_POSITION;
-//	float2 uv : TEXCOORD;
-//	float3 normal : NORMAL;
-//	float3 tangent : TANGENT;
-//	float3 worldPosition : POSITION1;
-//};
-
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -33,7 +24,6 @@ cbuffer CameraBuffer : register(b0)
 
 
 SamplerState sampler0 : register(s0);
-//Texture2D texture0 : register(t0);
 TextureCube texture0 : register(t0);
 
 // SkyBox는 하늘과 카메라가 같이 움직이고 회전시 하늘과 카메라가 반대방향으로 회전.

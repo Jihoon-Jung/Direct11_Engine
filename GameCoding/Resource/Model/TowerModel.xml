@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>TowerModel</Name>
+    <Path>Tower/Tower</Path>
+    <Shader>StaticMesh_Shader</Shader>
+    <Material>Tower/Tower</Material>
+</Model>

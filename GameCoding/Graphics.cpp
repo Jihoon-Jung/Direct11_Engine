@@ -277,7 +277,7 @@ void Graphics::RenderQuad()
 	RasterizerStateInfo rasterzerStates;
 	rasterzerStates.fillMode = D3D11_FILL_SOLID;
 	rasterzerStates.cullMode = D3D11_CULL_BACK;
-	rasterzerStates.frontCouterClockWise = false;
+	rasterzerStates.frontCounterClockwise = false;
 	rasterizerState->CreateRasterizerState(rasterzerStates);
 
 	// inputAssembler

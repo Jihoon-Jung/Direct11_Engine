@@ -1,4 +1,6 @@
 #pragma once
+#include <filesystem>
+
 class GUIManager
 {
 protected:
@@ -17,6 +19,10 @@ public:
 	void RenderUI();
 	void RenderUI_End();
 	void RenderGuizmo();
+	void RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject);
+	
+	void RenderFolderTree(const filesystem::path& path, filesystem::path& selectedFolder);
+	void RenderFileGrid(const filesystem::path& path);
 
 private:
 	shared_ptr<GameObject> _selectedObject = nullptr;
@@ -42,5 +48,8 @@ private:
 	RotationAxis currentRotationAxis = NONE;
 
 	bool _rotationUpdated = false;
+	filesystem::path _selectedFolder;
+	bool _isFirstFrame = true;  // 첫 프레임 체크를 위한 변수
+
 };
 

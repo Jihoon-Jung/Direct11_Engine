@@ -84,7 +84,7 @@ void Billboard::DrawBillboard()
 	RasterizerStateInfo states;
 	states.fillMode = D3D11_FILL_SOLID;
 	states.cullMode = D3D11_CULL_BACK;
-	states.frontCouterClockWise = false;
+	states.frontCounterClockwise = false;
 	rasterizerState->CreateRasterizerState(states);
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();

@@ -19,7 +19,7 @@ void SphereCollider::Update()
 	shared_ptr<Transform> transform = GetTransform();
 
 	// 중심점 업데이트
-	_boundingSphere.Center = transform->GetWorldPosition();
+	_boundingSphere.Center = transform->GetWorldPosition() + _center;
 
 	// 크기 업데이트 (로컬 스케일 * 콜라이더 스케일)
 	Vec3 scale = transform->GetWorldScale() * _scale;

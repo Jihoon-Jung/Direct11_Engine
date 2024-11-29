@@ -63,6 +63,12 @@ cbuffer LightSpaceTransformBuffer : register(b5)
 	row_major matrix light_projectionMatrix;
 };
 
+cbuffer TransformBuffer : register(b6)
+{
+	row_major matrix worldMatrix;
+	row_major matrix worldInvTranspose;
+}
+
 SamplerState sampler0 : register(s0); // PS
 SamplerState shadowSampler : register(s1); // PS
 SamplerState samHeightmap : register(s2); // VS, DS, PS
@@ -77,7 +83,7 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	// Terrain specified directly in world space.
-	vout.PosW = vin.PosL;
+	vout.PosW = mul(float4(vin.PosL, 1.0f), worldMatrix).xyz;
 
 	// Displace the patch corners to world space.  This is to make 
 	// the eye to patch distance calculation more accurate.

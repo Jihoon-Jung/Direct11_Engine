@@ -14,6 +14,15 @@ Texture::~Texture()
 
 void Texture::CreateTexture(const wstring& path)
 {
+	// 파일 확장자 얻기
+	wstring ext = fs::path(path).extension();
+
+	if (ext == L".dds" || ext == L".DDS")
+	{
+		LoadTextureFromDDS(path);
+		return;
+	}
+
 	DirectX::TexMetadata md;
 	DirectX::ScratchImage img;
 	HRESULT hr = ::LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, &md, img);

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>RenderParticle_Shader</Name>
+    <Path>Shader/RenderParticleSystem.hlsl</Path>
+    <ShaderTypes>
+        <Type>0</Type>
+        <Type>3</Type>
+        <Type>1</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>4</Layout>
+        <Layout>4</Layout>
+        <Layout>4</Layout>
+    </InputLayouts>
+    <Slots>
+        <Slot name="ParticleBuffer" index="0"/>
+        <Slot name="TransformBuffer" index="1"/>
+        <Slot name="gTexArray" index="0"/>
+    </Slots>
+</Shader>

@@ -1,0 +1,105 @@
+<Scene>
+    <GameObject name="MainCamera">
+        <Transform posX="1" posY="2" posZ="107" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="0"/>
+        <Script type="MoveObject" speed="10"/>
+    </GameObject>
+    <GameObject name="UICamera">
+        <Transform posX="0" posY="0" posZ="-3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="1"/>
+    </GameObject>
+    <GameObject name="MainLight">
+        <Transform posX="1.3587203" posY="37" posZ="148.35771" rotX="0" rotY="96.166206" rotZ="0" scaleX="10" scaleY="10" scaleZ="10"/>
+        <Light ambientR="1" ambientG="1" ambientB="1" ambientA="1" diffuseR="1" diffuseG="1" diffuseB="1" diffuseA="1" specularR="1" specularG="1" specularB="1" specularA="1" emissiveR="1" emissiveG="1" emissiveB="1" emissiveA="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SimpleMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Env_Sphere">
+        <Transform posX="4" posY="1" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="7" depthStencilState="0"/>
+        </MeshRenderer>
+        <SphereCollider radius="0.5" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="Sphere">
+        <Transform posX="-6.5" posY="5.5999999" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="cube">
+        <Transform posX="-6.5" posY="3.2676027" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="tessellation_cube">
+        <Transform posX="-7" posY="1.5" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Tessellation_Material" mesh="Cylinder">
+            <RenderPass pass="5" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="stencil_cube1">
+        <Transform posX="-10.5" posY="0" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="1" depthStencilState="1"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Terrain_obj">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="TerrainMaterial" mesh="Terrain">
+            <RenderPass pass="6" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="UI_Quad">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <UIImage posX="-60" posY="320" sizeX="240" sizeY="180"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Debug_UI_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="UI_Button">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Debug_UI_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="house">
+        <Transform posX="0" posY="0" posZ="130" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="HouseModel">
+            <RenderPass pass="8" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="Kachujin_OBJ">
+        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="Dreyar_OBJ">
+        <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="FireParticle">
+        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
+            <RenderPass pass="10" depthStencilState="3"/>
+        </MeshRenderer>
+        <ParticleSystem/>
+    </GameObject>
+    <GameObject name="skyBox">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="SkyBoxMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+</Scene>

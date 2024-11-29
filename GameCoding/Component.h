@@ -17,11 +17,14 @@ enum class ComponentType : uint8
 	Billboard,
 	Particle,
 	Script,
+	BoxCollider,
+	SphereCollider,
+	ParticleSystem,
 	None
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 11
+	FIXED_COMPONENT_COUNT = 15
 };
 
 class Component
@@ -34,14 +37,18 @@ public:
 	virtual void Update() {};
 	virtual void LateUpdate() {};
 
-	shared_ptr<GameObject> GetGameObject() { return _gameObject; }
+	shared_ptr<GameObject> GetGameObject() {
+		if (auto gameObject = _gameObject.lock())
+			return gameObject;
+		return nullptr;
+	}
 	shared_ptr<Transform> GetTransform();
 	ComponentType GetType() { return _type; }
 
 
 protected:
 	ComponentType _type;
-	shared_ptr<GameObject> _gameObject;
+	weak_ptr<GameObject> _gameObject;
 	
 private:
 	friend class GameObject;

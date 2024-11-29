@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>HouseModel</Name>
+    <Path>House/House</Path>
+    <Shader>StaticMesh_Shader</Shader>
+    <Material>House/House</Material>
+</Model>

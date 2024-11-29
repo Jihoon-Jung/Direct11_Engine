@@ -15,7 +15,7 @@ void RasterizerState::CreateRasterizerState(RasterizerStateInfo rasterizerStateI
 	ZeroMemory(&desc, sizeof(desc));
 	desc.FillMode = rasterizerStateInfo.fillMode;
 	desc.CullMode = rasterizerStateInfo.cullMode;
-	desc.FrontCounterClockwise = rasterizerStateInfo.frontCouterClockWise;
+	desc.FrontCounterClockwise = rasterizerStateInfo.frontCounterClockwise;
 
 	HRESULT hr = DEVICE->CreateRasterizerState(&desc, _rasterizerState.GetAddressOf());
 	CHECK(hr);

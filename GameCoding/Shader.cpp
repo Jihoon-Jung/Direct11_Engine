@@ -133,6 +133,10 @@ void Shader::CreateShader(ShaderType type, const wstring& shaderPath, InputLayou
 void Shader::PushConstantBufferToShader(ShaderType type, const wstring& name, UINT numBuffers, shared_ptr<Buffer> buffer)
 {
 	UINT slot = _shaderSlot->GetSlotNumber(name);
+	if (slot > _shaderSlot->GetMaxSlotNumber())
+	{
+		return;
+	}
 	if (type == ShaderType::VERTEX_SHADER)
 		DEVICECONTEXT->VSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 	if (type == ShaderType::GEOMETRY_SHADER)
