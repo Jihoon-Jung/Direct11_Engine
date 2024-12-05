@@ -171,10 +171,13 @@ void Scene::UIPicking()
 		return;
 	POINT screenPoint = INPUT.GetMousePos();
 
-	const auto& gameObjects = GetGameObjects();
+	const vector<shared_ptr<GameObject>>& gameObjects = GetGameObjects();
 
-	for (auto& gameObject : gameObjects)
+	for (shared_ptr<GameObject> gameObject : gameObjects)
 	{
+		if (!gameObject)
+			continue;
+
 		if (gameObject->GetComponent<Button>() != nullptr)
 		{
 			if (gameObject->GetComponent<Button>()->Picked(screenPoint))

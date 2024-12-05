@@ -9,42 +9,17 @@ void ResourceManager::Init()
 	AddResource();
 }
 
-void ResourceManager::AddResource()
+void ResourceManager::SaveResource()
 {
-	// just for particle system
-	{
-		shared_ptr<Texture> fireParticleTexture = make_shared<Texture>();
-
-		shared_ptr<Texture> randomTexture = make_shared<Texture>();
-
-		vector<wstring> textureVector;
-		textureVector.push_back(L"flare0.dds");
-		fireParticleTexture->CreateTexture2DArraySRV(textureVector);
-		fireParticleTexture->SetName(L"Fire_Particle");
-		RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
-
-		randomTexture->CreateRandomTexture1DSRV();
-		randomTexture->SetName(L"Random_Texture");
-		RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
-	}
-	
-
-	
-
+	// mesh
 	WriteMeshToXML(L"Sphere", L"Sphere", L"Resource/Mesh/Sphere.xml");
 	WriteMeshToXML(L"Cube", L"Cube", L"Resource/Mesh/Cube.xml");
 	WriteMeshToXML(L"Grid", L"Grid", L"Resource/Mesh/Grid.xml");
 	WriteMeshToXML(L"Terrain", L"Terrain", L"Resource/Mesh/Terrain.xml");
 	WriteMeshToXML(L"Quad", L"Quad", L"Resource/Mesh/Quad.xml");
 	WriteMeshToXML(L"Cylinder", L"Cylinder", L"Resource/Mesh/Cylinder.xml");
-	LoadMeshData(L"Resource/Mesh/Sphere.xml");
-	LoadMeshData(L"Resource/Mesh/Cube.xml");
-	LoadMeshData(L"Resource/Mesh/Grid.xml");
-	LoadMeshData(L"Resource/Mesh/Terrain.xml");
-	LoadMeshData(L"Resource/Mesh/Quad.xml");
-	LoadMeshData(L"Resource/Mesh/Cylinder.xml");
 
-
+	// texture
 	WriteTextureToXML(L"bricks.jpg", L"Bricks", L"Resource/Texture/Bricks.xml");
 	WriteTextureToXML(L"Leather.jpg", L"Leather", L"Resource/Texture/Leather.xml");
 	WriteTextureToXML(L"yellow.jpg", L"Yellow", L"Resource/Texture/Yellow.xml");
@@ -56,30 +31,14 @@ void ResourceManager::AddResource()
 	WriteTextureToXML(L"stop.png", L"stopButton", L"Resource/Texture/stopButton.xml");
 	WriteTextureToXML(L"grasscube1024.dds", L"skyboxTexture", L"Resource/Texture/skyboxTexture.xml");
 	WriteTextureToXML(L"bricks_nmap.png", L"NormalMap", L"Resource/Texture/NormalMap.xml");
-
 	WriteTextureToXML(L"Material_Icon.png", L"Material_Icon", L"Resource/Texture/Material_Icon.xml");
 	WriteTextureToXML(L"Mesh_Icon.png", L"Mesh_Icon", L"Resource/Texture/Mesh_Icon.xml");
 	WriteTextureToXML(L"Model_Icon.png", L"Model_Icon", L"Resource/Texture/Model_Icon.xml");
 	WriteTextureToXML(L"Shader_Icon.png", L"Shader_Icon", L"Resource/Texture/Shader_Icon.xml");
+	WriteTextureToXML(L"Solid_white.png", L"Solid_white", L"Resource/Texture/Solid_white.xml");
+	WriteTextureToXML(L"DefaultNormal.png", L"DefaultNormal", L"Resource/Texture/DefaultNormal.xml");
 
-	LoadTextureData(L"Resource/Texture/Bricks.xml");
-	LoadTextureData(L"Resource/Texture/Leather.xml");
-	LoadTextureData(L"Resource/Texture/Yellow.xml");
-	LoadTextureData(L"Resource/Texture/Grass.xml");
-	LoadTextureData(L"Resource/Texture/Panda.xml");
-	LoadTextureData(L"Resource/Texture/Tree.xml");
-	LoadTextureData(L"Resource/Texture/startButton.xml");
-	LoadTextureData(L"Resource/Texture/pauseButton.xml");
-	LoadTextureData(L"Resource/Texture/stopButton.xml");
-	LoadTextureData(L"Resource/Texture/skyboxTexture.xml");
-	LoadTextureData(L"Resource/Texture/NormalMap.xml");
-	
-	LoadTextureData(L"Resource/Texture/Material_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Mesh_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Model_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Shader_Icon.xml");
-
-	
+	// shader
 	vector<ShaderType> types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	vector<InputLayoutType> layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	map<wstring, uint32> slots = {
@@ -97,7 +56,6 @@ void ResourceManager::AddResource()
 	};
 
 	WriteShaderToXML(L"Shader/Default.hlsl", L"Default_Shader", types, layouts, slots, L"Resource/Shader/DefaultShader.xml");
-	LoadShaderData(L"Resource/Shader/DefaultShader.xml");
 
 	types = {
 	ShaderType::VERTEX_SHADER,
@@ -128,9 +86,7 @@ void ResourceManager::AddResource()
 	};
 
 	WriteShaderToXML(L"Shader/Terrain.hlsl", L"Terrain_Shader", types, layouts, slots, L"Resource/Shader/TerrainShader.xml");
-	LoadShaderData(L"Resource/Shader/TerrainShader.xml");
 
-	// Debug UI Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -139,9 +95,7 @@ void ResourceManager::AddResource()
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/Debug_UI_Shader.hlsl", L"Debug_UI_Shader", types, layouts, slots, L"Resource/Shader/DebugUIShader.xml");
-	LoadShaderData(L"Resource/Shader/DebugUIShader.xml");
 
-	// Init Particle Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT };
 	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
 	slots = {
@@ -149,9 +103,7 @@ void ResourceManager::AddResource()
 		{L"gRandomTex", 0}
 	};
 	WriteShaderToXML(L"Shader/InitParticleSystem.hlsl", L"InitParticle_Shader", types, layouts, slots, L"Resource/Shader/InitParticleShader.xml");
-	LoadShaderData(L"Resource/Shader/InitParticleShader.xml");
 
-	// Render Particle Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
 	slots = {
@@ -160,9 +112,7 @@ void ResourceManager::AddResource()
 		{L"gTexArray", 0}
 	};
 	WriteShaderToXML(L"Shader/RenderParticleSystem.hlsl", L"RenderParticle_Shader", types, layouts, slots, L"Resource/Shader/RenderParticleShader.xml");
-	LoadShaderData(L"Resource/Shader/RenderParticleShader.xml");
 
-	// Tessellation Shader
 	types = {
 		ShaderType::VERTEX_SHADER,
 		ShaderType::PIXEL_SHADER,
@@ -189,9 +139,8 @@ void ResourceManager::AddResource()
 		{L"shadowMap", 4}
 	};
 	WriteShaderToXML(L"Shader/Tesselation.hlsl", L"Tesselation_Shader", types, layouts, slots, L"Resource/Shader/TessellationShader.xml");
-	LoadShaderData(L"Resource/Shader/TessellationShader.xml");
 
-	// Environment Map Shader
+
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -208,18 +157,14 @@ void ResourceManager::AddResource()
 		{L"shadowMap", 4}
 	};
 	WriteShaderToXML(L"Shader/EnvironmentMap.hlsl", L"EnvironmentMap_Shader", types, layouts, slots, L"Resource/Shader/EnvironmentMapShader.xml");
-	LoadShaderData(L"Resource/Shader/EnvironmentMapShader.xml");
 
-	// Quad Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/Quad.hlsl", L"Quad_Shader", types, layouts, slots, L"Resource/Shader/QuadShader.xml");
-	LoadShaderData(L"Resource/Shader/QuadShader.xml");
 
-	// Billboard Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER, ShaderType::GEOMETRY_SHADER };
 	layouts = {
 		InputLayoutType::VertexBillboard_Geometry,
@@ -233,26 +178,18 @@ void ResourceManager::AddResource()
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/Billboard.hlsl", L"Billboard_Shader", types, layouts, slots, L"Resource/Shader/BillboardShader.xml");
-	LoadShaderData(L"Resource/Shader/BillboardShader.xml");
 
-	// Adjust Texture Shader
 	types = { ShaderType::COMPUTE_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots.clear();
 	WriteShaderToXML(L"Shader/ComputeShader_AdjustTexture.hlsl", L"AdjustTexture_Shader", types, layouts, slots, L"Resource/Shader/AdjustTextureShader.xml");
-	LoadShaderData(L"Resource/Shader/AdjustTextureShader.xml");
 
-	// Gaussian Blur Horizontal Shader
 	types = { ShaderType::COMPUTE_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
 	WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurHorizontal.hlsl", L"Gaussian_Horizontal", types, layouts, slots, L"Resource/Shader/GaussianHorizontalShader.xml");
-	LoadShaderData(L"Resource/Shader/GaussianHorizontalShader.xml");
 
-	// Gaussian Blur Vertical Shader
 	WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurVertical.hlsl", L"Gaussian_Vertical", types, layouts, slots, L"Resource/Shader/GaussianVerticalShader.xml");
-	LoadShaderData(L"Resource/Shader/GaussianVerticalShader.xml");
 
-	// Skybox Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -260,9 +197,7 @@ void ResourceManager::AddResource()
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/SkyBox.hlsl", L"SkyBox_Shader", types, layouts, slots, L"Resource/Shader/SkyboxShader.xml");
-	LoadShaderData(L"Resource/Shader/SkyboxShader.xml");
 
-	// Simple Render Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -271,9 +206,7 @@ void ResourceManager::AddResource()
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/SimpleShader.hlsl", L"Simple_Render_Shader", types, layouts, slots, L"Resource/Shader/SimpleShader.xml");
-	LoadShaderData(L"Resource/Shader/SimpleShader.xml");
 
-	// Static Mesh Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -292,9 +225,7 @@ void ResourceManager::AddResource()
 		{L"shadowMap", 4}
 	};
 	WriteShaderToXML(L"Shader/StaticMesh.hlsl", L"StaticMesh_Shader", types, layouts, slots, L"Resource/Shader/StaticMeshShader.xml");
-	LoadShaderData(L"Resource/Shader/StaticMeshShader.xml");
 
-	// Animated Mesh Shader
 	types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
 	slots = {
@@ -312,74 +243,432 @@ void ResourceManager::AddResource()
 		{L"shadowMap", 4}
 	};
 	WriteShaderToXML(L"Shader/AnimatedMesh.hlsl", L"AnimatedMesh_Shader", types, layouts, slots, L"Resource/Shader/AnimatedMeshShader.xml");
-	LoadShaderData(L"Resource/Shader/AnimatedMeshShader.xml");
 
-	// Default Material
+
+	// material
 	MaterialDesc matDesc;
 	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Default_Shader", L"DefaultMaterial", L"Resource/Material/DefaultMaterial.xml");
-	LoadMaterialData(L"Resource/Material/DefaultMaterial.xml");
 
-	// Particle Material
-	WriteMaterialToXML(L"Fire_Particle", L"", MaterialDesc(), L"RenderParticle_Shader", L"ParticleMaterial", L"Resource/Material/ParticleMaterial.xml");
-	LoadMaterialData(L"Resource/Material/ParticleMaterial.xml");
-
-	// Grid Material
-	WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Default_Shader", L"GridMaterial", L"Resource/Material/GridMaterial.xml");
-	LoadMaterialData(L"Resource/Material/GridMaterial.xml");
-
-	// Debug UI Material
-	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Debug_UI_Shader", L"Debug_UI_Material", L"Resource/Material/DebugUIMaterial.xml");
-	LoadMaterialData(L"Resource/Material/DebugUIMaterial.xml");
-
-	// Tessellation Material
 	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Tesselation_Shader", L"Tessellation_Material", L"Resource/Material/TessellationMaterial.xml");
-	LoadMaterialData(L"Resource/Material/TessellationMaterial.xml");
 
-	// Billboard Material
-	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Billboard_Shader", L"Billboard_Material", L"Resource/Material/BillboardMaterial.xml");
-	LoadMaterialData(L"Resource/Material/BillboardMaterial.xml");
-
-	// Skybox Material
-	WriteMaterialToXML(L"skyboxTexture", L"", MaterialDesc(), L"SkyBox_Shader", L"SkyBoxMaterial", L"Resource/Material/SkyboxMaterial.xml");
-	LoadMaterialData(L"Resource/Material/SkyboxMaterial.xml");
-
-	// Terrain Material
 	matDesc.ambient = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 64.0f);
 	WriteMaterialToXML(L"", L"", matDesc, L"Terrain_Shader", L"TerrainMaterial", L"Resource/Material/TerrainMaterial.xml");
-	LoadMaterialData(L"Resource/Material/TerrainMaterial.xml");
 
-	// Simple Material
 	WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Simple_Render_Shader", L"SimpleMaterial", L"Resource/Material/SimpleMaterial.xml");
-	LoadMaterialData(L"Resource/Material/SimpleMaterial.xml");
 
-	// Tower Model (Static Mesh)
+	WriteMaterialToXML(L"Solid_white", L"DefaultNormal", MaterialDesc(), L"Default_Shader", L"SolidWhiteMaterial", L"Resource/Material/SolidWhiteMaterial.xml");
+
+	WriteMaterialToXML(L"Fire_Particle", L"", MaterialDesc(), L"RenderParticle_Shader", L"ParticleMaterial", L"Resource/Material/ParticleMaterial.xml");
+
+	WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Default_Shader", L"GridMaterial", L"Resource/Material/GridMaterial.xml");
+
+	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Billboard_Shader", L"Billboard_Material", L"Resource/Material/BillboardMaterial.xml");
+
+	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Debug_UI_Shader", L"Debug_UI_Material", L"Resource/Material/DebugUIMaterial.xml");
+
+	WriteMaterialToXML(L"skyboxTexture", L"", MaterialDesc(), L"SkyBox_Shader", L"SkyBoxMaterial", L"Resource/Material/SkyboxMaterial.xml");
+
+	// model
 	WriteModelToXML(L"Tower/Tower", L"StaticMesh_Shader", L"Tower/Tower", L"TowerModel",
 		vector<wstring>(), L"Resource/Model/TowerModel.xml");
-	LoadModelData(L"Resource/Model/TowerModel.xml");
 
-	// House Model (Static Mesh)
 	WriteModelToXML(L"House/House", L"StaticMesh_Shader", L"House/House", L"HouseModel",
 		vector<wstring>(), L"Resource/Model/HouseModel.xml");
-	LoadModelData(L"Resource/Model/HouseModel.xml");
 
-	// Kachujin Model (Animated Mesh)
-	vector<wstring> kachujinAnims = { L"Kachujin/Run", L"Kachujin/Slash", L"Kachujin/Dismissing"};
+	vector<wstring> kachujinAnims = { L"Kachujin/Run", L"Kachujin/Slash", L"Kachujin/Dismissing" };
 	WriteModelToXML(L"Kachujin/Kachujin", L"AnimatedMesh_Shader", L"Kachujin/Kachujin", L"Kachujin",
 		kachujinAnims, L"Resource/Model/KachujinModel.xml");
-	LoadModelData(L"Resource/Model/KachujinModel.xml");
 
-	// Dreyar Model (Animated Mesh)
 	vector<wstring> dreyarAnims = { L"Dreyar/Kick", L"Dreyar/Fall", L"Dreyar/Dance" };
 	WriteModelToXML(L"Dreyar/Dreyar", L"AnimatedMesh_Shader", L"Dreyar/Dreyar", L"Dreyar",
 		dreyarAnims, L"Resource/Model/DreyarModel.xml");
+}
+
+void ResourceManager::AddResource()
+{
+	// just for particle system
+	{
+		shared_ptr<Texture> fireParticleTexture = make_shared<Texture>();
+
+		shared_ptr<Texture> randomTexture = make_shared<Texture>();
+
+		vector<wstring> textureVector;
+		textureVector.push_back(L"flare0.dds");
+		fireParticleTexture->CreateTexture2DArraySRV(textureVector);
+		fireParticleTexture->SetName(L"Fire_Particle");
+		RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
+
+		randomTexture->CreateRandomTexture1DSRV();
+		randomTexture->SetName(L"Random_Texture");
+		RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
+	}
+	
+
+	
+
+	/*WriteMeshToXML(L"Sphere", L"Sphere", L"Resource/Mesh/Sphere.xml");
+	WriteMeshToXML(L"Cube", L"Cube", L"Resource/Mesh/Cube.xml");
+	WriteMeshToXML(L"Grid", L"Grid", L"Resource/Mesh/Grid.xml");
+	WriteMeshToXML(L"Terrain", L"Terrain", L"Resource/Mesh/Terrain.xml");
+	WriteMeshToXML(L"Quad", L"Quad", L"Resource/Mesh/Quad.xml");
+	WriteMeshToXML(L"Cylinder", L"Cylinder", L"Resource/Mesh/Cylinder.xml");*/
+	LoadMeshData(L"Resource/Mesh/Sphere.xml");
+	LoadMeshData(L"Resource/Mesh/Cube.xml");
+	LoadMeshData(L"Resource/Mesh/Grid.xml");
+	LoadMeshData(L"Resource/Mesh/Terrain.xml");
+	LoadMeshData(L"Resource/Mesh/Quad.xml");
+	LoadMeshData(L"Resource/Mesh/Cylinder.xml");
+
+
+	/*WriteTextureToXML(L"bricks.jpg", L"Bricks", L"Resource/Texture/Bricks.xml");
+	WriteTextureToXML(L"Leather.jpg", L"Leather", L"Resource/Texture/Leather.xml");
+	WriteTextureToXML(L"yellow.jpg", L"Yellow", L"Resource/Texture/Yellow.xml");
+	WriteTextureToXML(L"Grass.png", L"Grass", L"Resource/Texture/Grass.xml");
+	WriteTextureToXML(L"panda.jpg", L"Panda", L"Resource/Texture/Panda.xml");
+	WriteTextureToXML(L"tree.png", L"Tree", L"Resource/Texture/Tree.xml");
+	WriteTextureToXML(L"start.png", L"startButton", L"Resource/Texture/startButton.xml");
+	WriteTextureToXML(L"pause.png", L"pauseButton", L"Resource/Texture/pauseButton.xml");
+	WriteTextureToXML(L"stop.png", L"stopButton", L"Resource/Texture/stopButton.xml");
+	WriteTextureToXML(L"grasscube1024.dds", L"skyboxTexture", L"Resource/Texture/skyboxTexture.xml");
+	WriteTextureToXML(L"bricks_nmap.png", L"NormalMap", L"Resource/Texture/NormalMap.xml");
+
+	WriteTextureToXML(L"Material_Icon.png", L"Material_Icon", L"Resource/Texture/Material_Icon.xml");
+	WriteTextureToXML(L"Mesh_Icon.png", L"Mesh_Icon", L"Resource/Texture/Mesh_Icon.xml");
+	WriteTextureToXML(L"Model_Icon.png", L"Model_Icon", L"Resource/Texture/Model_Icon.xml");
+	WriteTextureToXML(L"Shader_Icon.png", L"Shader_Icon", L"Resource/Texture/Shader_Icon.xml");
+	WriteTextureToXML(L"Solid_white.png", L"Solid_white", L"Resource/Texture/Solid_white.xml");
+	WriteTextureToXML(L"DefaultNormal.png", L"DefaultNormal", L"Resource/Texture/DefaultNormal.xml");*/
+	LoadTextureData(L"Resource/Texture/Bricks.xml");
+	LoadTextureData(L"Resource/Texture/Leather.xml");
+	LoadTextureData(L"Resource/Texture/Yellow.xml");
+	LoadTextureData(L"Resource/Texture/Grass.xml");
+	LoadTextureData(L"Resource/Texture/Panda.xml");
+	LoadTextureData(L"Resource/Texture/Tree.xml");
+	LoadTextureData(L"Resource/Texture/startButton.xml");
+	LoadTextureData(L"Resource/Texture/pauseButton.xml");
+	LoadTextureData(L"Resource/Texture/stopButton.xml");
+	LoadTextureData(L"Resource/Texture/skyboxTexture.xml");
+	LoadTextureData(L"Resource/Texture/NormalMap.xml");
+	LoadTextureData(L"Resource/Texture/Solid_white.xml");
+	LoadTextureData(L"Resource/Texture/DefaultNormal.xml");
+	LoadTextureData(L"Resource/Texture/Material_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Mesh_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Model_Icon.xml");
+	LoadTextureData(L"Resource/Texture/Shader_Icon.xml");
+
+	
+	/*vector<ShaderType> types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	vector<InputLayoutType> layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	map<wstring, uint32> slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4},
+	};
+
+	WriteShaderToXML(L"Shader/Default.hlsl", L"Default_Shader", types, layouts, slots, L"Resource/Shader/DefaultShader.xml");*/
+	LoadShaderData(L"Resource/Shader/DefaultShader.xml");
+
+	/*types = {
+	ShaderType::VERTEX_SHADER,
+	ShaderType::HULL_SHADER,
+	ShaderType::DOMAIN_SHADER,
+	ShaderType::PIXEL_SHADER
+	};
+
+	layouts = {
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain,
+		InputLayoutType::Terrain
+	};
+
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"LightMaterial", 1},
+		{L"LightDesc", 2},
+		{L"LightAndCameraPos", 3},
+		{L"TerrainBuffer", 4},
+		{L"LightSpaceTransform", 5},
+		{L"TransformBuffer", 6},
+		{L"gLayerMapArray", 0},
+		{L"gBlendMap", 1},
+		{L"gHeightMap", 2},
+		{L"shadowMap", 3}
+	};
+
+	WriteShaderToXML(L"Shader/Terrain.hlsl", L"Terrain_Shader", types, layouts, slots, L"Resource/Shader/TerrainShader.xml");*/
+	LoadShaderData(L"Resource/Shader/TerrainShader.xml");
+
+	// Debug UI Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Debug_UI_Shader.hlsl", L"Debug_UI_Shader", types, layouts, slots, L"Resource/Shader/DebugUIShader.xml");*/
+	LoadShaderData(L"Resource/Shader/DebugUIShader.xml");
+
+	// Init Particle Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT };
+	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
+	slots = {
+		{L"ParticleBuffer", 0},
+		{L"gRandomTex", 0}
+	};
+	WriteShaderToXML(L"Shader/InitParticleSystem.hlsl", L"InitParticle_Shader", types, layouts, slots, L"Resource/Shader/InitParticleShader.xml");*/
+	LoadShaderData(L"Resource/Shader/InitParticleShader.xml");
+
+	// Render Particle Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
+	slots = {
+		{L"ParticleBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"gTexArray", 0}
+	};
+	WriteShaderToXML(L"Shader/RenderParticleSystem.hlsl", L"RenderParticle_Shader", types, layouts, slots, L"Resource/Shader/RenderParticleShader.xml");*/
+	LoadShaderData(L"Resource/Shader/RenderParticleShader.xml");
+
+	// Tessellation Shader
+	/*types = {
+		ShaderType::VERTEX_SHADER,
+		ShaderType::PIXEL_SHADER,
+		ShaderType::HULL_SHADER,
+		ShaderType::DOMAIN_SHADER
+	};
+	layouts = {
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData,
+		InputLayoutType::VertexTextureNormalTangentBlendData
+	};
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/Tesselation.hlsl", L"Tesselation_Shader", types, layouts, slots, L"Resource/Shader/TessellationShader.xml");*/
+	LoadShaderData(L"Resource/Shader/TessellationShader.xml");
+
+	// Environment Map Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"LightSpaceTransform", 5},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/EnvironmentMap.hlsl", L"EnvironmentMap_Shader", types, layouts, slots, L"Resource/Shader/EnvironmentMapShader.xml");*/
+	LoadShaderData(L"Resource/Shader/EnvironmentMapShader.xml");
+
+	// Quad Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Quad.hlsl", L"Quad_Shader", types, layouts, slots, L"Resource/Shader/QuadShader.xml");*/
+	LoadShaderData(L"Resource/Shader/QuadShader.xml");
+
+	// Billboard Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER, ShaderType::GEOMETRY_SHADER };
+	layouts = {
+		InputLayoutType::VertexBillboard_Geometry,
+		InputLayoutType::VertexBillboard_Geometry,
+		InputLayoutType::VertexBillboard_Geometry
+	};
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"CameraPos", 2},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/Billboard.hlsl", L"Billboard_Shader", types, layouts, slots, L"Resource/Shader/BillboardShader.xml");*/
+	LoadShaderData(L"Resource/Shader/BillboardShader.xml");
+
+	// Adjust Texture Shader
+	/*types = { ShaderType::COMPUTE_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots.clear();
+	WriteShaderToXML(L"Shader/ComputeShader_AdjustTexture.hlsl", L"AdjustTexture_Shader", types, layouts, slots, L"Resource/Shader/AdjustTextureShader.xml");*/
+	LoadShaderData(L"Resource/Shader/AdjustTextureShader.xml");
+
+	// Gaussian Blur Horizontal Shader
+	/*types = { ShaderType::COMPUTE_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData };
+	WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurHorizontal.hlsl", L"Gaussian_Horizontal", types, layouts, slots, L"Resource/Shader/GaussianHorizontalShader.xml");*/
+	LoadShaderData(L"Resource/Shader/GaussianHorizontalShader.xml");
+
+	// Gaussian Blur Vertical Shader
+	/*WriteShaderToXML(L"Shader/ComputeShader_GaussianBlurVertical.hlsl", L"Gaussian_Vertical", types, layouts, slots, L"Resource/Shader/GaussianVerticalShader.xml");*/
+	LoadShaderData(L"Resource/Shader/GaussianVerticalShader.xml");
+
+	// Skybox Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/SkyBox.hlsl", L"SkyBox_Shader", types, layouts, slots, L"Resource/Shader/SkyboxShader.xml");*/
+	LoadShaderData(L"Resource/Shader/SkyboxShader.xml");
+
+	// Simple Render Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"texture0", 0}
+	};
+	WriteShaderToXML(L"Shader/SimpleShader.hlsl", L"Simple_Render_Shader", types, layouts, slots, L"Resource/Shader/SimpleShader.xml");*/
+	LoadShaderData(L"Resource/Shader/SimpleShader.xml");
+
+	// Static Mesh Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"BoneBuffer", 5},
+		{L"BonIndex", 6},
+		{L"LightSpaceTransform", 7},
+		{L"texture0", 0},
+		{L"normalMap", 1},
+		{L"specularMap", 2},
+		{L"diffuseMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/StaticMesh.hlsl", L"StaticMesh_Shader", types, layouts, slots, L"Resource/Shader/StaticMeshShader.xml");*/
+	LoadShaderData(L"Resource/Shader/StaticMeshShader.xml");
+
+	// Animated Mesh Shader
+	/*types = { ShaderType::VERTEX_SHADER, ShaderType::PIXEL_SHADER };
+	layouts = { InputLayoutType::VertexTextureNormalTangentBlendData, InputLayoutType::VertexTextureNormalTangentBlendData };
+	slots = {
+		{L"CameraBuffer", 0},
+		{L"TransformBuffer", 1},
+		{L"LightMaterial", 2},
+		{L"LightDesc", 3},
+		{L"LightAndCameraPos", 4},
+		{L"BlendBuffer", 5},
+		{L"LightSpaceTransform", 6},
+		{L"normalMap", 0},
+		{L"specularMap", 1},
+		{L"diffuseMap", 2},
+		{L"TransformMap", 3},
+		{L"shadowMap", 4}
+	};
+	WriteShaderToXML(L"Shader/AnimatedMesh.hlsl", L"AnimatedMesh_Shader", types, layouts, slots, L"Resource/Shader/AnimatedMeshShader.xml");*/
+	LoadShaderData(L"Resource/Shader/AnimatedMeshShader.xml");
+
+	// Default Material
+	/*MaterialDesc matDesc;
+	matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Default_Shader", L"DefaultMaterial", L"Resource/Material/DefaultMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/DefaultMaterial.xml");
+
+	// Solid White Material
+	/*WriteMaterialToXML(L"Solid_white", L"DefaultNormal", MaterialDesc(), L"Default_Shader", L"SolidWhiteMaterial", L"Resource/Material/SolidWhiteMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/SolidWhiteMaterial.xml");
+
+	// Particle Material
+	/*WriteMaterialToXML(L"Fire_Particle", L"", MaterialDesc(), L"RenderParticle_Shader", L"ParticleMaterial", L"Resource/Material/ParticleMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/ParticleMaterial.xml");
+
+	// Grid Material
+	/*WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Default_Shader", L"GridMaterial", L"Resource/Material/GridMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/GridMaterial.xml");
+
+	// Debug UI Material
+	/*WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Debug_UI_Shader", L"Debug_UI_Material", L"Resource/Material/DebugUIMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/DebugUIMaterial.xml");
+
+	// Tessellation Material
+	/*matDesc.ambient = Vec4(0.95f, 0.95f, 0.95f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	WriteMaterialToXML(L"Bricks", L"NormalMap", matDesc, L"Tesselation_Shader", L"Tessellation_Material", L"Resource/Material/TessellationMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/TessellationMaterial.xml");
+
+	// Billboard Material
+	/*WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Billboard_Shader", L"Billboard_Material", L"Resource/Material/BillboardMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/BillboardMaterial.xml");
+
+	// Skybox Material
+	/*WriteMaterialToXML(L"skyboxTexture", L"", MaterialDesc(), L"SkyBox_Shader", L"SkyBoxMaterial", L"Resource/Material/SkyboxMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/SkyboxMaterial.xml");
+
+	// Terrain Material
+	/*matDesc.ambient = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.diffuse = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	matDesc.specular = Vec4(0.0f, 0.0f, 0.0f, 64.0f);
+	WriteMaterialToXML(L"", L"", matDesc, L"Terrain_Shader", L"TerrainMaterial", L"Resource/Material/TerrainMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/TerrainMaterial.xml");
+
+	// Simple Material
+	/*WriteMaterialToXML(L"Yellow", L"", MaterialDesc(), L"Simple_Render_Shader", L"SimpleMaterial", L"Resource/Material/SimpleMaterial.xml");*/
+	LoadMaterialData(L"Resource/Material/SimpleMaterial.xml");
+
+	// Tower Model (Static Mesh)
+	/*WriteModelToXML(L"Tower/Tower", L"StaticMesh_Shader", L"Tower/Tower", L"TowerModel",
+		vector<wstring>(), L"Resource/Model/TowerModel.xml");*/
+	LoadModelData(L"Resource/Model/TowerModel.xml");
+
+	// House Model (Static Mesh)
+	/*WriteModelToXML(L"House/House", L"StaticMesh_Shader", L"House/House", L"HouseModel",
+		vector<wstring>(), L"Resource/Model/HouseModel.xml");*/
+	LoadModelData(L"Resource/Model/HouseModel.xml");
+
+	// Kachujin Model (Animated Mesh)
+	/*vector<wstring> kachujinAnims = { L"Kachujin/Run", L"Kachujin/Slash", L"Kachujin/Dismissing"};
+	WriteModelToXML(L"Kachujin/Kachujin", L"AnimatedMesh_Shader", L"Kachujin/Kachujin", L"Kachujin",
+		kachujinAnims, L"Resource/Model/KachujinModel.xml");*/
+	LoadModelData(L"Resource/Model/KachujinModel.xml");
+
+	// Dreyar Model (Animated Mesh)
+	/*vector<wstring> dreyarAnims = { L"Dreyar/Kick", L"Dreyar/Fall", L"Dreyar/Dance" };
+	WriteModelToXML(L"Dreyar/Dreyar", L"AnimatedMesh_Shader", L"Dreyar/Dreyar", L"Dreyar",
+		dreyarAnims, L"Resource/Model/DreyarModel.xml");*/
 	LoadModelData(L"Resource/Model/DreyarModel.xml");
 
 }

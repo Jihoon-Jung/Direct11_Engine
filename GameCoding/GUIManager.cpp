@@ -228,11 +228,32 @@ void GUIManager::RenderUI()
                 {
                     // TODO: NULL1 구현 예정
                 }
-                if (ImGui::MenuItem("NULL2##CreateMenu2"))
+                if (ImGui::MenuItem("Cube##CreateMenu2"))
                 {
+                    SCENE.CreateCubeToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL2 구현 예정
                 }
-                if (ImGui::MenuItem("NULL3##CreateMenu3"))
+                if (ImGui::MenuItem("Sphere##CreateMenu3"))
+                {
+                    // TODO: NULL3 구현 예정
+                }
+                if (ImGui::MenuItem("Cylinder##CreateMenu4"))
+                {
+                    // TODO: NULL3 구현 예정
+                }
+                if (ImGui::MenuItem("Plane##CreateMenu5"))
+                {
+                    // TODO: NULL3 구현 예정
+                }
+                if (ImGui::MenuItem("Quad##CreateMenu6"))
+                {
+                    // TODO: NULL3 구현 예정
+                }
+                if (ImGui::MenuItem("Terrain##CreateMenu7"))
+                {
+                    // TODO: NULL3 구현 예정
+                }
+                if (ImGui::MenuItem("Particel System##CreateMenu8"))
                 {
                     // TODO: NULL3 구현 예정
                 }
@@ -816,7 +837,9 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     {
         if (ImGui::MenuItem("Delete"))
         {
-            // TODO: Delete GameObject 구현 예정
+            wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+            SCENE.RemoveGameObjectFromXML(currentSceneName, gameObject->GetName());
+            SCENE.GetActiveScene()->RemoveGameObject(gameObject);
         }
         ImGui::EndPopup();
     }

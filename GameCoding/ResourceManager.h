@@ -24,6 +24,7 @@ public:
 	
 	void Init();
 	void AddResource();
+	void SaveResource();
 	void WriteMeshToXML(const wstring& meshName, const wstring& meshType, const wstring& finalPath);
 	void WriteTextureToXML(const wstring& imagePath, const wstring& textureNamae, const wstring& finalPath);
 	void WriteShaderToXML(const wstring& shaderPath, const wstring& shaderName,

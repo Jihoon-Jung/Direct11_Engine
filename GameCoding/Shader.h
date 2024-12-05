@@ -4,6 +4,9 @@
 #include "ShaderSlot.h"
 #include "Texture.h"
 #include "ConstantBufferType.h"
+
+
+
 enum class ShaderType
 {
 	VERTEX_SHADER,
@@ -14,6 +17,7 @@ enum class ShaderType
 	HULL_SHADER,
 	DOMAIN_SHADER
 };
+
 class Shader : public ResourceBase
 {
 	using Super = ResourceBase;
@@ -24,8 +28,9 @@ public:
 	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
 	void CreateShader(ShaderType type, const wstring& shaderPath, InputLayoutType inputType);
 	void PushConstantBufferToShader(ShaderType type, const wstring& name, UINT numBuffers, shared_ptr<Buffer> buffer);
-	void PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, shared_ptr<Texture> texture);
 	void PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, ComPtr<ID3D11ShaderResourceView> shaderResourceViews);
+
+	void ResetShaderResources();
 
 	ComPtr<ID3D11VertexShader> GetVertexShader() { return _vertexShader; }
 	ComPtr<ID3D11PixelShader> GetPixelShader() { return _pixelShader; }
@@ -57,5 +62,12 @@ private:
 	ComPtr<ID3D11DomainShader> _domainShader;
 	shared_ptr<InputLayout> _inputLayout;
 	shared_ptr<ShaderSlot> _shaderSlot;
+
+	void ResetVertexShaderResources();
+	void ResetPixelShaderResources();
+	void ResetGeometryShaderResources();
+	void ResetDomainShaderResources();
+	void ResetHullShaderResources();
+
 };
 

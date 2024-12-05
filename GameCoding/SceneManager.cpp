@@ -1337,3 +1337,48 @@ void SceneManager::UpdateGameObjectSphereColliderInXML(const wstring& sceneName,
 		}
 	}
 }
+
+void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName)
+{
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	tinyxml2::XMLDocument doc;
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root)
+		return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// GameObject를 찾으면 삭제
+			root->DeleteChild(gameObjElem);
+			doc.SaveFile(pathStr.c_str());
+			break;
+		}
+	}
+}
+
+void SceneManager::CreateCubeToScene(const wstring& sceneName)
+{
+	SaveAndLoadGameObjectToXML(sceneName, L"cube1",
+		Vec3(0.0f, 0.0f, 0.0f));
+	auto cubeRenderer = make_shared<MeshRenderer>();
+	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+	cubeRenderer->SetModel(nullptr);
+	cubeRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cubeRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	cubeRenderer->AddRenderPass();
+	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
+	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"cube1")->transform());
+	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube1", cubeRenderer,
+		L"SolidWhiteMaterial", L"Cube");
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube", boxCollider);
+}

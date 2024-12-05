@@ -161,11 +161,59 @@ void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UI
 	else
 		DEVICECONTEXT->PSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
 }
-void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UINT numViews, shared_ptr<Texture> texture)
+
+void Shader::ResetShaderResources()
 {
-	UINT slot = _shaderSlot->GetSlotNumber(name);
-	if (type == ShaderType::VERTEX_SHADER)
-		DEVICECONTEXT->VSSetShaderResources(slot, numViews, texture->GetShaderResourceView().GetAddressOf());
-	else
-		DEVICECONTEXT->PSSetShaderResources(slot, numViews, texture->GetShaderResourceView().GetAddressOf());
+	ResetVertexShaderResources();
+	ResetPixelShaderResources();
+	ResetGeometryShaderResources();
+	ResetDomainShaderResources();
+	ResetHullShaderResources();
 }
+
+void Shader::ResetVertexShaderResources()
+{
+	ID3D11Buffer* nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = { nullptr };
+	ID3D11ShaderResourceView* nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = { nullptr };
+
+	DEVICECONTEXT->VSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);
+	DEVICECONTEXT->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);
+}
+
+void Shader::ResetPixelShaderResources()
+{
+	ID3D11Buffer* nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = { nullptr };
+	ID3D11ShaderResourceView* nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = { nullptr };
+
+	DEVICECONTEXT->PSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);
+	DEVICECONTEXT->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);
+}
+
+void Shader::ResetGeometryShaderResources()
+{
+	ID3D11Buffer* nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = { nullptr };
+	ID3D11ShaderResourceView* nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = { nullptr };
+
+	DEVICECONTEXT->GSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);
+	DEVICECONTEXT->GSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);
+}
+
+void Shader::ResetDomainShaderResources()
+{
+	ID3D11Buffer* nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = { nullptr };
+	ID3D11ShaderResourceView* nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = { nullptr };
+
+	DEVICECONTEXT->DSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);
+	DEVICECONTEXT->DSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);
+}
+
+void Shader::ResetHullShaderResources()
+{
+	ID3D11Buffer* nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = { nullptr };
+	ID3D11ShaderResourceView* nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = { nullptr };
+
+	DEVICECONTEXT->HSSetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);
+	DEVICECONTEXT->HSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);
+}
+
+

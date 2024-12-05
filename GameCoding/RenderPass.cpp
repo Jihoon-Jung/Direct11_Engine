@@ -55,11 +55,9 @@ void RenderPass::DefaultRender(bool isEnv)
 	else if (RENDER.GetShadowMapFlag())
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 	else
-	{
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-	}
-		
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 	if (lightObject != nullptr)
@@ -134,7 +132,7 @@ void RenderPass::DefaultRender(bool isEnv)
 	// Set SpecularMap
 	if (specularMap != nullptr)
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
-
+	
 	// Set DiffuseMap
 	if (diffuseMap != nullptr)
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
@@ -162,6 +160,55 @@ void RenderPass::DefaultRender(bool isEnv)
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
 
+	shader->ResetShaderResources();
+
+	//// 셰이더 리소스 해제
+	//ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+	//UINT slot;
+
+	//if (defaultTexture != nullptr)
+	//{
+	//	slot = shader->GetShaderSlot()->GetSlotNumber(L"texture0");
+	//	DEVICECONTEXT->PSSetShaderResources(slot, 1, nullSRV);
+	//}
+
+	//if (normalMap != nullptr)
+	//{
+	//	slot = shader->GetShaderSlot()->GetSlotNumber(L"normalMap");
+	//	DEVICECONTEXT->PSSetShaderResources(slot, 1, nullSRV);
+	//}
+
+	//if (specularMap != nullptr)
+	//{
+	//	slot = shader->GetShaderSlot()->GetSlotNumber(L"specularMap");
+	//	DEVICECONTEXT->PSSetShaderResources(slot, 1, nullSRV);
+	//}
+
+	//if (diffuseMap != nullptr)
+	//{
+	//	slot = shader->GetShaderSlot()->GetSlotNumber(L"diffuseMap");
+	//	DEVICECONTEXT->PSSetShaderResources(slot, 1, nullSRV);
+	//}
+
+	//if (!RENDER.GetShadowMapFlag())
+	//{
+	//	slot = shader->GetShaderSlot()->GetSlotNumber(L"shadowMap");
+	//	DEVICECONTEXT->PSSetShaderResources(slot, 1, nullSRV);
+	//}
+
+	//// 상수 버퍼 해제
+	//ID3D11Buffer* nullCB[1] = { nullptr };
+
+	//// VS 상수 버퍼 해제
+	//DEVICECONTEXT->VSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"TransformBuffer"), 1, nullCB);
+	//DEVICECONTEXT->VSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"CameraBuffer"), 1, nullCB);
+	//DEVICECONTEXT->VSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightSpaceTransform"), 1, nullCB);
+	//DEVICECONTEXT->VSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightAndCameraPos"), 1, nullCB);
+
+	//// PS 상수 버퍼 해제
+	//DEVICECONTEXT->PSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightDesc"), 1, nullCB);
+	//DEVICECONTEXT->PSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightMaterial"), 1, nullCB);
+
 }
 
 void RenderPass::EnvironmentMapRender()
@@ -179,10 +226,9 @@ void RenderPass::EnvironmentMapRender()
 	if (RENDER.GetShadowMapFlag())
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 	else
-	{
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-	}
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 	if (lightObject != nullptr)
@@ -261,6 +307,8 @@ void RenderPass::EnvironmentMapRender()
 	if (diffuseMap != nullptr)
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
 
+	if (!RENDER.GetShadowMapFlag())
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
 	depthStencilState->SetDepthStencilState(_dsStateType);
@@ -281,6 +329,8 @@ void RenderPass::EnvironmentMapRender()
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
+	shader->ResetShaderResources();
+
 }
 
 void RenderPass::TessellationRender(bool isEnv)
@@ -297,11 +347,9 @@ void RenderPass::TessellationRender(bool isEnv)
 	else if (RENDER.GetShadowMapFlag())
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 	else
-	{
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-	}
-		
+
+	shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 	if (lightObject != nullptr)
@@ -391,6 +439,8 @@ void RenderPass::TessellationRender(bool isEnv)
 	if (diffuseMap != nullptr)
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
 
+	if (!RENDER.GetShadowMapFlag())
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
 	depthStencilState->SetDepthStencilState(_dsStateType);
@@ -414,7 +464,7 @@ void RenderPass::TessellationRender(bool isEnv)
 
 	DEVICECONTEXT->HSSetShader(nullptr, nullptr, 0);
 	DEVICECONTEXT->DSSetShader(nullptr, nullptr, 0);
-
+	shader->ResetShaderResources();
 }
 
 void RenderPass::OutlineRender(bool isEnv)
@@ -447,11 +497,9 @@ void RenderPass::OutlineRender(bool isEnv)
 		else if (RENDER.GetShadowMapFlag())
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 		else
-		{
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-		}
 
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 		if (lightObject != nullptr)
@@ -539,6 +587,8 @@ void RenderPass::OutlineRender(bool isEnv)
 		if (diffuseMap != nullptr)
 			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
 
+		if (!RENDER.GetShadowMapFlag())
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
 
 		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
 		depthStencilState->SetDepthStencilState(_dsStateType);
@@ -559,6 +609,7 @@ void RenderPass::OutlineRender(bool isEnv)
 		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 		DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
+		shader->ResetShaderResources();
 	}
 	
 	// Restore
@@ -636,6 +687,8 @@ void RenderPass::QuadRender(bool isEnv)
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
+
+	_meshRenderer->GetShader()->ResetShaderResources();
 }
 
 void RenderPass::TerrainRender(bool isEnv)
@@ -652,11 +705,9 @@ void RenderPass::TerrainRender(bool isEnv)
 	else if (RENDER.GetShadowMapFlag())
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 	else
-	{
 		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-		shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-	}
-		
+
+	shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 	if (lightObject != nullptr)
@@ -795,6 +846,7 @@ void RenderPass::TerrainRender(bool isEnv)
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetTerrainGeometry()->GetIndices().size(), 0, 0);
+	shader->ResetShaderResources();
 
 	DEVICECONTEXT->HSSetShader(nullptr, nullptr, 0);
 	DEVICECONTEXT->DSSetShader(nullptr, nullptr, 0);
@@ -855,10 +907,9 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 		else if (RENDER.GetShadowMapFlag())
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 		else
-		{
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-		}
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 		if (lightObject != nullptr)
@@ -925,6 +976,9 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 		if (diffuseMap != nullptr)
 			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
 
+		if (!RENDER.GetShadowMapFlag())
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
+
 		if (vertexShader != nullptr)
 			DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
 
@@ -955,7 +1009,10 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 		DEVICECONTEXT->DrawIndexed(mesh->GetGeometry()->GetIndices().size(), 0, 0);
+		
 	}
+
+	shader->ResetShaderResources();
 }
 
 void RenderPass::AnimatedMeshRender(bool isEnv)
@@ -1049,11 +1106,9 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		else if (RENDER.GetShadowMapFlag())
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 		else
-		{
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
-		}
-			
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
 		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
 		if (lightObject != nullptr)
@@ -1118,6 +1173,9 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		if (diffuseMap != nullptr)
 			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
 
+		if (!RENDER.GetShadowMapFlag())
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
+
 		if (vertexShader != nullptr)
 			DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
 
@@ -1148,7 +1206,10 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 		DEVICECONTEXT->DrawIndexed(mesh->GetGeometry()->GetIndices().size(), 0, 0);
+		
 	}
+
+	shader->ResetShaderResources();
 }
 
 void RenderPass::ParticleRender(bool isEnv)
@@ -1293,6 +1354,8 @@ void RenderPass::ParticleRender(bool isEnv)
 
 	DEVICECONTEXT->DrawAuto();
 
+	renderParticleShader->ResetShaderResources();
+
 	DEVICECONTEXT->GSSetShader(nullptr, nullptr, 0);
 }
 
@@ -1359,6 +1422,8 @@ void RenderPass::DebugQuadRender()
 	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
 	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
 	DEVICECONTEXT->DrawIndexed(_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), 0, 0);
+
+	shader->ResetShaderResources();
 }
 
 void RenderPass::SetRenderTarget(int width, int height)

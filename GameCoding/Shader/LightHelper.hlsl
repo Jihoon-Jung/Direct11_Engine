@@ -73,7 +73,7 @@ void ComputeDirectionalLight(Material mat, DirectionalLight light,
 	// the line of site of the light.
 
 	float diffuseFactor = dot(lightVec, normal);
-
+	
 	// Flatten to avoid dynamic branching.
 	[flatten]
 	if (diffuseFactor > 0.0f)
@@ -239,36 +239,6 @@ void ComputeNormalMapping(inout float3 normal, float3 tangent, float2 uv, Textur
 	normal = worldNormal;
 }
 
-
-//float CalculateShadowFactor(Shadow info)
-//{
-//	float shadow = 1.0;
-//	// perform perspective divide
-//	float2 projCoords;
-//	projCoords.x = (info.lightPosition.x / info.lightPosition.w) * 0.5f + 0.5f;
-//	projCoords.y = -(info.lightPosition.y / info.lightPosition.w) * 0.5f + 0.5f;
-//
-//	if (projCoords.x < 0.0f || projCoords.x > 1.0f || projCoords.y < 0.0f || projCoords.y > 1.0f)
-//	{
-//		// 그림자 계산을 하지 않음
-//		return shadow;
-//	}
-//
-//	// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-//	float closestDepth = info.shadowMap.Sample(info.shadowSampler, projCoords).r;
-//
-//	// get depth of current fragment from light's perspective
-//	float currentDepth = info.lightPosition.z / info.lightPosition.w;
-//
-//	float shadowBias = 0.001; // 바이어스 값
-//	shadow = (currentDepth - shadowBias) < closestDepth ? 1.0 : 0.0;
-//
-//	if (currentDepth >= 0.99f)
-//		shadow = 1.0;
-//
-//	return shadow;
-//}
-
 float CalculateShadowFactor(Shadow info)
 {
 	float shadow = 1.0;
@@ -286,18 +256,54 @@ float CalculateShadowFactor(Shadow info)
 	float currentDepth = info.lightPosition.z / info.lightPosition.w;
 	float shadowBias = 0.005; // 바이어스 값
 
-	 // PCF 적용 (근처 5x5 필터링)
-	shadow = 0.0;
-	const float texelSize = 0.001; // 그림자 맵에서 텍셀 크기
-	for (int x = -2; x <= 2; ++x)
+
+	float shadowSum = 0.0f;
+	float texelSize = 1.0f / 2048.0f; // 해상도를 높임
+	int pcfCount = 5; // PCF 커널 크기를 증가
+	int halfCount = pcfCount / 2;
+
+	[unroll]
+	for (int x = -halfCount; x <= halfCount; x++)
 	{
-		for (int y = -2; y <= 2; ++y)
+		[unroll]
+		for (int y = -halfCount; y <= halfCount; y++)
 		{
-			float closestDepth = info.shadowMap.Sample(info.shadowSampler, projCoords + float2(x, y) * texelSize).r;
-			shadow += (currentDepth - shadowBias) < closestDepth ? 1.0 : 0.0;
+			float2 offset = float2(x * texelSize, y * texelSize);
+			float closestDepth = info.shadowMap.Sample(info.shadowSampler, projCoords + offset).r;
+			float currentDepthCheck = (currentDepth - shadowBias) < closestDepth ? 1.0 : 0.0;
+			shadowSum += currentDepthCheck;
 		}
 	}
-	shadow /= 25.0; // 평균값 계산 (5x5=25 샘플)
 
+	shadow = shadowSum / (pcfCount * pcfCount);
+	
+	// // 표면 기울기에 따른 동적 bias 계산
+	//float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);
+
+	//// PCF 강화
+	//shadow = 0.0;
+	//float2 texelSize = 1.0 / 2048.0; // shadowmap 해상도에 맞게 조정
+
+	//// PCF 커널 크기를 7x7로 증가
+	//[unroll]
+	//for (int x = -3; x <= 3; ++x)
+	//{
+	//	[unroll]
+	//	for (int y = -3; y <= 3; ++y)
+	//	{
+	//		// 가우시안 가중치 적용
+	//		float weight = 1.0 / 49.0; // 7x7 커널
+	//		float2 offset = float2(x, y) * texelSize;
+
+	//		// 약간의 랜덤 오프셋 추가로 엘리어싱 감소
+	//		float noise = frac(sin(dot(projCoords.xy, float2(12.9898, 78.233))) * 43758.5453);
+	//		offset += texelSize * noise * 0.5;
+
+	//		float pcfDepth = info.shadowMap.Sample(info.shadowSampler, projCoords + offset).r;
+	//		shadow += ((currentDepth - bias) < pcfDepth ? 1.0 : 0.0) * weight;
+	//	}
+	//}
+
+	//return shadow;
 	return shadow;
 }

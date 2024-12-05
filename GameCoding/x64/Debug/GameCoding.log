@@ -1,2 +1,6 @@
-﻿  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SimpleShader.cso
+﻿  Camera.cpp
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(51,52): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(51,45): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(86,55): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(86,48): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   GameCoding.vcxproj -> D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe

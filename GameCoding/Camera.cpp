@@ -120,32 +120,14 @@ void Camera::SetShadowMapViewProjectionMatrix()
 	_shadowProjection = ::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
 
+	
 	//int width = 100; //Graphics::GetInstance().GetViewWidth();
 	//int height = 100;// Graphics::GetInstance().GetViewHeight();
 	//float nearZ = 0.1f;
-	//float farZ = 1000.f;
-	//nearZ = 1.f;
-	//farZ = 100.f;
+	//float farZ = 250.f;
 
-	//float width = 20.0f;  // 좌우 클립 범위 (right - left = 20.0f)
-	//float height = 20.0f; // 상하 클립 범위 (top - bottom = 20.0f)
-	//float nearZ = 1.0f;   // near_plane
-	//float farZ = 7.5f;    // far_plane
 	//_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
 	
-
-	//int width = Graphics::GetInstance().GetViewWidth();
-	//int height = Graphics::GetInstance().GetViewHeight();
-
-	//float aspectRatio = (float)(width) / (float)(height);
-
-	//float fovAngleY = XM_PI / 4.f;
-	//float nearZ = 0.1f;
-	//float farZ = 1000.f;
-
-	//_shadowProjection = ::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, nearZ, farZ);
-	////_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
-
 
 	_shadowCameraBuffer = make_shared<Buffer>();
 	CameraBuffer _cameraBufferData;

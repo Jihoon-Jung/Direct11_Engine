@@ -44,7 +44,9 @@ public:
 		const Vec3& center, const Vec3& scale, bool isBoxCollider);
 	void UpdateGameObjectSphereColliderInXML(const wstring& sceneName, const wstring& objectName,
 		const Vec3& center, float radius);
+	void RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName);
 
+	void CreateCubeToScene(const wstring& sceneName);
 private:
 
     void SaveGameObjectToXML(const wstring& path, const wstring& name,

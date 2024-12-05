@@ -108,7 +108,7 @@ public:
 private:
 	ComPtr<ID3D11Buffer> _vertexBuffer;
 	ComPtr<ID3D11Buffer> _indexBuffer;
-	ComPtr<ID3D11Buffer> _constantBuffer;
+	ComPtr<ID3D11Buffer> _constantBuffer = nullptr;
 	uint32 _stride = 0;
 	uint32 _offset = 0;
 };
