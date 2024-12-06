@@ -47,6 +47,9 @@ public:
 	void RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName);
 
 	void CreateCubeToScene(const wstring& sceneName);
+	void CreateSphereToScene(const wstring& sceneName);
+	void CreateCylinderToScene(const wstring& sceneName);
+
 private:
 
     void SaveGameObjectToXML(const wstring& path, const wstring& name,

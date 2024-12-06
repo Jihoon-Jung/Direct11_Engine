@@ -92,8 +92,9 @@ SamplerState shadowSampler : register(s1);
 Texture2D normalMap : register(t0);
 Texture2D specularMap : register(t1);
 Texture2D diffuseMap : register(t2);
-Texture2D shadowMap : register(t3);
 Texture2DArray TransformMap : register(t3);
+Texture2D shadowMap : register(t4);
+
 
 matrix GetAnimationMatrix(VS_INPUT input)
 {
@@ -181,8 +182,8 @@ VS_OUTPUT VS(VS_INPUT input)
 
 	// 노멀과 탄젠트에 애니메이션 행렬 적용 (회전 성분만 추출해서 곱함)
 	float3x3 rotationMatrix = (float3x3)m; // 애니메이션 매트릭스의 회전 부분만 사용
-	output.normal = mul(input.normal, rotationMatrix); // 노멀 변환
-	output.normal = mul(output.normal, (float3x3)worldMatrix); // 월드 변환
+	output.normal = normalize(mul(input.normal, rotationMatrix));
+	output.normal = normalize(mul(output.normal, (float3x3)worldMatrix));
 
 	output.tangent = mul(input.tangent, rotationMatrix); // 탄젠트 변환
 	output.tangent = mul(output.tangent, (float3x3)worldMatrix); // 월드 변환
@@ -216,9 +217,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	shadow.lightPosition = input.lightPosition;
 	shadow.shadowSampler = shadowSampler;
 	shadow.shadowMap = shadowMap;
+	shadow.normal = normal;
+	shadow.lightDir = -lightDirection;
 	float shadowFactor = CalculateShadowFactor(shadow);
 
-	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor, 1.0);
+	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor, shadowFactor);
 
 	return textureColor;
 }

@@ -235,10 +235,12 @@ void GUIManager::RenderUI()
                 }
                 if (ImGui::MenuItem("Sphere##CreateMenu3"))
                 {
+                    SCENE.CreateSphereToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
                 if (ImGui::MenuItem("Cylinder##CreateMenu4"))
                 {
+                    SCENE.CreateCylinderToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
                 if (ImGui::MenuItem("Plane##CreateMenu5"))

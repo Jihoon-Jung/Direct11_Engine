@@ -346,6 +346,9 @@ float4 PS(DomainOut pin) : SV_Target
 	shadow.lightPosition = pin.LPosH;
 	shadow.shadowSampler = shadowSampler;
 	shadow.shadowMap = shadowMap;
+	shadow.normal = normalW;
+	shadow.lightDir = -lightDirection;
+
 	float shadowFactor = CalculateShadowFactor(shadow);
 
 	ComputeDirectionalLight(mat, light, normalW, viewDirection, texColor, shadowFactor);

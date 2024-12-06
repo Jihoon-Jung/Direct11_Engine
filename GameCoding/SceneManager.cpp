@@ -1380,5 +1380,47 @@ void SceneManager::CreateCubeToScene(const wstring& sceneName)
 		L"SolidWhiteMaterial", L"Cube");
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube", boxCollider);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube1", boxCollider);
+}
+
+void SceneManager::CreateSphereToScene(const wstring& sceneName)
+{
+	SaveAndLoadGameObjectToXML(sceneName, L"sphere1",
+		Vec3(0.0f, 0.0f, 0.0f));
+	auto cubeRenderer = make_shared<MeshRenderer>();
+	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	cubeRenderer->SetModel(nullptr);
+	cubeRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cubeRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	cubeRenderer->AddRenderPass();
+	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
+	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"sphere1")->transform());
+	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"sphere1", cubeRenderer,
+		L"SolidWhiteMaterial", L"Sphere");
+	auto sphereCollider = make_shared<SphereCollider>();
+	sphereCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"sphere1", sphereCollider);
+}
+
+void SceneManager::CreateCylinderToScene(const wstring& sceneName)
+{
+	SaveAndLoadGameObjectToXML(sceneName, L"cylinder1",
+		Vec3(0.0f, 0.0f, 0.0f));
+	auto cubeRenderer = make_shared<MeshRenderer>();
+	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cylinder"));
+	cubeRenderer->SetModel(nullptr);
+	cubeRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cubeRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	cubeRenderer->AddRenderPass();
+	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
+	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"cylinder1")->transform());
+	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", cubeRenderer,
+		L"SolidWhiteMaterial", L"Cylinder");
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetScale(Vec3(0.866f, 3.0f, 1.0f));
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", boxCollider);
 }

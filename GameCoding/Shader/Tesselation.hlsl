@@ -238,38 +238,12 @@ float4 PS(DomainOut pin) : SV_Target
     shadow.lightPosition = pin.LPosH;
     shadow.shadowSampler = shadowSampler;
     shadow.shadowMap = shadowMap;
+    shadow.normal = normal;
+    shadow.lightDir = -lightDirection;
+
     float shadowFactor = CalculateShadowFactor(shadow);
 
     ComputeDirectionalLight(mat, light, bumpedNormal, viewDirection, textureColor, shadowFactor);
-    //// Ambient
-    //{
-    //    float ambientStrength = 1.0;
-    //    float4 color = ambient * materialAmbient * ambientStrength;
-    //    ambientColor = textureColor * color;
-    //}
-    //// Diffuse
-    //{
-    //    float value = dot(lightDirection, normal);
-    //    diffuseColor = textureColor * value * diffuse * materialDiffuse;
-    //}
-    //// Specular
-    //{
-    //    float specularStrength = 1.0;
 
-    //    float3 reflectDir = reflect(-lightDirection, normal);
-    //    float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 10);
-    //    specularColor = spec * specular * materialSpecular * specularStrength;
-    //}
-    //// Emissive
-    //{
-    //    float value = saturate(dot(viewDirection, normal));
-    //    float e = 1.0f - value;
-
-    //    e = smoothstep(0.0f, 1.0f, e);
-    //    e = pow(e, 5);
-    //    emissiveColor = materialEmissive * emissive * e;
-    //}
-
-    //float4 textureColor = texture0.Sample(sampler0, pin.Tex);
-    return textureColor;// float4((textureColor + diffuseColor + specularColor).xyz, 1.0);// textureColor;
+    return textureColor;
 }

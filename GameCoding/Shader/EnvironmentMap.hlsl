@@ -158,6 +158,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
 	shadow.lightPosition = input.lightSpacePosition;
 	shadow.shadowSampler = shadowSampler;
 	shadow.shadowMap = shadowMap;
+	shadow.normal = normal;
+	shadow.lightDir = -lightDirection;
 	float shadowFactor = CalculateShadowFactor(shadow);
 
 	ComputeDirectionalLight(mat, light, normal, viewDirection, textureColor, shadowFactor);
