@@ -1,8 +1,15 @@
-﻿  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\AnimatedMesh.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Debug_UI_Shader.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Default.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\EnvironmentMap.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\StaticMesh.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Terrain.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Tesselation.cso
+﻿  RenderPass.cpp
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(161,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(331,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(463,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(611,96): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(689,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(809,43): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(848,102): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1011,76): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1219,76): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1435,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1498,19): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1499,20): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\ShaderSlot.h(37): warning C4715: 'ShaderSlot::GetSlotNumber': 모든 제어 경로에서 값을 반환하지는 않습니다.
   GameCoding.vcxproj -> D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe

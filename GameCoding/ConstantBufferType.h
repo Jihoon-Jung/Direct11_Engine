@@ -81,7 +81,8 @@ struct KeyframeDesc
 	float ratio = 0.f;
 	float sumTime = 0.f;// 현재까지 경과된 시간
 	float speed = 1.f; // 애니메이션 재생 속도
-	Vec2 padding;
+	int activeAnimation = 0;
+	int padding;
 };
 
 struct BlendAnimDesc

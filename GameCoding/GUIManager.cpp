@@ -37,6 +37,17 @@ void GUIManager::Init()
     // 초기 선택 폴더를 Resource 폴더로 설정
     _selectedFolder = "Resource/";
     _isFirstFrame = true;
+
+    // EmptyObject 관련 초기화
+    _resourceListInitialized = false;
+    _showEmptyObjectPopup = false;
+    _newObjectUseMeshRenderer = false;
+    _newObjectSelectedMesh = 0;
+    _newObjectSelectedMaterial = 0;
+    strcpy_s(_newObjectName, "NewObject");
+    _newObjectPosition = Vec3::Zero;
+    _newObjectRotation = Vec3::Zero;
+    _newObjectScale = Vec3(1.0f, 1.0f, 1.0f);
 }
 
 float EaseInOutCubic(float t)
@@ -114,6 +125,188 @@ std::string WStringToString(const std::wstring& wstr)
 
 void GUIManager::RenderUI()
 {
+    // 독립적인 팝업창 렌더링
+    if (_showEmptyObjectPopup)
+    {
+        // 팝업 창 크기와 위치 설정
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(400, 300));
+
+        if (ImGui::Begin("Create Empty Object", &_showEmptyObjectPopup, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
+        {
+            // Object Name
+            ImGui::Text("Object Name:");
+            ImGui::InputText("##ObjectName", _newObjectName, IM_ARRAYSIZE(_newObjectName));
+
+            // Transform
+            ImGui::Separator();
+            ImGui::Text("Transform:");
+            ImGui::DragFloat3("Position", &_newObjectPosition.x, 0.1f);
+            ImGui::DragFloat3("Rotation", &_newObjectRotation.x, 0.1f);
+            ImGui::DragFloat3("Scale", &_newObjectScale.x, 0.1f);
+
+            // MeshRenderer
+            ImGui::Separator();
+            if (ImGui::Checkbox("Use MeshRenderer", &_newObjectUseMeshRenderer))
+            {
+                // Checkbox가 변경될 때 리소스 목록 초기화
+                _resourceListInitialized = false;
+            }
+
+            if (_newObjectUseMeshRenderer)
+            {
+                // 리소스 목록 초기화
+                if (!_resourceListInitialized)
+                {
+                    // Mesh 리스트 가져오기
+                    _meshList.clear();
+                    filesystem::path meshPath = "Resource/Mesh";
+                    if (filesystem::exists(meshPath))
+                    {
+                        for (const auto& entry : filesystem::directory_iterator(meshPath))
+                        {
+                            if (entry.path().extension() == ".xml")
+                            {
+                                _meshList.push_back(entry.path().stem().wstring());
+                            }
+                        }
+                    }
+
+                    // Material 리스트 가져오기
+                    _materialList.clear();
+                    filesystem::path materialPath = "Resource/Material";
+                    if (filesystem::exists(materialPath))
+                    {
+                        for (const auto& entry : filesystem::directory_iterator(materialPath))
+                        {
+                            if (entry.path().extension() == ".xml")
+                            {
+                                wstring materialName = entry.path().stem().wstring();
+                                shared_ptr<Material> material = RESOURCE.GetResource<Material>(materialName);
+                                if (material && material->GetShader())
+                                {
+                                    wstring shaderName = material->GetShader()->GetName();
+                                    if (shaderName == L"Simple_Render_Shader" || shaderName == L"Default_Shader")
+                                    {
+                                        _materialList.push_back(materialName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _resourceListInitialized = true;
+                }
+
+                // Mesh 선택 콤보박스
+                if (!_meshList.empty())
+                {
+                    ImGui::Text("Mesh:"); ImGui::SameLine();
+                    string previewValue = _newObjectSelectedMesh < _meshList.size() ?
+                        Utils::ToString(_meshList[_newObjectSelectedMesh]) : "Select Mesh";
+                    if (ImGui::BeginCombo("##MeshCombo", previewValue.c_str()))
+                    {
+                        for (int i = 0; i < _meshList.size(); i++)
+                        {
+                            bool isSelected = (_newObjectSelectedMesh == i);
+                            if (ImGui::Selectable(Utils::ToString(_meshList[i]).c_str(), isSelected))
+                                _newObjectSelectedMesh = i;
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "No Mesh files found in Resource/Mesh");
+                }
+
+                // Material 선택 콤보박스
+                if (!_materialList.empty())
+                {
+                    ImGui::Text("Material:"); ImGui::SameLine();
+                    string previewValue = _newObjectSelectedMaterial < _materialList.size() ?
+                        Utils::ToString(_materialList[_newObjectSelectedMaterial]) : "Select Material";
+                    if (ImGui::BeginCombo("##MaterialCombo", previewValue.c_str()))
+                    {
+                        for (int i = 0; i < _materialList.size(); i++)
+                        {
+                            bool isSelected = (_newObjectSelectedMaterial == i);
+                            if (ImGui::Selectable(Utils::ToString(_materialList[i]).c_str(), isSelected))
+                                _newObjectSelectedMaterial = i;
+                            if (isSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+                else
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                        "No Material files found with Simple_Render_Shader or Default_Shader");
+                }
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                wstring objectName = Utils::ToWString(_newObjectName);
+                wstring sceneName = SCENE.GetActiveScene()->GetSceneName();
+
+                // 이름 중복 체크
+                if (SCENE.GetActiveScene()->Find(objectName) != nullptr)
+                {
+                    // 경고 메시지 팝업
+                    ImGui::OpenPopup("Name Exists");
+                }
+                else
+                {
+                    // GameObject 생성 및 저장
+                    SCENE.SaveAndLoadGameObjectToXML(sceneName, objectName, _newObjectPosition, _newObjectRotation, _newObjectScale);
+
+                    // MeshRenderer 추가
+                    if (_newObjectUseMeshRenderer && _newObjectSelectedMesh < _meshList.size() && _newObjectSelectedMaterial < _materialList.size())
+                    {
+                        auto meshRenderer = make_shared<MeshRenderer>();
+                        meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(_meshList[_newObjectSelectedMesh]));
+                        meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(_materialList[_newObjectSelectedMaterial]));
+                        meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+                        meshRenderer->AddRenderPass();
+                        meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+                        meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+                        meshRenderer->GetRenderPasses()[0]->SetTransform(SCENE.GetActiveScene()->Find(objectName)->transform());
+                        meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+
+                        // MeshRenderer 컴포넌트를 GameObject에 추가하고 XML에 저장
+                        SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, objectName, meshRenderer,
+                            _materialList[_newObjectSelectedMaterial], _meshList[_newObjectSelectedMesh]);
+                    }
+
+                    // 초기화
+                    strcpy_s(_newObjectName, "NewObject");
+                    _newObjectPosition = Vec3::Zero;
+                    _newObjectRotation = Vec3::Zero;
+                    _newObjectScale = Vec3(1.0f, 1.0f, 1.0f);
+                    _newObjectUseMeshRenderer = false;
+                    _newObjectSelectedMesh = 0;
+                    _newObjectSelectedMaterial = 0;
+
+                    _showEmptyObjectPopup = false;
+                }
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                _showEmptyObjectPopup = false;
+            }
+
+            ImGui::End();
+        }
+    }
     // controller
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     {
@@ -191,6 +384,7 @@ void GUIManager::RenderUI()
         // 창 테두리 스타일 복원
         ImGui::PopStyleColor();
         ImGui::PopStyleVar();
+
     }
 
     // Hierachy
@@ -224,10 +418,25 @@ void GUIManager::RenderUI()
         {
             if (ImGui::BeginMenu("Create"))
             {
-                if (ImGui::MenuItem("EmptyObject##CreateMenu1"))  // ##뒤의 문자열로 고유 ID 부여
+                // EmptyObject 메뉴 아이템 클릭 처리 부분 수정
+                if (ImGui::MenuItem("EmptyObject##CreateMenu1"))
                 {
-                    // TODO: NULL1 구현 예정
+                    // 새로운 오브젝트 생성 시 기본 이름 설정
+                    int count = 1;
+                    string baseName = "NewObject";
+                    string newName = baseName;
+
+                    // 이미 존재하는 오브젝트 이름인지 확인
+                    while (SCENE.GetActiveScene()->Find(Utils::ToWString(newName)) != nullptr)
+                    {
+                        newName = baseName + to_string(count);
+                        count++;
+                    }
+
+                    strcpy_s(_newObjectName, newName.c_str());
+                    _showEmptyObjectPopup = true;
                 }
+
                 if (ImGui::MenuItem("Cube##CreateMenu2"))
                 {
                     SCENE.CreateCubeToScene(SCENE.GetActiveScene()->GetSceneName());
@@ -433,6 +642,23 @@ void GUIManager::RenderUI()
                 {
                     if (ImGui::CollapsingHeader(componentName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                     {
+                        // 컴포넌트 제거 메뉴
+                        if (ImGui::BeginPopupContextItem())
+                        {
+                            if (ImGui::MenuItem("Delete"))
+                            {
+                                // 오브젝트에서 컴포넌트 제거
+                                _selectedObject->RemoveComponent(component);
+
+                                // XML 업데이트
+                                SCENE.RemoveComponentFromGameObjectInXML(
+                                    SCENE.GetActiveScene()->GetSceneName(),
+                                    _selectedObject->GetName(),
+                                    component
+                                );
+                            }
+                            ImGui::EndPopup();
+                        }
                         // 각 컴포넌트 타입별 속성 표시
                         // TODO: 컴포넌트별 세부 속성 표시 로직 추가
 
@@ -508,48 +734,48 @@ void GUIManager::RenderUI()
                             ImGui::Text("RenderPass"); ImGui::SameLine(labelWidth);
                             if (ImGui::Button("..##RenderPass", ImVec2(20, 0))) ImGui::OpenPopup("RenderPassSelectPopup");
                             ImGui::SameLine();
-                            Pass passType = _selectedObject->GetComponent<MeshRenderer>()->GetRenderPasses()[0]->GetPass();
+                            Pass passType = meshRenderer->GetRenderPasses()[0]->GetPass();
                             wstring passName = L"";
                             switch (passType)
                             {
-                            case Pass::DEFAULT_RENDER:
-                                passName = L"DEFAULT_RENDER";
-                                break;
-                            case Pass::OUTLINE_RENDER:
-                                passName = L"OUTLINE_RENDER";
-                                break;
-                            case Pass::GAUSSIANBLUR_RENDER:
-                                passName = L"GAUSSIANBLUR_RENDER";
-                                break;
-                            case Pass::SHADOWMAP_RENDER:
-                                passName = L"SHADOWMAP_RENDER";
-                                break;
-                            case Pass::QUAD_RENDER:
-                                passName = L"QUAD_RENDER";
-                                break;
-                            case Pass::TESSELLATION_RENDER:
-                                passName = L"TESSELLATION_RENDER";
-                                break;
-                            case Pass::TERRAIN_RENDER:
-                                passName = L"TERRAIN_RENDER";
-                                break;
-                            case Pass::ENVIRONMENTMAP_RENDER:
-                                passName = L"ENVIRONMENTMAP_RENDER";
-                                break;
-                            case Pass::STATIC_MESH_RENDER:
-                                passName = L"STATIC_MESH_RENDER";
-                                break;
-                            case Pass::ANIMATED_MESH_RENDER:
-                                passName = L"ANIMATED_MESH_RENDER";
-                                break;
-                            case Pass::PARTICLE_RENDER:
-                                passName = L"PARTICLE_RENDER";
-                                break;
-                            case Pass::DEBUG_2D_RENDER:
-                                passName = L"DEBUG_2D_RENDER";
-                                break;
-                            default:
-                                break;
+                                case Pass::DEFAULT_RENDER:
+                                    passName = L"DEFAULT_RENDER";
+                                    break;
+                                case Pass::OUTLINE_RENDER:
+                                    passName = L"OUTLINE_RENDER";
+                                    break;
+                                case Pass::GAUSSIANBLUR_RENDER:
+                                    passName = L"GAUSSIANBLUR_RENDER";
+                                    break;
+                                case Pass::SHADOWMAP_RENDER:
+                                    passName = L"SHADOWMAP_RENDER";
+                                    break;
+                                case Pass::QUAD_RENDER:
+                                    passName = L"QUAD_RENDER";
+                                    break;
+                                case Pass::TESSELLATION_RENDER:
+                                    passName = L"TESSELLATION_RENDER";
+                                    break;
+                                case Pass::TERRAIN_RENDER:
+                                    passName = L"TERRAIN_RENDER";
+                                    break;
+                                case Pass::ENVIRONMENTMAP_RENDER:
+                                    passName = L"ENVIRONMENTMAP_RENDER";
+                                    break;
+                                case Pass::STATIC_MESH_RENDER:
+                                    passName = L"STATIC_MESH_RENDER";
+                                    break;
+                                case Pass::ANIMATED_MESH_RENDER:
+                                    passName = L"ANIMATED_MESH_RENDER";
+                                    break;
+                                case Pass::PARTICLE_RENDER:
+                                    passName = L"PARTICLE_RENDER";
+                                    break;
+                                case Pass::DEBUG_2D_RENDER:
+                                    passName = L"DEBUG_2D_RENDER";
+                                    break;
+                                default:
+                                    break;
                             }
                             string passNameStr = WStringToString(passName);
 
@@ -562,7 +788,7 @@ void GUIManager::RenderUI()
                             ImGui::SameLine();
 
                             wstring meshName = L"None";
-                            shared_ptr<Mesh> mesh = _selectedObject->GetComponent<MeshRenderer>()->GetMesh();
+                            shared_ptr<Mesh> mesh = meshRenderer->GetMesh();
                             if (mesh != nullptr)
                                 meshName = mesh->GetMeshName();
                             string meshNameStr = WStringToString(meshName);
@@ -576,7 +802,7 @@ void GUIManager::RenderUI()
                             ImGui::SameLine();
 
                             wstring modelName = L"None";
-                            shared_ptr<Model> model = _selectedObject->GetComponent<MeshRenderer>()->GetModel();
+                            shared_ptr<Model> model = meshRenderer->GetModel();
                             if (model != nullptr)
                                 modelName = model->GetModelName();
                             string modelNameStr = WStringToString(modelName);
@@ -590,21 +816,118 @@ void GUIManager::RenderUI()
                             ImGui::SameLine();
 
                             wstring materialName = L"None";
-                            shared_ptr<Material> material = _selectedObject->GetComponent<MeshRenderer>()->GetMaterial();
+                            shared_ptr<Material> material = meshRenderer->GetMaterial();
                             if (material != nullptr)
-                                materialName = _selectedObject->GetComponent<MeshRenderer>()->GetMaterial()->GetMaterialName();
+                                materialName = material->GetMaterialName();
                             string materialNameStr = WStringToString(materialName);
 
                             ImGui::SetNextItemWidth(valueWidth);
                             ImGui::InputText("##MaterialValue", (char*)materialNameStr.c_str(), materialNameStr.size(), ImGuiInputTextFlags_ReadOnly);
 
-
                             // 팝업 처리
-                            if (ImGui::BeginPopup("MeshSelectPopup")) {
+                            if (ImGui::BeginPopup("MeshSelectPopup"))
+                            {
+                                ImGui::SetNextWindowSize(ImVec2(300, 400));
                                 ImGui::Text("Mesh List");
+                                ImGui::Separator();
+
+                                // 검색창 추가
+                                static char searchBuffer[128] = "";
+                                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                                ImGui::InputText("##Search", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+                                ImGui::Separator();
+
+                                // Mesh 목록을 표시할 Child 윈도우
+                                if (ImGui::BeginChild("MeshList", ImVec2(0, 0), true))
+                                {
+                                    string searchStr = string(searchBuffer);
+                                    std::transform(searchStr.begin(), searchStr.end(), searchStr.begin(), ::tolower);
+
+                                    for (const auto& entry : filesystem::directory_iterator("Resource/Mesh"))
+                                    {
+                                        if (entry.path().extension() == ".xml")
+                                        {
+                                            string meshName = entry.path().stem().string();
+
+                                            // 검색어 필터링
+                                            string lowerMeshName = meshName;
+                                            std::transform(lowerMeshName.begin(), lowerMeshName.end(), lowerMeshName.begin(), ::tolower);
+                                            if (searchStr.empty() || lowerMeshName.find(searchStr) != string::npos)
+                                            {
+                                                if (ImGui::Selectable(meshName.c_str()))
+                                                {
+                                                    meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(Utils::ToWString(meshName)));
+                                                    SCENE.UpdateMeshInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(), meshName);
+                                                    ImGui::CloseCurrentPopup();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ImGui::EndChild();
+                                }
                                 ImGui::EndPopup();
                             }
-                            // ... 다른 팝업들
+
+                            if (ImGui::BeginPopup("MaterialSelectPopup"))
+                            {
+                                ImGui::SetNextWindowSize(ImVec2(300, 400));
+                                ImGui::Text("Material List");
+                                ImGui::Separator();
+
+                                // 검색창 추가
+                                static char materialSearchBuffer[128] = "";
+                                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                                ImGui::InputText("##MaterialSearch", materialSearchBuffer, IM_ARRAYSIZE(materialSearchBuffer));
+                                ImGui::Separator();
+
+                                // Material 목록을 표시할 Child 윈도우
+                                if (ImGui::BeginChild("MaterialList", ImVec2(0, 0), true))
+                                {
+                                    string searchStr = string(materialSearchBuffer);
+                                    std::transform(searchStr.begin(), searchStr.end(), searchStr.begin(), ::tolower);
+
+                                    for (const auto& entry : filesystem::directory_iterator("Resource/Material"))
+                                    {
+                                        if (entry.path().extension() == ".xml")
+                                        {
+                                            // XML 파일 파싱
+                                            tinyxml2::XMLDocument doc;
+                                            if (doc.LoadFile(entry.path().string().c_str()) == tinyxml2::XML_SUCCESS)
+                                            {
+                                                tinyxml2::XMLElement* root = doc.FirstChildElement("Material");
+                                                if (root)
+                                                {
+                                                    tinyxml2::XMLElement* shaderElement = root->FirstChildElement("Shader");
+                                                    if (shaderElement)
+                                                    {
+                                                        const char* shaderType = shaderElement->GetText();
+                                                        if (shaderType && (strcmp(shaderType, "Simple_Render_Shader") == 0 ||
+                                                            strcmp(shaderType, "Default_Shader") == 0))
+                                                        {
+                                                            string materialName = entry.path().stem().string();
+
+                                                            // 검색어 필터링
+                                                            string lowerMaterialName = materialName;
+                                                            std::transform(lowerMaterialName.begin(), lowerMaterialName.end(), lowerMaterialName.begin(), ::tolower);
+                                                            if (searchStr.empty() || lowerMaterialName.find(searchStr) != string::npos)
+                                                            {
+                                                                if (ImGui::Selectable(materialName.c_str()))
+                                                                {
+                                                                    meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(Utils::ToWString(materialName)));
+                                                                    SCENE.UpdateMaterialInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(), materialName);
+                                                                    ImGui::CloseCurrentPopup();
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ImGui::EndChild();
+                                }
+                                ImGui::EndPopup();
+                            }
 
                             // 스타일 복원
                             ImGui::PopStyleColor(2);
@@ -616,6 +939,93 @@ void GUIManager::RenderUI()
                     }
                     
                 }
+            }
+
+            // 컴포넌트 추가 메뉴
+            if (ImGui::BeginPopupContextWindow("AddComponentMenu", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+            {
+                if (ImGui::BeginMenu("Add Component"))
+                {
+                    // 현재 오브젝트의 컴포넌트 목록 확인
+                    const vector<shared_ptr<Component>>& components = _selectedObject->GetComponents();
+                    bool hasBoxCollider = false;
+                    bool hasSphereCollider = false;
+                    bool hasMeshRenderer = false;
+
+                    // 기존 컴포넌트 체크
+                    for (const auto& component : components)
+                    {
+                        if (dynamic_pointer_cast<BoxCollider>(component))
+                            hasBoxCollider = true;
+                        else if (dynamic_pointer_cast<SphereCollider>(component))
+                            hasSphereCollider = true;
+                        else if (dynamic_pointer_cast<MeshRenderer>(component))
+                            hasMeshRenderer = true;
+                    }
+
+                    // BoxCollider 메뉴 아이템
+                    if (!hasBoxCollider && ImGui::MenuItem("Box Collider"))
+                    {
+                        auto boxCollider = make_shared<BoxCollider>();
+                        boxCollider->SetCenter(Vec3::Zero);
+                        boxCollider->SetScale(Vec3::One);
+                        _selectedObject->AddComponent(boxCollider);
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            boxCollider
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    // SphereCollider 메뉴 아이템
+                    if (!hasSphereCollider && ImGui::MenuItem("Sphere Collider"))
+                    {
+                        auto sphereCollider = make_shared<SphereCollider>();
+                        sphereCollider->SetCenter(Vec3::Zero);
+                        sphereCollider->SetRadius(0.5f);
+                        _selectedObject->AddComponent(sphereCollider);
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            sphereCollider
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    // MeshRenderer 메뉴 아이템
+                    if (!hasMeshRenderer && ImGui::MenuItem("Mesh Renderer"))
+                    {
+                        auto meshRenderer = make_shared<MeshRenderer>();
+                        // 기본 메시와 머티리얼 설정
+                        meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+                        meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+                        meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+                        meshRenderer->AddRenderPass();
+                        meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+                        meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+                        meshRenderer->GetRenderPasses()[0]->SetTransform(_selectedObject->transform());
+                        meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+                        _selectedObject->AddComponent(meshRenderer);
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            meshRenderer,
+                            L"DefaultMaterial",   // material name
+                            L"Cube"       // mesh name
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::EndMenu();
+                }
+                ImGui::EndPopup();
             }
         }
 
@@ -701,6 +1111,11 @@ void GUIManager::RenderUI()
 
         ImGui::EndChild();
         ImGui::End();
+    }
+
+    if (ImGui::Button("Test"))
+    {
+        GP.test = !GP.test;  // 버튼 클릭 시 GP.test 값을 토글
     }
     RenderGuizmo();
 }

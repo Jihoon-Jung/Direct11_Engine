@@ -31,6 +31,7 @@ public:
 	void LateUpdate();
 
 	void AddComponent(shared_ptr<Component> component);
+	void RemoveComponent(shared_ptr<Component> component);
 	void SetParent(shared_ptr<GameObject> parent);
 	void AddChild(shared_ptr<GameObject> child);
 	void SetObjectType(GameObjectType type) { _type = type; }

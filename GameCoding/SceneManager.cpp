@@ -1182,6 +1182,53 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 	doc.SaveFile(pathStr.c_str());
 }
 
+void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, const wstring& objectName, const shared_ptr<Component>& component)
+{
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	tinyxml2::XMLDocument doc;
+	if (doc.LoadFile(pathStr.c_str()) != tinyxml2::XML_SUCCESS)
+		return;
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root)
+		return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// 컴포넌트 타입에 따라 XML 노드 제거
+			if (dynamic_pointer_cast<BoxCollider>(component))
+			{
+				if (auto colliderElem = gameObjElem->FirstChildElement("BoxCollider"))
+				{
+					gameObjElem->DeleteChild(colliderElem);
+				}
+			}
+			else if (dynamic_pointer_cast<SphereCollider>(component))
+			{
+				if (auto colliderElem = gameObjElem->FirstChildElement("SphereCollider"))
+				{
+					gameObjElem->DeleteChild(colliderElem);
+				}
+			}
+			else if (dynamic_pointer_cast<MeshRenderer>(component))
+			{
+				if (auto rendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+				{
+					gameObjElem->DeleteChild(rendererElem);
+				}
+			}
+			// ... 다른 컴포넌트 타입들 추가 ...
+
+			doc.SaveFile(pathStr.c_str());
+			break;
+		}
+	}
+}
+
 void SceneManager::UpdateGameObjectTransformInXML(const wstring& sceneName, const wstring& objectName, const Vec3& position, const Vec3& rotation, const Vec3& scale)
 {
 	tinyxml2::XMLDocument doc;
@@ -1362,6 +1409,64 @@ void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstri
 	}
 }
 
+void SceneManager::UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root)
+		return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// MeshRenderer 엘리먼트 찾기
+			if (auto rendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+			{
+				// Mesh 속성 업데이트
+				rendererElem->SetAttribute("mesh", meshName.c_str());
+				doc.SaveFile(pathStr.c_str());
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root)
+		return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// MeshRenderer 엘리먼트 찾기
+			if (auto rendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+			{
+				// Material 속성 업데이트
+				rendererElem->SetAttribute("material", materialName.c_str());
+				doc.SaveFile(pathStr.c_str());
+			}
+			break;
+		}
+	}
+}
+
+
+
 void SceneManager::CreateCubeToScene(const wstring& sceneName)
 {
 	SaveAndLoadGameObjectToXML(sceneName, L"cube1",
@@ -1424,3 +1529,4 @@ void SceneManager::CreateCylinderToScene(const wstring& sceneName)
 	boxCollider->SetScale(Vec3(0.866f, 3.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", boxCollider);
 }
+

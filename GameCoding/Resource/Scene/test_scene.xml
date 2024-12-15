@@ -9,18 +9,11 @@
         <Camera projectionType="1"/>
     </GameObject>
     <GameObject name="MainLight">
-        <Transform posX="-5.5681424" posY="25.4" posZ="139.97244" rotX="0" rotY="-79.673042" rotZ="0" scaleX="10" scaleY="10" scaleZ="10"/>
+        <Transform posX="20.138821" posY="37" posZ="143.31149" rotX="0" rotY="132.24101" rotZ="0" scaleX="10" scaleY="10" scaleZ="10"/>
         <Light ambientR="1" ambientG="1" ambientB="1" ambientA="1" diffuseR="1" diffuseG="1" diffuseB="1" diffuseA="1" specularR="1" specularG="1" specularB="1" specularA="1" emissiveR="1" emissiveG="1" emissiveB="1" emissiveA="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SimpleMaterial" mesh="Sphere">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-    </GameObject>
-    <GameObject name="Env_Sphere">
-        <Transform posX="4" posY="1.6489856" posZ="117.35496" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
-            <RenderPass pass="7" depthStencilState="0"/>
-        </MeshRenderer>
-        <SphereCollider radius="0.5" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="Sphere">
         <Transform posX="-6.5" posY="5.5999999" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
@@ -30,22 +23,21 @@
         <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="cube">
-        <Transform posX="-6.5" posY="0.60000002" posZ="116.75454" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-6.5" posY="0.60000002" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="tessellation_cube">
-        <Transform posX="-16.218632" posY="1.5" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-7" posY="1.5" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Tessellation_Material" mesh="Cylinder">
             <RenderPass pass="5" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.8663609" scaleY="3.0016775" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="stencil_cube1">
-        <Transform posX="-10.5" posY="0.61601746" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-10.5" posY="0" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
             <RenderPass pass="1" depthStencilState="1"/>
         </MeshRenderer>
@@ -76,22 +68,15 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Kachujin_OBJ">
-        <Transform posX="-13.245154" posY="0" posZ="113.94367" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
     <GameObject name="Dreyar_OBJ">
-        <Transform posX="7.5309982" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="FireParticle">
-        <Transform posX="-6.6766329" posY="0" posZ="107.01674" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-2.0248685" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
             <RenderPass pass="10" depthStencilState="3"/>
         </MeshRenderer>
@@ -104,24 +89,20 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="cube1">
-        <Transform posX="0" posY="5" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-2.5098953" posY="2.6213901" posZ="117.21538" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cube">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="sphere1">
-        <Transform posX="10" posY="5" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Sphere">
+    <GameObject name="NewObject">
+        <Transform posX="6.2733088" posY="4.9872904" posZ="122" rotX="0" rotY="12.400002" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SimpleMaterial" mesh="Quad">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="cylinder1">
-        <Transform posX="-8.7925806" posY="5.9113722" posZ="120.76729" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cylinder">
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.866" scaleY="3" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
 </Scene>

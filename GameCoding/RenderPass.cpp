@@ -1017,49 +1017,57 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 void RenderPass::AnimatedMeshRender(bool isEnv)
 {
-	animationSumTime += TIME.GetDeltaTime() / 18.0f;
-	_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime() / 18.0f;
+	animationSumTime += TIME.GetDeltaTime() / 4.0f;
+	_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime() / 4.0f;
 	_blendAnimDesc.SetAnimSpeed(2.0f, 2.0f);
 
 	shared_ptr<Model> model = _meshRenderer->GetModel();
 	shared_ptr<Shader> shader = _meshRenderer->GetShader();
-
 	shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
 
+	shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
 	{
-		shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
-
 		if (current)
 		{
-			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed); // 1프레임에 몇초냐?
+			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
 			if (_blendAnimDesc.curr.sumTime >= timePerFrame)
 			{
 				_blendAnimDesc.curr.sumTime = 0.f;
 				_blendAnimDesc.curr.currFrame = (_blendAnimDesc.curr.currFrame + 1) % current->frameCount;
 				_blendAnimDesc.curr.nextFrame = (_blendAnimDesc.curr.currFrame + 1) % current->frameCount;
+
+				// 프레임이 변경되는 시점에 GP.test 체크
+				if (GP.test && _blendAnimDesc.blendRatio == 0.0f)
+				{
+					_blendAnimDesc.blendSumTime = 0.0f;
+					_blendAnimDesc.blendRatio = 0.0f;
+				}
 			}
 
 			_blendAnimDesc.curr.ratio = (_blendAnimDesc.curr.sumTime / timePerFrame);
 		}
 	}
 
-	if (animationSumTime > 3.0f)
+	// 두 조건 중 하나라도 만족하면 블렌딩 시작
+	if (_blendAnimDesc.curr.currFrame == current->frameCount - 1 ||
+		(GP.test && _blendAnimDesc.blendRatio >= 0.0f))
 	{
-		_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
-		_blendAnimDesc.blendRatio = (_blendAnimDesc.blendSumTime / _blendAnimDesc.blendDuration) * (_blendAnimDesc.curr.speed + _blendAnimDesc.next.speed);
+		_blendAnimDesc.blendSumTime += TIME.GetDeltaTime() * 8.0f;
+		_blendAnimDesc.blendRatio = (_blendAnimDesc.blendSumTime / _blendAnimDesc.blendDuration)
+			* (_blendAnimDesc.curr.speed + _blendAnimDesc.next.speed);
 
 		if (_blendAnimDesc.blendRatio > 1.0f)
 		{
 			animationSumTime = 0.0f;
 			_blendAnimDesc.ClearNextAnim();
+			GP.test = false;  // 블렌딩이 완료되면 test 플래그 리셋
 		}
 		else
 		{
 			shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-
 			if (next)
 			{
-				float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed); // 1프레임에 몇초냐?
+				float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
 				if (_blendAnimDesc.next.ratio >= 1.0f)
 				{
 					_blendAnimDesc.next.sumTime = 0.f;
@@ -1071,6 +1079,9 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 			}
 		}
 	}
+
+	_blendAnimDesc.curr.activeAnimation = 1;
+	_blendAnimDesc.next.activeAnimation = 1;
 
 	blendBuffer->CreateConstantBuffer<BlendAnimDesc>();
 	blendBuffer->CopyData(_blendAnimDesc);

@@ -38,6 +38,7 @@ public:
 		const wstring& material = L"",
 		const wstring& mesh = L"",
 		const wstring& model = L"");
+	void RemoveComponentFromGameObjectInXML(const wstring& sceneName, const wstring& objectName, const shared_ptr<Component>& component);
 
 	void UpdateGameObjectTransformInXML(const wstring& sceneName, const wstring& objectName, const Vec3& position, const Vec3& rotation, const Vec3& scale);
 	void UpdateGameObjectColliderInXML(const wstring& sceneName, const wstring& objectName,
@@ -45,6 +46,9 @@ public:
 	void UpdateGameObjectSphereColliderInXML(const wstring& sceneName, const wstring& objectName,
 		const Vec3& center, float radius);
 	void RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName);
+
+	void UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName);
+	void UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName);
 
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);

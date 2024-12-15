@@ -64,7 +64,8 @@ struct KeyframeDesc
 	float ratio;
 	float sumTime;
 	float speed;
-	float2 padding3;
+	int activeAnimation;
+	int padding3;
 };
 struct blendFrameDesc
 {
@@ -165,8 +166,21 @@ matrix GetAnimationMatrix(VS_INPUT input)
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	matrix m = GetAnimationMatrix(input); // 애니메이션 행렬
+	matrix m;
 
+	if (blendFrames.curr.activeAnimation == 1)
+	{
+		m = GetAnimationMatrix(input); // 애니메이션 적용
+	}
+	else
+	{
+		m = matrix(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+			);
+	}
 	// 정점 변환
 	output.position = mul(input.position, m);
 	output.position = mul(output.position, worldMatrix);

@@ -83,5 +83,7 @@ public:
 
 	uint32    _4xMsaaQuality = 0;
 	Vec3 centerPos = { 3.0f, 0.0f, 117.0f };
+
+	bool test = false;
 };
 

@@ -35,6 +35,22 @@ private:
 	float _cameraMoveTime = 0.0f;
 	const float _cameraMoveSpeed = 3.0f;  // 이동 속도 (값이 클수록 빠름)
 
+private:
+	// EmptyObject 생성 관련 변수들
+	bool _showEmptyObjectPopup = false;
+	char _newObjectName[128] = "NewObject";
+	Vec3 _newObjectPosition = Vec3::Zero;
+	Vec3 _newObjectRotation = Vec3::Zero;
+	Vec3 _newObjectScale = Vec3(1.0f, 1.0f, 1.0f);
+	bool _newObjectUseMeshRenderer = false;
+
+	// Resource 리스트 관련 변수들
+	bool _resourceListInitialized = false;
+	vector<wstring> _meshList;
+	vector<wstring> _materialList;
+	int _newObjectSelectedMesh = 0;
+	int _newObjectSelectedMaterial = 0;
+
 	// 현재 회전 중인 축을 추적
 	enum RotationAxis
 	{

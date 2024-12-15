@@ -52,6 +52,40 @@ void GameObject::AddComponent(shared_ptr<Component> component)
 	}
 }
 
+void GameObject::RemoveComponent(shared_ptr<Component> component)
+{
+	if (!component)
+		return;
+
+	ComponentType type = component->GetType();
+	uint8 index = static_cast<uint8>(type);
+
+	// Transform 컴포넌트는 제거할 수 없음
+	if (type == ComponentType::Transform)
+		return;
+
+	// FIXED_COMPONENT_COUNT 이내의 컴포넌트인 경우
+	if (index < FIXED_COMPONENT_COUNT)
+	{
+		if (_components[index] == component)
+		{
+			_components[index] = nullptr;
+		}
+	}
+	else
+	{
+		// FIXED_COMPONENT_COUNT 이후에 추가된 컴포넌트인 경우
+		auto it = std::find(_components.begin() + FIXED_COMPONENT_COUNT, _components.end(), component);
+		if (it != _components.end())
+		{
+			_components.erase(it);
+		}
+	}
+
+	// 컴포넌트의 GameObject 참조 제거
+	component->SetGameObject(nullptr);
+}
+
 void GameObject::SetParent(shared_ptr<GameObject> parent)
 {
 	_parent = parent;
