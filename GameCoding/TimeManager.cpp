@@ -12,6 +12,14 @@ void TimeManager::Update()
 	uint64 currentCount;
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
 
+	// 일시정지 상태면 deltaTime을 0으로 설정
+	if (_isPaused)
+	{
+		_deltaTime = 0.0f;
+		_prevCount = currentCount; // 일시정지 해제 시 갑자기 큰 델타값이 나오는 것 방지
+		return;
+	}
+
 	_deltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
 	_prevCount = currentCount;
 

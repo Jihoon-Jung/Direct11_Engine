@@ -636,6 +636,8 @@ void GUIManager::RenderUI()
                     componentName = "SphereCollider";
                 else if (dynamic_pointer_cast<MoveObject>(component))
                     componentName = "MoveObject";
+                else if (dynamic_pointer_cast<Animator>(component))
+                    componentName = "Animator";
                 // ... 다른 컴포넌트 타입들 추가 ...
 
                 if (!componentName.empty())
@@ -717,7 +719,11 @@ void GUIManager::RenderUI()
                                 _isColliderEditMode = !_isColliderEditMode;
                             }
                         }
-
+                        else if (auto animator = dynamic_pointer_cast<Animator>(component))
+                        {
+                            // TODO: Animator 속성들을 여기에 표시
+                            // 예: 현재 애니메이션, 재생 속도 등
+                        }
                         else if (auto meshRenderer = dynamic_pointer_cast<MeshRenderer>(component))
                         {
                             // 스타일 설정
@@ -951,6 +957,7 @@ void GUIManager::RenderUI()
                     bool hasBoxCollider = false;
                     bool hasSphereCollider = false;
                     bool hasMeshRenderer = false;
+                    bool hasAnimator = false;
 
                     // 기존 컴포넌트 체크
                     for (const auto& component : components)
@@ -961,6 +968,8 @@ void GUIManager::RenderUI()
                             hasSphereCollider = true;
                         else if (dynamic_pointer_cast<MeshRenderer>(component))
                             hasMeshRenderer = true;
+                        else if (dynamic_pointer_cast<Animator>(component))
+                            hasAnimator = true;
                     }
 
                     // BoxCollider 메뉴 아이템
@@ -996,7 +1005,15 @@ void GUIManager::RenderUI()
                         );
                         ImGui::CloseCurrentPopup();
                     }
-
+                    if (!hasAnimator && ImGui::MenuItem("Animator"))
+                    {
+                        auto animator = make_shared<Animator>();
+                        _selectedObject->AddComponent(animator);
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            animator);
+                    }
                     // MeshRenderer 메뉴 아이템
                     if (!hasMeshRenderer && ImGui::MenuItem("Mesh Renderer"))
                     {
@@ -1116,6 +1133,14 @@ void GUIManager::RenderUI()
     if (ImGui::Button("Test"))
     {
         GP.test = !GP.test;  // 버튼 클릭 시 GP.test 값을 토글
+    }
+    if (ImGui::Button("Test2"))
+    {
+        GP.test2 = !GP.test2;  // 버튼 클릭 시 GP.test 값을 토글
+    }
+    if (ImGui::Button("Test3"))
+    {
+        GP.test3 = !GP.test3;  // 버튼 클릭 시 GP.test 값을 토글
     }
     RenderGuizmo();
 }

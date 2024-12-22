@@ -1017,72 +1017,95 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 void RenderPass::AnimatedMeshRender(bool isEnv)
 {
-	animationSumTime += TIME.GetDeltaTime() / 4.0f;
-	_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime() / 4.0f;
-	_blendAnimDesc.SetAnimSpeed(2.0f, 2.0f);
+    shared_ptr<Animator> animator = _meshRenderer->GetGameObject()->GetComponent<Animator>();
+    shared_ptr<Model> model = _meshRenderer->GetModel();
+    shared_ptr<Shader> shader = _meshRenderer->GetShader();
 
-	shared_ptr<Model> model = _meshRenderer->GetModel();
-	shared_ptr<Shader> shader = _meshRenderer->GetShader();
-	shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
+    shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
+    if (animator != nullptr)
+    {
+        shared_ptr<Clip> currClip = animator->_currClip;
+        shared_ptr<Transition> currTransition = animator->_currTransition;
+		int currIndex = currClip->animIndex;
+		int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
+		_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
 
-	shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
-	{
-		if (current)
-		{
-			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
-			if (_blendAnimDesc.curr.sumTime >= timePerFrame)
-			{
-				_blendAnimDesc.curr.sumTime = 0.f;
-				_blendAnimDesc.curr.currFrame = (_blendAnimDesc.curr.currFrame + 1) % current->frameCount;
-				_blendAnimDesc.curr.nextFrame = (_blendAnimDesc.curr.currFrame + 1) % current->frameCount;
+        // 현재 애니메이션 업데이트
+        shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
+        if (current)
+        {
+            float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
+            _blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
 
-				// 프레임이 변경되는 시점에 GP.test 체크
-				if (GP.test && _blendAnimDesc.blendRatio == 0.0f)
-				{
-					_blendAnimDesc.blendSumTime = 0.0f;
-					_blendAnimDesc.blendRatio = 0.0f;
-				}
-			}
+            // 한 프레임이 끝났는지 체크
+            if (_blendAnimDesc.curr.sumTime >= timePerFrame)
+            {
+                _blendAnimDesc.curr.sumTime = 0.f;
 
-			_blendAnimDesc.curr.ratio = (_blendAnimDesc.curr.sumTime / timePerFrame);
-		}
-	}
+                // 마지막 프레임 체크
+                if (_blendAnimDesc.curr.currFrame >= current->frameCount - 1)
+                {
+                    currClip->isEndFrame = true;
+                    
+                    if (currClip->isLoop)
+                    {
+                        _blendAnimDesc.curr.currFrame = 0;
+                        _blendAnimDesc.curr.nextFrame = 1;
+                    }
+                    else
+                    {
+                        _blendAnimDesc.curr.currFrame = current->frameCount - 1;
+                        _blendAnimDesc.curr.nextFrame = current->frameCount - 1;
+                    }
+                }
+                else
+                {
+                    _blendAnimDesc.curr.currFrame++;
+                    _blendAnimDesc.curr.nextFrame = min(_blendAnimDesc.curr.currFrame + 1, current->frameCount - 1);
+                }
+            }
 
-	// 두 조건 중 하나라도 만족하면 블렌딩 시작
-	if (_blendAnimDesc.curr.currFrame == current->frameCount - 1 ||
-		(GP.test && _blendAnimDesc.blendRatio >= 0.0f))
-	{
-		_blendAnimDesc.blendSumTime += TIME.GetDeltaTime() * 8.0f;
-		_blendAnimDesc.blendRatio = (_blendAnimDesc.blendSumTime / _blendAnimDesc.blendDuration)
-			* (_blendAnimDesc.curr.speed + _blendAnimDesc.next.speed);
+            _blendAnimDesc.curr.ratio = (_blendAnimDesc.curr.sumTime / timePerFrame);
+        }
 
-		if (_blendAnimDesc.blendRatio > 1.0f)
-		{
-			animationSumTime = 0.0f;
-			_blendAnimDesc.ClearNextAnim();
-			GP.test = false;  // 블렌딩이 완료되면 test 플래그 리셋
-		}
-		else
-		{
-			shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-			if (next)
-			{
-				float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
-				if (_blendAnimDesc.next.ratio >= 1.0f)
-				{
-					_blendAnimDesc.next.sumTime = 0.f;
-					_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-					_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-				}
+        // 트랜지션 처리
+        if (currTransition != nullptr)
+        {
+            // Case 1: Has Exit Time O + Condition O
+            if (currTransition->hasExitTime && currTransition->hasCondition)
+            {
+                if (currClip->isEndFrame && currTransition->flag)
+                {
+                    HandleTransitionBlend(animator, currTransition, model);
+                }
+            }
+            // Case 2: Has Exit Time O + Condition X
+            else if (currTransition->hasExitTime && !currTransition->hasCondition)
+            {
+                if (currClip->isEndFrame)
+                {
+                    HandleTransitionBlend(animator, currTransition, model);
+                }
+            }
+            // Case 3: Has Exit Time X + Condition O
+            else if (!currTransition->hasExitTime && currTransition->hasCondition)
+            {
+                if (currTransition->flag)
+                {
+                    HandleTransitionBlend(animator, currTransition, model);
+                }
+            }
+            // Case 4: Has Exit Time X + Condition X는 의미 없으므로 구현하지 않음
+        }
 
-				_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
-			}
-		}
-	}
-
-	_blendAnimDesc.curr.activeAnimation = 1;
-	_blendAnimDesc.next.activeAnimation = 1;
-
+        _blendAnimDesc.curr.activeAnimation = 1;
+        _blendAnimDesc.next.activeAnimation = 1;
+    }
+    else
+    {
+        _blendAnimDesc.curr.activeAnimation = 0;
+        _blendAnimDesc.next.activeAnimation = 0;
+    }
 	blendBuffer->CreateConstantBuffer<BlendAnimDesc>();
 	blendBuffer->CopyData(_blendAnimDesc);
 
@@ -1557,4 +1580,53 @@ void RenderPass::SaveRenderTargetToFile(ID3D11RenderTargetView* renderTargetView
 
 	// 6. 맵핑 해제
 	DEVICECONTEXT->Unmap(stagingTexture.Get(), 0);
+}
+
+void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_ptr<Transition>& transition, shared_ptr<Model>& model)
+{
+	// transitionOffset 적용: 다음 애니메이션의 시작 시점 조절
+	if (_blendAnimDesc.blendSumTime == 0.0f)  // 블렌딩 시작 시
+	{
+		shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+		if (next)
+		{
+			// Offset 위치로 다음 애니메이션 시작 프레임 설정
+			float offsetFrame = next->frameCount * transition->transitionOffset;
+			_blendAnimDesc.next.currFrame = static_cast<int>(offsetFrame);
+			_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+			_blendAnimDesc.next.sumTime = 0.f;
+		}
+	}
+
+	_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
+	_blendAnimDesc.blendRatio = _blendAnimDesc.blendSumTime / transition->transitionDuration;
+
+	if (_blendAnimDesc.blendRatio > 1.0f)
+	{
+		// 트랜지션 완료
+		animationSumTime = 0.0f;
+		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
+		animator->SetCurrentClip(transition->clipB.lock()->name);
+		animator->SetCurrentTransition();
+		transition->flag = false;
+	}
+	else
+	{
+		// 다음 애니메이션 업데이트
+		shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+		if (next)
+		{
+			_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
+			float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
+
+			if (_blendAnimDesc.next.ratio >= 1.0f)
+			{
+				_blendAnimDesc.next.sumTime = 0.f;
+				_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+				_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+			}
+
+			_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
+		}
+	}
 }

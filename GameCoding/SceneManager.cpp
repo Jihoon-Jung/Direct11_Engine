@@ -6,6 +6,10 @@
 
 void SceneManager::Init()
 {
+	if (_activeScene != nullptr)
+	{
+		_activeScene->Start();
+	}
 }
 
 void SceneManager::Update()
@@ -218,7 +222,11 @@ void SceneManager::LoadTestScene2()
 			}
 			// 다른 스크립트 타입들도 여기에 추가
 		}
-
+		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+		{
+			auto animator = make_shared<Animator>();
+			gameObj->AddComponent(animator);
+		}
 		_activeScene->AddGameObject(gameObj);
 	}
 }
@@ -948,6 +956,8 @@ void SceneManager::LoadTestScene()
 	boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Kachujin_OBJ", boxCollider);
+	
+
 
 	// Dreyar
 	SaveAndLoadGameObjectToXML(L"test_scene", L"Dreyar_OBJ",
@@ -967,6 +977,8 @@ void SceneManager::LoadTestScene()
 	boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", boxCollider);
+	auto animator = make_shared<Animator>();
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", animator);
 
 	// Particle System
 	SaveAndLoadGameObjectToXML(L"test_scene", L"FireParticle",
@@ -1177,6 +1189,11 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 	{
 		tinyxml2::XMLElement* particleElem = doc.NewElement("ParticleSystem");
 		gameObj->InsertEndChild(particleElem);
+	}
+	else if (auto animator = dynamic_pointer_cast<Animator>(component))
+	{
+		tinyxml2::XMLElement* animatorElem = doc.NewElement("Animator");
+		gameObj->InsertEndChild(animatorElem);
 	}
 	// 다른 MonoBehaviour 스크립트들도 여기에 추가...
 	doc.SaveFile(pathStr.c_str());

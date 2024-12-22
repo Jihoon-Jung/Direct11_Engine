@@ -6,6 +6,8 @@
 #include "RasterizerStateInfo.h"
 
 class MeshRenderer;
+class Animator;
+class Transition;
 struct RasterizerStateInfo;
 
 enum class Pass
@@ -58,6 +60,7 @@ public:
 	void SetMeshRenderer(shared_ptr<MeshRenderer> meshRenderer) { _meshRenderer = meshRenderer; }
 	void SetTransform(shared_ptr<Transform> transform) { _transform = transform; }
 	void SetDepthStencilStateType(DSState state) { _dsStateType = state; }
+	void HandleTransitionBlend(shared_ptr<Animator>& animator, shared_ptr<Transition>& transition, shared_ptr<Model>& model);
 
 	Pass GetPass() const { return _pass; }
 	DSState GetDepthStencilStateType() const { return _dsStateType; }

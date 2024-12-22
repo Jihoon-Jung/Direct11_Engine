@@ -193,7 +193,8 @@ void RenderManager::Render()
 	if (_filterType == FilterType::SHADOW_MAP)
 	{
 		GP.SetShadowMapRenderTarget();
-		
+		TIME.SetPause(true);
+
 		_drawShadowMapFlag = true;
 		
 		RenderAllGameObject();
@@ -203,7 +204,7 @@ void RenderManager::Render()
 		_drawShadowMapFlag = false;
 		GP.RestoreRenderTarget();
 	}
-	
+	TIME.SetPause(false);
 
 	RenderAllGameObject();
 
@@ -236,6 +237,8 @@ void RenderManager::RenderAllGameObject()
 	}
 	else
 	{
+		TIME.SetPause(true);
+		float deltaTime = TIME.GetDeltaTime();
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
 			shared_ptr<Material> material = make_shared<Material>();
@@ -245,6 +248,8 @@ void RenderManager::RenderAllGameObject()
 
 			RenderEnvironmentMappedObjects(gameObject, envTexture);
 		}
+
+		TIME.SetPause(false);
 	}
 	
 }

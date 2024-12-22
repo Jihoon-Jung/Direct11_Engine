@@ -23,6 +23,7 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	TIME.Init();
 	RESOURCE.Init();
 	SCENE.LoadScene(L"Test");
+    SCENE.Init();
 	RENDER.Init();
 	GUI.Init();
 

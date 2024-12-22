@@ -107,12 +107,22 @@ struct BlendAnimDesc
 		blendSumTime = 0;
 		blendRatio = 0;
 	}
+	void ClearNextAnim(int index)
+	{
+		curr = next;
+		next.animIndex = index;
+		next.currFrame = 0;
+		next.nextFrame = 0;
+		next.sumTime = 0;
+		blendSumTime = 0;
+		blendRatio = 0;
+	}
 	void SetAnimSpeed(float s1, float s2)
 	{
 		curr.speed = s1;
 		next.speed = s2;
 	}
-	float blendDuration = 1.0f;
+	float blendDuration = 0.5f;
 	float blendRatio = 0.f;
 	float blendSumTime = 0.f;
 	float padding = 0.f;

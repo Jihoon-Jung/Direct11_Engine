@@ -14,6 +14,7 @@
 #include "ParticleSystem.h"
 #include "BoxCollider.h"
 #include "SphereCollider.h"
+#include "Animator.h"
 
 enum class GameObjectType
 {
@@ -77,7 +78,8 @@ public:
 			type = ComponentType::BoxCollider;
 		if (std::is_same_v<T, SphereCollider>)
 			type = ComponentType::SphereCollider;
-
+		if (std::is_same_v<T, Animator>)
+			type = ComponentType::Animator;
 
 		uint8 index = static_cast<uint8>(type);
 		shared_ptr<Component> component = _components[index];
