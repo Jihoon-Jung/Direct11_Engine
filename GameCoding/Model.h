@@ -38,6 +38,15 @@ public:
 	ComPtr<ID3D11ShaderResourceView> GetAnimationTextureBuffer() { return _srv; }
 	vector<AnimTransform>& GetAnimTransforms() { return _animTransforms; };
 
+	int GetAnimationIndexByName(wstring name) {
+		for (int i = 0; i < _animations.size(); i++)
+		{
+			if (_animations[i]->name == name)
+				return i;
+		}
+		return INT_MAX;
+	}
+
 	void CalculateTangents(vector<VertexTextureNormalTangentBlendData>& vertices, const vector<unsigned int>& indices);
 	void CreateAnimationTransform(uint32 index);
 	void CreateTexture();

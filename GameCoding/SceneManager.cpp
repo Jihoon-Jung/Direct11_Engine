@@ -23,7 +23,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestScene2();
+	LoadTestScene();
 }
 void SceneManager::LoadTestScene2()
 {
@@ -225,6 +225,79 @@ void SceneManager::LoadTestScene2()
 		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
 		{
 			auto animator = make_shared<Animator>();
+
+			// Parameters 로드
+			for (auto paramElem = animatorElem->FirstChildElement("Parameter");
+				paramElem; paramElem = paramElem->NextSiblingElement("Parameter"))
+			{
+				string paramName = paramElem->Attribute("name");
+				Parameter::Type paramType = static_cast<Parameter::Type>(paramElem->IntAttribute("type"));
+
+				animator->AddParameter(paramName, paramType);
+
+				// 파라미터 값 로드
+				Parameter* param = animator->GetParameter(paramName);
+				if (param)
+				{
+					switch (paramType)
+					{
+					case Parameter::Type::Bool:
+						param->value.boolValue = paramElem->BoolAttribute("value");
+						break;
+					case Parameter::Type::Int:
+						param->value.intValue = paramElem->IntAttribute("value");
+						break;
+					case Parameter::Type::Float:
+						param->value.floatValue = paramElem->FloatAttribute("value");
+						break;
+					}
+				}
+			}
+			// Clips 로드
+			for (auto clipElem = animatorElem->FirstChildElement("Clip");
+				clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+			{
+				string clipName = clipElem->Attribute("name");
+				int animIndex = clipElem->IntAttribute("animIndex");
+				bool isLoop = clipElem->BoolAttribute("isLoop");
+
+				animator->AddClip(clipName, animIndex, isLoop);
+			}
+
+			// Entry Clip 로드
+			if (auto entryElem = animatorElem->FirstChildElement("EntryClip"))
+			{
+				string entryClipName = entryElem->Attribute("name");
+				animator->SetEntryClip(entryClipName);
+			}
+
+			// Transitions 로드
+			for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+				transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+			{
+				string clipAName = transitionElem->Attribute("clipA");
+				string clipBName = transitionElem->Attribute("clipB");
+
+				animator->AddTransition(clipAName, clipBName);
+
+				auto transition = animator->GetClip(clipAName)->transition;
+				if (transition)
+				{
+					bool flag = transitionElem->BoolAttribute("flag");
+					bool hasCondition = transitionElem->BoolAttribute("hasCondition");
+					bool hasExitTime = transitionElem->BoolAttribute("hasExitTime");
+					float offset = transitionElem->FloatAttribute("transitionOffset");
+					float duration = transitionElem->FloatAttribute("transitionDuration");
+
+					animator->SetTransitionFlag(transition, flag);
+					transition->hasCondition = hasCondition;
+					transition->hasExitTime = hasExitTime;
+					animator->SetTransitionOffset(transition, offset);
+					animator->SetTransitionDuration(transition, duration);
+				}
+			}
+
+			animator->SetCurrentTransition();
 			gameObj->AddComponent(animator);
 		}
 		_activeScene->AddGameObject(gameObj);
@@ -978,6 +1051,22 @@ void SceneManager::LoadTestScene()
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", boxCollider);
 	auto animator = make_shared<Animator>();
+	animator->AddClip("Clip1", 2, false);
+	animator->AddClip("Clip2", 0, false);
+	animator->AddClip("Clip3", 1, false);
+
+	animator->SetEntryClip("Clip1");
+
+	animator->AddTransition("Clip1", "Clip2");
+	animator->AddTransition("Clip2", "Clip3");
+	animator->AddTransition("Clip3", "Clip1");
+	animator->SetTransitionFlag(animator->GetClip("Clip1")->transition, false);
+	animator->SetTransitionFlag(animator->GetClip("Clip2")->transition, false);
+
+	animator->SetCurrentTransition();
+
+	animator->AddParameter("isTest", Parameter::Type::Bool);
+
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", animator);
 
 	// Particle System
@@ -1193,6 +1282,71 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 	else if (auto animator = dynamic_pointer_cast<Animator>(component))
 	{
 		tinyxml2::XMLElement* animatorElem = doc.NewElement("Animator");
+
+		// Parameters 정보 저장
+		for (const auto& param : animator->_parameters)
+		{
+			tinyxml2::XMLElement* paramElem = doc.NewElement("Parameter");
+			paramElem->SetAttribute("name", param.name.c_str());
+			paramElem->SetAttribute("type", static_cast<int>(param.type));
+
+			// 파라미터 값 저장
+			switch (param.type)
+			{
+			case Parameter::Type::Bool:
+				paramElem->SetAttribute("value", param.value.boolValue);
+				break;
+			case Parameter::Type::Int:
+				paramElem->SetAttribute("value", param.value.intValue);
+				break;
+			case Parameter::Type::Float:
+				paramElem->SetAttribute("value", param.value.floatValue);
+				break;
+			}
+
+			animatorElem->InsertEndChild(paramElem);
+		}
+		// Entry clip 정보 저장
+		if (animator->_entry)
+		{
+			tinyxml2::XMLElement* entryElem = doc.NewElement("EntryClip");
+			entryElem->SetAttribute("name", animator->_entry->name.c_str());
+			animatorElem->InsertEndChild(entryElem);
+		}
+
+		// Clips 정보 저장
+		for (const auto& clipPair : animator->_clips)
+		{
+			tinyxml2::XMLElement* clipElem = doc.NewElement("Clip");
+			const auto& clip = clipPair.second;
+
+			clipElem->SetAttribute("name", clip->name.c_str());
+			clipElem->SetAttribute("animIndex", clip->animIndex);
+			clipElem->SetAttribute("isLoop", clip->isLoop);
+
+			animatorElem->InsertEndChild(clipElem);
+		}
+
+		// Transitions 정보 저장
+		for (const auto& transition : animator->_transitions)
+		{
+			tinyxml2::XMLElement* transitionElem = doc.NewElement("Transition");
+
+			// clipA와 clipB의 이름을 저장
+			if (auto clipA = transition->clipA.lock())
+				transitionElem->SetAttribute("clipA", clipA->name.c_str());
+			if (auto clipB = transition->clipB.lock())
+				transitionElem->SetAttribute("clipB", clipB->name.c_str());
+
+			transitionElem->SetAttribute("flag", transition->flag);
+			transitionElem->SetAttribute("hasCondition", transition->hasCondition);
+			transitionElem->SetAttribute("hasExitTime", transition->hasExitTime);
+			transitionElem->SetAttribute("transitionOffset", transition->transitionOffset);
+			transitionElem->SetAttribute("transitionDuration", transition->transitionDuration);
+
+			animatorElem->InsertEndChild(transitionElem);
+		}
+
 		gameObj->InsertEndChild(animatorElem);
 	}
 	// 다른 MonoBehaviour 스크립트들도 여기에 추가...
@@ -1482,7 +1636,176 @@ void SceneManager::UpdateMaterialInXML(const wstring& sceneName, const wstring& 
 	}
 }
 
+void SceneManager::UpdateAnimatorClipInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipName, float speed, bool isLoop)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
 
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Clip 찾기
+				for (auto clipElem = animatorElem->FirstChildElement("Clip");
+					clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+				{
+					if (string(clipElem->Attribute("name")) == clipName)
+					{
+						clipElem->SetAttribute("speed", speed);
+						clipElem->SetAttribute("isLoop", isLoop);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateAnimatorTransitionInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipAName, const string& clipBName,
+	float duration, float offset, bool hasExitTime)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Transition 찾기
+				for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+					transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+				{
+					if (string(transitionElem->Attribute("clipA")) == clipAName &&
+						string(transitionElem->Attribute("clipB")) == clipBName)
+					{
+						transitionElem->SetAttribute("transitionDuration", duration);
+						transitionElem->SetAttribute("transitionOffset", offset);
+						transitionElem->SetAttribute("hasExitTime", hasExitTime);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::AddAnimatorParameterToXML(const wstring& sceneName, const wstring& objectName, const string& paramName, Parameter::Type paramType)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// 새로운 Parameter 추가
+				tinyxml2::XMLElement* paramElem = doc.NewElement("Parameter");
+				paramElem->SetAttribute("name", paramName.c_str());
+				paramElem->SetAttribute("type", static_cast<int>(paramType));
+
+				// 기본값 설정
+				switch (paramType)
+				{
+				case Parameter::Type::Bool:
+					paramElem->SetAttribute("value", false);
+					break;
+				case Parameter::Type::Int:
+					paramElem->SetAttribute("value", 0);
+					break;
+				case Parameter::Type::Float:
+					paramElem->SetAttribute("value", 0.0f);
+					break;
+				}
+
+				animatorElem->InsertFirstChild(paramElem);
+				doc.SaveFile(pathStr.c_str());
+				break;
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateAnimatorParameterInXML(const wstring& sceneName, const wstring& objectName,
+	const string& paramName, const Parameter& param)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Parameter 찾기
+				for (auto paramElem = animatorElem->FirstChildElement("Parameter");
+					paramElem; paramElem = paramElem->NextSiblingElement("Parameter"))
+				{
+					if (string(paramElem->Attribute("name")) == paramName)
+					{
+						// 값 업데이트
+						switch (param.type)
+						{
+						case Parameter::Type::Bool:
+							paramElem->SetAttribute("value", param.value.boolValue);
+							break;
+						case Parameter::Type::Int:
+							paramElem->SetAttribute("value", param.value.intValue);
+							break;
+						case Parameter::Type::Float:
+							paramElem->SetAttribute("value", param.value.floatValue);
+							break;
+						}
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
 
 void SceneManager::CreateCubeToScene(const wstring& sceneName)
 {
@@ -1547,3 +1870,70 @@ void SceneManager::CreateCylinderToScene(const wstring& sceneName)
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", boxCollider);
 }
 
+void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipAName, const string& clipBName,
+	const vector<Condition>& conditions)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Transition 찾기
+				for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+					transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+				{
+					if (string(transitionElem->Attribute("clipA")) == clipAName &&
+						string(transitionElem->Attribute("clipB")) == clipBName)
+					{
+						// 기존 Conditions 삭제
+						while (auto conditionElem = transitionElem->FirstChildElement("Condition"))
+						{
+							transitionElem->DeleteChild(conditionElem);
+						}
+
+						// 새로운 Conditions 추가
+						for (const auto& condition : conditions)
+						{
+							auto conditionElem = doc.NewElement("Condition");
+							conditionElem->SetAttribute("parameterName", condition.parameterName.c_str());
+							conditionElem->SetAttribute("parameterType", static_cast<int>(condition.parameterType));
+							conditionElem->SetAttribute("compareType", static_cast<int>(condition.compareType));
+
+							// 값 저장
+							switch (condition.parameterType)
+							{
+							case Parameter::Type::Bool:
+								conditionElem->SetAttribute("value", condition.value.boolValue);
+								break;
+							case Parameter::Type::Int:
+								conditionElem->SetAttribute("value", condition.value.intValue);
+								break;
+							case Parameter::Type::Float:
+								conditionElem->SetAttribute("value", condition.value.floatValue);
+								break;
+							}
+
+							transitionElem->InsertEndChild(conditionElem);
+						}
+
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}

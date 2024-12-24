@@ -1026,8 +1026,13 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
     {
         shared_ptr<Clip> currClip = animator->_currClip;
         shared_ptr<Transition> currTransition = animator->_currTransition;
+
 		int currIndex = currClip->animIndex;
 		int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
+
+		// condition 체크
+		animator->CheckConditionsAndSetFlag(currTransition);
+
 		_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
 
         // 현재 애니메이션 업데이트
@@ -1608,7 +1613,9 @@ void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_pt
 		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
 		animator->SetCurrentClip(transition->clipB.lock()->name);
 		animator->SetCurrentTransition();
-		transition->flag = false;
+		GP.test = false;
+		GP.test2 = false;
+		GP.test3 = false;
 	}
 	else
 	{

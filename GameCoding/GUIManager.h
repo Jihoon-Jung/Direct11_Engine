@@ -67,5 +67,44 @@ private:
 	filesystem::path _selectedFolder;
 	bool _isFirstFrame = true;  // 첫 프레임 체크를 위한 변수
 
+private:
+
+	// 노드 관련 변수들
+	struct NodeData
+	{
+		string name;
+		ImVec2 pos;
+		bool isEntry = false;
+		shared_ptr<Clip> clip;
+	};
+	vector<NodeData> _nodes;
+	shared_ptr<Animator> _selectedAnimator;
+
+	// Animator Editor 관련 변수들
+	bool _showAnimatorEditor = false;
+	string _newParameterName;
+	enum class ParameterType { Bool, Int, Float };
+	bool _showAddParameterPopup = false;
+	ParameterType _selectedParameterType;
+	NodeData* _selectedNode = nullptr;
+	shared_ptr<Transition> _selectedTransition = nullptr;
+	static constexpr float NODE_WIDTH = 150.0f;
+	static constexpr float NODE_HEIGHT = 50.0f;
+	static constexpr float TITLE_HEIGHT = 20.0f;
+
+	
+
+	// 편집기 관련 함수들
+	void ShowAnimatorEditor();
+	void RenderParametersPanel();
+	void RenderGraphPanel();
+	void DrawArrow(ImDrawList* drawList, const ImVec2& start, const ImVec2& end, ImU32 color, float thickness);
+	void RenderInspectorPanel();
+	void RenderNode(NodeData& node);
+	void RenderTransitions();
+	void DrawConnection(ImDrawList* drawList, const ImVec2& start, const ImVec2& end);
+	void DrawArrowHead(ImDrawList* drawList, const ImVec2& pos, float angle, ImU32 color);
+	ImVec2 BezierCubic(const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t);
+	float DistancePointToLineSegment(const ImVec2& point, const ImVec2& lineStart, const ImVec2& lineEnd);
 };
 

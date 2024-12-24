@@ -307,6 +307,9 @@ void GUIManager::RenderUI()
             ImGui::End();
         }
     }
+
+    ShowAnimatorEditor();
+
     // controller
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     {
@@ -609,7 +612,7 @@ void GUIManager::RenderUI()
 
                 if (ImGui::DragFloat3("Scale", &scale.x, 0.1f))
                     transform->SetLocalScale(scale);
-                SCENE.UpdateGameObjectTransformInXML(L"test_scene", _selectedObject->GetName(),
+                SCENE.UpdateGameObjectTransformInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(),
                     position, transform->GetLocalRotation(), transform->GetLocalScale());
 
                 ImGui::Separator();
@@ -671,7 +674,7 @@ void GUIManager::RenderUI()
                             if (ImGui::DragFloat3("Center", &center.x, 0.1f))
                             {
                                 boxCollider->SetCenter(center);
-                                SCENE.UpdateGameObjectColliderInXML(L"test_scene", _selectedObject->GetName(),
+                                SCENE.UpdateGameObjectColliderInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(),
                                     center, boxCollider->GetScale(), true);
                             }
 
@@ -680,7 +683,7 @@ void GUIManager::RenderUI()
                             if (ImGui::DragFloat3("Size", &scale.x, 0.1f))
                             {
                                 boxCollider->SetScale(scale);
-                                SCENE.UpdateGameObjectColliderInXML(L"test_scene", _selectedObject->GetName(),
+                                SCENE.UpdateGameObjectColliderInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(),
                                     boxCollider->GetCenter(), scale, true);
                             }
 
@@ -721,8 +724,36 @@ void GUIManager::RenderUI()
                         }
                         else if (auto animator = dynamic_pointer_cast<Animator>(component))
                         {
-                            // TODO: Animator 속성들을 여기에 표시
-                            // 예: 현재 애니메이션, 재생 속도 등
+                            if (ImGui::Button("Edit##Animator", ImVec2(60, 25)))
+                            {
+                                _showAnimatorEditor = true;
+                                _selectedAnimator = animator;
+
+                                // 노드 데이터 초기화
+                                _nodes.clear();
+
+                                // Entry 노드 추가
+                                NodeData entryNode;
+                                entryNode.name = "Entry";
+                                entryNode.pos = ImVec2(50, 100);  // Entry 노드의 시작 위치 수정
+                                entryNode.isEntry = true;
+                                _nodes.push_back(entryNode);
+
+                                // Clip 노드들 추가
+                                float xOffset = 250;  // Entry 노드와의 간격
+                                float yPos = 100;     // 시작 y 위치
+                                float xSpacing = 200; // 노드 간 가로 간격
+
+                                for (const auto& clipPair : animator->_clips)
+                                {
+                                    NodeData node;
+                                    node.name = clipPair.first;
+                                    node.pos = ImVec2(xOffset, yPos);
+                                    node.clip = clipPair.second;
+                                    _nodes.push_back(node);
+                                    xOffset += xSpacing;
+                                }
+                            }
                         }
                         else if (auto meshRenderer = dynamic_pointer_cast<MeshRenderer>(component))
                         {
@@ -1045,7 +1076,24 @@ void GUIManager::RenderUI()
                 ImGui::EndPopup();
             }
         }
+        if (_selectedObject != nullptr)
+        {
+            shared_ptr<Animator> animator = _selectedObject->GetComponent<Animator>();
 
+            if (animator != nullptr)
+            {
+                shared_ptr<MeshRenderer> meshRenderer = _selectedObject->GetComponent<MeshRenderer>();
+                vector<shared_ptr<ModelAnimation>> animations = meshRenderer->GetModel()->GetAnimations();
+                for (shared_ptr<ModelAnimation> animation : animations)
+                {
+                    wstring name = animation->name;
+                    int a = 1;
+                }
+
+            }
+        }
+        
+        
         ImGui::End();
     }
 
@@ -1787,4 +1835,833 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
     ImGui::Columns(1);
 
     ImGui::PopStyleVar();
+}
+
+
+void GUIManager::ShowAnimatorEditor()
+{
+    if (!_showAnimatorEditor)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(1000, 600), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Animator", &_showAnimatorEditor))
+    {
+        if (_selectedAnimator)
+        {
+            // 좌측 Parameters 패널
+            ImGui::BeginChild("Parameters", ImVec2(200, 0), true);
+            RenderParametersPanel();
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            // 중앙 Graph 패널
+            ImGui::BeginChild("Graph", ImVec2(-200, 0), true);
+            RenderGraphPanel();
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            // 우측 Inspector 패널
+            ImGui::BeginChild("Inspector", ImVec2(200, 0), true);
+            RenderInspectorPanel();  // 여기서 호출되는지 확인
+            ImGui::EndChild();
+        }
+    }
+    ImGui::End();
+}
+
+void GUIManager::RenderParametersPanel()
+{
+    if (!_selectedAnimator)
+        return;
+
+    ImGui::Text("Parameters");
+    ImGui::Separator();
+
+    if (ImGui::Button("+"))
+        ImGui::OpenPopup("AddParameter");
+
+    if (ImGui::BeginPopup("AddParameter"))
+    {
+        // 먼저 타입 선택 버튼들을 표시
+        if (ImGui::Button("Bool"))
+        {
+            _showAddParameterPopup = true;
+            _selectedParameterType = ParameterType::Bool;
+            ImGui::CloseCurrentPopup();
+        }
+        if (ImGui::Button("Int"))
+        {
+            _showAddParameterPopup = true;
+            _selectedParameterType = ParameterType::Int;
+            ImGui::CloseCurrentPopup();
+        }
+        if (ImGui::Button("Float"))
+        {
+            _showAddParameterPopup = true;
+            _selectedParameterType = ParameterType::Float;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // 타입 선택 후 이름 입력 팝업
+    if (_showAddParameterPopup)
+    {
+        ImGui::OpenPopup("ParameterName");
+        // 팝업 중앙 정렬
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    }
+
+    if (ImGui::BeginPopupModal("ParameterName", &_showAddParameterPopup))
+    {
+        static char paramName[128] = "";
+        ImGui::Text("Enter Parameter Name:");
+        ImGui::InputText("##Name", paramName, sizeof(paramName));
+
+        if (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))
+        {
+            if (strlen(paramName) > 0)
+            {
+                // 파라미터 추가
+                _selectedAnimator->AddParameter(paramName, static_cast<Parameter::Type>(_selectedParameterType));
+
+                // XML에도 저장
+                SCENE.AddAnimatorParameterToXML(SCENE.GetActiveScene()->GetSceneName(),
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    paramName,
+                    static_cast<Parameter::Type>(_selectedParameterType));
+
+                _showAddParameterPopup = false;
+                ImGui::CloseCurrentPopup();
+                memset(paramName, 0, sizeof(paramName));
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            _showAddParameterPopup = false;
+            ImGui::CloseCurrentPopup();
+            memset(paramName, 0, sizeof(paramName));
+        }
+        ImGui::EndPopup();
+    }
+
+    // 파라미터 목록 표시
+    for (auto& param : _selectedAnimator->_parameters)
+    {
+        bool valueChanged = false;
+        switch (param.type)
+        {
+        case Parameter::Type::Bool:
+        {
+            bool value = param.value.boolValue;
+            if (ImGui::Checkbox(param.name.c_str(), &value))
+            {
+                _selectedAnimator->SetBool(param.name, value);
+                valueChanged = true;
+            }
+        }
+        break;
+        case Parameter::Type::Int:
+        {
+            int value = param.value.intValue;
+            if (ImGui::DragInt(param.name.c_str(), &value))
+            {
+                _selectedAnimator->SetInt(param.name, value);
+                valueChanged = true;
+            }
+        }
+        break;
+        case Parameter::Type::Float:
+        {
+            float value = param.value.floatValue;
+            if (ImGui::DragFloat(param.name.c_str(), &value, 0.1f))
+            {
+                _selectedAnimator->SetFloat(param.name, value);
+                valueChanged = true;
+            }
+        }
+        break;
+        }
+
+        if (valueChanged)
+        {
+            SCENE.UpdateAnimatorParameterInXML(SCENE.GetActiveScene()->GetSceneName(),
+                _selectedAnimator->GetGameObject()->GetName(),
+                param.name, param);
+        }
+    }
+}
+
+void GUIManager::RenderGraphPanel()
+{
+    // 회색 배경으로 설정
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(50, 50, 50, 255));
+    ImGui::BeginChild("canvas", ImVec2(0, 0), true);
+
+    // 캔버스의 시작 위치를 저장
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+    // 먼저 트랜지션(화살표)을 그림
+    RenderTransitions();
+
+    // 노드들을 그릴 때 저장된 캔버스 위치를 사용
+    for (auto& node : _nodes)
+    {
+        ImGui::SetCursorScreenPos(canvasPos);
+        RenderNode(node);
+    }
+
+    // 빈 공간 클릭 감지
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    {
+        ImVec2 mousePos = ImGui::GetMousePos();
+        bool clickedEmpty = true;
+
+        // 노드 클릭 체크
+        for (auto& node : _nodes)
+        {
+            ImVec2 nodePos = ImGui::GetCursorScreenPos();
+            nodePos.x += node.pos.x;
+            nodePos.y += node.pos.y;
+
+            if (ImGui::IsMouseHoveringRect(
+                nodePos,
+                ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT)))
+            {
+                clickedEmpty = false;
+                break;
+            }
+        }
+
+        // 트랜지션 클릭 체크
+        if (_selectedTransition != nullptr)
+        {
+            clickedEmpty = false;
+        }
+
+        // 빈 공간을 클릭했을 때만 선택 해제
+        if (clickedEmpty)
+        {
+            _selectedNode = nullptr;
+            _selectedTransition = nullptr;
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
+}
+
+void GUIManager::RenderInspectorPanel()
+{
+    if (!_selectedAnimator)
+    {
+        return;
+    }
+
+    // 선택된 트랜지션이 있는 경우
+    if (_selectedTransition)
+    {
+        ImGui::Text("Transition Settings");
+        ImGui::Separator();
+
+        auto clipA = _selectedTransition->clipA.lock();
+        auto clipB = _selectedTransition->clipB.lock();
+
+        // Duration 설정
+        float duration = _selectedTransition->transitionDuration;
+        if (ImGui::DragFloat("Duration", &duration, 0.1f, 0.0f, 5.0f))
+        {
+            _selectedAnimator->SetTransitionDuration(_selectedTransition, duration);
+            
+            if (clipA && clipB)
+            {
+                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    clipA->name, clipB->name, duration, _selectedTransition->transitionOffset,
+                    _selectedTransition->hasExitTime);
+            }
+        }
+
+        // Offset 설정
+        float offset = _selectedTransition->transitionOffset;
+        if (ImGui::DragFloat("Offset", &offset, 0.1f, 0.0f, 1.0f))
+        {
+            _selectedAnimator->SetTransitionOffset(_selectedTransition, offset);
+            if (clipA && clipB)
+            {
+                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    clipA->name, clipB->name, _selectedTransition->transitionDuration,
+                    offset, _selectedTransition->hasExitTime);
+            }
+        }
+
+        // Has Exit Time 설정
+        bool hasExitTime = _selectedTransition->hasExitTime;
+        if (ImGui::Checkbox("Has Exit Time", &hasExitTime))
+        {
+            _selectedAnimator->SetTransitionHasExit(_selectedTransition, hasExitTime);
+            if (clipA && clipB)
+            {
+                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    clipA->name, clipB->name, _selectedTransition->transitionDuration,
+                    _selectedTransition->transitionOffset, hasExitTime);
+            }
+        }
+
+        // Conditions 섹션
+        ImGui::Spacing();
+        ImGui::Text("Conditions");
+        ImGui::Separator();
+
+        // 조건 목록 표시
+        for (size_t i = 0; i < _selectedTransition->conditions.size(); i++)
+        {
+            auto& condition = _selectedTransition->conditions[i];
+            ImGui::PushID(static_cast<int>(i));
+
+            bool conditionChanged = false;
+
+            // Parameter 선택 콤보박스 (첫 번째 줄)
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 20.0f); // X 버튼 공간 확보
+            if (ImGui::BeginCombo("##param", condition.parameterName.c_str()))
+            {
+                for (const auto& param : _selectedAnimator->_parameters)
+                {
+                    bool isSelected = (condition.parameterName == param.name);
+                    if (ImGui::Selectable(param.name.c_str(), isSelected))
+                    {
+                        condition.parameterName = param.name;
+                        condition.parameterType = param.type;
+                        conditionChanged = true;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            // 삭제 버튼을 오른쪽에 배치
+            ImGui::SameLine();
+            if (ImGui::Button("X##remove"))
+            {
+                _selectedTransition->conditions.erase(_selectedTransition->conditions.begin() + i);
+
+                // Condition 삭제 후 XML 업데이트 추가
+                SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    _selectedTransition->clipA.lock()->name,
+                    _selectedTransition->clipB.lock()->name,
+                    _selectedTransition->conditions);
+
+                ImGui::PopID();
+                break;
+            }
+
+            // 값 설정 UI (두 번째 줄)
+            switch (condition.parameterType)
+            {
+            case Parameter::Type::Bool:
+            {
+                int value = condition.value.boolValue ? 1 : 0;
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (ImGui::Combo("##boolValue", &value, "false\0true\0"))
+                {
+                    condition.value.boolValue = (value == 1);
+                    conditionChanged = true;
+                }
+            }
+            break;
+
+            case Parameter::Type::Int:
+            case Parameter::Type::Float:
+            {
+                // 비교 연산자 콤보박스
+                const char* compareTypes[] = { "==", "!=", ">", "<" };
+                int currentType = static_cast<int>(condition.compareType);
+                float totalWidth = ImGui::GetContentRegionAvail().x;
+                float compareWidth = 60.0f;
+                float valueWidth = totalWidth - compareWidth;
+
+                ImGui::SetNextItemWidth(compareWidth);
+                if (ImGui::Combo("##compare", &currentType, compareTypes, 4))
+                {
+                    condition.compareType = static_cast<Condition::CompareType>(currentType);
+                    conditionChanged = true;
+                }
+
+                ImGui::SameLine();
+
+                // 값 입력
+                ImGui::SetNextItemWidth(valueWidth);
+                if (condition.parameterType == Parameter::Type::Int)
+                {
+                    int value = condition.value.intValue;
+                    if (ImGui::DragInt("##value", &value))
+                    {
+                        condition.value.intValue = value;
+                        conditionChanged = true;
+                    }
+                }
+                else
+                {
+                    float value = condition.value.floatValue;
+                    if (ImGui::DragFloat("##value", &value, 0.1f))
+                    {
+                        condition.value.floatValue = value;
+                        conditionChanged = true;
+                    }
+                }
+            }
+            break;
+            }
+
+            if (conditionChanged)
+            {
+                SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    _selectedTransition->clipA.lock()->name,
+                    _selectedTransition->clipB.lock()->name,
+                    _selectedTransition->conditions);
+            }
+
+            ImGui::PopID();
+            ImGui::Spacing();
+        }
+
+        // Add Condition 버튼
+        if (ImGui::Button("Add Condition", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        {
+            if (!_selectedAnimator->_parameters.empty())
+            {
+                Condition newCondition;
+                const auto& firstParam = _selectedAnimator->_parameters[0];
+                newCondition.parameterName = firstParam.name;
+                newCondition.parameterType = firstParam.type;
+                newCondition.compareType = Condition::CompareType::Equals;
+                _selectedTransition->conditions.push_back(newCondition);
+
+                SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    _selectedTransition->clipA.lock()->name,
+                    _selectedTransition->clipB.lock()->name,
+                    _selectedTransition->conditions);
+            }
+        }
+    }
+    // 선택된 노드가 있고 Entry가 아닌 경우
+    else if (_selectedNode && !_selectedNode->isEntry)
+    {
+        ImGui::Text("Clip Settings");
+        ImGui::Separator();
+
+        auto clip = _selectedNode->clip;
+        if (clip)
+        {
+            // Speed 설정
+            float speed = clip->speed;
+            if (ImGui::DragFloat("Speed", &speed, 0.1f, 0.0f, 10.0f))
+            {
+                clip->speed = speed;
+                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    _selectedNode->clip->name, speed, _selectedNode->clip->isLoop);
+            }
+
+            // Loop 설정
+            bool isLoop = clip->isLoop;
+            if (ImGui::Checkbox("Loop", &isLoop))
+            {
+                clip->isLoop = isLoop;
+                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    _selectedNode->clip->name, speed, isLoop);
+            }
+        }
+    }
+}
+
+void GUIManager::RenderNode(NodeData& node)
+{
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+    // 노드의 실제 화면 위치 계산
+    ImVec2 nodePos = ImVec2(
+        canvasPos.x + node.pos.x,
+        canvasPos.y + node.pos.y
+    );
+
+    // 노드 색상 설정
+    ImU32 nodeColor;
+    if (node.isEntry)
+    {
+        nodeColor = IM_COL32(76, 156, 76, 255);  // 초록색
+    }
+    else if (_selectedAnimator && _selectedAnimator->_entry && node.clip == _selectedAnimator->_entry)
+    {
+        nodeColor = IM_COL32(255, 140, 0, 255);  // 주황색
+    }
+    else
+    {
+        nodeColor = IM_COL32(51, 122, 183, 255);  // 파란색
+    }
+
+    // 선택된 노드는 테두리 강조
+    if (&node == _selectedNode)
+    {
+        drawList->AddRect(
+            nodePos,
+            ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT),
+            IM_COL32(255, 255, 255, 255),  // 흰색 테두리
+            4.0f,
+            0,
+            2.0f
+        );
+    }
+
+    // 노드 그리기
+    drawList->AddRectFilled(
+        nodePos,
+        ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT),
+        nodeColor,
+        4.0f
+    );
+
+    // 노드 제목
+    ImVec2 textPos(
+        nodePos.x + (NODE_WIDTH * 0.5f),
+        nodePos.y + (NODE_HEIGHT * 0.5f)
+    );
+
+    ImVec2 textSize = ImGui::CalcTextSize(node.name.c_str());
+    drawList->AddText(
+        ImVec2(textPos.x - textSize.x * 0.5f, textPos.y - textSize.y * 0.5f),
+        IM_COL32(255, 255, 255, 255),
+        node.name.c_str()
+    );
+
+    // 드래그 앤 드롭을 위한 투명 버튼
+    ImGui::SetCursorScreenPos(nodePos);  // 버튼 위치를 노드 위치로 설정
+
+    // 고유한 ID 생성
+    string buttonId = "##" + node.name;
+    if (ImGui::InvisibleButton(buttonId.c_str(), ImVec2(NODE_WIDTH, NODE_HEIGHT)))
+    {
+        // 클릭 처리 (필요한 경우)
+    }
+
+    // 드래그 처리
+    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    {
+        // 노드 위치 업데이트
+        node.pos.x += ImGui::GetIO().MouseDelta.x;
+        node.pos.y += ImGui::GetIO().MouseDelta.y;
+    }
+
+    // 호버 효과 (선택사항)
+    if (ImGui::IsItemHovered())
+    {
+        drawList->AddRect(
+            nodePos,
+            ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT),
+            IM_COL32(255, 255, 255, 100),
+            4.0f,
+            0,
+            2.0f
+        );
+    }
+
+    if (ImGui::IsItemClicked())
+    {
+        _selectedNode = &node;
+        _selectedTransition = nullptr;  // 트랜지션 선택 해제
+    }
+}
+
+void GUIManager::RenderTransitions()
+{
+    if (!_selectedAnimator)
+        return;
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+    // Entry 노드와 Entry Clip 사이의 연결
+    if (_selectedAnimator->_entry)
+    {
+        NodeData* entryNode = nullptr;
+        NodeData* entryClipNode = nullptr;
+
+        for (auto& node : _nodes)
+        {
+            if (node.isEntry)
+                entryNode = &node;
+            else if (_selectedAnimator->_entry && node.clip == _selectedAnimator->_entry)
+                entryClipNode = &node;
+        }
+
+        if (entryNode && entryClipNode)
+        {
+            ImVec2 start(
+                canvasPos.x + entryNode->pos.x + NODE_WIDTH,
+                canvasPos.y + entryNode->pos.y + (NODE_HEIGHT * 0.5f)
+            );
+
+            ImVec2 end(
+                canvasPos.x + entryClipNode->pos.x,
+                canvasPos.y + entryClipNode->pos.y + (NODE_HEIGHT * 0.5f)
+            );
+
+            DrawConnection(drawList, start, end);
+        }
+    }
+
+    // 일반 트랜지션 연결
+    // 실제 존재하는 트랜지션에 대해서만 화살표를 그림
+    for (const auto& transition : _selectedAnimator->_transitions)
+    {
+        // 트랜지션의 시작 클립이나 끝 클립이 없는 경우 건너뜀
+        auto clipA = transition->clipA.lock();
+        auto clipB = transition->clipB.lock();
+        if (!clipA || !clipB)
+            continue;
+
+        NodeData* startNode = nullptr;
+        NodeData* endNode = nullptr;
+
+        // 노드 찾기
+        for (auto& node : _nodes)
+        {
+            if (node.clip == clipA)
+                startNode = &node;
+            if (node.clip == clipB)
+                endNode = &node;
+        }
+
+        // 시작 노드와 끝 노드가 모두 존재하는 경우에만 화살표를 그림
+        if (startNode && endNode)
+        {
+            ImVec2 start(
+                canvasPos.x + startNode->pos.x + NODE_WIDTH,
+                canvasPos.y + startNode->pos.y + (NODE_HEIGHT * 0.5f)
+            );
+
+            ImVec2 end(
+                canvasPos.x + endNode->pos.x,
+                canvasPos.y + endNode->pos.y + (NODE_HEIGHT * 0.5f)
+            );
+
+            DrawConnection(drawList, start, end);
+        }
+    }
+
+    
+}
+void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const ImVec2& end)
+{
+    ImU32 arrowColor = IM_COL32(255, 255, 0, 255);
+
+    // 베지어 곡선의 제어점 계산
+    float dx = end.x - start.x;
+    float controlOffset = min(100.0f, std::abs(dx) * 0.5f);
+    ImVec2 control1(start.x + controlOffset, start.y);
+    ImVec2 control2(end.x - controlOffset, end.y);
+
+    // 마우스 위치 가져오기
+    ImVec2 mousePos = ImGui::GetMousePos();
+    bool isHovered = false;
+
+    // 베지어 곡선 그리기 및 클릭 감지
+    const int segments = 30;
+    ImVec2 current = start;
+    for (int i = 1; i <= segments; i++)
+    {
+        float t = i / (float)segments;
+        ImVec2 next = BezierCubic(start, control1, control2, end, t);
+
+        // 선분 그리기
+        drawList->AddLine(current, next, arrowColor, 2.0f);
+
+        // 마우스가 선분 근처에 있는지 확인
+        float distanceToSegment = DistancePointToLineSegment(mousePos, current, next);
+        if (distanceToSegment < 5.0f)  // 5픽셀 이내면 호버로 간주
+        {
+            isHovered = true;
+        }
+
+        current = next;
+
+        if (i == segments)
+        {
+            ImVec2 dir(next.x - current.x, next.y - current.y);
+            float angle = atan2(dir.y, dir.x);
+            DrawArrowHead(drawList, end, angle, arrowColor);
+        }
+    }
+
+    // 호버 상태일 때 하이라이트 효과 및 클릭 감지
+    if (isHovered)
+    {
+        // 하이라이트 효과 (선을 더 밝게)
+        current = start;
+        for (int i = 1; i <= segments; i++)
+        {
+            float t = i / (float)segments;
+            ImVec2 next = BezierCubic(start, control1, control2, end, t);
+            drawList->AddLine(current, next, IM_COL32(255, 255, 128, 255), 3.0f);
+            current = next;
+        }
+
+        // 클릭 감지
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        {
+            ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+            // 클릭된 화살표의 시작점과 끝점에 해당하는 노드 찾기
+            NodeData* clickedStartNode = nullptr;
+            NodeData* clickedEndNode = nullptr;
+
+            for (auto& node : _nodes)
+            {
+                // 시작점 체크
+                ImVec2 nodeStart(
+                    canvasPos.x + node.pos.x + NODE_WIDTH,
+                    canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
+                );
+
+                // 끝점 체크
+                ImVec2 nodeEnd(
+                    canvasPos.x + node.pos.x,
+                    canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
+                );
+
+                // 시작점이나 끝점이 일치하는지 확인 (약간의 오차 허용)
+                const float threshold = 1.0f;
+                if (abs(nodeStart.x - start.x) < threshold && abs(nodeStart.y - start.y) < threshold)
+                {
+                    clickedStartNode = &node;
+                }
+                if (abs(nodeEnd.x - end.x) < threshold && abs(nodeEnd.y - end.y) < threshold)
+                {
+                    clickedEndNode = &node;
+                }
+            }
+
+            // Entry 노드에서 시작하는 화살표는 무시
+            if (clickedStartNode && clickedStartNode->isEntry)
+                return;
+
+            // 찾은 노드들로 해당하는 트랜지션 찾기
+            if (clickedStartNode && clickedEndNode)
+            {
+                for (const auto& transition : _selectedAnimator->_transitions)
+                {
+                    auto clipA = transition->clipA.lock();
+                    auto clipB = transition->clipB.lock();
+                    if (!clipA || !clipB)
+                        continue;
+
+                    if (clipA == clickedStartNode->clip && clipB == clickedEndNode->clip)
+                    {
+                        _selectedTransition = transition;
+                        _selectedNode = nullptr;  // 노드 선택 해제
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+ImVec2 GUIManager::BezierCubic(const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t)
+{
+    float u = 1.0f - t;
+    float tt = t * t;
+    float uu = u * u;
+    float uuu = uu * u;
+    float ttt = tt * t;
+
+    ImVec2 result = ImVec2(
+        uuu * p0.x +                 // (1-t)^3 * p0
+        3 * uu * t * p1.x +         // 3(1-t)^2 * t * p1
+        3 * u * tt * p2.x +         // 3(1-t) * t^2 * p2
+        ttt * p3.x,                 // t^3 * p3
+        uuu * p0.y +
+        3 * uu * t * p1.y +
+        3 * u * tt * p2.y +
+        ttt * p3.y
+    );
+    return result;
+}
+
+void GUIManager::DrawArrowHead(ImDrawList* drawList, const ImVec2& pos, float angle, ImU32 color)
+{
+    float arrowSize = 10.0f;
+    ImVec2 arrowP1(
+        pos.x - arrowSize * cos(angle - 0.5f),
+        pos.y - arrowSize * sin(angle - 0.5f)
+    );
+    ImVec2 arrowP2(
+        pos.x - arrowSize * cos(angle + 0.5f),
+        pos.y - arrowSize * sin(angle + 0.5f)
+    );
+
+    drawList->AddTriangleFilled(pos, arrowP1, arrowP2, color);
+}
+
+void GUIManager::DrawArrow(ImDrawList* drawList, const ImVec2& start, const ImVec2& end,
+    ImU32 color, float thickness)
+{
+    // 메인 라인 그리기
+    drawList->AddLine(start, end, color, thickness);
+
+    // 화살표 머리 그리기
+    float angle = atan2(end.y - start.y, end.x - start.x);
+    float arrowSize = 10.0f;
+
+    ImVec2 arrowP1(
+        end.x - arrowSize * cos(angle - 0.5f),
+        end.y - arrowSize * sin(angle - 0.5f)
+    );
+    ImVec2 arrowP2(
+        end.x - arrowSize * cos(angle + 0.5f),
+        end.y - arrowSize * sin(angle + 0.5f)
+    );
+
+    drawList->AddTriangleFilled(end, arrowP1, arrowP2, color);
+}
+
+// 점과 선분 사이의 거리를 계산하는 헬퍼 함수
+float GUIManager::DistancePointToLineSegment(const ImVec2& point, const ImVec2& lineStart, const ImVec2& lineEnd)
+{
+    float A = point.x - lineStart.x;
+    float B = point.y - lineStart.y;
+    float C = lineEnd.x - lineStart.x;
+    float D = lineEnd.y - lineStart.y;
+
+    float dot = A * C + B * D;
+    float len_sq = C * C + D * D;
+    float param = -1;
+
+    if (len_sq != 0)
+        param = dot / len_sq;
+
+    float xx, yy;
+
+    if (param < 0) {
+        xx = lineStart.x;
+        yy = lineStart.y;
+    }
+    else if (param > 1) {
+        xx = lineEnd.x;
+        yy = lineEnd.y;
+    }
+    else {
+        xx = lineStart.x + param * C;
+        yy = lineStart.y + param * D;
+    }
+
+    float dx = point.x - xx;
+    float dy = point.y - yy;
+    return sqrt(dx * dx + dy * dy);
 }

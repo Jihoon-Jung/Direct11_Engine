@@ -76,22 +76,31 @@
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="Kachujin_OBJ">
-        <Transform posX="6.5857801" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="Dreyar_OBJ">
-        <Transform posX="-2.0086541" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <Animator/>
+        <Animator>
+            <Parameter name="isTest" type="0" value="false"/>
+            <EntryClip name="Clip1"/>
+            <Clip name="Clip1" animIndex="2" isLoop="false"/>
+            <Clip name="Clip2" animIndex="0" isLoop="false"/>
+            <Clip name="Clip3" animIndex="1" isLoop="false"/>
+            <Transition clipA="Clip1" clipB="Clip2" flag="false" hasCondition="true" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Clip2" clipB="Clip3" flag="false" hasCondition="true" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Clip3" clipB="Clip1" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
     </GameObject>
     <GameObject name="FireParticle">
-        <Transform posX="9.6758614" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
             <RenderPass pass="10" depthStencilState="3"/>
         </MeshRenderer>

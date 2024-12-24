@@ -50,6 +50,23 @@ public:
 	void UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName);
 	void UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName);
 
+	void UpdateAnimatorClipInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipName, float speed, bool isLoop);
+
+	void UpdateAnimatorTransitionInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipAName, const string& clipBName,
+		float duration, float offset, bool hasExitTime);
+
+	void AddAnimatorParameterToXML(const wstring& sceneName, const wstring& objectName,
+		const string& paramName, Parameter::Type paramType);
+
+	void UpdateAnimatorParameterInXML(const wstring& sceneName, const wstring& objectName,
+		const string& paramName, const Parameter& param);
+
+	void UpdateAnimatorTransitionConditionInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipAName, const string& clipBName,
+		const vector<Condition>& conditions);
+
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);
 	void CreateCylinderToScene(const wstring& sceneName);
