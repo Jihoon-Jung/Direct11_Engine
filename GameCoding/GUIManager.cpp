@@ -1190,7 +1190,14 @@ void GUIManager::RenderUI()
     {
         GP.test3 = !GP.test3;  // 버튼 클릭 시 GP.test 값을 토글
     }
-    RenderGuizmo();
+
+
+    if (!_showAnimatorEditor)
+    {
+        RenderGuizmo();
+    }
+
+    
 }
 
 void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
@@ -2145,7 +2152,7 @@ void GUIManager::RenderInspectorPanel()
             ImGui::SameLine();
             if (ImGui::Button("X##remove"))
             {
-                _selectedTransition->conditions.erase(_selectedTransition->conditions.begin() + i);
+                _selectedAnimator->RemoveCondition(_selectedTransition, i);
 
                 // Condition 삭제 후 XML 업데이트 추가
                 SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
@@ -2234,12 +2241,9 @@ void GUIManager::RenderInspectorPanel()
         {
             if (!_selectedAnimator->_parameters.empty())
             {
-                Condition newCondition;
                 const auto& firstParam = _selectedAnimator->_parameters[0];
-                newCondition.parameterName = firstParam.name;
-                newCondition.parameterType = firstParam.type;
-                newCondition.compareType = Condition::CompareType::Equals;
-                _selectedTransition->conditions.push_back(newCondition);
+                _selectedAnimator->AddCondition(_selectedTransition,
+                    firstParam.name, firstParam.type, Condition::CompareType::Equals);
 
                 SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
                     _selectedAnimator->GetGameObject()->GetName(),
@@ -2419,41 +2423,207 @@ void GUIManager::RenderTransitions()
     // 실제 존재하는 트랜지션에 대해서만 화살표를 그림
     for (const auto& transition : _selectedAnimator->_transitions)
     {
-        // 트랜지션의 시작 클립이나 끝 클립이 없는 경우 건너뜀
         auto clipA = transition->clipA.lock();
         auto clipB = transition->clipB.lock();
         if (!clipA || !clipB)
             continue;
 
+        // 시작점과 끝점 노드 찾기
         NodeData* startNode = nullptr;
         NodeData* endNode = nullptr;
-
-        // 노드 찾기
         for (auto& node : _nodes)
         {
-            if (node.clip == clipA)
-                startNode = &node;
-            if (node.clip == clipB)
-                endNode = &node;
+            if (node.clip == clipA) startNode = &node;
+            if (node.clip == clipB) endNode = &node;
         }
 
-        // 시작 노드와 끝 노드가 모두 존재하는 경우에만 화살표를 그림
-        if (startNode && endNode)
+        if (!startNode || !endNode)
+            continue;
+
+        // 화살표 그리기
+        ImVec2 start(
+            canvasPos.x + startNode->pos.x + NODE_WIDTH,
+            canvasPos.y + startNode->pos.y + (NODE_HEIGHT * 0.5f)
+        );
+        ImVec2 end(
+            canvasPos.x + endNode->pos.x,
+            canvasPos.y + endNode->pos.y + (NODE_HEIGHT * 0.5f)
+        );
+
+        DrawConnection(drawList, start, end);
+
+        // 화살표 클릭 감지
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
         {
-            ImVec2 start(
-                canvasPos.x + startNode->pos.x + NODE_WIDTH,
-                canvasPos.y + startNode->pos.y + (NODE_HEIGHT * 0.5f)
-            );
-
-            ImVec2 end(
-                canvasPos.x + endNode->pos.x,
-                canvasPos.y + endNode->pos.y + (NODE_HEIGHT * 0.5f)
-            );
-
-            DrawConnection(drawList, start, end);
+            ImVec2 mousePos = ImGui::GetMousePos();
+            float dist = DistancePointToLineSegment(mousePos, start, end);
+            if (dist < 5.0f)  // 클릭 허용 범위
+            {
+                _rightClickedTransition = transition;
+                ImGui::OpenPopup("TransitionContextMenu");
+            }
         }
     }
 
+    // 트랜지션 우클릭 메뉴
+    if (ImGui::BeginPopup("TransitionContextMenu"))
+    {
+        if (ImGui::MenuItem("Delete"))
+        {
+            if (_rightClickedTransition)
+            {
+                auto clipA = _rightClickedTransition->clipA.lock();
+                auto clipB = _rightClickedTransition->clipB.lock();
+                if (clipA && clipB)
+                {
+                    // XML에서 삭제
+                    SCENE.RemoveAnimatorTransitionFromXML(
+                        SCENE.GetActiveScene()->GetSceneName(),
+                        _selectedAnimator->GetGameObject()->GetName(),
+                        clipA->name, clipB->name);
+
+                    // 메모리에서 삭제
+                    auto& transitions = _selectedAnimator->_transitions;
+                    transitions.erase(
+                        std::remove(transitions.begin(), transitions.end(), _rightClickedTransition),
+                        transitions.end()
+                    );
+                }
+            }
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    // 노드 우클릭 메뉴
+    for (auto& node : _nodes)
+    {
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+        {
+            ImVec2 mousePos = ImGui::GetMousePos();
+            ImVec2 nodeMin(
+                canvasPos.x + node.pos.x,
+                canvasPos.y + node.pos.y
+            );
+            ImVec2 nodeMax(
+                nodeMin.x + NODE_WIDTH,
+                nodeMin.y + NODE_HEIGHT
+            );
+
+            if (mousePos.x >= nodeMin.x && mousePos.x <= nodeMax.x &&
+                mousePos.y >= nodeMin.y && mousePos.y <= nodeMax.y)
+            {
+                _rightClickedNode = &node;
+                ImGui::OpenPopup("NodeContextMenu");
+            }
+        }
+    }
+
+    if (ImGui::BeginPopup("NodeContextMenu"))
+    {
+        if (_rightClickedNode && !_rightClickedNode->isEntry)
+        {
+            if (ImGui::MenuItem("Set as Default State"))
+            {
+                // Entry 노드와의 기존 연결 해제
+                auto& transitions = _selectedAnimator->_transitions;
+                for (auto it = transitions.begin(); it != transitions.end();)
+                {
+                    auto clipA = (*it)->clipA.lock();
+                    if (clipA && clipA == _selectedAnimator->_entry)
+                    {
+                        it = transitions.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+
+                // 새로운 Entry 설정
+                _selectedAnimator->SetEntryClip(_rightClickedNode->clip->name);
+
+                // XML 업데이트
+                SCENE.UpdateAnimatorEntryClipInXML(
+                    SCENE.GetActiveScene()->GetSceneName(),
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    _rightClickedNode->clip->name);
+            }
+
+            if (ImGui::MenuItem("Make Transition"))
+            {
+                _isCreatingTransition = true;
+                _transitionStartNode = _rightClickedNode;
+                _transitionEndPos = ImGui::GetMousePos();
+            }
+        }
+        ImGui::EndPopup();
+    }
+
+    // 트랜지션 생성 중일 때 화살표 그리기
+    if (_isCreatingTransition)
+    {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+        // 시작점 계산
+        ImVec2 startPos(
+            canvasPos.x + _transitionStartNode->pos.x + NODE_WIDTH,
+            canvasPos.y + _transitionStartNode->pos.y + (NODE_HEIGHT * 0.5f)
+        );
+
+        // 마우스 위치 업데이트
+        ImVec2 mousePos = ImGui::GetMousePos();
+        _transitionEndPos = mousePos;
+
+        // 다른 노드 위에 있는지 확인
+        NodeData* targetNode = nullptr;
+        for (auto& node : _nodes)
+        {
+            if (&node != _transitionStartNode && !node.isEntry)
+            {
+                ImVec2 nodeMin(
+                    canvasPos.x + node.pos.x,
+                    canvasPos.y + node.pos.y
+                );
+                ImVec2 nodeMax(
+                    nodeMin.x + NODE_WIDTH,
+                    nodeMin.y + NODE_HEIGHT
+                );
+
+                if (mousePos.x >= nodeMin.x && mousePos.x <= nodeMax.x &&
+                    mousePos.y >= nodeMin.y && mousePos.y <= nodeMax.y)
+                {
+                    targetNode = &node;
+                    _transitionEndPos = ImVec2(
+                        canvasPos.x + node.pos.x,
+                        canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
+                    );
+                    break;
+                }
+            }
+        }
+
+        DrawConnection(drawList, startPos, _transitionEndPos);
+
+        // 마우스 좌클릭 감지
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        {
+            if (targetNode)
+            {
+                // 새 트랜지션 생성
+                _selectedAnimator->AddTransition(_transitionStartNode->clip->name, targetNode->clip->name);
+
+                // XML에 새 트랜지션 추가
+                SCENE.AddAnimatorTransitionToXML(
+                    SCENE.GetActiveScene()->GetSceneName(),
+                    _selectedAnimator->GetGameObject()->GetName(),
+                    _transitionStartNode->clip->name,
+                    targetNode->clip->name);
+            }
+            _isCreatingTransition = false;
+        }
+    }
     
 }
 void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const ImVec2& end)

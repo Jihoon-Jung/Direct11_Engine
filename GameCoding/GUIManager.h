@@ -92,6 +92,14 @@ private:
 	static constexpr float NODE_HEIGHT = 50.0f;
 	static constexpr float TITLE_HEIGHT = 20.0f;
 
+	// 트랜지션 생성을 위한 변수들
+	bool _isCreatingTransition = false;
+	NodeData* _transitionStartNode = nullptr;
+	ImVec2 _transitionEndPos;
+
+	// 우클릭 메뉴 관련 변수들
+	shared_ptr<Transition> _rightClickedTransition = nullptr;
+	NodeData* _rightClickedNode = nullptr;
 	
 
 	// 편집기 관련 함수들

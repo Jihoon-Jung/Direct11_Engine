@@ -1031,7 +1031,8 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
 
 		// condition üũ
-		animator->CheckConditionsAndSetFlag(currTransition);
+		if (currTransition != nullptr)
+			animator->CheckConditionsAndSetFlag(currTransition);
 
 		_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
 

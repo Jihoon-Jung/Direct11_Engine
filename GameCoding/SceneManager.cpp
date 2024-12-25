@@ -294,6 +294,32 @@ void SceneManager::LoadTestScene2()
 					transition->hasExitTime = hasExitTime;
 					animator->SetTransitionOffset(transition, offset);
 					animator->SetTransitionDuration(transition, duration);
+
+					// Conditions 로드 추가
+					for (auto conditionElem = transitionElem->FirstChildElement("Condition");
+						conditionElem; conditionElem = conditionElem->NextSiblingElement("Condition"))
+					{
+						Condition condition;
+						condition.parameterName = conditionElem->Attribute("parameterName");
+						condition.parameterType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
+						condition.compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
+
+						// 값 로드
+						switch (condition.parameterType)
+						{
+						case Parameter::Type::Bool:
+							condition.value.boolValue = conditionElem->BoolAttribute("value");
+							break;
+						case Parameter::Type::Int:
+							condition.value.intValue = conditionElem->IntAttribute("value");
+							break;
+						case Parameter::Type::Float:
+							condition.value.floatValue = conditionElem->FloatAttribute("value");
+							break;
+						}
+
+						transition->conditions.push_back(condition);
+					}
 				}
 			}
 
@@ -1109,6 +1135,7 @@ void SceneManager::SaveAndLoadGameObjectToXML(const wstring& sceneName, const ws
 
 	// XML에 저장
 	SaveGameObjectToXML(path, name, &position, &rotation, &scale, parent);
+
 
 	// 실제 GameObject 생성 및 Scene에 추가
 	shared_ptr<GameObject> gameObject = make_shared<GameObject>();
@@ -1932,6 +1959,110 @@ void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneNa
 						break;
 					}
 				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::RemoveAnimatorTransitionFromXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipAName, const string& clipBName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+					transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+				{
+					if (string(transitionElem->Attribute("clipA")) == clipAName &&
+						string(transitionElem->Attribute("clipB")) == clipBName)
+					{
+						animatorElem->DeleteChild(transitionElem);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateAnimatorEntryClipInXML(const wstring& sceneName, const wstring& objectName,
+	const string& entryClipName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// 기존 EntryClip 엘리먼트 찾아서 삭제
+				if (auto entryElem = animatorElem->FirstChildElement("EntryClip"))
+				{
+					animatorElem->DeleteChild(entryElem);
+				}
+
+				// 새로운 EntryClip 엘리먼트 생성
+				auto newEntryElem = doc.NewElement("EntryClip");
+				newEntryElem->SetAttribute("name", entryClipName.c_str());
+				animatorElem->InsertFirstChild(newEntryElem);
+
+				doc.SaveFile(pathStr.c_str());
+				break;
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::AddAnimatorTransitionToXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipAName, const string& clipBName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// 새로운 Transition 엘리먼트 생성
+				auto transitionElem = doc.NewElement("Transition");
+				transitionElem->SetAttribute("clipA", clipAName.c_str());
+				transitionElem->SetAttribute("clipB", clipBName.c_str());
+				transitionElem->SetAttribute("transitionDuration", 1.0f);
+				transitionElem->SetAttribute("transitionOffset", 0.0f);
+				transitionElem->SetAttribute("hasExitTime", false);
+
+				animatorElem->InsertEndChild(transitionElem);
+				doc.SaveFile(pathStr.c_str());
+				break;
 			}
 			break;
 		}

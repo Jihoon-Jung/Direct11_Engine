@@ -30,8 +30,8 @@ void Animator::Start()
 
 void Animator::Update()
 {
-	SetTransitionFlag(GetClip("Clip1")->transition, GP.test);
-	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);
+	/*SetTransitionFlag(GetClip("Clip1")->transition, GP.test);
+	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);*/
 }
 
 void Animator::AddClip(const string& name, int animIndex, bool isLoop)
@@ -249,7 +249,11 @@ void Animator::CheckConditionsAndSetFlag(shared_ptr<Transition> transition)
 	}
 
 	if (isAllConditionSatisfy)
+	{
 		transition->flag = true;
+		
+	}
+		
 }
 
 int Animator::GetInt(const string& name)
@@ -270,4 +274,29 @@ float Animator::GetFloat(const string& name)
 			return param->value.floatValue;
 	}
 	return 0.0f;
+}
+
+void Animator::AddCondition(shared_ptr<Transition> transition, const string& paramName,
+	Parameter::Type paramType, Condition::CompareType compareType)
+{
+	if (!transition)
+		return;
+
+	Condition newCondition;
+	newCondition.parameterName = paramName;
+	newCondition.parameterType = paramType;
+	newCondition.compareType = compareType;
+	transition->conditions.push_back(newCondition);
+	transition->hasCondition = true;
+}
+
+void Animator::RemoveCondition(shared_ptr<Transition> transition, int index)
+{
+	if (!transition || index < 0 || index >= transition->conditions.size())
+		return;
+
+	transition->conditions.erase(transition->conditions.begin() + index);
+
+	if (transition->conditions.size() == 0)
+		transition->hasCondition = false;
 }

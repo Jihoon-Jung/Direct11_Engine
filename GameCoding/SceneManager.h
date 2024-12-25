@@ -67,6 +67,15 @@ public:
 		const string& clipAName, const string& clipBName,
 		const vector<Condition>& conditions);
 
+	void RemoveAnimatorTransitionFromXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipAName, const string& clipBName);
+
+	void UpdateAnimatorEntryClipInXML(const wstring& sceneName, const wstring& objectName,
+		const string& entryClipName);
+
+	void AddAnimatorTransitionToXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipAName, const string& clipBName);
+
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);
 	void CreateCylinderToScene(const wstring& sceneName);

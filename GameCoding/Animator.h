@@ -82,6 +82,10 @@ public:
 
 	void CheckConditionsAndSetFlag(shared_ptr<Transition> transition);
 
+	void AddCondition(shared_ptr<Transition> transition, const string& paramName,
+		Parameter::Type paramType, Condition::CompareType compareType);
+	void RemoveCondition(shared_ptr<Transition> transition, int index);
+
 	shared_ptr<Clip> GetClip(const string& name);
 
 	shared_ptr<Clip> _entry;
