@@ -23,7 +23,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestScene();
+	LoadTestScene2();
 }
 void SceneManager::LoadTestScene2()
 {
@@ -296,29 +296,35 @@ void SceneManager::LoadTestScene2()
 					animator->SetTransitionDuration(transition, duration);
 
 					// Conditions 로드 추가
+					transition->conditions.clear();
 					for (auto conditionElem = transitionElem->FirstChildElement("Condition");
 						conditionElem; conditionElem = conditionElem->NextSiblingElement("Condition"))
 					{
-						Condition condition;
-						condition.parameterName = conditionElem->Attribute("parameterName");
-						condition.parameterType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
-						condition.compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
+						string paramName = conditionElem->Attribute("parameterName");
+						Parameter::Type paramType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
+						Condition::CompareType compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
 
-						// 값 로드
-						switch (condition.parameterType)
+						// AddCondition 함수 사용
+						animator->AddCondition(transition, paramName, paramType, compareType);
+
+						// 값 설정
+						if (!transition->conditions.empty())
 						{
-						case Parameter::Type::Bool:
-							condition.value.boolValue = conditionElem->BoolAttribute("value");
-							break;
-						case Parameter::Type::Int:
-							condition.value.intValue = conditionElem->IntAttribute("value");
-							break;
-						case Parameter::Type::Float:
-							condition.value.floatValue = conditionElem->FloatAttribute("value");
-							break;
+							Condition& condition = transition->conditions.back();
+							switch (paramType)
+							{
+							case Parameter::Type::Bool:
+								condition.value.boolValue = conditionElem->BoolAttribute("value");
+								break;
+							case Parameter::Type::Int:
+								condition.value.intValue = conditionElem->IntAttribute("value");
+								break;
+							case Parameter::Type::Float:
+								condition.value.floatValue = conditionElem->FloatAttribute("value");
+								break;
+							}
 						}
 
-						transition->conditions.push_back(condition);
 					}
 				}
 			}
@@ -1086,8 +1092,6 @@ void SceneManager::LoadTestScene()
 	animator->AddTransition("Clip1", "Clip2");
 	animator->AddTransition("Clip2", "Clip3");
 	animator->AddTransition("Clip3", "Clip1");
-	animator->SetTransitionFlag(animator->GetClip("Clip1")->transition, false);
-	animator->SetTransitionFlag(animator->GetClip("Clip2")->transition, false);
 
 	animator->SetCurrentTransition();
 

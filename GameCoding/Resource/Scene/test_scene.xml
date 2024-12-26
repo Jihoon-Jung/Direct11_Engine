@@ -89,23 +89,17 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
-            <Parameter name="flag3" type="0" value="true"/>
-            <Parameter name="flag2" type="0" value="false"/>
-            <Parameter name="flag1" type="0" value="false"/>
+            <Parameter name="t3" type="0" value="false"/>
+            <Parameter name="t2" type="0" value="false"/>
+            <Parameter name="t1" type="0" value="false"/>
             <Parameter name="isTest" type="0" value="false"/>
             <EntryClip name="Clip1"/>
             <Clip name="Clip1" animIndex="2" isLoop="false"/>
             <Clip name="Clip2" animIndex="0" isLoop="false"/>
             <Clip name="Clip3" animIndex="1" isLoop="false"/>
-            <Transition clipA="Clip1" clipB="Clip2" flag="false" hasCondition="true" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001">
-                <Condition parameterName="flag1" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Clip2" clipB="Clip3" flag="false" hasCondition="true" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001">
-                <Condition parameterName="flag2" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Clip3" clipB="Clip1" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001">
-                <Condition parameterName="flag3" parameterType="0" compareType="0" value="true"/>
-            </Transition>
+            <Transition clipA="Clip1" clipB="Clip2" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Clip2" clipB="Clip3" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Clip3" clipB="Clip1" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
         </Animator>
     </GameObject>
     <GameObject name="FireParticle">

@@ -136,7 +136,11 @@ void Animator::SetBool(const string& name, bool value)
 	if (auto param = GetParameter(name))
 	{
 		if (param->type == Parameter::Type::Bool)
+		{
 			param->value.boolValue = value;
+			CheckConditionsAndSetFlag();
+		}
+			
 	}
 }
 
@@ -145,7 +149,10 @@ void Animator::SetInt(const string& name, int value)
 	if (auto param = GetParameter(name))
 	{
 		if (param->type == Parameter::Type::Int)
+		{
 			param->value.intValue = value;
+			CheckConditionsAndSetFlag();
+		}
 	}
 }
 
@@ -154,7 +161,10 @@ void Animator::SetFloat(const string& name, float value)
 	if (auto param = GetParameter(name))
 	{
 		if (param->type == Parameter::Type::Float)
+		{
 			param->value.floatValue = value;
+			CheckConditionsAndSetFlag();
+		}
 	}
 }
 
@@ -168,92 +178,93 @@ bool Animator::GetBool(const string& name)
 	return false;
 }
 
-void Animator::CheckConditionsAndSetFlag(shared_ptr<Transition> transition)
+void Animator::CheckConditionsAndSetFlag()
 {
-	bool isAllConditionSatisfy = true;
-	for (const Condition& condition : transition->conditions)
+	for (shared_ptr<Transition> transition : _transitions)
 	{
-		bool conditionSatisfied = false;
-
-		// 파라미터 값 가져오기
-		switch (condition.parameterType)
+		bool isAllConditionSatisfy = true;
+		for (const Condition& condition : transition->conditions)
 		{
-		case Parameter::Type::Bool:
-		{
-			bool paramValue = GetBool(condition.parameterName);
-			bool conditionValue = condition.value.boolValue;
+			bool conditionSatisfied = false;
 
-			switch (condition.compareType)
+			// 파라미터 값 가져오기
+			switch (condition.parameterType)
 			{
-			case Condition::CompareType::Equals:
-				conditionSatisfied = (paramValue == conditionValue);
-				break;
-			case Condition::CompareType::NotEqual:
-				conditionSatisfied = (paramValue != conditionValue);
+			case Parameter::Type::Bool:
+			{
+				bool paramValue = GetBool(condition.parameterName);
+				bool conditionValue = condition.value.boolValue;
+
+				switch (condition.compareType)
+				{
+				case Condition::CompareType::Equals:
+					conditionSatisfied = (paramValue == conditionValue);
+					break;
+				case Condition::CompareType::NotEqual:
+					conditionSatisfied = (paramValue != conditionValue);
+					break;
+				}
 				break;
 			}
-			break;
-		}
-		case Parameter::Type::Int:
-		{
-			int paramValue = GetInt(condition.parameterName);
-			int conditionValue = condition.value.intValue;
-
-			switch (condition.compareType)
+			case Parameter::Type::Int:
 			{
-			case Condition::CompareType::Equals:
-				conditionSatisfied = (paramValue == conditionValue);
-				break;
-			case Condition::CompareType::NotEqual:
-				conditionSatisfied = (paramValue != conditionValue);
-				break;
-			case Condition::CompareType::Greater:
-				conditionSatisfied = (paramValue > conditionValue);
-				break;
-			case Condition::CompareType::Less:
-				conditionSatisfied = (paramValue < conditionValue);
+				int paramValue = GetInt(condition.parameterName);
+				int conditionValue = condition.value.intValue;
+
+				switch (condition.compareType)
+				{
+				case Condition::CompareType::Equals:
+					conditionSatisfied = (paramValue == conditionValue);
+					break;
+				case Condition::CompareType::NotEqual:
+					conditionSatisfied = (paramValue != conditionValue);
+					break;
+				case Condition::CompareType::Greater:
+					conditionSatisfied = (paramValue > conditionValue);
+					break;
+				case Condition::CompareType::Less:
+					conditionSatisfied = (paramValue < conditionValue);
+					break;
+				}
 				break;
 			}
-			break;
-		}
-		case Parameter::Type::Float:
-		{
-			float paramValue = GetFloat(condition.parameterName);
-			float conditionValue = condition.value.floatValue;
-
-			switch (condition.compareType)
+			case Parameter::Type::Float:
 			{
-			case Condition::CompareType::Equals:
-				conditionSatisfied = (abs(paramValue - conditionValue) < 0.0001f);
-				break;
-			case Condition::CompareType::NotEqual:
-				conditionSatisfied = (abs(paramValue - conditionValue) >= 0.0001f);
-				break;
-			case Condition::CompareType::Greater:
-				conditionSatisfied = (paramValue > conditionValue);
-				break;
-			case Condition::CompareType::Less:
-				conditionSatisfied = (paramValue < conditionValue);
+				float paramValue = GetFloat(condition.parameterName);
+				float conditionValue = condition.value.floatValue;
+
+				switch (condition.compareType)
+				{
+				case Condition::CompareType::Equals:
+					conditionSatisfied = (abs(paramValue - conditionValue) < 0.0001f);
+					break;
+				case Condition::CompareType::NotEqual:
+					conditionSatisfied = (abs(paramValue - conditionValue) >= 0.0001f);
+					break;
+				case Condition::CompareType::Greater:
+					conditionSatisfied = (paramValue > conditionValue);
+					break;
+				case Condition::CompareType::Less:
+					conditionSatisfied = (paramValue < conditionValue);
+					break;
+				}
 				break;
 			}
-			break;
-		}
+			}
+
+			// 하나의 조건이라도 만족하지 않으면 전체 조건은 실패
+			if (!conditionSatisfied)
+			{
+				isAllConditionSatisfy = false;
+				break;
+			}
 		}
 
-		// 하나의 조건이라도 만족하지 않으면 전체 조건은 실패
-		if (!conditionSatisfied)
+		if (isAllConditionSatisfy)
 		{
-			isAllConditionSatisfy = false;
-			break;
+			transition->flag = true;
 		}
 	}
-
-	if (isAllConditionSatisfy)
-	{
-		transition->flag = true;
-		
-	}
-		
 }
 
 int Animator::GetInt(const string& name)

@@ -80,7 +80,7 @@ public:
 	void SetCurrentClip(const string& name) { _currClip = GetClip(name); }
 	void SetCurrentTransition();
 
-	void CheckConditionsAndSetFlag(shared_ptr<Transition> transition);
+	void CheckConditionsAndSetFlag();
 
 	void AddCondition(shared_ptr<Transition> transition, const string& paramName,
 		Parameter::Type paramType, Condition::CompareType compareType);
