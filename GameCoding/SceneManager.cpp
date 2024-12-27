@@ -2072,3 +2072,54 @@ void SceneManager::AddAnimatorTransitionToXML(const wstring& sceneName, const ws
 		}
 	}
 }
+void SceneManager::RemoveAnimatorParameterFromXML(const wstring& sceneName, const wstring& objectName, const string& paramName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Parameter 찾아서 삭제
+				for (auto paramElem = animatorElem->FirstChildElement("Parameter");
+					paramElem; paramElem = paramElem->NextSiblingElement("Parameter"))
+				{
+					if (string(paramElem->Attribute("name")) == paramName)
+					{
+						animatorElem->DeleteChild(paramElem);
+
+						// Transition의 Condition들도 삭제
+						for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+							transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+						{
+							auto conditionElem = transitionElem->FirstChildElement("Condition");
+							while (conditionElem)
+							{
+								auto nextCondition = conditionElem->NextSiblingElement("Condition");
+								if (string(conditionElem->Attribute("parameterName")) == paramName)
+								{
+									transitionElem->DeleteChild(conditionElem);
+								}
+								conditionElem = nextCondition;
+							}
+						}
+
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}

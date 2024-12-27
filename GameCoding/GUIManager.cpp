@@ -1957,8 +1957,15 @@ void GUIManager::RenderParametersPanel()
     }
 
     // 파라미터 목록 표시
-    for (auto& param : _selectedAnimator->_parameters)
+    auto& parameters = _selectedAnimator->_parameters;
+    for (size_t i = 0; i < parameters.size(); i++)
     {
+        auto& param = parameters[i];
+
+        // 파라미터 이름과 삭제 버튼을 한 줄에 표시하기 위한 그룹
+        ImGui::PushID(i);
+        ImGui::BeginGroup();
+
         bool valueChanged = false;
         switch (param.type)
         {
@@ -1993,6 +2000,37 @@ void GUIManager::RenderParametersPanel()
         }
         break;
         }
+
+        // 삭제 버튼 추가
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
+
+        if (ImGui::Button("X##"))
+        {
+            // XML에서 먼저 삭제
+            if (auto gameObj = _selectedObject)
+            {
+                SCENE.RemoveAnimatorParameterFromXML(
+                    SCENE.GetActiveScene()->GetSceneName(),
+                    gameObj->GetName(),
+                    param.name
+                );
+            }
+
+            // Animator에서 삭제
+            _selectedAnimator->RemoveParameter(param.name);
+
+            ImGui::PopStyleColor(3);
+            ImGui::EndGroup();
+            ImGui::PopID();
+            break;  // 파라미터가 삭제되었으므로 루프 종료
+        }
+
+        ImGui::PopStyleColor(3);
+        ImGui::EndGroup();
+        ImGui::PopID();
 
         if (valueChanged)
         {

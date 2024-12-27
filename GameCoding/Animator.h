@@ -79,7 +79,7 @@ public:
 	void SetEntryClip(const string& clipName);
 	void SetCurrentClip(const string& name) { _currClip = GetClip(name); }
 	void SetCurrentTransition();
-
+	void RemoveParameter(const string& name);
 	void CheckConditionsAndSetFlag();
 
 	void AddCondition(shared_ptr<Transition> transition, const string& paramName,

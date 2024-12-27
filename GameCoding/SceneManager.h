@@ -76,6 +76,8 @@ public:
 	void AddAnimatorTransitionToXML(const wstring& sceneName, const wstring& objectName,
 		const string& clipAName, const string& clipBName);
 
+	void RemoveAnimatorParameterFromXML(const wstring& sceneName, const wstring& objectName, const string& paramName);
+
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);
 	void CreateCylinderToScene(const wstring& sceneName);

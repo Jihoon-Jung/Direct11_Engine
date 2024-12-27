@@ -92,7 +92,6 @@
             <Parameter name="t3" type="0" value="false"/>
             <Parameter name="t2" type="0" value="false"/>
             <Parameter name="t1" type="0" value="false"/>
-            <Parameter name="isTest" type="0" value="false"/>
             <EntryClip name="Clip1"/>
             <Clip name="Clip1" animIndex="2" isLoop="false"/>
             <Clip name="Clip2" animIndex="0" isLoop="false"/>

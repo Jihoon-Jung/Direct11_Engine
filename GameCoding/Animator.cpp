@@ -311,3 +311,32 @@ void Animator::RemoveCondition(shared_ptr<Transition> transition, int index)
 	if (transition->conditions.size() == 0)
 		transition->hasCondition = false;
 }
+
+void Animator::RemoveParameter(const string& name)
+{
+	auto it = std::find_if(_parameters.begin(), _parameters.end(),
+		[&name](const Parameter& param) { return param.name == name; });
+
+	if (it != _parameters.end())
+	{
+		// 파라미터와 관련된 모든 트랜지션의 조건들도 제거
+		for (auto& transition : _transitions)
+		{
+			transition->conditions.erase(
+				std::remove_if(transition->conditions.begin(), transition->conditions.end(),
+					[&name](const Condition& condition) {
+						return condition.parameterName == name;
+					}
+				),
+				transition->conditions.end()
+						);
+
+			// 조건이 모두 제거되었다면 hasCondition 플래그 업데이트
+			if (transition->conditions.empty())
+				transition->hasCondition = false;
+		}
+
+		// 파라미터 제거
+		_parameters.erase(it);
+	}
+}
