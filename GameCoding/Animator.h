@@ -56,7 +56,10 @@ struct Clip
 	bool isEndFrame = false;
 	int animIndex;
 	float speed = 1.0f;
+	float progressRatio = 0.0f;  // 0.0f ~ 1.0f 사이의 재생 진행률
+	ImVec2 pos;  // Animator편집기의 노드 위치
 	shared_ptr<Transition> transition;
+	vector <shared_ptr<Transition>> transitions;
 };
 
 
@@ -87,6 +90,8 @@ public:
 	void RemoveCondition(shared_ptr<Transition> transition, int index);
 
 	shared_ptr<Clip> GetClip(const string& name);
+
+	void SetClipCurrentTransition(shared_ptr<Clip> clip);
 
 	shared_ptr<Clip> _entry;
 	shared_ptr<Clip> _currClip;

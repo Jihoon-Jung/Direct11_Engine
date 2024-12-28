@@ -81,6 +81,18 @@
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Dismissing"/>
+            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="333" posY="292"/>
+            <Clip name="Run" animIndex="1" isLoop="false" posX="319" posY="61"/>
+            <Clip name="Slash" animIndex="2" isLoop="false"/>
+            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Run" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Slash" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Dismissing" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+        </Animator>
     </GameObject>
     <GameObject name="Dreyar_OBJ">
         <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
@@ -89,16 +101,34 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
-            <Parameter name="t3" type="0" value="false"/>
-            <Parameter name="t2" type="0" value="false"/>
-            <Parameter name="t1" type="0" value="false"/>
-            <EntryClip name="Clip1"/>
-            <Clip name="Clip1" animIndex="2" isLoop="false"/>
-            <Clip name="Clip2" animIndex="0" isLoop="false"/>
-            <Clip name="Clip3" animIndex="1" isLoop="false"/>
-            <Transition clipA="Clip1" clipB="Clip2" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Clip2" clipB="Clip3" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Clip3" clipB="Clip1" flag="false" hasCondition="false" hasExitTime="true" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Parameter name="FallToDance" type="0" value="false"/>
+            <Parameter name="FallToKick" type="0" value="false"/>
+            <Parameter name="DanceToKick" type="0" value="false"/>
+            <Parameter name="DanceToFall" type="0" value="false"/>
+            <Parameter name="KickToFall" type="0" value="false"/>
+            <Parameter name="KickToDance" type="0" value="true"/>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false" posX="379" posY="333"/>
+            <Clip name="Fall" animIndex="1" isLoop="false" posX="683" posY="151"/>
+            <Clip name="Kick" animIndex="0" isLoop="false" posX="394" posY="67"/>
+            <Transition clipA="Kick" clipB="Dance" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="true">
+                <Condition parameterName="KickToDance" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Kick" clipB="Fall" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
+                <Condition parameterName="KickToFall" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Dance" clipB="Fall" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="true">
+                <Condition parameterName="DanceToFall" parameterType="0" compareType="0" value="false"/>
+            </Transition>
+            <Transition clipA="Dance" clipB="Kick" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
+                <Condition parameterName="DanceToKick" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Fall" clipB="Dance" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="false" hasCondition="true">
+                <Condition parameterName="FallToDance" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Fall" clipB="Kick" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
+                <Condition parameterName="FallToKick" parameterType="0" compareType="0" value="true"/>
+            </Transition>
         </Animator>
     </GameObject>
     <GameObject name="FireParticle">

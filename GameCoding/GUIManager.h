@@ -112,7 +112,12 @@ private:
 	void RenderTransitions();
 	void DrawConnection(ImDrawList* drawList, const ImVec2& start, const ImVec2& end);
 	void DrawArrowHead(ImDrawList* drawList, const ImVec2& pos, float angle, ImU32 color);
+	shared_ptr<Transition> GetTransitionFromPoints(const ImVec2& start, const ImVec2& end);
 	ImVec2 BezierCubic(const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t);
 	float DistancePointToLineSegment(const ImVec2& point, const ImVec2& lineStart, const ImVec2& lineEnd);
+	ImVec2 GetNodeCenterPos(shared_ptr<Clip> clip);
+	bool IsOppositeTransition(const ImVec2& start1, const ImVec2& end1, const ImVec2& start2, const ImVec2& end2);
+	bool IsCurrentTransitionNewer(shared_ptr<Transition> current, shared_ptr<Transition> other);
+
 };
 

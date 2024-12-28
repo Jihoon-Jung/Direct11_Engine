@@ -261,7 +261,19 @@ void SceneManager::LoadTestScene2()
 				int animIndex = clipElem->IntAttribute("animIndex");
 				bool isLoop = clipElem->BoolAttribute("isLoop");
 
+				// 노드 위치 정보 로드
+				float posX = clipElem->FloatAttribute("posX", 0.0f);  // 기본값 0
+				float posY = clipElem->FloatAttribute("posY", 0.0f);  // 기본값 0
+
+				// 클립 추가
 				animator->AddClip(clipName, animIndex, isLoop);
+
+				auto clip = animator->GetClip(clipName);
+				// UI에 표시될 노드 위치 설정
+				if (auto clip = animator->GetClip(clipName))
+				{
+					clip->pos = ImVec2(posX, posY);
+				}
 			}
 
 			// Entry Clip 로드
@@ -1082,22 +1094,21 @@ void SceneManager::LoadTestScene()
 	boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", boxCollider);
-	auto animator = make_shared<Animator>();
-	animator->AddClip("Clip1", 2, false);
-	animator->AddClip("Clip2", 0, false);
-	animator->AddClip("Clip3", 1, false);
+	//auto animator = make_shared<Animator>();
+	//animator->AddClip("Clip1", 2, false);
+	//animator->AddClip("Clip2", 0, false);
+	//animator->AddClip("Clip3", 1, false);
 
-	animator->SetEntryClip("Clip1");
+	//animator->SetEntryClip("Clip1");
 
-	animator->AddTransition("Clip1", "Clip2");
-	animator->AddTransition("Clip2", "Clip3");
-	animator->AddTransition("Clip3", "Clip1");
+	//animator->AddTransition("Clip1", "Clip2");
+	//animator->AddTransition("Clip2", "Clip3");
+	//animator->AddTransition("Clip3", "Clip1");
 
-	animator->SetCurrentTransition();
+	//animator->SetCurrentTransition();
 
-	animator->AddParameter("isTest", Parameter::Type::Bool);
 
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", animator);
+	//AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", animator);
 
 	// Particle System
 	SaveAndLoadGameObjectToXML(L"test_scene", L"FireParticle",
@@ -1934,6 +1945,9 @@ void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneNa
 							transitionElem->DeleteChild(conditionElem);
 						}
 
+						// hasCondition 값 업데이트 추가
+						transitionElem->SetAttribute("hasCondition", !conditions.empty());
+
 						// 새로운 Conditions 추가
 						for (const auto& condition : conditions)
 						{
@@ -2114,6 +2128,110 @@ void SceneManager::RemoveAnimatorParameterFromXML(const wstring& sceneName, cons
 							}
 						}
 
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateAnimatorNodePositionInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipName, const ImVec2& position)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				for (auto clipElem = animatorElem->FirstChildElement("Clip");
+					clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+				{
+					if (string(clipElem->Attribute("name")) == clipName)
+					{
+						clipElem->SetAttribute("posX", position.x);
+						clipElem->SetAttribute("posY", position.y);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+ImVec2 SceneManager::GetAnimatorNodePositionFromXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipName)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return ImVec2(0, 0);
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				for (auto clipElem = animatorElem->FirstChildElement("Clip");
+					clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+				{
+					if (string(clipElem->Attribute("name")) == clipName)
+					{
+						return ImVec2(
+							clipElem->FloatAttribute("posX", 0.0f),
+							clipElem->FloatAttribute("posY", 0.0f)
+						);
+					}
+				}
+			}
+			break;
+		}
+	}
+	return ImVec2(0, 0);
+}
+
+void SceneManager::UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipAName, const string& clipBName, bool flag, bool hasCondition)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+					transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+				{
+					if (string(transitionElem->Attribute("clipA")) == clipAName &&
+						string(transitionElem->Attribute("clipB")) == clipBName)
+					{
+						transitionElem->SetAttribute("flag", flag);
+						transitionElem->SetAttribute("hasCondition", hasCondition);
 						doc.SaveFile(pathStr.c_str());
 						break;
 					}

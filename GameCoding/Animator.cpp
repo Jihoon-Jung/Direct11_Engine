@@ -36,12 +36,44 @@ void Animator::Update()
 
 void Animator::AddClip(const string& name, int animIndex, bool isLoop)
 {
+	string uniqueName = name;
+
+	// 이름이 이미 존재하는 경우 처리
+	if (_clips.find(uniqueName) != _clips.end())
+	{
+		// 기본 이름과 숫자 부분 분리
+		size_t underscorePos = name.rfind('_');
+		string baseName = name;
+		int number = 1;
+
+		// 이미 _숫자 형식이 있는지 확인
+		if (underscorePos != string::npos)
+		{
+			string numberStr = name.substr(underscorePos + 1);
+			// 숫자로만 이루어져 있는지 확인
+			bool isNumber = !numberStr.empty() &&
+				std::all_of(numberStr.begin(), numberStr.end(), ::isdigit);
+
+			if (isNumber)
+			{
+				baseName = name.substr(0, underscorePos);
+				number = std::stoi(numberStr) + 1;
+			}
+		}
+
+		// 사용 가능한 이름을 찾을 때까지 반복
+		do {
+			uniqueName = baseName + "_" + std::to_string(number);
+			number++;
+		} while (_clips.find(uniqueName) != _clips.end());
+	}
+
 	shared_ptr<Clip> clip = make_shared<Clip>();
-	clip->name = name;
+	clip->name = uniqueName;
 	clip->animIndex = animIndex;
 	clip->isLoop = isLoop;
 
-	_clips[name] = clip;
+	_clips[uniqueName] = clip;
 }
 
 void Animator::AddTransition(const string& clipAName, const string& clipBName)
@@ -58,9 +90,14 @@ void Animator::AddTransition(const string& clipAName, const string& clipBName)
 		transition->hasExitTime = true;
 		transition->hasCondition = false;
 
-		clipA->transition = transition;
+		//clipA->transition = transition;
+		clipA->transitions.push_back(transition);
+		if (_currClip->name == clipAName || _currClip->name == clipBName)
+			SetCurrentTransition();
+
 		_transitions.push_back(transition);
 	}
+	SetClipCurrentTransition(clipA);
 }
 void Animator::SetTransitionFlag(shared_ptr<Transition> transition, bool flag)
 {
@@ -182,7 +219,9 @@ void Animator::CheckConditionsAndSetFlag()
 {
 	for (shared_ptr<Transition> transition : _transitions)
 	{
+		bool prevFlag = transition->flag;
 		bool isAllConditionSatisfy = true;
+
 		for (const Condition& condition : transition->conditions)
 		{
 			bool conditionSatisfied = false;
@@ -264,6 +303,21 @@ void Animator::CheckConditionsAndSetFlag()
 		{
 			transition->flag = true;
 		}
+		else
+			transition->flag = false;
+
+		SetClipCurrentTransition(transition->clipA.lock());
+		
+		if (prevFlag != transition->flag)
+		{
+			if (auto clipA = transition->clipA.lock())
+				if (auto clipB = transition->clipB.lock())
+					SCENE.UpdateAnimatorTransitionFlagInXML(
+						SCENE.GetActiveScene()->GetSceneName(),
+						GetGameObject()->GetName(),
+						clipA->name, clipB->name,
+						transition->flag, transition->hasCondition);
+		}
 	}
 }
 
@@ -299,6 +353,7 @@ void Animator::AddCondition(shared_ptr<Transition> transition, const string& par
 	newCondition.compareType = compareType;
 	transition->conditions.push_back(newCondition);
 	transition->hasCondition = true;
+
 }
 
 void Animator::RemoveCondition(shared_ptr<Transition> transition, int index)
@@ -338,5 +393,112 @@ void Animator::RemoveParameter(const string& name)
 
 		// 파라미터 제거
 		_parameters.erase(it);
+	}
+}
+
+void Animator::SetClipCurrentTransition(shared_ptr<Clip> clip)
+{
+	if (!clip)
+		return;
+
+	// 1. hasCondition이 true인 트랜지션들 찾기
+	vector<shared_ptr<Transition>> conditionTransitions;
+	for (const auto& transition : clip->transitions)
+	{
+		if (transition->hasCondition)
+			conditionTransitions.push_back(transition);
+	}
+
+	// 조건이 있는 트랜지션이 존재하는 경우
+	if (!conditionTransitions.empty())
+	{
+		if (conditionTransitions.size() > 1)
+		{
+			// HasExitTime이 false인 트랜지션들 찾기
+			vector<shared_ptr<Transition>> noExitTransitions;
+			for (const auto& transition : conditionTransitions)
+			{
+				if (!transition->hasExitTime)
+					noExitTransitions.push_back(transition);
+			}
+
+			if (!noExitTransitions.empty())
+			{
+				// HasExitTime이 false인 트랜지션 중 flag가 true인 것들 찾기
+				vector<shared_ptr<Transition>> flaggedTransitions;
+				for (const auto& transition : noExitTransitions)
+				{
+					if (transition->flag)
+						flaggedTransitions.push_back(transition);
+				}
+
+				if (flaggedTransitions.size() > 1)
+				{
+					clip->transition = flaggedTransitions[0]; // 먼저 넣은 것 사용
+				}
+				else if (flaggedTransitions.size() == 1)
+				{
+					clip->transition = flaggedTransitions[0];
+				}
+				else
+				{
+					clip->transition = nullptr;  // flag가 true인 것이 없음
+				}
+			}
+			else
+			{
+				// HasExitTime이 true인 트랜지션들 중 flag가 true인 것들 찾기
+				vector<shared_ptr<Transition>> flaggedTransitions;
+				for (const auto& transition : conditionTransitions)
+				{
+					if (transition->flag)
+						flaggedTransitions.push_back(transition);
+				}
+
+				if (flaggedTransitions.size() > 1)
+				{
+					clip->transition = flaggedTransitions[0];
+				}
+				else if (flaggedTransitions.size() == 1)
+				{
+					clip->transition = flaggedTransitions[0];
+				}
+				else
+				{
+					clip->transition = nullptr;
+				}
+			}
+		}
+		else
+		{
+			// 트랜지션이 1개인 경우 flag가 true일 때만 설정
+			if (conditionTransitions[0]->flag)
+				clip->transition = conditionTransitions[0];
+			else
+				clip->transition = nullptr;
+		}
+	}
+	else
+	{
+		// 조건이 없는 트랜지션들 중 hasExitTime이 true인 것들 찾기
+		vector<shared_ptr<Transition>> exitTimeTransitions;
+		for (const auto& transition : clip->transitions)
+		{
+			if (transition->hasExitTime)
+				exitTimeTransitions.push_back(transition);
+		}
+
+		if (exitTimeTransitions.size() > 1)
+		{
+			clip->transition = exitTimeTransitions[0];
+		}
+		else if (exitTimeTransitions.size() == 1)
+		{
+			clip->transition = exitTimeTransitions[0];
+		}
+		else
+		{
+			clip->transition = nullptr;
+		}
 	}
 }

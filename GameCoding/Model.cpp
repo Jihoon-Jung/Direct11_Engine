@@ -285,7 +285,9 @@ void Model::ReadAnimation(wstring filename)
 	file->Open(fullPath, FileMode::Read);
 
 	shared_ptr<ModelAnimation> animation = make_shared<ModelAnimation>();
-
+	
+	filesystem::path path(filename);
+	animation->clipName = path.filename().wstring();
 	animation->name = Utils::ToWString(file->Read<string>());
 	animation->duration = file->Read<float>();
 	animation->frameRate = file->Read<float>();

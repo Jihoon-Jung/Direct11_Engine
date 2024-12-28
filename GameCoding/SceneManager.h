@@ -78,6 +78,16 @@ public:
 
 	void RemoveAnimatorParameterFromXML(const wstring& sceneName, const wstring& objectName, const string& paramName);
 
+	void UpdateAnimatorNodePositionInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipName, const ImVec2& position);
+
+	ImVec2 GetAnimatorNodePositionFromXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipName);
+
+	void UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipAName, const string& clipBName,
+		bool flag, bool hasCondition);
+
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);
 	void CreateCylinderToScene(const wstring& sceneName);

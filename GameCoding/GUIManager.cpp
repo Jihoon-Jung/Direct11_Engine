@@ -1038,12 +1038,34 @@ void GUIManager::RenderUI()
                     }
                     if (!hasAnimator && ImGui::MenuItem("Animator"))
                     {
-                        auto animator = make_shared<Animator>();
-                        _selectedObject->AddComponent(animator);
-                        SCENE.AddComponentToGameObjectAndSaveToXML(
-                            SCENE.GetActiveScene()->GetSceneName(),
-                            _selectedObject->GetName(),
-                            animator);
+                        auto meshRenderer = _selectedObject->GetComponent<MeshRenderer>();
+                        if (!meshRenderer || meshRenderer->GetModel()->GetAnimations().empty())
+                        {
+                            MessageBoxA(nullptr, "No animations in this model!", "Error", MB_ICONERROR);
+                            abort();
+                        }
+                        else
+                        {
+                            auto animator = make_shared<Animator>();
+                            vector<shared_ptr<ModelAnimation>> animations = meshRenderer->GetModel()->GetAnimations();
+                            int animIndex = 0;
+                            for (shared_ptr<ModelAnimation> animation : animations)
+                            {
+                                string name = Utils::ToString(animation->clipName);
+                                animator->AddClip(name, animIndex, false);
+
+                                if (animIndex == 0)
+                                    animator->SetEntryClip(name);
+
+                                animIndex++;
+                            }
+
+                            _selectedObject->AddComponent(animator);
+                            SCENE.AddComponentToGameObjectAndSaveToXML(
+                                SCENE.GetActiveScene()->GetSceneName(),
+                                _selectedObject->GetName(),
+                                animator);
+                        }
                     }
                     // MeshRenderer 메뉴 아이템
                     if (!hasMeshRenderer && ImGui::MenuItem("Mesh Renderer"))
@@ -1298,6 +1320,38 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     {
         _selectedObject = gameObject;
         SCENE.GetActiveScene()->AddPickedObject(gameObject);
+
+        // Animator 업데이트
+        _selectedAnimator = gameObject->GetComponent<Animator>();
+        if (_selectedAnimator)
+        {
+            // 노드 데이터 초기화
+            _nodes.clear();
+
+            // Entry 노드 추가
+            NodeData entryNode;
+            entryNode.name = "Entry";
+            entryNode.isEntry = true;
+            entryNode.pos = ImVec2(50, 50);  // 적절한 초기 위치 설정
+            _nodes.push_back(entryNode);
+
+            // 애니메이션 클립 노드들 추가
+            for (const auto& clipPair : _selectedAnimator->_clips)  // pair<string, shared_ptr<Clip>>
+            {
+                NodeData clipNode;
+                clipNode.name = clipPair.second->name;
+                clipNode.clip = clipPair.second;
+                clipNode.isEntry = false;
+                clipNode.pos = clipPair.second->pos;  // 저장된 위치 사용
+                _nodes.push_back(clipNode);
+            }
+        }
+        else
+        {
+            // Animator가 없는 경우 노드 데이터 초기화
+            _nodes.clear();
+            _selectedTransition = nullptr;
+        }
     }
 
     // 더블 클릭 처리 (카메라 포커스)
@@ -2081,12 +2135,46 @@ void GUIManager::RenderGraphPanel()
                 break;
             }
         }
-
         // 트랜지션 클릭 체크
-        if (_selectedTransition != nullptr)
+        for (const auto& transition : _selectedAnimator->_transitions)
         {
-            clickedEmpty = false;
+            auto clipA = transition->clipA.lock();
+            auto clipB = transition->clipB.lock();
+            if (!clipA || !clipB)
+                continue;
+
+            // 시작점과 끝점 노드 찾기
+            NodeData* startNode = nullptr;
+            NodeData* endNode = nullptr;
+            for (auto& node : _nodes)
+            {
+                if (node.clip == clipA) startNode = &node;
+                if (node.clip == clipB) endNode = &node;
+            }
+
+            if (startNode && endNode)
+            {
+                ImVec2 start(
+                    canvasPos.x + startNode->pos.x + (NODE_WIDTH * 0.5f),
+                    canvasPos.y + startNode->pos.y + (NODE_HEIGHT * 0.5f)
+                );
+                ImVec2 end(
+                    canvasPos.x + endNode->pos.x + (NODE_WIDTH * 0.5f),
+                    canvasPos.y + endNode->pos.y + (NODE_HEIGHT * 0.5f)
+                );
+
+                if (DistancePointToLineSegment(mousePos, start, end) < 5.0f)
+                {
+                    clickedEmpty = false;
+                    break;
+                }
+            }
         }
+        //// 트랜지션 클릭 체크
+        //if (_selectedTransition != nullptr)
+        //{
+        //    clickedEmpty = false;
+        //}
 
         // 빈 공간을 클릭했을 때만 선택 해제
         if (clickedEmpty)
@@ -2263,6 +2351,8 @@ void GUIManager::RenderInspectorPanel()
 
             if (conditionChanged)
             {
+                _selectedAnimator->CheckConditionsAndSetFlag();
+
                 SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
                     _selectedAnimator->GetGameObject()->GetName(),
                     _selectedTransition->clipA.lock()->name,
@@ -2282,6 +2372,8 @@ void GUIManager::RenderInspectorPanel()
                 const auto& firstParam = _selectedAnimator->_parameters[0];
                 _selectedAnimator->AddCondition(_selectedTransition,
                     firstParam.name, firstParam.type, Condition::CompareType::Equals);
+
+                _selectedAnimator->CheckConditionsAndSetFlag();
 
                 SCENE.UpdateAnimatorTransitionConditionInXML(L"test_scene",
                     _selectedAnimator->GetGameObject()->GetName(),
@@ -2331,7 +2423,19 @@ void GUIManager::RenderNode(NodeData& node)
         canvasPos.x + node.pos.x,
         canvasPos.y + node.pos.y
     );
-
+    
+    if (node.name != "Entry")
+    {
+        if (node.clip->pos.x != 0 && node.clip->pos.y != 0)
+        {
+            node.pos = node.clip->pos;
+            nodePos = ImVec2(
+                canvasPos.x + node.pos.x,
+                canvasPos.y + node.pos.y
+            );
+        }
+    }
+    
     // 노드 색상 설정
     ImU32 nodeColor;
     if (node.isEntry)
@@ -2347,6 +2451,33 @@ void GUIManager::RenderNode(NodeData& node)
         nodeColor = IM_COL32(51, 122, 183, 255);  // 파란색
     }
 
+    // 노드 그리기
+    drawList->AddRectFilled(
+        nodePos,
+        ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT),
+        nodeColor,
+        4.0f
+    );
+
+    // 프로그레스 바 그리기
+    bool isCurrentNode = (_selectedAnimator && _selectedAnimator->_currClip && _selectedAnimator->_currClip == node.clip);
+    bool isBlendingNode = (_selectedAnimator && _selectedAnimator->_currTransition &&
+        (_selectedAnimator->_currTransition->clipA.lock() == node.clip ||
+            _selectedAnimator->_currTransition->clipB.lock() == node.clip));
+
+    if (isCurrentNode || isBlendingNode)
+    {
+        float progress = node.clip->progressRatio;
+        ImVec2 progressBarMin = nodePos;
+        ImVec2 progressBarMax = ImVec2(nodePos.x + (NODE_WIDTH * progress), nodePos.y + NODE_HEIGHT);
+
+        ImU32 progressColor = isCurrentNode ?
+            IM_COL32(100, 200, 255, 128) :  // 현재 노드는 밝은 파란색
+            IM_COL32(100, 255, 200, 128);   // 블렌딩 노드는 밝은 초록색
+
+        drawList->AddRectFilled(progressBarMin, progressBarMax, progressColor, 4.0f);
+    }
+
     // 선택된 노드는 테두리 강조
     if (&node == _selectedNode)
     {
@@ -2359,14 +2490,6 @@ void GUIManager::RenderNode(NodeData& node)
             2.0f
         );
     }
-
-    // 노드 그리기
-    drawList->AddRectFilled(
-        nodePos,
-        ImVec2(nodePos.x + NODE_WIDTH, nodePos.y + NODE_HEIGHT),
-        nodeColor,
-        4.0f
-    );
 
     // 노드 제목
     ImVec2 textPos(
@@ -2382,9 +2505,8 @@ void GUIManager::RenderNode(NodeData& node)
     );
 
     // 드래그 앤 드롭을 위한 투명 버튼
-    ImGui::SetCursorScreenPos(nodePos);  // 버튼 위치를 노드 위치로 설정
+    ImGui::SetCursorScreenPos(nodePos);
 
-    // 고유한 ID 생성
     string buttonId = "##" + node.name;
     if (ImGui::InvisibleButton(buttonId.c_str(), ImVec2(NODE_WIDTH, NODE_HEIGHT)))
     {
@@ -2394,12 +2516,22 @@ void GUIManager::RenderNode(NodeData& node)
     // 드래그 처리
     if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
     {
-        // 노드 위치 업데이트
         node.pos.x += ImGui::GetIO().MouseDelta.x;
         node.pos.y += ImGui::GetIO().MouseDelta.y;
+
+        if (node.name != "Entry")
+            node.clip->pos = node.pos;
+
+        // 노드 위치 XML에 저장
+        SCENE.UpdateAnimatorNodePositionInXML(
+            SCENE.GetActiveScene()->GetSceneName(),
+            _selectedAnimator->GetGameObject()->GetName(),
+            node.name,
+            node.pos
+        );
     }
 
-    // 호버 효과 (선택사항)
+    // 호버 효과
     if (ImGui::IsItemHovered())
     {
         drawList->AddRect(
@@ -2415,7 +2547,7 @@ void GUIManager::RenderNode(NodeData& node)
     if (ImGui::IsItemClicked())
     {
         _selectedNode = &node;
-        _selectedTransition = nullptr;  // 트랜지션 선택 해제
+        _selectedTransition = nullptr;
     }
 }
 
@@ -2443,13 +2575,23 @@ void GUIManager::RenderTransitions()
 
         if (entryNode && entryClipNode)
         {
+            //ImVec2 start(
+            //    canvasPos.x + entryNode->pos.x + NODE_WIDTH,
+            //    canvasPos.y + entryNode->pos.y + (NODE_HEIGHT * 0.5f)
+            //);
+
+            //ImVec2 end(
+            //    canvasPos.x + entryClipNode->pos.x,
+            //    canvasPos.y + entryClipNode->pos.y + (NODE_HEIGHT * 0.5f)
+            //);
             ImVec2 start(
-                canvasPos.x + entryNode->pos.x + NODE_WIDTH,
+                canvasPos.x + entryNode->pos.x + (NODE_WIDTH * 0.5f),
                 canvasPos.y + entryNode->pos.y + (NODE_HEIGHT * 0.5f)
             );
 
+            // 끝점: 노드의 중앙
             ImVec2 end(
-                canvasPos.x + entryClipNode->pos.x,
+                canvasPos.x + entryClipNode->pos.x + (NODE_WIDTH * 0.5f),
                 canvasPos.y + entryClipNode->pos.y + (NODE_HEIGHT * 0.5f)
             );
 
@@ -2478,13 +2620,14 @@ void GUIManager::RenderTransitions()
         if (!startNode || !endNode)
             continue;
 
-        // 화살표 그리기
         ImVec2 start(
-            canvasPos.x + startNode->pos.x + NODE_WIDTH,
+            canvasPos.x + startNode->pos.x + (NODE_WIDTH * 0.5f),
             canvasPos.y + startNode->pos.y + (NODE_HEIGHT * 0.5f)
         );
+
+        // 끝점: 노드의 중앙
         ImVec2 end(
-            canvasPos.x + endNode->pos.x,
+            canvasPos.x + endNode->pos.x + (NODE_WIDTH * 0.5f),
             canvasPos.y + endNode->pos.y + (NODE_HEIGHT * 0.5f)
         );
 
@@ -2520,6 +2663,10 @@ void GUIManager::RenderTransitions()
                         _selectedAnimator->GetGameObject()->GetName(),
                         clipA->name, clipB->name);
 
+                    if (_selectedAnimator->_currTransition == _rightClickedTransition)
+                    {
+                        _selectedAnimator->_currTransition = nullptr;
+                    }
                     // 메모리에서 삭제
                     auto& transitions = _selectedAnimator->_transitions;
                     transitions.erase(
@@ -2606,7 +2753,7 @@ void GUIManager::RenderTransitions()
 
         // 시작점 계산
         ImVec2 startPos(
-            canvasPos.x + _transitionStartNode->pos.x + NODE_WIDTH,
+            canvasPos.x + _transitionStartNode->pos.x + (NODE_WIDTH * 0.5f),
             canvasPos.y + _transitionStartNode->pos.y + (NODE_HEIGHT * 0.5f)
         );
 
@@ -2634,7 +2781,7 @@ void GUIManager::RenderTransitions()
                 {
                     targetNode = &node;
                     _transitionEndPos = ImVec2(
-                        canvasPos.x + node.pos.x,
+                        canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
                         canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
                     );
                     break;
@@ -2666,59 +2813,125 @@ void GUIManager::RenderTransitions()
 }
 void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const ImVec2& end)
 {
-    ImU32 arrowColor = IM_COL32(255, 255, 0, 255);
-
-    // 베지어 곡선의 제어점 계산
-    float dx = end.x - start.x;
-    float controlOffset = min(100.0f, std::abs(dx) * 0.5f);
-    ImVec2 control1(start.x + controlOffset, start.y);
-    ImVec2 control2(end.x - controlOffset, end.y);
+    ImU32 arrowColor = IM_COL32(255, 255, 255, 255);
+    ImU32 highlightColor = IM_COL32(135, 195, 255, 255);
 
     // 마우스 위치 가져오기
     ImVec2 mousePos = ImGui::GetMousePos();
     bool isHovered = false;
 
-    // 베지어 곡선 그리기 및 클릭 감지
-    const int segments = 30;
-    ImVec2 current = start;
-    for (int i = 1; i <= segments; i++)
+    // 직선 그리기 및 클릭 감지
+    float distanceToLine = DistancePointToLineSegment(mousePos, start, end);
+    if (distanceToLine < 5.0f)  // 5픽셀 이내면 호버로 간주
     {
-        float t = i / (float)segments;
-        ImVec2 next = BezierCubic(start, control1, control2, end, t);
-
-        // 선분 그리기
-        drawList->AddLine(current, next, arrowColor, 2.0f);
-
-        // 마우스가 선분 근처에 있는지 확인
-        float distanceToSegment = DistancePointToLineSegment(mousePos, current, next);
-        if (distanceToSegment < 5.0f)  // 5픽셀 이내면 호버로 간주
-        {
-            isHovered = true;
-        }
-
-        current = next;
-
-        if (i == segments)
-        {
-            ImVec2 dir(next.x - current.x, next.y - current.y);
-            float angle = atan2(dir.y, dir.x);
-            DrawArrowHead(drawList, end, angle, arrowColor);
-        }
+        isHovered = true;
     }
+
+    // 선택된 트랜지션이거나 호버 상태일 때는 하이라이트 색상 사용
+    ImU32 currentColor = (isHovered ||
+        (_selectedTransition && _selectedTransition == GetTransitionFromPoints(start, end)))
+        ? highlightColor : arrowColor;
+
+    // 기본 선 그리기
+    drawList->AddLine(start, end, currentColor, 2.0f);
+
+    // 선의 중앙점 계산
+    ImVec2 midPoint(
+        start.x + (end.x - start.x) * 0.5f,
+        start.y + (end.y - start.y) * 0.5f
+    );
+
+    // 화살표 머리 그리기 (중앙점에) - currentColor 사용으로 변경
+    float angle = atan2(end.y - start.y, end.x - start.x);
+
+    //ImU32 arrowColor = IM_COL32(255, 255, 255, 255);
+    //ImU32 highlightColor = IM_COL32(135, 195, 255, 255);
+
+    //// 현재 라인이 양방향 연결인지 확인
+    //bool isBidirectional = false;
+    //shared_ptr<Transition> oppositeTransition = nullptr;
+
+    //// 현재 연결의 반대 방향 트랜지션이 존재하는지 확인
+    //if (_selectedAnimator)
+    //{
+    //    for (const auto& transition : _selectedAnimator->_transitions)
+    //    {
+    //        auto clipA = transition->clipA.lock();
+    //        auto clipB = transition->clipB.lock();
+    //        if (!clipA || !clipB)
+    //            continue;
+
+    //        // 반대 방향의 트랜지션 찾기
+    //        if (IsOppositeTransition(start, end,
+    //            GetNodeCenterPos(clipA), GetNodeCenterPos(clipB)))
+    //        {
+    //            isBidirectional = true;
+    //            oppositeTransition = transition;
+    //            break;
+    //        }
+    //    }
+    //}
+
+    //// 마우스 위치 가져오기
+    //ImVec2 mousePos = ImGui::GetMousePos();
+    //bool isHovered = false;
+
+    //// 양방향일 경우 라인을 약간 이동
+    //ImVec2 adjustedStart = start;
+    //ImVec2 adjustedEnd = end;
+
+    //if (isBidirectional)
+    //{
+    //    const float offset = 8.0f; // 평행 이동할 거리
+
+    //    // 수직 벡터 계산
+    //    float dx = end.x - start.x;
+    //    float dy = end.y - start.y;
+    //    float length = sqrt(dx * dx + dy * dy);
+
+    //    if (length > 0)
+    //    {
+    //        // 현재 트랜지션이 oppositeTransition보다 나중에 생성되었다면
+    //        // 반대 방향으로 오프셋 적용
+    //        bool isCurrentNewer = IsCurrentTransitionNewer(GetTransitionFromPoints(start, end), oppositeTransition);
+    //        float normalX = -dy / length * offset * (isCurrentNewer ? 1 : -1);
+    //        float normalY = dx / length * offset * (isCurrentNewer ? 1 : -1);
+
+    //        adjustedStart.x += normalX;
+    //        adjustedStart.y += normalY;
+    //        adjustedEnd.x += normalX;
+    //        adjustedEnd.y += normalY;
+    //    }
+    //}
+
+    //// 직선 그리기 및 클릭 감지
+    //float distanceToLine = DistancePointToLineSegment(mousePos, adjustedStart, adjustedEnd);
+    //if (distanceToLine < 5.0f)
+    //{
+    //    isHovered = true;
+    //}
+
+    //ImU32 currentColor = (isHovered ||
+    //    (_selectedTransition && _selectedTransition == GetTransitionFromPoints(start, end)))
+    //    ? highlightColor : arrowColor;
+
+    //// 조정된 위치로 선 그리기
+    //drawList->AddLine(adjustedStart, adjustedEnd, currentColor, 2.0f);
+
+    //// 선의 중앙점 계산 (조정된 위치 사용)
+    //ImVec2 midPoint(
+    //    adjustedStart.x + (adjustedEnd.x - adjustedStart.x) * 0.5f,
+    //    adjustedStart.y + (adjustedEnd.y - adjustedStart.y) * 0.5f
+    //);
+
+    //// 화살표 머리 그리기
+    //float angle = atan2(adjustedEnd.y - adjustedStart.y, adjustedEnd.x - adjustedStart.x);
+
+    DrawArrowHead(drawList, midPoint, angle, currentColor);
 
     // 호버 상태일 때 하이라이트 효과 및 클릭 감지
     if (isHovered)
     {
-        // 하이라이트 효과 (선을 더 밝게)
-        current = start;
-        for (int i = 1; i <= segments; i++)
-        {
-            float t = i / (float)segments;
-            ImVec2 next = BezierCubic(start, control1, control2, end, t);
-            drawList->AddLine(current, next, IM_COL32(255, 255, 128, 255), 3.0f);
-            current = next;
-        }
-
         // 클릭 감지
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
@@ -2730,15 +2943,15 @@ void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const
 
             for (auto& node : _nodes)
             {
-                // 시작점 체크
+                // 시작점 체크 (노드 중앙)
                 ImVec2 nodeStart(
-                    canvasPos.x + node.pos.x + NODE_WIDTH,
+                    canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
                     canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
                 );
 
-                // 끝점 체크
+                // 끝점 체크 (노드 중앙)
                 ImVec2 nodeEnd(
-                    canvasPos.x + node.pos.x,
+                    canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
                     canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
                 );
 
@@ -2872,4 +3085,109 @@ float GUIManager::DistancePointToLineSegment(const ImVec2& point, const ImVec2& 
     float dx = point.x - xx;
     float dy = point.y - yy;
     return sqrt(dx * dx + dy * dy);
+}
+
+ImVec2 GUIManager::GetNodeCenterPos(shared_ptr<Clip> clip)
+{
+    for (const auto& node : _nodes)
+    {
+        if (node.clip == clip)
+        {
+            ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+            return ImVec2(
+                canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
+                canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
+            );
+        }
+    }
+    return ImVec2(0, 0);
+}
+
+bool GUIManager::IsOppositeTransition(const ImVec2& start1, const ImVec2& end1, const ImVec2& start2, const ImVec2& end2)
+{
+    const float threshold = 1.0f;
+    return (abs(start1.x - end2.x) < threshold && abs(start1.y - end2.y) < threshold &&
+        abs(end1.x - start2.x) < threshold && abs(end1.y - start2.y) < threshold);
+}
+
+bool GUIManager::IsCurrentTransitionNewer(shared_ptr<Transition> current, shared_ptr<Transition> other)
+{
+    if (!current || !other)
+        return true;
+
+    // 트랜지션 리스트에서 위치를 비교하여 나중에 추가된 것 확인
+    auto& transitions = _selectedAnimator->_transitions;
+    auto currentIt = std::find(transitions.begin(), transitions.end(), current);
+    auto otherIt = std::find(transitions.begin(), transitions.end(), other);
+
+    if (currentIt == transitions.end() || otherIt == transitions.end())
+        return true;
+
+    return std::distance(transitions.begin(), currentIt) >
+        std::distance(transitions.begin(), otherIt);
+}
+
+shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, const ImVec2& end)
+{
+    if (!_selectedAnimator)
+    {
+        return nullptr;
+    }
+
+    ImVec2 canvasPos = ImGui::GetCursorScreenPos();
+
+    NodeData* startNode = nullptr;
+    NodeData* endNode = nullptr;
+
+    for (auto& node : _nodes)
+    {
+        ImVec2 nodePos(
+            canvasPos.x + node.pos.x,
+            canvasPos.y + node.pos.y
+        );
+
+        ImVec2 nodeStart = nodePos;
+        ImVec2 nodeEnd = nodePos;
+        nodeStart.x += NODE_WIDTH;
+        nodeStart.y += NODE_HEIGHT * 0.5f;
+        nodeEnd.x += 0;
+        nodeEnd.y += NODE_HEIGHT * 0.5f;
+
+        const float x_threshold = 100.0f;  // x 좌표 threshold 증가
+        const float y_threshold = 200.0f;  // y 좌표는 더 큰 threshold 사용
+
+        // x, y 좌표 모두 비교
+        if (abs(nodeStart.x - start.x) < x_threshold &&
+            abs(nodeStart.y - start.y) < y_threshold)
+        {
+            startNode = &node;
+        }
+        if (abs(nodeEnd.x - end.x) < x_threshold &&
+            abs(nodeEnd.y - end.y) < y_threshold)
+        {
+            endNode = &node;
+        }
+    }
+
+    if (!startNode || !endNode)
+    {
+        return nullptr;
+    }
+
+    // 찾은 노드들로 해당하는 트랜지션 찾기
+    for (const auto& transition : _selectedAnimator->_transitions)
+    {
+        auto clipA = transition->clipA.lock();
+        auto clipB = transition->clipB.lock();
+        if (!clipA || !clipB)
+        {
+            continue;
+        }
+
+        if (clipA == startNode->clip && clipB == endNode->clip)
+        {
+            return transition;
+        }
+    }
+    return nullptr;
 }

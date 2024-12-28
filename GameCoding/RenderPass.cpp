@@ -1025,7 +1025,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 	if (animator != nullptr)
 	{
 		shared_ptr<Clip> currClip = animator->_currClip;
-		shared_ptr<Transition> currTransition = animator->_currTransition;
+		shared_ptr<Transition> currTransition = currClip->transition;// animator->_currTransition;
 		int currIndex = currClip->animIndex;
 		int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
 		_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
@@ -1034,6 +1034,8 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
 		if (current)
 		{
+			currClip->progressRatio = static_cast<float>(_blendAnimDesc.curr.currFrame) / (current->frameCount - 1);
+
 			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
 			_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
 
@@ -1603,12 +1605,6 @@ void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_pt
 
 	if (_blendAnimDesc.blendRatio > 1.0f)
 	{
-		// 트랜지션 완료
-		/*animationSumTime = 0.0f;
-		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
-		animator->SetCurrentClip(transition->clipB.lock()->name);
-		animator->SetCurrentTransition();*/
-
 		animationSumTime = 0.0f;
 		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
 
@@ -1629,6 +1625,12 @@ void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_pt
 		shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
 		if (next)
 		{
+			// 다음 클립의 진행률 업데이트
+			if (auto nextClip = transition->clipB.lock())
+			{
+				nextClip->progressRatio = static_cast<float>(_blendAnimDesc.next.currFrame) / (next->frameCount - 1);
+			}
+
 			_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
 			float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
 
