@@ -34,7 +34,7 @@ private:
 	Vec3 _cameraTargetRot;
 	float _cameraMoveTime = 0.0f;
 	const float _cameraMoveSpeed = 3.0f;  // 이동 속도 (값이 클수록 빠름)
-
+	bool _isTransformChanged = false;
 private:
 	// EmptyObject 생성 관련 변수들
 	bool _showEmptyObjectPopup = false;
@@ -100,7 +100,7 @@ private:
 	// 우클릭 메뉴 관련 변수들
 	shared_ptr<Transition> _rightClickedTransition = nullptr;
 	NodeData* _rightClickedNode = nullptr;
-	
+	bool _isAnyArrowHovered = false;  // 화살표 호버 상태 추적을 위한 변수 추가
 
 	// 편집기 관련 함수들
 	void ShowAnimatorEditor();
@@ -119,5 +119,13 @@ private:
 	bool IsOppositeTransition(const ImVec2& start1, const ImVec2& end1, const ImVec2& start2, const ImVec2& end2);
 	bool IsCurrentTransitionNewer(shared_ptr<Transition> current, shared_ptr<Transition> other);
 
+	void ClearAnimatorEditorData()
+	{
+		_nodes.clear();
+		_selectedNode = nullptr;
+		_selectedTransition = nullptr;
+		_rightClickedNode = nullptr;
+		_rightClickedTransition = nullptr;
+	}
 };
 

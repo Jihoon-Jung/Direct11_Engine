@@ -76,63 +76,45 @@
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="Kachujin_OBJ">
-        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <Transform posX="2.0233178" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
+            <Parameter name="SlashToDismissing" type="0" value="false"/>
+            <Parameter name="RunToSlash" type="0" value="false"/>
+            <Parameter name="DismissingToRun" type="0" value="false"/>
             <EntryClip name="Dismissing"/>
-            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="333" posY="292"/>
-            <Clip name="Run" animIndex="1" isLoop="false" posX="319" posY="61"/>
-            <Clip name="Slash" animIndex="2" isLoop="false"/>
-            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Run" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Slash" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Dismissing" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="212" posY="257"/>
+            <Clip name="Run" animIndex="1" isLoop="false" posX="356" posY="36"/>
+            <Clip name="Slash" animIndex="2" isLoop="false" posX="428" posY="166"/>
+            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="false" hasCondition="true">
+                <Condition parameterName="DismissingToRun" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="false" hasCondition="true">
+                <Condition parameterName="RunToSlash" parameterType="0" compareType="0" value="true"/>
+            </Transition>
+            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="false" hasCondition="true">
+                <Condition parameterName="SlashToDismissing" parameterType="0" compareType="0" value="true"/>
+            </Transition>
         </Animator>
     </GameObject>
     <GameObject name="Dreyar_OBJ">
-        <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <Transform posX="3.6040001" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
-            <Parameter name="FallToDance" type="0" value="false"/>
-            <Parameter name="FallToKick" type="0" value="false"/>
-            <Parameter name="DanceToKick" type="0" value="false"/>
-            <Parameter name="DanceToFall" type="0" value="false"/>
-            <Parameter name="KickToFall" type="0" value="false"/>
-            <Parameter name="KickToDance" type="0" value="true"/>
             <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false" posX="379" posY="333"/>
-            <Clip name="Fall" animIndex="1" isLoop="false" posX="683" posY="151"/>
-            <Clip name="Kick" animIndex="0" isLoop="false" posX="394" posY="67"/>
-            <Transition clipA="Kick" clipB="Dance" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="true">
-                <Condition parameterName="KickToDance" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Kick" clipB="Fall" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
-                <Condition parameterName="KickToFall" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Dance" clipB="Fall" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="true">
-                <Condition parameterName="DanceToFall" parameterType="0" compareType="0" value="false"/>
-            </Transition>
-            <Transition clipA="Dance" clipB="Kick" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
-                <Condition parameterName="DanceToKick" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Fall" clipB="Dance" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="false" hasCondition="true">
-                <Condition parameterName="FallToDance" parameterType="0" compareType="0" value="true"/>
-            </Transition>
-            <Transition clipA="Fall" clipB="Kick" transitionDuration="1" transitionOffset="0" hasExitTime="false" flag="true" hasCondition="false">
-                <Condition parameterName="FallToKick" parameterType="0" compareType="0" value="true"/>
-            </Transition>
+            <Clip name="Dance" animIndex="2" isLoop="false" posX="648" posY="189"/>
+            <Clip name="Fall" animIndex="1" isLoop="false" posX="406" posY="294"/>
+            <Clip name="Kick" animIndex="0" isLoop="false" posX="321" posY="112"/>
         </Animator>
     </GameObject>
     <GameObject name="FireParticle">
-        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="-1.4037558" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
             <RenderPass pass="10" depthStencilState="3"/>
         </MeshRenderer>
