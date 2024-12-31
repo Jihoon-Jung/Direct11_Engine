@@ -1036,6 +1036,15 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		{
 			currClip->progressRatio = static_cast<float>(_blendAnimDesc.curr.currFrame) / (current->frameCount - 1);
 
+			// exitTime 도달 여부 체크
+			if (currClip->transition && currClip->transition->hasExitTime)
+			{
+				if (currClip->progressRatio >= currClip->transition->exitTime)
+				{
+					currClip->isEndFrame = true;
+				}
+			}
+
 			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
 			_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
 
@@ -1064,6 +1073,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 				{
 					_blendAnimDesc.curr.currFrame++;
 					_blendAnimDesc.curr.nextFrame = min(_blendAnimDesc.curr.currFrame + 1, current->frameCount - 1);
+
 				}
 			}
 

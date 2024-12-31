@@ -120,6 +120,11 @@ void Animator::SetTransitionHasExit(shared_ptr<Transition> transition, bool flag
 	transition->hasExitTime = flag;
 }
 
+void Animator::SetTransitionExitTime(shared_ptr<Transition> transition, float exitTime)
+{
+	transition->exitTime = exitTime;
+}
+
 void Animator::SetTransitionOffset(shared_ptr<Transition> transition, float offset)
 {
 	transition->transitionOffset = offset;

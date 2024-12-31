@@ -55,7 +55,7 @@ public:
 
 	void UpdateAnimatorTransitionInXML(const wstring& sceneName, const wstring& objectName,
 		const string& clipAName, const string& clipBName,
-		float duration, float offset, bool hasExitTime);
+		float duration, float offset, float exitTime, bool hasExitTime);
 
 	void AddAnimatorParameterToXML(const wstring& sceneName, const wstring& objectName,
 		const string& paramName, Parameter::Type paramType);

@@ -300,12 +300,14 @@ void SceneManager::LoadTestScene2()
 					bool hasExitTime = transitionElem->BoolAttribute("hasExitTime");
 					float offset = transitionElem->FloatAttribute("transitionOffset");
 					float duration = transitionElem->FloatAttribute("transitionDuration");
+					float exitTime = transitionElem->FloatAttribute("ExitTime");
 
 					animator->SetTransitionFlag(transition, flag);
 					transition->hasCondition = hasCondition;
 					transition->hasExitTime = hasExitTime;
 					animator->SetTransitionOffset(transition, offset);
 					animator->SetTransitionDuration(transition, duration);
+					animator->SetTransitionExitTime(transition, exitTime);
 
 					// Conditions 로드 추가
 					transition->conditions.clear();
@@ -1383,6 +1385,7 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 			transitionElem->SetAttribute("flag", transition->flag);
 			transitionElem->SetAttribute("hasCondition", transition->hasCondition);
 			transitionElem->SetAttribute("hasExitTime", transition->hasExitTime);
+			transitionElem->SetAttribute("ExitTime", transition->exitTime);
 			transitionElem->SetAttribute("transitionOffset", transition->transitionOffset);
 			transitionElem->SetAttribute("transitionDuration", transition->transitionDuration);
 
@@ -1717,7 +1720,7 @@ void SceneManager::UpdateAnimatorClipInXML(const wstring& sceneName, const wstri
 
 void SceneManager::UpdateAnimatorTransitionInXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipAName, const string& clipBName,
-	float duration, float offset, bool hasExitTime)
+	float duration, float offset, float exitTime, bool hasExitTime)
 {
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
@@ -1744,6 +1747,7 @@ void SceneManager::UpdateAnimatorTransitionInXML(const wstring& sceneName, const
 					{
 						transitionElem->SetAttribute("transitionDuration", duration);
 						transitionElem->SetAttribute("transitionOffset", offset);
+						transitionElem->SetAttribute("ExitTime", exitTime);
 						transitionElem->SetAttribute("hasExitTime", hasExitTime);
 						doc.SaveFile(pathStr.c_str());
 						break;

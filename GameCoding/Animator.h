@@ -44,6 +44,7 @@ struct Transition
 	bool flag = false;
 	bool hasCondition = false;
 	bool hasExitTime = false;
+	float exitTime = 1.0f;
 	float transitionOffset = 0.0f;
 	float transitionDuration = 0.3f;
 	vector<Condition> conditions;
@@ -77,6 +78,7 @@ public:
 	void AddTransition(const string& clipAName, const string& clipBName);
 	void SetTransitionFlag(shared_ptr<Transition> transition, bool flag);
 	void SetTransitionHasExit(shared_ptr<Transition> transition, bool flag);
+	void SetTransitionExitTime(shared_ptr<Transition> transition, float exitTime);
 	void SetTransitionOffset(shared_ptr<Transition> transition, float offset);
 	void SetTransitionDuration(shared_ptr<Transition> transition, float duration);
 	void SetEntryClip(const string& clipName);

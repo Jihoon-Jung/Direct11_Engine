@@ -2227,6 +2227,32 @@ void GUIManager::RenderInspectorPanel()
         auto clipA = _selectedTransition->clipA.lock();
         auto clipB = _selectedTransition->clipB.lock();
 
+        // Has Exit Time 설정
+        bool hasExitTime = _selectedTransition->hasExitTime;
+        if (ImGui::Checkbox("Has Exit Time", &hasExitTime))
+        {
+            _selectedAnimator->SetTransitionHasExit(_selectedTransition, hasExitTime);
+            if (clipA && clipB)
+            {
+                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    clipA->name, clipB->name, _selectedTransition->transitionDuration,
+                    _selectedTransition->transitionOffset, _selectedTransition->exitTime, hasExitTime);
+            }
+        }
+
+        // Exit Time 설정
+        float exitTime = _selectedTransition->exitTime;
+        if (ImGui::DragFloat("ExitTime", &exitTime, 0.1f, 0.0f, 5.0f))
+        {
+            _selectedAnimator->SetTransitionExitTime(_selectedTransition, exitTime);
+            if (clipA && clipB)
+            {
+                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                    clipA->name, clipB->name, _selectedTransition->transitionDuration,
+                    _selectedTransition->transitionOffset, exitTime,  hasExitTime);
+            }
+        }
+
         // Duration 설정
         float duration = _selectedTransition->transitionDuration;
         if (ImGui::DragFloat("Duration", &duration, 0.1f, 0.0f, 5.0f))
@@ -2237,7 +2263,7 @@ void GUIManager::RenderInspectorPanel()
             {
                 SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
                     clipA->name, clipB->name, duration, _selectedTransition->transitionOffset,
-                    _selectedTransition->hasExitTime);
+                    _selectedTransition->exitTime, _selectedTransition->hasExitTime);
             }
         }
 
@@ -2250,20 +2276,7 @@ void GUIManager::RenderInspectorPanel()
             {
                 SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
                     clipA->name, clipB->name, _selectedTransition->transitionDuration,
-                    offset, _selectedTransition->hasExitTime);
-            }
-        }
-
-        // Has Exit Time 설정
-        bool hasExitTime = _selectedTransition->hasExitTime;
-        if (ImGui::Checkbox("Has Exit Time", &hasExitTime))
-        {
-            _selectedAnimator->SetTransitionHasExit(_selectedTransition, hasExitTime);
-            if (clipA && clipB)
-            {
-                SCENE.UpdateAnimatorTransitionInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
-                    clipA->name, clipB->name, _selectedTransition->transitionDuration,
-                    _selectedTransition->transitionOffset, hasExitTime);
+                    offset, _selectedTransition->exitTime, _selectedTransition->hasExitTime);
             }
         }
 
