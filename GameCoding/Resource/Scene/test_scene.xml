@@ -90,6 +90,7 @@
             <Transition clipA="Run" clipB="Slash" transitionDuration="0.2" transitionOffset="0" hasExitTime="false" ExitTime="1"/>
             <Transition clipA="Slash" clipB="Dismissing" transitionDuration="0.2" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
         </Animator>
+        <Script type="TestEvent"/>
     </GameObject>
     <GameObject name="Dreyar_OBJ">
         <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>

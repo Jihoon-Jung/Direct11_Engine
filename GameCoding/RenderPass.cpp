@@ -1020,6 +1020,28 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 	shared_ptr<Shader> shader = _meshRenderer->GetShader();
 
 	shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
+
+	if (animator != nullptr && animator->_currClip)
+	{
+		// 현재 클립에 이벤트 추가 (테스트용)
+		if (animator->_currClip->events.empty())  // 이벤트가 없을 때만 추가
+		{
+			AnimationEvent event;
+			event.triggerTime = 0.5f;  // 애니메이션 50% 지점에서 실행
+			event.functionName = "TestLog";
+			animator->_currClip->events.push_back(event);
+		}
+
+		// 현재 애니메이션의 진행률을 체크하여 이벤트 실행
+		for (const auto& event : animator->_currClip->events)
+		{
+			if (abs(animator->_currClip->progressRatio - event.triggerTime) < 0.01f)
+			{
+				animator->InvokeAnimationEvent(event.functionName);
+			}
+		}
+	}
+
 	if (animator != nullptr)
 	{
 		shared_ptr<Clip> currClip = animator->_currClip;

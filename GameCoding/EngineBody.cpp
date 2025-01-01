@@ -4,7 +4,7 @@
 EngineBody::EngineBody()
 	: _graphics(GP), _resourceManager(RESOURCE),
 	_inputManager(INPUT), _timeManager(TIME),
-	_sceneManager(SCENE)
+	_sceneManager(SCENE), _methodRegistry(MR)
 {
 }
 
@@ -28,6 +28,7 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	GUI.Init();
 
     RenderInitialScreen();
+ 
 }
 
 void EngineBody::Update()

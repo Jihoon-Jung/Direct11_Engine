@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "MoveObject.h"
 #include "RenderPass.h"
+#include "TestEvent.h"
 
 void SceneManager::Init()
 {
@@ -211,17 +212,6 @@ void SceneManager::LoadTestScene2()
 			particleSystem->SetTransform(gameObj->transform());
 			gameObj->AddComponent(particleSystem);
 		}
-		// Script 컴포넌트 처리
-		if (auto scriptElem = gameObjElem->FirstChildElement("Script"))
-		{
-			string type = scriptElem->Attribute("type");
-			if (type == "MoveObject")
-			{
-				auto moveObject = make_shared<MoveObject>();
-				gameObj->AddComponent(moveObject);
-			}
-			// 다른 스크립트 타입들도 여기에 추가
-		}
 		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
 		{
 			auto animator = make_shared<Animator>();
@@ -345,6 +335,22 @@ void SceneManager::LoadTestScene2()
 
 			animator->SetCurrentTransition();
 			gameObj->AddComponent(animator);
+		}
+		// Script 컴포넌트 처리
+		for (auto scriptElem = gameObjElem->FirstChildElement("Script");
+			scriptElem; scriptElem = scriptElem->NextSiblingElement("Script"))
+		{
+			string scriptType = scriptElem->Attribute("type");
+			if (scriptType == "MoveObject")
+			{
+				auto moveObject = make_shared<MoveObject>();
+				gameObj->AddComponent(moveObject);
+			}
+			if (scriptType == "TestEvent")
+			{
+				auto testEvent = make_shared<TestEvent>();
+				gameObj->AddComponent(testEvent);
+			}
 		}
 		_activeScene->AddGameObject(gameObj);
 	}
@@ -1393,6 +1399,12 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 		}
 
 		gameObj->InsertEndChild(animatorElem);
+	}
+	else if (auto testEvent = dynamic_pointer_cast<TestEvent>(component))
+	{
+		tinyxml2::XMLElement* scriptElem = doc.NewElement("Script");
+		scriptElem->SetAttribute("type", "TestEvent");
+		gameObj->InsertEndChild(scriptElem);
 	}
 	// 다른 MonoBehaviour 스크립트들도 여기에 추가...
 	doc.SaveFile(pathStr.c_str());

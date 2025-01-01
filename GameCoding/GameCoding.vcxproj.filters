@@ -305,6 +305,15 @@
     <ClInclude Include="ImZoomSlider.h">
       <Filter>소스 파일\Uitls\imGuizmo</Filter>
     </ClInclude>
+    <ClInclude Include="MethodRegisterMacro.h">
+      <Filter>소스 파일\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodRegistry.h">
+      <Filter>소스 파일\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="TestEvent.h">
+      <Filter>소스 파일\CustomScript</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -529,6 +538,9 @@
     </ClCompile>
     <ClCompile Include="ImSequencer.cpp">
       <Filter>소스 파일\Uitls\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="TestEvent.cpp">
+      <Filter>소스 파일\CustomScript</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

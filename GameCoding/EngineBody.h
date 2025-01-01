@@ -12,6 +12,7 @@
 #include "TimeManager.h"
 #include "SceneManager.h"
 #include "RenderManager.h"
+#include "MethodRegistry.h"
 
 class EngineBody
 {
@@ -60,6 +61,7 @@ private:
     TimeManager& _timeManager;
     SceneManager& _sceneManager;
     ResourceManager& _resourceManager;
+    MethodRegistry& _methodRegistry;
 
     bool isStop = false;
     bool isPaused = false;

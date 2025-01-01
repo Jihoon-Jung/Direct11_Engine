@@ -49,7 +49,12 @@ struct Transition
 	float transitionDuration = 0.3f;
 	vector<Condition> conditions;
 };
-
+struct AnimationEvent
+{
+	float triggerTime = 0.f;     // 언제 호출?
+	std::string functionName;    // 어떤 함수?
+	// (선택) std::string paramStr; 등 파라미터도 보낼 수 있음
+};
 struct Clip
 {
 	string name;
@@ -61,6 +66,7 @@ struct Clip
 	ImVec2 pos;  // Animator편집기의 노드 위치
 	shared_ptr<Transition> transition;
 	vector <shared_ptr<Transition>> transitions;
+	vector<AnimationEvent> events;
 };
 
 
@@ -86,6 +92,7 @@ public:
 	void SetCurrentTransition();
 	void RemoveParameter(const string& name);
 	void CheckConditionsAndSetFlag();
+	void InvokeAnimationEvent(const std::string& functionName);
 
 	void AddCondition(shared_ptr<Transition> transition, const string& paramName,
 		Parameter::Type paramType, Condition::CompareType compareType);

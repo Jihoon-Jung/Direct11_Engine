@@ -8,7 +8,7 @@ void Scene::Start()
 		gameObject->Start();
 	}
 }
-
+#include "MoveObject.h"
 void Scene::Update()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)

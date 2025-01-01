@@ -326,6 +326,36 @@ void Animator::CheckConditionsAndSetFlag()
 	}
 }
 
+void Animator::InvokeAnimationEvent(const std::string& functionName)
+{
+	// Animator가 달려있는 GameObject 취득
+	auto owner = GetGameObject();
+	if (!owner)
+		return;
+
+	// 1) owner->GetComponents() 순회
+	for (auto& comp : owner->GetComponents())
+	{
+		// 2) MonoBehaviour* 캐스팅
+		MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+		if (mb == nullptr)
+			continue;
+
+		// 3) 현재 MonoBehaviour의 C++ RTTI 이름
+		std::string className = typeid(*mb).name();
+		// 4) 레지스트리에서 조회할 키를 만든다: "MoveObject::TestLog"
+		std::string key = className + "::" + functionName;
+
+		// 5) 실제 함수 호출 람다를 구해 옴
+		auto method = MR.getMethod(key);
+		if (method)
+		{
+			// 6) 함수 호출
+			method(mb);
+		}
+	}
+}
+
 int Animator::GetInt(const string& name)
 {
 	if (auto param = GetParameter(name))

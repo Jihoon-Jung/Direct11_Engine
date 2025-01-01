@@ -11,6 +11,7 @@ public:
 
 	virtual void Start();
 	virtual void Update();
+
 	void ResetMouse();
 
 	float Clamp(float value, float min, float max)
@@ -31,3 +32,4 @@ private:
 	float _accumulatedRotX = 0.0f;  // 누적된 X축 회전 각도
 	float _accumulatedRotY = 0.0f;  // 누적된 Y축 회전 각도
 };
+

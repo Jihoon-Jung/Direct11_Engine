@@ -2,6 +2,7 @@
 #include <string>
 #include "GUIManager.h"
 #include "MoveObject.h"
+#include "TestEvent.h"
 #include <algorithm>
 
 void GUIManager::Init()
@@ -659,6 +660,8 @@ void GUIManager::RenderUI()
                     componentName = "MoveObject";
                 else if (dynamic_pointer_cast<Animator>(component))
                     componentName = "Animator";
+                else if (dynamic_pointer_cast<TestEvent>(component))  // TestEvent 추가
+                    componentName = "TestEvent";
                 // ... 다른 컴포넌트 타입들 추가 ...
 
                 if (!componentName.empty())
@@ -1007,6 +1010,7 @@ void GUIManager::RenderUI()
                     bool hasSphereCollider = false;
                     bool hasMeshRenderer = false;
                     bool hasAnimator = false;
+                    bool hasTestEvent = false;
 
                     // 기존 컴포넌트 체크
                     for (const auto& component : components)
@@ -1019,6 +1023,8 @@ void GUIManager::RenderUI()
                             hasMeshRenderer = true;
                         else if (dynamic_pointer_cast<Animator>(component))
                             hasAnimator = true;
+                        else if (dynamic_pointer_cast<TestEvent>(component))  // TestEvent 체크 추가
+                            hasTestEvent = true;
                     }
 
                     // BoxCollider 메뉴 아이템
@@ -1110,7 +1116,19 @@ void GUIManager::RenderUI()
                         );
                         ImGui::CloseCurrentPopup();
                     }
+                    if (!hasTestEvent && ImGui::MenuItem("Test Event"))
+                    {
+                        auto testEvent = make_shared<TestEvent>();
+                        _selectedObject->AddComponent(testEvent);
 
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            testEvent
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
                     ImGui::EndMenu();
                 }
                 ImGui::EndPopup();
