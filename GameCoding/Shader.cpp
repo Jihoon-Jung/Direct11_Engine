@@ -139,9 +139,9 @@ void Shader::PushConstantBufferToShader(ShaderType type, const wstring& name, UI
 	}
 	if (type == ShaderType::VERTEX_SHADER)
 		DEVICECONTEXT->VSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
-	if (type == ShaderType::GEOMETRY_SHADER)
+	else if (type == ShaderType::GEOMETRY_SHADER)
 		DEVICECONTEXT->GSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
-	if (type == ShaderType::DOMAIN_SHADER)
+	else if (type == ShaderType::DOMAIN_SHADER)
 		DEVICECONTEXT->DSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
 	else if (type == ShaderType::HULL_SHADER)
 		DEVICECONTEXT->HSSetConstantBuffers(slot, numBuffers, buffer->GetConstantBuffer().GetAddressOf());
@@ -154,9 +154,9 @@ void Shader::PushShaderResourceToShader(ShaderType type, const wstring& name, UI
 	UINT slot = _shaderSlot->GetSlotNumber(name);
 	if (type == ShaderType::VERTEX_SHADER)
 		DEVICECONTEXT->VSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
-	if (type == ShaderType::DOMAIN_SHADER)
+	else if (type == ShaderType::DOMAIN_SHADER)
 		DEVICECONTEXT->DSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
-	if (type == ShaderType::GEOMETRY_SHADER)
+	else if (type == ShaderType::GEOMETRY_SHADER)
 		DEVICECONTEXT->GSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());
 	else
 		DEVICECONTEXT->PSSetShaderResources(slot, numViews, shaderResourceViews.GetAddressOf());

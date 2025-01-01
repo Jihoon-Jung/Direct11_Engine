@@ -77,7 +77,7 @@ void RenderPass::DefaultRender(bool isEnv)
 	light->CreateConstantBuffer<LightAndCameraPos>();
 	light->CopyData(lightDirection);
 
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
 
 
@@ -220,9 +220,7 @@ void RenderPass::EnvironmentMapRender()
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
 	else
 		assert(0);
-	/*if (isEnv)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
-	else*/
+
 	if (RENDER.GetShadowMapFlag())
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
 	else
@@ -234,10 +232,10 @@ void RenderPass::EnvironmentMapRender()
 	if (lightObject != nullptr)
 	{
 		lightObject->GetLightBuffer();
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
 	}
 
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
 	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
@@ -248,7 +246,7 @@ void RenderPass::EnvironmentMapRender()
 	light->CreateConstantBuffer<LightAndCameraPos>();
 	light->CopyData(lightDirection);
 
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
 
 
@@ -421,7 +419,7 @@ void RenderPass::TessellationRender(bool isEnv)
 	// Set Default Texture
 	if (defaultTexture != nullptr)
 	{
-		shader->PushShaderResourceToShader(ShaderType::DOMAIN_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
 	}
 
 	// Set NormalMap
@@ -505,10 +503,10 @@ void RenderPass::OutlineRender(bool isEnv)
 		if (lightObject != nullptr)
 		{
 			lightObject->GetLightBuffer();
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+			shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
 		}
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 		LightAndCameraPos lightDirection;
 		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
@@ -519,7 +517,7 @@ void RenderPass::OutlineRender(bool isEnv)
 		light->CreateConstantBuffer<LightAndCameraPos>();
 		light->CopyData(lightDirection);
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
 
 
@@ -1175,7 +1173,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		light->CopyData(lightDirection);
 
 
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightAndCameraPos", 1, light);
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
 
 
