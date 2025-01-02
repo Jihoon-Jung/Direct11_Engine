@@ -33,3 +33,4 @@ private:
 	float _accumulatedRotY = 0.0f;  // 누적된 Y축 회전 각도
 };
 
+REGISTER_SCRIPT(MoveObject, "MoveObject");

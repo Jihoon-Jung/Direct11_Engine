@@ -34,7 +34,9 @@ public:
         }
         return nullptr;
     }
-
+    const std::unordered_map<std::string, MethodType>& GetAllMethods() const {
+        return _methods;
+    }
 private:
     std::unordered_map<std::string, MethodType> _methods;
 };

@@ -2,8 +2,13 @@
 
 struct Clip;
 struct Transition;
+class MonoBehaviour;
 
-
+struct AvailableFunction
+{
+	MonoBehaviour* script;
+	string functionKey;
+};
 
 struct Parameter
 {
@@ -51,10 +56,12 @@ struct Transition
 };
 struct AnimationEvent
 {
-	float triggerTime = 0.f;     // 언제 호출?
-	std::string functionName;    // 어떤 함수?
+	float time;              // 이벤트 발생 시간
+	AvailableFunction function;     // 호출할 함수 이름
+	bool isFuctionCalled = false;
 	// (선택) std::string paramStr; 등 파라미터도 보낼 수 있음
 };
+
 struct Clip
 {
 	string name;
@@ -67,6 +74,7 @@ struct Clip
 	shared_ptr<Transition> transition;
 	vector <shared_ptr<Transition>> transitions;
 	vector<AnimationEvent> events;
+
 };
 
 
@@ -92,7 +100,9 @@ public:
 	void SetCurrentTransition();
 	void RemoveParameter(const string& name);
 	void CheckConditionsAndSetFlag();
+
 	void InvokeAnimationEvent(const std::string& functionName);
+	void InvokeAnimationEvent(const AvailableFunction& function);
 
 	void AddCondition(shared_ptr<Transition> transition, const string& paramName,
 		Parameter::Type paramType, Condition::CompareType compareType);
@@ -101,6 +111,8 @@ public:
 	shared_ptr<Clip> GetClip(const string& name);
 
 	void SetClipCurrentTransition(shared_ptr<Clip> clip);
+
+	vector<AvailableFunction> GetAvailableFunctions();
 
 	shared_ptr<Clip> _entry;
 	shared_ptr<Clip> _currClip;

@@ -646,6 +646,27 @@ void GUIManager::RenderUI()
 
                 // 컴포넌트 타입에 따른 이름 설정
                 string componentName;
+
+                // MonoBehaviour 스크립트 컴포넌트 처리
+                if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
+                {
+                    // ComponentFactory에서 등록된 스크립트 정보 찾기
+                    const auto& scripts = CF.GetRegisteredScripts();
+                    string currentTypeName = typeid(*script).name();
+
+                    // "class " 접두사 제거
+                    if (currentTypeName.substr(0, 6) == "class ")
+                    {
+                        currentTypeName = currentTypeName.substr(6);
+                    }
+
+                    auto it = scripts.find(currentTypeName);
+                    if (it != scripts.end())
+                    {
+                        componentName = it->second.displayName;
+                    }
+                }
+
                 if (dynamic_pointer_cast<MeshRenderer>(component))
                     componentName = "Mesh Renderer";
                 else if (dynamic_pointer_cast<Camera>(component))
@@ -656,13 +677,10 @@ void GUIManager::RenderUI()
                     componentName = "BoxCollider";
                 else if (dynamic_pointer_cast<SphereCollider>(component))
                     componentName = "SphereCollider";
-                else if (dynamic_pointer_cast<MoveObject>(component))
-                    componentName = "MoveObject";
+                /*else if (dynamic_pointer_cast<MoveObject>(component))
+                    componentName = "MoveObject";*/
                 else if (dynamic_pointer_cast<Animator>(component))
                     componentName = "Animator";
-                else if (dynamic_pointer_cast<TestEvent>(component))  // TestEvent 추가
-                    componentName = "TestEvent";
-                // ... 다른 컴포넌트 타입들 추가 ...
 
                 if (!componentName.empty())
                 {
@@ -673,15 +691,16 @@ void GUIManager::RenderUI()
                         {
                             if (ImGui::MenuItem("Delete"))
                             {
-                                // 오브젝트에서 컴포넌트 제거
-                                _selectedObject->RemoveComponent(component);
-
                                 // XML 업데이트
                                 SCENE.RemoveComponentFromGameObjectInXML(
                                     SCENE.GetActiveScene()->GetSceneName(),
                                     _selectedObject->GetName(),
                                     component
                                 );
+
+                                // 오브젝트에서 컴포넌트 제거
+                                _selectedObject->RemoveComponent(component);
+
                             }
                             ImGui::EndPopup();
                         }
@@ -1004,13 +1023,49 @@ void GUIManager::RenderUI()
             {
                 if (ImGui::BeginMenu("Add Component"))
                 {
+                    // Scripts 서브메뉴
+                    if (ImGui::BeginMenu("Scripts"))
+                    {
+                        const auto& scripts = CF.GetRegisteredScripts();
+                        for (const auto& [typeName, info] : scripts)
+                        {
+                            // 이미 추가된 스크립트인지 확인
+                            bool hasScript = false;
+                            for (const auto& component : _selectedObject->GetComponents())
+                            {
+                                if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
+                                {
+                                    if (typeid(*script).name() == typeName)
+                                    {
+                                        hasScript = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!hasScript && ImGui::MenuItem(info.displayName.c_str()))
+                            {
+                                auto script = info.createFunc();
+                                _selectedObject->AddComponent(script);
+
+                                // XML 업데이트
+                                SCENE.AddComponentToGameObjectAndSaveToXML(
+                                    SCENE.GetActiveScene()->GetSceneName(),
+                                    _selectedObject->GetName(),
+                                    script
+                                );
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                        ImGui::EndMenu();
+                    }
+
                     // 현재 오브젝트의 컴포넌트 목록 확인
                     const vector<shared_ptr<Component>>& components = _selectedObject->GetComponents();
                     bool hasBoxCollider = false;
                     bool hasSphereCollider = false;
                     bool hasMeshRenderer = false;
                     bool hasAnimator = false;
-                    bool hasTestEvent = false;
 
                     // 기존 컴포넌트 체크
                     for (const auto& component : components)
@@ -1023,8 +1078,6 @@ void GUIManager::RenderUI()
                             hasMeshRenderer = true;
                         else if (dynamic_pointer_cast<Animator>(component))
                             hasAnimator = true;
-                        else if (dynamic_pointer_cast<TestEvent>(component))  // TestEvent 체크 추가
-                            hasTestEvent = true;
                     }
 
                     // BoxCollider 메뉴 아이템
@@ -1113,19 +1166,6 @@ void GUIManager::RenderUI()
                             meshRenderer,
                             L"DefaultMaterial",   // material name
                             L"Cube"       // mesh name
-                        );
-                        ImGui::CloseCurrentPopup();
-                    }
-                    if (!hasTestEvent && ImGui::MenuItem("Test Event"))
-                    {
-                        auto testEvent = make_shared<TestEvent>();
-                        _selectedObject->AddComponent(testEvent);
-
-                        // XML 업데이트
-                        SCENE.AddComponentToGameObjectAndSaveToXML(
-                            SCENE.GetActiveScene()->GetSceneName(),
-                            _selectedObject->GetName(),
-                            testEvent
                         );
                         ImGui::CloseCurrentPopup();
                     }
@@ -2451,7 +2491,8 @@ void GUIManager::RenderInspectorPanel()
             if (ImGui::DragFloat("Speed", &speed, 0.1f, 0.0f, 10.0f))
             {
                 clip->speed = speed;
-                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(),
+                    _selectedAnimator->GetGameObject()->GetName(),
                     _selectedNode->clip->name, speed, _selectedNode->clip->isLoop);
             }
 
@@ -2460,8 +2501,173 @@ void GUIManager::RenderInspectorPanel()
             if (ImGui::Checkbox("Loop", &isLoop))
             {
                 clip->isLoop = isLoop;
-                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedAnimator->GetGameObject()->GetName(),
+                SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(),
+                    _selectedAnimator->GetGameObject()->GetName(),
                     _selectedNode->clip->name, speed, isLoop);
+            }
+
+            // Events 섹션 추가
+            ImGui::Separator();
+            ImGui::Text("Events");
+
+            // 이벤트 추가 버튼
+            if (ImGui::Button("+", ImVec2(30, 20)))
+            {
+                auto availableFunctions = _selectedAnimator->GetAvailableFunctions();
+                if (!availableFunctions.empty())
+                {
+                    AnimationEvent newEvent;
+                    newEvent.time = 0.0f;
+                    newEvent.function = availableFunctions[0];  // 기본값으로 첫 번째 함수 선택
+                    clip->events.push_back(newEvent);
+
+                    // XML 업데이트 추가
+                    SCENE.UpdateAnimatorClipEventsInXML(
+                        SCENE.GetActiveScene()->GetSceneName(),
+                        _selectedAnimator->GetGameObject()->GetName(),
+                        clip->name,
+                        clip->events
+                    );
+                }
+            }
+
+            shared_ptr<Model> model = _selectedAnimator->GetGameObject()->GetComponent<MeshRenderer>()->GetModel();
+            shared_ptr<ModelAnimation> anim = model->GetAnimationByIndex(clip->animIndex);
+
+            // 타임라인 영역
+            float timelineWidth = ImGui::GetContentRegionAvail().x * 0.9f;
+            float timelineHeight = 20.0f;
+
+            // 가운데 정렬을 위한 좌측 여백 계산
+            float leftPadding = (ImGui::GetContentRegionAvail().x - timelineWidth) * 0.5f;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + leftPadding);
+
+            ImVec2 timelineStart = ImGui::GetCursorScreenPos();
+            ImVec2 timelineEnd = ImVec2(timelineStart.x + timelineWidth, timelineStart.y + timelineHeight);
+
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+            // 타임라인 배경 (밝은 회색)
+            drawList->AddRectFilled(timelineStart, timelineEnd, IM_COL32(80, 80, 80, 255));
+
+            // 눈금 그리기
+            int numDivisions = 6; // 0.0 ~ 1.0을 6등분
+            float divisionWidth = timelineWidth / numDivisions;
+            for (int i = 0; i <= numDivisions; i++)
+            {
+                float x = timelineStart.x + (i * divisionWidth);
+
+                // 세로 눈금선
+                drawList->AddLine(
+                    ImVec2(x, timelineStart.y),
+                    ImVec2(x, timelineEnd.y),
+                    IM_COL32(120, 120, 120, 255)
+                );
+
+                // 시간 텍스트
+                char text[32];
+                sprintf_s(text, "%.1f", static_cast<float>(i) / numDivisions);
+                float textWidth = ImGui::CalcTextSize(text).x;
+                drawList->AddText(
+                    ImVec2(x - (textWidth * 0.5f), timelineEnd.y + 2),  // 텍스트 중앙 정렬
+                    IM_COL32(200, 200, 200, 255),
+                    text
+                );
+            }
+
+            // 가로 경계선
+            drawList->AddLine(
+                timelineStart,
+                ImVec2(timelineEnd.x, timelineStart.y),
+                IM_COL32(120, 120, 120, 255)
+            );
+            drawList->AddLine(
+                ImVec2(timelineStart.x, timelineEnd.y),
+                timelineEnd,
+                IM_COL32(120, 120, 120, 255)
+            );
+
+            // 이벤트 마커와 설정 UI 개선
+            for (int i = 0; i < clip->events.size(); i++)
+            {
+                auto& event = clip->events[i];
+                float markerX = timelineStart.x + (event.time * timelineWidth);
+
+                // 마커 드래그 로직
+                ImVec2 markerPos(markerX, timelineStart.y);
+                ImVec2 markerSize(5, timelineHeight);
+
+                // 마커 그리기
+                drawList->AddRectFilled(
+                    markerPos,
+                    ImVec2(markerPos.x + markerSize.x, markerPos.y + markerSize.y),
+                    IM_COL32(255, 255, 0, 255)
+                );
+
+                // 마커 드래그 처리
+                ImGui::SetCursorScreenPos(markerPos);
+                ImGui::InvisibleButton(("##marker" + std::to_string(i)).c_str(), markerSize);
+
+                if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+                {
+                    float newX = ImGui::GetIO().MousePos.x - timelineStart.x;
+                    event.time = std::clamp(newX / timelineWidth, 0.0f, 1.0f);
+
+                    // XML 업데이트
+                    SCENE.UpdateAnimatorClipEventsInXML(
+                        SCENE.GetActiveScene()->GetSceneName(),
+                        _selectedAnimator->GetGameObject()->GetName(),
+                        clip->name,
+                        clip->events
+                    );
+                }
+            }
+
+            // 타임라인 아래에 이벤트 설정 UI 배치
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + timelineHeight + 20);  // 타임라인과 간격 추가
+
+            for (int i = 0; i < clip->events.size(); i++)
+            {
+                auto& event = clip->events[i];
+                ImGui::PushID(i);
+
+                // 정규화된 시간으로 표시 (0.0 ~ 1.0)
+                ImGui::Text("%.2f", event.time);  // 0~1 사이의 값 직접 표시
+                ImGui::SameLine();
+
+                // 함수 선택 콤보박스 - 너비 제한
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 30.0f);  // X 버튼 공간 확보
+                if (ImGui::BeginCombo(("Function##" + std::to_string(i)).c_str(),
+                    event.function.functionKey.c_str()))
+                {
+                    auto availableFunctions = _selectedAnimator->GetAvailableFunctions();
+                    for (const auto& availableFunc : availableFunctions)
+                    {
+                        if (ImGui::Selectable(availableFunc.functionKey.c_str()))
+                        {
+                            event.function = availableFunc;  // 전체 AvailableFunction 객체를 저장
+
+                            // XML 업데이트 추가
+                            SCENE.UpdateAnimatorClipEventsInXML(
+                                SCENE.GetActiveScene()->GetSceneName(),
+                                _selectedAnimator->GetGameObject()->GetName(),
+                                clip->name,
+                                clip->events
+                            );
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // 삭제 버튼
+                ImGui::SameLine();
+                if (ImGui::Button("X"))
+                {
+                    clip->events.erase(clip->events.begin() + i);
+                    i--;
+                }
+
+                ImGui::PopID();
             }
         }
     }

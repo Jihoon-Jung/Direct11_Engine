@@ -4,7 +4,7 @@
 EngineBody::EngineBody()
 	: _graphics(GP), _resourceManager(RESOURCE),
 	_inputManager(INPUT), _timeManager(TIME),
-	_sceneManager(SCENE), _methodRegistry(MR)
+	_sceneManager(SCENE), _methodRegistry(MR), _componentFactory(CF)
 {
 }
 

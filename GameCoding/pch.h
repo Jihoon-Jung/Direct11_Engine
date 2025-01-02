@@ -54,7 +54,8 @@ using namespace Microsoft::WRL;
 #include "SceneManager.h"
 #include "RenderManager.h"
 #include "GUIManager.h"
-#include "MethodRegistry.h"
+//#include "MethodRegistry.h"
+//#include "ComponentFactory.h"
 
 // COMPONENT (have to add when create new Monobehaviour)
 #include "Component.h"
@@ -96,3 +97,4 @@ using namespace Microsoft::WRL;
 #define GUI							GUIManager::GetInstance()
 #define ENGINE                      EngineBody::GetInstance()
 #define MR							MethodRegistry::GetInstance()
+#define CF							ComponentFactory::GetInstance()

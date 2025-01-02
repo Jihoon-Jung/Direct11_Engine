@@ -13,8 +13,24 @@ public:
 	virtual void Update() {};
 
 	void TestLog() {
-		printf("Test Event");
+		char buffer[100];
+		sprintf_s(buffer, "Event Test1.\n");
+		OutputDebugStringA(buffer);
+	}
+	void TestLog2() {
+		char buffer[100];
+		sprintf_s(buffer, "Event Test2.\n");
+		OutputDebugStringA(buffer);
+	}
+	void TestLog3() {
+		char buffer[100];
+		sprintf_s(buffer, "Event Test3.\n");
+		OutputDebugStringA(buffer);
 	}
 };
-// 여기에 등록 매크로 추가
+
+// 등록 매크로 추가
 REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog);
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog2);
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog3);
+REGISTER_SCRIPT(TestEvent, "TestEvent");

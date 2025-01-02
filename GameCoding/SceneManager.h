@@ -4,6 +4,16 @@
 #include <filesystem>
 #include "Utils.h"
 
+
+struct AnimatorEventLoadData
+{
+	shared_ptr<GameObject> gameObject;
+	shared_ptr<Animator> animator;
+	string clipName;
+	float time;
+	string functionKey;
+};
+
 class SceneManager
 {
 protected:
@@ -87,6 +97,9 @@ public:
 	void UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, const wstring& objectName,
 		const string& clipAName, const string& clipBName,
 		bool flag, bool hasCondition);
+
+	void UpdateAnimatorClipEventsInXML(const wstring& sceneName, const wstring& objectName,
+		const string& clipName, const vector<AnimationEvent>& events);
 
 	void CreateCubeToScene(const wstring& sceneName);
 	void CreateSphereToScene(const wstring& sceneName);

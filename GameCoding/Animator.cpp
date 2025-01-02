@@ -356,6 +356,44 @@ void Animator::InvokeAnimationEvent(const std::string& functionName)
 	}
 }
 
+void Animator::InvokeAnimationEvent(const AvailableFunction& function)
+{
+	if (auto method = MR.getMethod(function.functionKey))
+	{
+		method(function.script);
+	}
+}
+
+vector<AvailableFunction> Animator::GetAvailableFunctions()
+{
+	vector<AvailableFunction> availableFunctions;
+
+	auto owner = GetGameObject();
+	if (!owner)
+		return availableFunctions;
+
+	const auto& registeredMethods = MR.GetAllMethods();
+
+	for (auto& comp : owner->GetComponents())
+	{
+		MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+		if (!mb)
+			continue;
+
+		string className = typeid(*mb).name();
+
+		for (const auto& [key, method] : registeredMethods)
+		{
+			if (key.find(className + "::") == 0)
+			{
+				availableFunctions.push_back({ mb, key });
+			}
+		}
+	}
+
+	return availableFunctions;
+}
+
 int Animator::GetInt(const string& name)
 {
 	if (auto param = GetParameter(name))

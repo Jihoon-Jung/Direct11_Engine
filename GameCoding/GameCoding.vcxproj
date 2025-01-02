@@ -151,6 +151,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentFactory.h" />
     <ClInclude Include="ConstantBufferType.h" />
     <ClInclude Include="DepthStencilState.h" />
     <ClInclude Include="EngineBody.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ComponentFactory.cpp" />
     <ClCompile Include="ConstantBufferType.cpp" />
     <ClCompile Include="DepthStencilState.cpp" />
     <ClCompile Include="EngineBody.cpp" />

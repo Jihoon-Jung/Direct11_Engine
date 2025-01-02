@@ -1021,27 +1021,6 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 	shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
 
-	if (animator != nullptr && animator->_currClip)
-	{
-		// 현재 클립에 이벤트 추가 (테스트용)
-		if (animator->_currClip->events.empty())  // 이벤트가 없을 때만 추가
-		{
-			AnimationEvent event;
-			event.triggerTime = 0.5f;  // 애니메이션 50% 지점에서 실행
-			event.functionName = "TestLog";
-			animator->_currClip->events.push_back(event);
-		}
-
-		// 현재 애니메이션의 진행률을 체크하여 이벤트 실행
-		for (const auto& event : animator->_currClip->events)
-		{
-			if (abs(animator->_currClip->progressRatio - event.triggerTime) < 0.01f)
-			{
-				animator->InvokeAnimationEvent(event.functionName);
-			}
-		}
-	}
-
 	if (animator != nullptr)
 	{
 		shared_ptr<Clip> currClip = animator->_currClip;
@@ -1054,6 +1033,24 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
 		if (current)
 		{
+			// 현재 프레임의 시간 계산 (프레임 수를 프레임 레이트로 나누어 초 단위로 변환)
+			float clipLength = (current->frameCount - 1) / current->frameRate;
+			float currentTime = currClip->progressRatio * clipLength;
+
+			float currentRatio = currClip->progressRatio;
+			float frameStep = 1.0f / current->frameCount;  // 한 프레임당 증가량
+
+			// 이벤트 체크
+			for (auto& event : currClip->events)
+			{
+				// 현재 프레임 구간에 이벤트가 있는지 확인
+				if (!event.isFuctionCalled && event.time > (currentRatio - frameStep) && event.time <= currentRatio)
+				{
+					animator->InvokeAnimationEvent(event.function);
+					event.isFuctionCalled = true;
+				}
+			}
+
 			currClip->progressRatio = static_cast<float>(_blendAnimDesc.curr.currFrame) / (current->frameCount - 1);
 
 			// exitTime 도달 여부 체크
@@ -1077,6 +1074,12 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 				if (_blendAnimDesc.curr.currFrame >= current->frameCount - 1)
 				{
 					currClip->isEndFrame = true;
+
+					for (auto& event : currClip->events)
+					{
+						if (event.isFuctionCalled)
+							event.isFuctionCalled = false;
+					}
 
 					if (currClip->isLoop)
 					{
@@ -1640,7 +1643,15 @@ void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_pt
 
 		// 현재 클립의 isEndFrame 초기화
 		if (auto currClip = animator->_currClip)
+		{
 			currClip->isEndFrame = false;
+			for (auto& event : currClip->events)
+			{
+				if (event.isFuctionCalled)
+					event.isFuctionCalled = false;
+			}
+		}
+			
 
 		// 다음 클립의 isEndFrame도 초기화
 		if (auto nextClip = animator->GetClip(transition->clipB.lock()->name))
@@ -1648,6 +1659,7 @@ void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_pt
 
 		animator->SetCurrentClip(transition->clipB.lock()->name);
 		animator->SetCurrentTransition();
+
 	}
 	else
 	{

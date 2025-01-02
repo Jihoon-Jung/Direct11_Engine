@@ -1,27 +1,10 @@
-﻿  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\AnimatedMesh.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Billboard.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_AdjustTexture.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_GaussianBlurHorizontal.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\ComputeShader_GaussianBlurVertical.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Debug_UI_Shader.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Default.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\EnvironmentMap.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\InitParticleSystem.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Light.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Quad.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\RenderParticleSystem.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SimpleShader.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\SkyBox.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\StaticMesh.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Terrain.cso
-  compilation object save succeeded; see D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\Tesselation.cso
-  pch.cpp
+﻿  pch.cpp
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Model.h(34,29): warning C4267: 'return': 'size_t'에서 'uint32'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Transform.h(81,19): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Animator.h(4,18): warning C4099: 'Transition': 처음에는 'class'을(를) 사용하여 형식 이름을 표시했는데 이제는 'struct'을(를) 사용하여 표시합니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.h(10): message : 'Transition' 선언을 참조하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Animator.h(41,1): warning C4099: 'Transition': 처음에는 'class'을(를) 사용하여 형식 이름을 표시했는데 이제는 'struct'을(를) 사용하여 표시합니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Animator.h(40): message : 'Transition' 선언을 참조하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Animator.h(46,1): warning C4099: 'Transition': 처음에는 'class'을(를) 사용하여 형식 이름을 표시했는데 이제는 'struct'을(를) 사용하여 표시합니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Animator.h(45): message : 'Transition' 선언을 참조하십시오.
   Animator.cpp
   BaseCollider.cpp
   Billboard.cpp
@@ -42,11 +25,18 @@ D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(51,45): war
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(86,55): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Camera.cpp(86,48): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Component.cpp
+  ComponentFactory.cpp
   ConstantBufferType.cpp
   DepthStencilState.cpp
-  EngineBody.cpp
   Engine.cpp
+  EngineBody.cpp
   FileUtils.cpp
+  GUIManager.cpp
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(56,14): warning C4244: 'return': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(2099,24): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(2375,74): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(3536,25): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(3537,23): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   GameCoding.cpp
   GameObject.cpp
   Geometry.cpp
@@ -56,15 +46,9 @@ D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Graphics.cpp(159,33): 
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Graphics.cpp(178,31): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Graphics.cpp(179,33): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Graphics.cpp(317,75): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  GUIManager.cpp
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(56,14): warning C4244: 'return': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(2059,24): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(2335,74): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(3330,25): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\GUIManager.cpp(3331,23): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  InputLayout.cpp
   코드를 생성하고 있습니다...
   컴파일하고 있습니다...
+  InputLayout.cpp
   InputManager.cpp
   Light.cpp
   Material.cpp
@@ -93,19 +77,18 @@ D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(687,95)
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(807,43): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(846,102): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1009,76): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1077,39): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1095,38): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1274,76): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1490,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1553,19): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1554,20): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1074,39): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1098,38): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1277,76): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1493,95): warning C4267: '인수': 'size_t'에서 'UINT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1556,19): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderPass.cpp(1557,20): warning C4244: '=': 'int'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   ResourceBase.cpp
   ResourceManager.cpp
-  SamplerState.cpp
   코드를 생성하고 있습니다...
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\ShaderSlot.h(37): warning C4715: 'ShaderSlot::GetSlotNumber': 모든 제어 경로에서 값을 반환하지는 않습니다.
   컴파일하고 있습니다...
-  ScreenShot.cpp
+  SamplerState.cpp
   Scene.cpp
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Scene.cpp(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Scene.cpp(77,74): warning C4244: '인수': 'int32'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -114,9 +97,10 @@ D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Scene.cpp(95,74): warn
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Scene.cpp(95,54): warning C4244: '인수': 'int32'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   SceneManager.cpp
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(735,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1325,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2131,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(751,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1337,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2146,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  ScreenShot.cpp
   Shader.cpp
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Shader.cpp(136,11): warning C4018: '>': signed 또는 unsigned가 일치하지 않습니다.
   ShaderSlot.cpp
@@ -186,20 +170,6 @@ D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Viewport.cpp(5,17): wa
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\Viewport.cpp(5,6): warning C4244: '인수': 'int32'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다...
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\ShaderSlot.h(37): warning C4715: 'ShaderSlot::GetSlotNumber': 모든 제어 경로에서 값을 반환하지는 않습니다.
-  GraphEditor.cpp
-  ImCurveEdit.cpp
-  ImGradient.cpp
-  imgui.cpp
-  ImGuizmo.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_dx11.cpp
-  imgui_impl_win32.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  ImSequencer.cpp
-  tinyxml2.cpp
-  코드를 생성하고 있습니다...
 DirectXTex_debug.lib(BC.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
 DirectXTex_debug.lib(BC4BC5.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC4BC5.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
 DirectXTex_debug.lib(BC6HBC7.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC6HBC7.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.

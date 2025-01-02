@@ -212,6 +212,9 @@ void SceneManager::LoadTestScene2()
 			particleSystem->SetTransform(gameObj->transform());
 			gameObj->AddComponent(particleSystem);
 		}
+
+		vector<AnimatorEventLoadData> eventLoadDataList;  // 임시 저장용 구조체
+
 		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
 		{
 			auto animator = make_shared<Animator>();
@@ -263,6 +266,18 @@ void SceneManager::LoadTestScene2()
 				if (auto clip = animator->GetClip(clipName))
 				{
 					clip->pos = ImVec2(posX, posY);
+				}
+
+				for (auto eventElem = clipElem->FirstChildElement("Event");
+					eventElem; eventElem = eventElem->NextSiblingElement("Event"))
+				{
+					AnimatorEventLoadData eventData;
+					eventData.gameObject = gameObj;
+					eventData.animator = animator;
+					eventData.clipName = clipName;
+					eventData.time = eventElem->FloatAttribute("time");
+					eventData.functionKey = eventElem->Attribute("function");
+					eventLoadDataList.push_back(eventData);
 				}
 			}
 
@@ -336,23 +351,48 @@ void SceneManager::LoadTestScene2()
 			animator->SetCurrentTransition();
 			gameObj->AddComponent(animator);
 		}
-		// Script 컴포넌트 처리
+		// Script 컴포넌트 로드
 		for (auto scriptElem = gameObjElem->FirstChildElement("Script");
 			scriptElem; scriptElem = scriptElem->NextSiblingElement("Script"))
 		{
-			string scriptType = scriptElem->Attribute("type");
-			if (scriptType == "MoveObject")
+			string type = scriptElem->Attribute("type");
+			// "class " 접두사가 있다면 제거
+			if (type.substr(0, 6) == "class ")
 			{
-				auto moveObject = make_shared<MoveObject>();
-				gameObj->AddComponent(moveObject);
+				type = type.substr(6);
 			}
-			if (scriptType == "TestEvent")
+
+			const auto& scripts = CF.GetRegisteredScripts();
+			auto it = scripts.find(type);
+			if (it != scripts.end())
 			{
-				auto testEvent = make_shared<TestEvent>();
-				gameObj->AddComponent(testEvent);
+				auto script = it->second.createFunc();
+				gameObj->AddComponent(script);
 			}
 		}
 		_activeScene->AddGameObject(gameObj);
+
+		for (const auto& eventData : eventLoadDataList)
+		{
+			auto animator = eventData.animator;
+			auto availableFunctions = animator->GetAvailableFunctions();
+
+			for (const auto& func : availableFunctions)
+			{
+				if (func.functionKey == eventData.functionKey)
+				{
+					AnimationEvent event;
+					event.time = eventData.time;
+					event.function = func;
+
+					if (auto clip = animator->GetClip(eventData.clipName))
+					{
+						clip->events.push_back(event);
+					}
+					break;
+				}
+			}
+		}
 	}
 }
 void SceneManager::LoadTestScene()
@@ -1317,13 +1357,13 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 		uiElem->SetAttribute("sizeY", size.y);
 		gameObj->InsertEndChild(uiElem);
 	}
-	else if (auto moveObject = dynamic_pointer_cast<MoveObject>(component))
-	{
-		tinyxml2::XMLElement* scriptElem = doc.NewElement("Script");
-		scriptElem->SetAttribute("type", "MoveObject");
-		scriptElem->SetAttribute("speed", moveObject->GetSpeed());
-		gameObj->InsertEndChild(scriptElem);
-	}
+	//else if (auto moveObject = dynamic_pointer_cast<MoveObject>(component))
+	//{
+	//	tinyxml2::XMLElement* scriptElem = doc.NewElement("Script");
+	//	scriptElem->SetAttribute("type", "MoveObject");
+	//	scriptElem->SetAttribute("speed", moveObject->GetSpeed());
+	//	gameObj->InsertEndChild(scriptElem);
+	//}
 	else if (auto particleSystem = dynamic_pointer_cast<ParticleSystem>(component))
 	{
 		tinyxml2::XMLElement* particleElem = doc.NewElement("ParticleSystem");
@@ -1400,10 +1440,18 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 
 		gameObj->InsertEndChild(animatorElem);
 	}
-	else if (auto testEvent = dynamic_pointer_cast<TestEvent>(component))
+	else if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
 	{
 		tinyxml2::XMLElement* scriptElem = doc.NewElement("Script");
-		scriptElem->SetAttribute("type", "TestEvent");
+		string typeName = typeid(*script).name();
+
+		// "class " 접두사 제거
+		if (typeName.substr(0, 6) == "class ")
+		{
+			typeName = typeName.substr(6);
+		}
+
+		scriptElem->SetAttribute("type", typeName.c_str());
 		gameObj->InsertEndChild(scriptElem);
 	}
 	// 다른 MonoBehaviour 스크립트들도 여기에 추가...
@@ -1449,7 +1497,26 @@ void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, 
 					gameObjElem->DeleteChild(rendererElem);
 				}
 			}
-			// ... 다른 컴포넌트 타입들 추가 ...
+			else if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
+			{
+				// Script 엘리먼트들을 순회하면서 해당하는 타입의 스크립트 찾기
+				for (auto scriptElem = gameObjElem->FirstChildElement("Script");
+					scriptElem; scriptElem = scriptElem->NextSiblingElement("Script"))
+				{
+					string typeName = typeid(*script).name();
+					if (typeName.substr(0, 6) == "class ")
+					{
+						typeName = typeName.substr(6);
+					}
+
+					if (string(scriptElem->Attribute("type")) == typeName)
+					{
+						gameObjElem->DeleteChild(scriptElem);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
 
 			doc.SaveFile(pathStr.c_str());
 			break;
@@ -2248,6 +2315,56 @@ void SceneManager::UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, c
 					{
 						transitionElem->SetAttribute("flag", flag);
 						transitionElem->SetAttribute("hasCondition", hasCondition);
+						doc.SaveFile(pathStr.c_str());
+						break;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateAnimatorClipEventsInXML(const wstring& sceneName, const wstring& objectName,
+	const string& clipName, const vector<AnimationEvent>& events)
+{
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// Animator 컴포넌트 찾기
+			if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+			{
+				// Clip 찾기
+				for (auto clipElem = animatorElem->FirstChildElement("Clip");
+					clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+				{
+					if (string(clipElem->Attribute("name")) == clipName)
+					{
+						// 기존 Events 삭제
+						while (auto eventElem = clipElem->FirstChildElement("Event"))
+						{
+							clipElem->DeleteChild(eventElem);
+						}
+
+						// 새로운 Events 추가
+						for (const auto& event : events)
+						{
+							auto eventElem = doc.NewElement("Event");
+							eventElem->SetAttribute("time", event.time);
+							eventElem->SetAttribute("function", event.function.functionKey.c_str());
+							clipElem->InsertEndChild(eventElem);
+						}
+
 						doc.SaveFile(pathStr.c_str());
 						break;
 					}

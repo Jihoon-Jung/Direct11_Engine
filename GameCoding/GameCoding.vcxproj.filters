@@ -314,6 +314,9 @@
     <ClInclude Include="TestEvent.h">
       <Filter>소스 파일\CustomScript</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentFactory.h">
+      <Filter>소스 파일\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -541,6 +544,9 @@
     </ClCompile>
     <ClCompile Include="TestEvent.cpp">
       <Filter>소스 파일\CustomScript</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentFactory.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
