@@ -2269,6 +2269,29 @@ void GUIManager::RenderGraphPanel()
     ImGui::PopStyleColor();
 }
 
+ImVec4 HSVtoRGB(float h, float s, float v)
+{
+    float r, g, b;
+
+    int hi = static_cast<int>(h * 6.0f) % 6;
+    float f = h * 6.0f - static_cast<float>(hi);
+    float p = v * (1.0f - s);
+    float q = v * (1.0f - s * f);
+    float t = v * (1.0f - s * (1.0f - f));
+
+    switch (hi)
+    {
+    case 0: r = v; g = t; b = p; break;
+    case 1: r = q; g = v; b = p; break;
+    case 2: r = p; g = v; b = t; break;
+    case 3: r = p; g = q; b = v; break;
+    case 4: r = t; g = p; b = v; break;
+    default: r = v; g = p; b = q; break;
+    }
+
+    return ImVec4(r, g, b, 1.0f);
+
+}
 void GUIManager::RenderInspectorPanel()
 {
     if (!_selectedAnimator)
@@ -2587,11 +2610,20 @@ void GUIManager::RenderInspectorPanel()
                 IM_COL32(120, 120, 120, 255)
             );
 
+            vector<ImVec4> markerColors(0);
+
             // 이벤트 마커와 설정 UI 개선
             for (int i = 0; i < clip->events.size(); i++)
             {
                 auto& event = clip->events[i];
                 float markerX = timelineStart.x + (event.time * timelineWidth);
+
+                // 각 이벤트마다 다른 색상 생성
+                float hue = (i * 0.618034f);  // 황금비를 사용하여 균일한 색상 분포
+                hue = fmodf(hue, 1.0f);
+                ImVec4 color = HSVtoRGB(hue, 0.8f, 0.9f);
+                ImU32 markerColor = ImGui::ColorConvertFloat4ToU32(color);
+                markerColors.push_back(color);
 
                 // 마커 드래그 로직
                 ImVec2 markerPos(markerX, timelineStart.y);
@@ -2601,7 +2633,7 @@ void GUIManager::RenderInspectorPanel()
                 drawList->AddRectFilled(
                     markerPos,
                     ImVec2(markerPos.x + markerSize.x, markerPos.y + markerSize.y),
-                    IM_COL32(255, 255, 0, 255)
+                    markerColor
                 );
 
                 // 마커 드래그 처리
@@ -2624,20 +2656,39 @@ void GUIManager::RenderInspectorPanel()
             }
 
             // 타임라인 아래에 이벤트 설정 UI 배치
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + timelineHeight + 20);  // 타임라인과 간격 추가
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + timelineHeight + 20);
+
+            // 이벤트 목록 헤더
+            ImGui::Text("Function");
+            ImGui::Separator();
 
             for (int i = 0; i < clip->events.size(); i++)
             {
                 auto& event = clip->events[i];
                 ImGui::PushID(i);
+                char timeText[16];
+                sprintf_s(timeText, "(%.2f)", event.time);
+                ImVec2 textSize = ImGui::CalcTextSize(timeText);
 
-                // 정규화된 시간으로 표시 (0.0 ~ 1.0)
-                ImGui::Text("%.2f", event.time);  // 0~1 사이의 값 직접 표시
-                ImGui::SameLine();
+                // 같은 색상을 시간값 배경에도 사용
+                ImU32 bgColor = ImGui::ColorConvertFloat4ToU32(ImVec4(markerColors[i].x, markerColors[i].y, markerColors[i].z, 0.3f));
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
-                // 함수 선택 콤보박스 - 너비 제한
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 30.0f);  // X 버튼 공간 확보
-                if (ImGui::BeginCombo(("Function##" + std::to_string(i)).c_str(),
+                // 배경 사각형 그리기
+                ImVec2 textPos = ImGui::GetCursorScreenPos();
+                drawList->AddRectFilled(
+                    textPos,
+                    ImVec2(textPos.x + textSize.x, textPos.y + textSize.y),
+                    bgColor,
+                    4.0f  // 모서리 둥글게
+                );
+
+                ImGui::Text(timeText);  // 시간값 표시
+                ImGui::PopStyleColor();
+
+                // 함수 선택 콤보박스
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (ImGui::BeginCombo(("##Function" + std::to_string(i)).c_str(),
                     event.function.functionKey.c_str()))
                 {
                     auto availableFunctions = _selectedAnimator->GetAvailableFunctions();
@@ -2645,9 +2696,7 @@ void GUIManager::RenderInspectorPanel()
                     {
                         if (ImGui::Selectable(availableFunc.functionKey.c_str()))
                         {
-                            event.function = availableFunc;  // 전체 AvailableFunction 객체를 저장
-
-                            // XML 업데이트 추가
+                            event.function = availableFunc;
                             SCENE.UpdateAnimatorClipEventsInXML(
                                 SCENE.GetActiveScene()->GetSceneName(),
                                 _selectedAnimator->GetGameObject()->GetName(),
@@ -2659,14 +2708,16 @@ void GUIManager::RenderInspectorPanel()
                     ImGui::EndCombo();
                 }
 
-                // 삭제 버튼
-                ImGui::SameLine();
-                if (ImGui::Button("X"))
+                // 삭제 버튼 (오른쪽 정렬, 작은 크기)
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + windowWidth - 30.0f);  // 오른쪽에서 30픽셀 위치
+                if (ImGui::Button("X##delete", ImVec2(25.0f, 0)))  // 25픽셀 너비
                 {
                     clip->events.erase(clip->events.begin() + i);
                     i--;
                 }
 
+                //ImGui::Separator();  // 각 이벤트 사이에 구분선 추가
                 ImGui::PopID();
             }
         }

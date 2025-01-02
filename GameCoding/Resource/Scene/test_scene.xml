@@ -99,7 +99,7 @@
         <Animator>
             <EntryClip name="Dismissing"/>
             <Clip name="Dismissing" animIndex="0" isLoop="true" posX="343" posY="269" speed="1">
-                <Event time="0.30072495" function="class TestEvent::TestLog"/>
+                <Event time="0.32487953" function="class TestEvent::TestLog"/>
                 <Event time="0.65096653" function="class TestEvent::TestLog2"/>
                 <Event time="0.83816457" function="class TestEvent::TestLog3"/>
             </Clip>
@@ -120,6 +120,18 @@
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Script type="TestEvent"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false" posX="547" posY="273"/>
+            <Clip name="Fall" animIndex="1" isLoop="false" posX="310" posY="261"/>
+            <Clip name="Kick" animIndex="0" isLoop="false" posX="349" posY="103">
+                <Event time="0" function="class TestEvent::TestLog3"/>
+            </Clip>
+            <Transition clipA="Kick" clipB="Fall" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Fall" clipB="Dance" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+            <Transition clipA="Dance" clipB="Kick" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
+        </Animator>
     </GameObject>
     <GameObject name="FireParticle">
         <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
