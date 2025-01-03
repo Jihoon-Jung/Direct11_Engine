@@ -101,9 +101,11 @@ public:
 	void UpdateAnimatorClipEventsInXML(const wstring& sceneName, const wstring& objectName,
 		const string& clipName, const vector<AnimationEvent>& events);
 
-	void CreateCubeToScene(const wstring& sceneName);
-	void CreateSphereToScene(const wstring& sceneName);
-	void CreateCylinderToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateCubeToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateSphereToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateCylinderToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateAnimatedMeshToScene(const wstring& sceneName, const wstring& modelName);
+	shared_ptr<GameObject> CreateStaticMeshToScene(const wstring& sceneName, const wstring& modelName);
 
 private:
 

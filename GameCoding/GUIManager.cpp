@@ -1276,26 +1276,73 @@ void GUIManager::RenderUI()
         ImGui::End();
     }
 
-    if (ImGui::Button("Test"))
-    {
-        GP.test = !GP.test;  // 버튼 클릭 시 GP.test 값을 토글
-    }
-    if (ImGui::Button("Test2"))
-    {
-        GP.test2 = !GP.test2;  // 버튼 클릭 시 GP.test 값을 토글
-    }
-    if (ImGui::Button("Test3"))
-    {
-        GP.test3 = !GP.test3;  // 버튼 클릭 시 GP.test 값을 토글
-    }
-
 
     if (!_showAnimatorEditor)
     {
+        // 뷰포트 영역 계산
+        float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
+        float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
+        float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
+        float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+
+        // 드래그 중일 때만 드롭 영역 활성화
+        bool isDragging = ImGui::GetDragDropPayload() != nullptr;
+
+        if (isDragging)
+        {
+            ImGui::SetNextWindowPos(ImVec2(viewportX, viewportY));
+            ImGui::SetNextWindowSize(ImVec2(viewportWidth, viewportHeight));
+
+            ImGuiWindowFlags window_flags =
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoScrollbar |
+                ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoBringToFrontOnFocus |
+                ImGuiWindowFlags_NoFocusOnAppearing |
+                ImGuiWindowFlags_NoNav;
+
+            ImGui::SetNextWindowBgAlpha(0.0f);
+
+            if (ImGui::Begin("##ViewportDropTarget", nullptr, window_flags))
+            {
+                ImGui::SetCursorPos(ImVec2(0, 0));
+                ImGui::InvisibleButton("##dropzone", ImGui::GetContentRegionAvail(), ImGuiButtonFlags_MouseButtonLeft);
+
+                // 마우스 위치를 직접 체크하여 뷰포트 영역 안에 있는지 확인
+                ImVec2 mousePos = ImGui::GetMousePos();
+                if (mousePos.x >= viewportX && mousePos.x <= (viewportX + viewportWidth) &&
+                    mousePos.y >= viewportY && mousePos.y <= (viewportY + viewportHeight))
+                {
+                    const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+                    if (payload && payload->IsDataType("RESOURCE_FILE"))  // 타입 체크는 IsDataType 사용
+                    {
+                        const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+                        if (payload && payload->IsDataType("RESOURCE_FILE"))
+                        {
+                            const char* fullPath = (const char*)payload->Data;
+                            OnResourceDroppedToViewport(fullPath);
+                        }
+                    }
+                }
+
+                // 실제 드롭 처리
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE"))
+                    {
+                        _droppedObject = nullptr;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+            }
+            ImGui::End();
+        }
+
         RenderGuizmo();
     }
-
-    
+        
 }
 
 void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
@@ -2715,9 +2762,14 @@ void GUIManager::RenderInspectorPanel()
                 {
                     clip->events.erase(clip->events.begin() + i);
                     i--;
+                    SCENE.UpdateAnimatorClipEventsInXML(
+                        SCENE.GetActiveScene()->GetSceneName(),
+                        _selectedAnimator->GetGameObject()->GetName(),
+                        clip->name,
+                        clip->events
+                    );
                 }
 
-                //ImGui::Separator();  // 각 이벤트 사이에 구분선 추가
                 ImGui::PopID();
             }
         }
@@ -2891,15 +2943,6 @@ void GUIManager::RenderTransitions()
 
         if (entryNode && entryClipNode)
         {
-            //ImVec2 start(
-            //    canvasPos.x + entryNode->pos.x + NODE_WIDTH,
-            //    canvasPos.y + entryNode->pos.y + (NODE_HEIGHT * 0.5f)
-            //);
-
-            //ImVec2 end(
-            //    canvasPos.x + entryClipNode->pos.x,
-            //    canvasPos.y + entryClipNode->pos.y + (NODE_HEIGHT * 0.5f)
-            //);
             ImVec2 start(
                 canvasPos.x + entryNode->pos.x + (NODE_WIDTH * 0.5f),
                 canvasPos.y + entryNode->pos.y + (NODE_HEIGHT * 0.5f)
@@ -3221,70 +3264,6 @@ void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const
 
     DrawArrowHead(drawList, midPoint, angle, currentColor);
 
-    // 호버 상태일 때 하이라이트 효과 및 클릭 감지
-    //if (isHovered)
-    //{
-    //    // 클릭 감지
-    //    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-    //    {
-    //        ImVec2 canvasPos = ImGui::GetCursorScreenPos();
-
-    //        // 클릭된 화살표의 시작점과 끝점에 해당하는 노드 찾기
-    //        NodeData* clickedStartNode = nullptr;
-    //        NodeData* clickedEndNode = nullptr;
-
-    //        for (auto& node : _nodes)
-    //        {
-    //            // 시작점 체크 (노드 중앙)
-    //            ImVec2 nodeStart(
-    //                canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
-    //                canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
-    //            );
-
-    //            // 끝점 체크 (노드 중앙)
-    //            ImVec2 nodeEnd(
-    //                canvasPos.x + node.pos.x + (NODE_WIDTH * 0.5f),
-    //                canvasPos.y + node.pos.y + (NODE_HEIGHT * 0.5f)
-    //            );
-
-    //            // offset이 적용된 위치와 비교
-    //            const float threshold = 1.0f;
-    //            if (abs(nodeStart.x - adjustedStart.x) < threshold &&
-    //                abs(nodeStart.y - adjustedStart.y) < threshold)
-    //            {
-    //                clickedStartNode = &node;
-    //            }
-    //            if (abs(nodeEnd.x - adjustedEnd.x) < threshold &&
-    //                abs(nodeEnd.y - adjustedEnd.y) < threshold)
-    //            {
-    //                clickedEndNode = &node;
-    //            }
-    //        }
-
-    //        // Entry 노드에서 시작하는 화살표는 무시
-    //        if (clickedStartNode && clickedStartNode->isEntry)
-    //            return;
-
-    //        // 찾은 노드들로 해당하는 트랜지션 찾기
-    //        if (clickedStartNode && clickedEndNode)
-    //        {
-    //            for (const auto& transition : _selectedAnimator->_transitions)
-    //            {
-    //                auto clipA = transition->clipA.lock();
-    //                auto clipB = transition->clipB.lock();
-    //                if (!clipA || !clipB)
-    //                    continue;
-
-    //                if (clipA == clickedStartNode->clip && clipB == clickedEndNode->clip)
-    //                {
-    //                    _selectedTransition = transition;
-    //                    _selectedNode = nullptr;  // 노드 선택 해제
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
     if (isHovered)
     {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
@@ -3511,63 +3490,6 @@ bool GUIManager::IsCurrentTransitionNewer(shared_ptr<Transition> current, shared
 
 shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, const ImVec2& end)
 {
-    //if (!_selectedAnimator)
-    //    return nullptr;
-
-    //ImVec2 canvasPos = ImGui::GetCursorScreenPos();
-    //NodeData* startNode = nullptr;
-    //NodeData* endNode = nullptr;
-
-    //// 각 노드의 중심점과의 거리를 계산하여 가장 가까운 노드 찾기
-    //float minStartDist = FLT_MAX;
-    //float minEndDist = FLT_MAX;
-
-    //for (auto& node : _nodes)
-    //{
-    //    // 노드의 중심점 계산
-    //    ImVec2 nodeCenter(
-    //        canvasPos.x + node.pos.x + NODE_WIDTH * 0.5f,
-    //        canvasPos.y + node.pos.y + NODE_HEIGHT * 0.5f
-    //    );
-
-    //    // 시작점과의 거리 계산
-    //    float startDist = sqrt(pow(nodeCenter.x - start.x, 2) + pow(nodeCenter.y - start.y, 2));
-    //    if (startDist < minStartDist)
-    //    {
-    //        minStartDist = startDist;
-    //        startNode = &node;
-    //    }
-
-    //    // 끝점과의 거리 계산
-    //    float endDist = sqrt(pow(nodeCenter.x - end.x, 2) + pow(nodeCenter.y - end.y, 2));
-    //    if (endDist < minEndDist)
-    //    {
-    //        minEndDist = endDist;
-    //        endNode = &node;
-    //    }
-    //}
-
-    //// 거리가 일정 threshold보다 큰 경우 null 반환
-    //const float threshold = 50.0f;  // 적절한 값으로 조정 가능
-    //if (minStartDist > threshold || minEndDist > threshold)
-    //    return nullptr;
-
-    //if (!startNode || !endNode)
-    //    return nullptr;
-
-    //// 찾은 노드들로 해당하는 트랜지션 찾기
-    //for (const auto& transition : _selectedAnimator->_transitions)
-    //{
-    //    auto clipA = transition->clipA.lock();
-    //    auto clipB = transition->clipB.lock();
-    //    if (!clipA || !clipB)
-    //        continue;
-
-    //    if (clipA == startNode->clip && clipB == endNode->clip)
-    //        return transition;
-    //}
-    //return nullptr;
-
     if (!_selectedAnimator)
         return nullptr;
 
@@ -3594,4 +3516,120 @@ shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, 
     }
 
     return nullptr;
+}
+
+void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
+{
+    // 경로에서 폴더명 추출
+    const char* start = strstr(fullPath.c_str(), "Resource/");
+    if (!start) return;
+
+    start += strlen("Resource/");
+    string folderName = string(start, strcspn(start, "\\"));
+
+    // 파일명 추출 (확장자 포함)
+    const char* lastSlash = strrchr(start, '\\');
+    if (!lastSlash) return;
+    string fileName = string(lastSlash + 1);
+
+    // 레이캐스팅
+    Matrix worldMatrix;
+    shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+    shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
+    Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
+    Matrix viewMatrix = cameraComponent->GetViewMatrix();
+
+    int32 mouseX = INPUT.GetMousePos().x;
+    int32 mouseY = INPUT.GetMousePos().y;
+    Ray ray = GP.GetViewport().GetRayFromScreenPoint(mouseX, mouseY, worldMatrix, viewMatrix, projectionMatrix, camera->transform()->GetWorldPosition());
+
+    // Y=0 평면과의 교차점 계산
+    Vec3 planeNormal(0, 1, 0);
+    Vec3 planePoint(0, 0, 0);
+    float d = DirectX::XMVectorGetX(DirectX::XMVector3Dot(ray.direction, planeNormal));
+
+    if (abs(d) > 0.0001f)
+    {
+        float t = DirectX::XMVectorGetX(DirectX::XMVector3Dot(planePoint - ray.position, planeNormal)) / d;
+        Vec3 intersectionPoint = ray.position + ray.direction * t;
+
+        if (_droppedObject == nullptr)
+        {
+            // Mesh 폴더 처리
+            if (folderName == "Mesh")
+            {
+                string meshName = fileName.substr(0, fileName.find_last_of("."));
+
+                if (meshName == "Cube")
+                {
+                    _droppedObject = SCENE.CreateCubeToScene(SCENE.GetActiveScene()->GetSceneName());
+                }
+                else if (meshName == "Sphere")
+                {
+                    _droppedObject = SCENE.CreateSphereToScene(SCENE.GetActiveScene()->GetSceneName());
+                }
+                else if (meshName == "Cylinder")
+                {
+                    _droppedObject = SCENE.CreateCylinderToScene(SCENE.GetActiveScene()->GetSceneName());
+                }
+                else if (meshName == "Grid")
+                {
+                    OutputDebugStringA("Grid");
+                }
+                else if (meshName == "Quad")
+                {
+                    OutputDebugStringA("Quad");
+                }
+                else if (meshName == "Sphere")
+                {
+                    OutputDebugStringA("Sphere");
+                }
+                else if (meshName == "Terrain")
+                {
+                    OutputDebugStringA("Terrain");
+                }
+            }
+            // Model 폴더 처리
+            else if (folderName == "Model")
+            {
+                // XML 파일 파싱
+                tinyxml2::XMLDocument doc;
+                if (doc.LoadFile(fullPath.c_str()) == tinyxml2::XML_SUCCESS)
+                {
+                    tinyxml2::XMLElement* root = doc.FirstChildElement("Model");
+                    if (root)
+                    {
+                        // Name 요소 추출
+                        wstring modelName;
+                        if (auto nameElement = root->FirstChildElement("Name"))
+                        {
+                            const char* nameStr = nameElement->GetText();
+                            if (nameStr)
+                            {
+                                modelName = Utils::ToWString(nameStr);
+                            }
+                        }
+
+                        tinyxml2::XMLElement* shaderElement = root->FirstChildElement("Shader");
+                        if (shaderElement)
+                        {
+                            const char* shaderType = shaderElement->GetText();
+                            if (strcmp(shaderType, "AnimatedMesh_Shader") == 0)
+                            {
+                                _droppedObject = SCENE.CreateAnimatedMeshToScene(SCENE.GetActiveScene()->GetSceneName(), modelName);
+                            }
+                            else if (strcmp(shaderType, "StaticMesh_Shader") == 0)
+                            {
+                                _droppedObject = SCENE.CreateStaticMeshToScene(SCENE.GetActiveScene()->GetSceneName(), modelName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            _droppedObject->transform()->SetPosition(intersectionPoint);
+        }
+    }
 }

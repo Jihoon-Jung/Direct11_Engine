@@ -1142,21 +1142,7 @@ void SceneManager::LoadTestScene()
 	boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", boxCollider);
-	//auto animator = make_shared<Animator>();
-	//animator->AddClip("Clip1", 2, false);
-	//animator->AddClip("Clip2", 0, false);
-	//animator->AddClip("Clip3", 1, false);
 
-	//animator->SetEntryClip("Clip1");
-
-	//animator->AddTransition("Clip1", "Clip2");
-	//animator->AddTransition("Clip2", "Clip3");
-	//animator->AddTransition("Clip3", "Clip1");
-
-	//animator->SetCurrentTransition();
-
-
-	//AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Dreyar_OBJ", animator);
 
 	// Particle System
 	SaveAndLoadGameObjectToXML(L"test_scene", L"FireParticle",
@@ -1932,9 +1918,21 @@ void SceneManager::UpdateAnimatorParameterInXML(const wstring& sceneName, const 
 	}
 }
 
-void SceneManager::CreateCubeToScene(const wstring& sceneName)
+shared_ptr<GameObject> SceneManager::CreateCubeToScene(const wstring& sceneName)
 {
-	SaveAndLoadGameObjectToXML(sceneName, L"cube1",
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"cube";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
 		Vec3(0.0f, 0.0f, 0.0f));
 	auto cubeRenderer = make_shared<MeshRenderer>();
 	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
@@ -1944,55 +1942,156 @@ void SceneManager::CreateCubeToScene(const wstring& sceneName)
 	cubeRenderer->AddRenderPass();
 	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
 	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
-	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"cube1")->transform());
+	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
 	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube1", cubeRenderer,
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, cubeRenderer,
 		L"SolidWhiteMaterial", L"Cube");
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cube1", boxCollider);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	return _activeScene->Find(newName);
 }
 
-void SceneManager::CreateSphereToScene(const wstring& sceneName)
+shared_ptr<GameObject> SceneManager::CreateSphereToScene(const wstring& sceneName)
 {
-	SaveAndLoadGameObjectToXML(sceneName, L"sphere1",
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"sphere";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
 		Vec3(0.0f, 0.0f, 0.0f));
-	auto cubeRenderer = make_shared<MeshRenderer>();
-	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
-	cubeRenderer->SetModel(nullptr);
-	cubeRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
-	cubeRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	cubeRenderer->AddRenderPass();
-	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
-	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"sphere1")->transform());
-	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"sphere1", cubeRenderer,
+	auto sphereRenderer = make_shared<MeshRenderer>();
+	sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	sphereRenderer->SetModel(nullptr);
+	sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	sphereRenderer->AddRenderPass();
+	sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
+	sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, sphereRenderer,
 		L"SolidWhiteMaterial", L"Sphere");
 	auto sphereCollider = make_shared<SphereCollider>();
-	sphereCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"sphere1", sphereCollider);
+	sphereCollider->SetRadius(0.5f);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, sphereCollider);
+
+	return _activeScene->Find(newName);
 }
 
-void SceneManager::CreateCylinderToScene(const wstring& sceneName)
+shared_ptr<GameObject> SceneManager::CreateCylinderToScene(const wstring& sceneName)
 {
-	SaveAndLoadGameObjectToXML(sceneName, L"cylinder1",
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"cylinder";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
 		Vec3(0.0f, 0.0f, 0.0f));
-	auto cubeRenderer = make_shared<MeshRenderer>();
-	cubeRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cylinder"));
-	cubeRenderer->SetModel(nullptr);
-	cubeRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
-	cubeRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	cubeRenderer->AddRenderPass();
-	cubeRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-	cubeRenderer->GetRenderPasses()[0]->SetMeshRenderer(cubeRenderer);
-	cubeRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"cylinder1")->transform());
-	cubeRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", cubeRenderer,
+	auto cylinderRenderer = make_shared<MeshRenderer>();
+	cylinderRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cylinder"));
+	cylinderRenderer->SetModel(nullptr);
+	cylinderRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cylinderRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	cylinderRenderer->AddRenderPass();
+	cylinderRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cylinderRenderer->GetRenderPasses()[0]->SetMeshRenderer(cylinderRenderer);
+	cylinderRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	cylinderRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, cylinderRenderer,
 		L"SolidWhiteMaterial", L"Cylinder");
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(0.866f, 3.0f, 1.0f));
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"cylinder1", boxCollider);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	return _activeScene->Find(newName);
+}
+
+shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sceneName, const wstring& modelName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = modelName;
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
+		GP.centerPos - Vec3(2.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(0.01f));
+
+	auto kachujinRenderer = make_shared<MeshRenderer>();
+	kachujinRenderer->SetMesh(nullptr);
+	kachujinRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
+	kachujinRenderer->SetMaterial(kachujinRenderer->GetModel()->GetMaterials()[0]);
+	kachujinRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	kachujinRenderer->AddRenderPass();
+	kachujinRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
+	kachujinRenderer->GetRenderPasses()[0]->SetMeshRenderer(kachujinRenderer);
+	kachujinRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	kachujinRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, kachujinRenderer,
+		L"", L"", modelName);
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	return _activeScene->Find(newName);
+}
+
+shared_ptr<GameObject> SceneManager::CreateStaticMeshToScene(const wstring& sceneName, const wstring& modelName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = modelName;
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
+		Vec3(0.f, 0.f, 130.f), Vec3::Zero, Vec3(0.005f));
+	auto houseRenderer = make_shared<MeshRenderer>();
+	houseRenderer->SetMesh(nullptr);
+	houseRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
+	houseRenderer->SetMaterial(houseRenderer->GetModel()->GetMaterials()[0]);
+	houseRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	houseRenderer->AddRenderPass();
+	houseRenderer->GetRenderPasses()[0]->SetPass(Pass::STATIC_MESH_RENDER);
+	houseRenderer->GetRenderPasses()[0]->SetMeshRenderer(houseRenderer);
+	houseRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	houseRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, houseRenderer,
+		L"", L"", modelName);
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	return _activeScene->Find(newName);
 }
 
 void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneName, const wstring& objectName,

@@ -24,6 +24,8 @@ public:
 	void RenderFolderTree(const filesystem::path& path, filesystem::path& selectedFolder);
 	void RenderFileGrid(const filesystem::path& path);
 
+	void OnResourceDroppedToViewport(const std::string& fullPath);  // 뷰포트에 리소스가 드롭되었을 때 호출되는 함수
+
 private:
 	shared_ptr<GameObject> _selectedObject = nullptr;
 	bool _isColliderEditMode = false;  // 콜라이더 편집 모드인지 여부
@@ -66,6 +68,8 @@ private:
 	bool _rotationUpdated = false;
 	filesystem::path _selectedFolder;
 	bool _isFirstFrame = true;  // 첫 프레임 체크를 위한 변수
+
+	shared_ptr<GameObject> _droppedObject;
 
 private:
 
