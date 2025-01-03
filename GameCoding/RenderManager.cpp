@@ -32,6 +32,8 @@ void RenderManager::Init()
 		}
 
 	}
+
+	GetRenderableObject();
 }
 
 void RenderManager::Update()
@@ -53,14 +55,14 @@ void RenderManager::Update()
 
 	
 
-	ClearRenderObject();
+	//ClearRenderObject();
 
 	GP.SetRenderTarget();
 	GP.SetViewport();
 
 	
 
-	GetRenderableObject();
+	//GetRenderableObject();
 	Render();
 
 	/*GP.SwapChain();*/
@@ -68,6 +70,8 @@ void RenderManager::Update()
 
 void RenderManager::GetRenderableObject()
 {
+	ClearRenderObject();
+
 	vector<shared_ptr<GameObject>> gameObjects = SCENE.GetActiveScene()->GetGameObjects();
 	for (shared_ptr<GameObject>& gameObject : gameObjects)
 	{
@@ -241,12 +245,15 @@ void RenderManager::RenderAllGameObject()
 		float deltaTime = TIME.GetDeltaTime();
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
-			shared_ptr<Material> material = make_shared<Material>();
-			material->CreateEnvironmentMapTexture(gameObject);
-			shared_ptr<Texture> envTexture = make_shared<Texture>();
-			envTexture->SetShaderResourceView(material->GetCubeMapSRV());
+			if (_envTexture == nullptr) {
 
-			RenderEnvironmentMappedObjects(gameObject, envTexture);
+				shared_ptr<Material> material = make_shared<Material>();
+				material->CreateEnvironmentMapTexture(gameObject);
+			
+				_envTexture = make_shared<Texture>();
+				_envTexture->SetShaderResourceView(material->GetCubeMapSRV());
+			}
+			RenderEnvironmentMappedObjects(gameObject, _envTexture);
 		}
 
 		TIME.SetPause(false);

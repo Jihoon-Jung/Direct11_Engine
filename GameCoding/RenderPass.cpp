@@ -42,7 +42,7 @@ void RenderPass::Render(bool isEnv)
 
 void RenderPass::DefaultRender(bool isEnv)
 {
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 
 	if (_transformPtr)
@@ -59,7 +59,7 @@ void RenderPass::DefaultRender(bool isEnv)
 
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 	if (lightObject != nullptr)
 	{
 		lightObject->GetLightBuffer();
@@ -213,7 +213,7 @@ void RenderPass::DefaultRender(bool isEnv)
 
 void RenderPass::EnvironmentMapRender()
 {
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"EnvironmentMap_Shader");
 
 	if (_transformPtr)
@@ -228,7 +228,7 @@ void RenderPass::EnvironmentMapRender()
 
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 	if (lightObject != nullptr)
 	{
 		lightObject->GetLightBuffer();
@@ -333,7 +333,7 @@ void RenderPass::EnvironmentMapRender()
 
 void RenderPass::TessellationRender(bool isEnv)
 {
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 	if (_transformPtr)
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
@@ -349,7 +349,7 @@ void RenderPass::TessellationRender(bool isEnv)
 
 	shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 	if (lightObject != nullptr)
 	{
 		lightObject->GetLightBuffer();
@@ -481,7 +481,7 @@ void RenderPass::OutlineRender(bool isEnv)
 		}
 			
 
-		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 		
 		shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 		shader = _meshRenderer->GetMaterial()->GetShader();
@@ -499,7 +499,7 @@ void RenderPass::OutlineRender(bool isEnv)
 
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 		if (lightObject != nullptr)
 		{
 			lightObject->GetLightBuffer();
@@ -691,7 +691,7 @@ void RenderPass::QuadRender(bool isEnv)
 
 void RenderPass::TerrainRender(bool isEnv)
 {
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 	if (_transformPtr)
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
@@ -707,7 +707,7 @@ void RenderPass::TerrainRender(bool isEnv)
 
 	shader->PushConstantBufferToShader(ShaderType::DOMAIN_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 	if (lightObject != nullptr)
 	{
 		lightObject->GetLightBuffer();
@@ -787,12 +787,12 @@ void RenderPass::TerrainRender(bool isEnv)
 	if (!RENDER.GetShadowMapFlag())
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
 
-	Matrix viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetViewMatrix();
-	Matrix projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetProjectionMatrix();
+	Matrix viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetViewMatrix();
+	Matrix projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetProjectionMatrix();
 	if (isEnv)
 	{
-		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvViewMatrix();
-		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvProjectionMatrix();
+		viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvViewMatrix();
+		projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvProjectionMatrix();
 	}
 		
 	Matrix viewProj = viewMat * projMat;
@@ -893,7 +893,7 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 		boneIndexBuffer->CopyData(boneIndex);
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BonIndex", 1, boneIndexBuffer);
 
-		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
 		if (_transformPtr)
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
@@ -909,7 +909,7 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 		if (lightObject != nullptr)
 		{
 			lightObject->GetLightBuffer();
@@ -1163,7 +1163,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 		}
 
-		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
 		if (_transformPtr)
 			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
@@ -1179,7 +1179,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
 
-		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->Find(L"MainLight");
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
 		if (lightObject != nullptr)
 		{
 			lightObject->GetLightBuffer();
@@ -1290,13 +1290,13 @@ void RenderPass::ParticleRender(bool isEnv)
 	Matrix projMat;
 	if (isEnv)
 	{
-		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvViewMatrix();
-		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetEnvProjectionMatrix();
+		viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvViewMatrix();
+		projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvProjectionMatrix();
 	}
 	else
 	{
-		viewMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetViewMatrix();
-		projMat = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>()->GetProjectionMatrix();
+		viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetViewMatrix();
+		projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetProjectionMatrix();
 	}
 
 

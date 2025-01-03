@@ -67,7 +67,7 @@ void GUIManager::Update()
             _isCameraMoving = false;
         }
 
-        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
         if (camera)
         {
             // 부드러운 보간을 위해 easeInOutCubic 함수 사용
@@ -3354,28 +3354,6 @@ void GUIManager::DrawConnection(ImDrawList* drawList, const ImVec2& start, const
     }
 }
 
-
-ImVec2 GUIManager::BezierCubic(const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, float t)
-{
-    float u = 1.0f - t;
-    float tt = t * t;
-    float uu = u * u;
-    float uuu = uu * u;
-    float ttt = tt * t;
-
-    ImVec2 result = ImVec2(
-        uuu * p0.x +                 // (1-t)^3 * p0
-        3 * uu * t * p1.x +         // 3(1-t)^2 * t * p1
-        3 * u * tt * p2.x +         // 3(1-t) * t^2 * p2
-        ttt * p3.x,                 // t^3 * p3
-        uuu * p0.y +
-        3 * uu * t * p1.y +
-        3 * u * tt * p2.y +
-        ttt * p3.y
-    );
-    return result;
-}
-
 void GUIManager::DrawArrowHead(ImDrawList* drawList, const ImVec2& pos, float angle, ImU32 color)
 {
     float arrowSize = 10.0f;
@@ -3505,7 +3483,7 @@ shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, 
         ImVec2 transEnd = GetNodeCenterPos(clipB);
 
         // 위치 비교 시 약간의 오차 허용
-        const float threshold = 10.0f;  // 오차 허용 범위를 좀 더 크게 설정
+        const float threshold = 10.0f;
         float startDist = sqrt(pow(transStart.x - start.x, 2) + pow(transStart.y - start.y, 2));
         float endDist = sqrt(pow(transEnd.x - end.x, 2) + pow(transEnd.y - end.y, 2));
 
@@ -3579,10 +3557,6 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
                 else if (meshName == "Quad")
                 {
                     OutputDebugStringA("Quad");
-                }
-                else if (meshName == "Sphere")
-                {
-                    OutputDebugStringA("Sphere");
                 }
                 else if (meshName == "Terrain")
                 {

@@ -24,7 +24,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestScene2();
+	LoadTestScene();
 }
 void SceneManager::LoadTestScene2()
 {
@@ -1950,6 +1950,8 @@ shared_ptr<GameObject> SceneManager::CreateCubeToScene(const wstring& sceneName)
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
 
+	RENDER.GetRenderableObject();
+
 	return _activeScene->Find(newName);
 }
 
@@ -1985,6 +1987,8 @@ shared_ptr<GameObject> SceneManager::CreateSphereToScene(const wstring& sceneNam
 	sphereCollider->SetRadius(0.5f);
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, sphereCollider);
 
+	RENDER.GetRenderableObject();
+
 	return _activeScene->Find(newName);
 }
 
@@ -2019,6 +2023,8 @@ shared_ptr<GameObject> SceneManager::CreateCylinderToScene(const wstring& sceneN
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(0.866f, 3.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	RENDER.GetRenderableObject();
 
 	return _activeScene->Find(newName);
 }
@@ -2056,6 +2062,8 @@ shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sc
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
 
+	RENDER.GetRenderableObject();
+
 	return _activeScene->Find(newName);
 }
 
@@ -2090,6 +2098,8 @@ shared_ptr<GameObject> SceneManager::CreateStaticMeshToScene(const wstring& scen
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	RENDER.GetRenderableObject();
 
 	return _activeScene->Find(newName);
 }

@@ -20,7 +20,8 @@ public:
 
 	shared_ptr<GameObject> FindWithComponent(ComponentType type);
 	shared_ptr<GameObject> GetPickedObject() const { return picked; }
-
+	shared_ptr<GameObject> GetMainCamera() { return _mainCamera; }
+	shared_ptr<GameObject> GetMainLight() { return _mainLignt; }
 	Vec3 GetCameraPos();
 	wstring GetSceneName() { return _sceneName; }
 private:
@@ -36,5 +37,8 @@ private:
 	int32 firstClickedMouseY = 0;
 
 	wstring _sceneName = L"test_scene";
+
+	shared_ptr<GameObject> _mainCamera;
+	shared_ptr<GameObject> _mainLignt;
 };
 

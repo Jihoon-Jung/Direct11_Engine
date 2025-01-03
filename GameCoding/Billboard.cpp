@@ -96,7 +96,7 @@ void Billboard::DrawBillboard()
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 	samplerState->CreateSamplerState();
 
-	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"MainCamera");
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
 	CameraPos cameraPos;
 	cameraPos.cameraPosition = SCENE.GetActiveScene()->GetCameraPos();

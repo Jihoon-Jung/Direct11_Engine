@@ -194,11 +194,11 @@ void Material::CreateCubeMapTexture(shared_ptr<Texture> textureArray[6])
 void Material::CreateEnvironmentMapTexture(shared_ptr<GameObject> gameObject)
 {
     Vec3 origin_rotation = gameObject->transform()->GetLocalRotation();
-    Vec3 camera_origin_position = SCENE.GetActiveScene()->Find(L"MainCamera")->transform()->GetLocalPosition();
-    shared_ptr<Camera> camera = SCENE.GetActiveScene()->Find(L"MainCamera")->GetComponent<Camera>();
+    Vec3 camera_origin_position = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetLocalPosition();
+    shared_ptr<Camera> camera = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>();
     
     Vec3 worldPosition = gameObject->transform()->GetWorldPosition();
-    SCENE.GetActiveScene()->Find(L"MainCamera")->transform()->SetLocalPosition(worldPosition);
+    SCENE.GetActiveScene()->GetMainCamera()->transform()->SetLocalPosition(worldPosition);
 
     Vec3 lookVector;
     Vec3 upVector;
@@ -267,7 +267,7 @@ void Material::CreateEnvironmentMapTexture(shared_ptr<GameObject> gameObject)
     }
 
     GP.RestoreRenderTarget();
-    SCENE.GetActiveScene()->Find(L"MainCamera")->transform()->SetLocalPosition(camera_origin_position);
+    SCENE.GetActiveScene()->GetMainCamera()->transform()->SetLocalPosition(camera_origin_position);
 
     shared_ptr<Texture> textureArray[6];
     for (auto& ta : textureArray) {

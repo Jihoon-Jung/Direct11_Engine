@@ -36,6 +36,8 @@ public:
 	void ClearRenderObject();
 	bool GetShadowMapFlag() { return _drawShadowMapFlag; }
 
+	shared_ptr<Texture> _envTexture;
+
 private:
 	shared_ptr<Pipeline> _pipeline;
 	PipelineInfo _pipelineInfo;

@@ -3,6 +3,9 @@
 
 void Scene::Start()
 {
+	_mainCamera = Find(L"MainCamera");
+	_mainLignt = Find(L"MainLight");
+
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
 	{
 		gameObject->Start();
@@ -41,6 +44,7 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 	{
 		_gameObjects.erase(it);
 	}
+	RENDER.GetRenderableObject();
 }
 
 void Scene::Picking()
@@ -51,8 +55,7 @@ void Scene::Picking()
 		return;
 
 	Matrix worldMatrix;
-	shared_ptr<GameObject> camera = Find(L"MainCamera");
-	shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
+	shared_ptr<Camera> cameraComponent = _mainCamera->GetComponent<Camera>();
 
 	Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
 	Matrix viewMatrix = cameraComponent->GetViewMatrix();
@@ -74,7 +77,7 @@ void Scene::Picking()
 			if (collider != nullptr)
 			{
 				worldMatrix = gameObject->transform()->GetWorldMatrix();
-				Ray ray = GP.GetViewport().GetRayFromScreenPoint(firstClickedMouseX, firstClickedMouseY, worldMatrix, viewMatrix, projectionMatrix, camera->transform()->GetWorldPosition());
+				Ray ray = GP.GetViewport().GetRayFromScreenPoint(firstClickedMouseX, firstClickedMouseY, worldMatrix, viewMatrix, projectionMatrix, _mainCamera->transform()->GetWorldPosition());
 				float distance = 0.f;
 				if (gameObject->GetComponent<BaseCollider>()->Intersects(ray, OUT distance) == false)
 					continue;
@@ -92,7 +95,7 @@ void Scene::Picking()
 			if (terrain != nullptr)
 			{
 				float distance = 0.f;
-				Ray ray = GP.GetViewport().GetRayFromScreenPoint(firstClickedMouseX, firstClickedMouseY, gameObject->transform()->GetWorldMatrix(), viewMatrix, projectionMatrix, camera->transform()->GetWorldPosition());
+				Ray ray = GP.GetViewport().GetRayFromScreenPoint(firstClickedMouseX, firstClickedMouseY, gameObject->transform()->GetWorldMatrix(), viewMatrix, projectionMatrix, _mainCamera->transform()->GetWorldPosition());
 				
 				if (terrain->Pick(ray, distance, hitPoint) == false)
 					continue;

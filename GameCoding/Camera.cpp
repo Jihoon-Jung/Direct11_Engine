@@ -97,7 +97,7 @@ void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 look
 
 void Camera::SetShadowMapViewProjectionMatrix()
 {
-	shared_ptr<GameObject> light = SCENE.GetActiveScene()->Find(L"MainLight");
+	shared_ptr<GameObject> light = SCENE.GetActiveScene()->GetMainLight();
 	Vec3 eye = light->transform()->GetWorldPosition();
 	Vec3 at = GP.centerPos;
 	Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
