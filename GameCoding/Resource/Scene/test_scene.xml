@@ -1,4 +1,304 @@
 <Scene>
+    <GameObject name="Sphere50">
+        <Transform posX="4" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere51">
+        <Transform posX="4" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere52">
+        <Transform posX="7" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere53">
+        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere54">
+        <Transform posX="3" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere55">
+        <Transform posX="3" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere56">
+        <Transform posX="0" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere57">
+        <Transform posX="6" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere58">
+        <Transform posX="2" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere59">
+        <Transform posX="8" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere60">
+        <Transform posX="2" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere61">
+        <Transform posX="6" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere62">
+        <Transform posX="4" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere63">
+        <Transform posX="0" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere64">
+        <Transform posX="0" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere65">
+        <Transform posX="1" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere66">
+        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere67">
+        <Transform posX="0" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere68">
+        <Transform posX="3" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere69">
+        <Transform posX="2" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere70">
+        <Transform posX="4" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere71">
+        <Transform posX="7" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere72">
+        <Transform posX="3" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere73">
+        <Transform posX="9" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere74">
+        <Transform posX="6" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere75">
+        <Transform posX="2" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere76">
+        <Transform posX="3" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere77">
+        <Transform posX="5" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere78">
+        <Transform posX="6" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere79">
+        <Transform posX="9" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere80">
+        <Transform posX="5" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere81">
+        <Transform posX="6" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere82">
+        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere83">
+        <Transform posX="7" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere84">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere85">
+        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere86">
+        <Transform posX="3" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere87">
+        <Transform posX="3" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere88">
+        <Transform posX="6" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere89">
+        <Transform posX="5" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere90">
+        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere91">
+        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere92">
+        <Transform posX="5" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere93">
+        <Transform posX="3" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere94">
+        <Transform posX="6" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere95">
+        <Transform posX="5" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere96">
+        <Transform posX="1" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere97">
+        <Transform posX="2" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere98">
+        <Transform posX="8" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere99">
+        <Transform posX="6" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
     <GameObject name="MainCamera">
         <Transform posX="1" posY="2" posZ="107" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <Camera projectionType="0"/>
@@ -15,132 +315,304 @@
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
     </GameObject>
-    <GameObject name="Env_Sphere">
-        <Transform posX="4" posY="1" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
-            <RenderPass pass="7" depthStencilState="0"/>
-        </MeshRenderer>
-        <SphereCollider radius="0.5" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="Sphere">
-        <Transform posX="-6.5" posY="5.5999999" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+    <GameObject name="Sphere0">
+        <Transform posX="2" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="cube">
-        <Transform posX="-6.5" posY="0.60000002" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
-            <RenderPass pass="0" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="tessellation_cube">
-        <Transform posX="-7" posY="1.5" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Tessellation_Material" mesh="Cylinder">
-            <RenderPass pass="5" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="stencil_cube1">
-        <Transform posX="-10.5" posY="0" posZ="120" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
-            <RenderPass pass="1" depthStencilState="1"/>
-        </MeshRenderer>
-    </GameObject>
-    <GameObject name="Terrain_obj">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="TerrainMaterial" mesh="Terrain">
-            <RenderPass pass="6" depthStencilState="0"/>
-        </MeshRenderer>
-    </GameObject>
-    <GameObject name="UI_Quad">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <UIImage posX="-60" posY="320" sizeX="240" sizeY="180"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Debug_UI_Material" mesh="Quad">
-            <RenderPass pass="11" depthStencilState="0"/>
-        </MeshRenderer>
-    </GameObject>
-    <GameObject name="UI_Button">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Debug_UI_Material" mesh="Quad">
-            <RenderPass pass="11" depthStencilState="0"/>
-        </MeshRenderer>
-    </GameObject>
-    <GameObject name="house">
-        <Transform posX="0" posY="0" posZ="130" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="HouseModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="Kachujin_OBJ">
-        <Transform posX="-1.6835666" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Dismissing"/>
-            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="250" posY="100"/>
-            <Clip name="Run" animIndex="1" isLoop="false" posX="450" posY="100"/>
-            <Clip name="Slash" animIndex="2" isLoop="false" posX="509" posY="228"/>
-            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-        </Animator>
-    </GameObject>
-    <GameObject name="Dreyar_OBJ">
-        <Transform posX="3" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="FireParticle">
-        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
-            <RenderPass pass="10" depthStencilState="3"/>
-        </MeshRenderer>
-        <ParticleSystem/>
-    </GameObject>
-    <GameObject name="skyBox">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="SkyBoxMaterial" mesh="Sphere">
+    <GameObject name="Sphere1">
+        <Transform posX="7" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
     </GameObject>
-    <GameObject name="Kachujin">
-        <Transform posX="1" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Sphere2">
+        <Transform posX="9" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Dismissing"/>
-            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="250" posY="100"/>
-            <Clip name="Run" animIndex="1" isLoop="false" posX="458" posY="27"/>
-            <Clip name="Slash" animIndex="2" isLoop="false" posX="650" posY="100"/>
-            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-        </Animator>
     </GameObject>
-    <GameObject name="Kachujin1">
-        <Transform posX="6.7933741" posY="0" posZ="117" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Sphere3">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Dismissing"/>
-            <Clip name="Dismissing" animIndex="0" isLoop="false" posX="250" posY="100"/>
-            <Clip name="Run" animIndex="1" isLoop="false" posX="450" posY="100"/>
-            <Clip name="Slash" animIndex="2" isLoop="false" posX="513" posY="219"/>
-            <Transition clipA="Dismissing" clipB="Run" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Run" clipB="Slash" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-            <Transition clipA="Slash" clipB="Dismissing" transitionDuration="1" transitionOffset="0" hasExitTime="false"/>
-        </Animator>
+    </GameObject>
+    <GameObject name="Sphere4">
+        <Transform posX="4" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere5">
+        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere6">
+        <Transform posX="5" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere7">
+        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere8">
+        <Transform posX="8" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere9">
+        <Transform posX="9" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere10">
+        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere11">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere12">
+        <Transform posX="6" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere13">
+        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere14">
+        <Transform posX="4" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere15">
+        <Transform posX="4" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere16">
+        <Transform posX="8" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere17">
+        <Transform posX="5" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere18">
+        <Transform posX="4" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere19">
+        <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere20">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere21">
+        <Transform posX="4" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere22">
+        <Transform posX="7" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere23">
+        <Transform posX="5" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere24">
+        <Transform posX="3" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere25">
+        <Transform posX="7" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere26">
+        <Transform posX="6" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere27">
+        <Transform posX="3" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere28">
+        <Transform posX="0" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere29">
+        <Transform posX="4" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere30">
+        <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere31">
+        <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere32">
+        <Transform posX="6" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere33">
+        <Transform posX="5" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere34">
+        <Transform posX="1" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere35">
+        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere36">
+        <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere37">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere38">
+        <Transform posX="8" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere39">
+        <Transform posX="7" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere40">
+        <Transform posX="8" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere41">
+        <Transform posX="1" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere42">
+        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere43">
+        <Transform posX="0" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere44">
+        <Transform posX="2" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere45">
+        <Transform posX="2" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere46">
+        <Transform posX="8" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere47">
+        <Transform posX="8" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere48">
+        <Transform posX="5" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Sphere49">
+        <Transform posX="2" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
     </GameObject>
 </Scene>

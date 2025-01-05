@@ -24,7 +24,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestScene();
+	LoadTestInstancingScene();
 }
 void SceneManager::LoadTestScene2()
 {
@@ -1177,7 +1177,67 @@ void SceneManager::LoadTestScene()
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"skyBox", skyBoxRenderer,
 		L"SkyBoxMaterial", L"Sphere");
 }
+void SceneManager::LoadTestInstancingScene()
+{
+	_activeScene = make_shared<Scene>();
 
+	 // MainCamera
+	SaveAndLoadGameObjectToXML(L"test_scene", L"MainCamera",
+		GP.centerPos + Vec3(-2.0f, 2.f, -10.0f));
+	auto camera = make_shared<Camera>();
+	camera->SetProjectionType(ProjectionType::Perspective);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainCamera", camera);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainCamera", make_shared<MoveObject>());
+
+	// UICamera
+	SaveAndLoadGameObjectToXML(L"test_scene", L"UICamera", Vec3(0, 0, -3));
+	auto uiCamera = make_shared<Camera>();
+	uiCamera->SetProjectionType(ProjectionType::Orthographic);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"UICamera", uiCamera);
+
+	// MainLight
+	SaveAndLoadGameObjectToXML(L"test_scene", L"MainLight",
+		Vec3(-28.0f, 37.0f, 112.0f), Vec3::Zero, Vec3(10.0f, 10.0f, 10.0f));
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainLight", make_shared<Light>());
+	auto lightRenderer = make_shared<MeshRenderer>();
+	lightRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	lightRenderer->SetModel(nullptr);
+	lightRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SimpleMaterial"));
+	lightRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	lightRenderer->AddRenderPass();
+	lightRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	lightRenderer->GetRenderPasses()[0]->SetMeshRenderer(lightRenderer);
+	lightRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"MainLight")->transform());
+	lightRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainLight", lightRenderer,
+		L"SimpleMaterial", L"Sphere");
+
+	// Normal Sphere
+	int count = 0;
+	for (int i = 0; i < 50; i++)
+	{
+		wstring baseName = L"Sphere";
+		wstring newName = baseName + to_wstring(count);
+		SaveAndLoadGameObjectToXML(L"test_scene", newName,
+			Vec3(rand() % 10, 0, rand() % 10));
+		auto sphereRenderer = make_shared<MeshRenderer>();
+		sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+		sphereRenderer->SetModel(nullptr);
+		sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		sphereRenderer->AddRenderPass();
+		sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
+		sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+		sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereRenderer,
+			L"DefaultMaterial", L"Sphere");
+		//auto sphereCollider = make_shared<SphereCollider>();
+		//sphereCollider->SetRadius(1.0f);
+		//AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereCollider);
+		count++;
+	}
+}
 void SceneManager::SaveAndLoadGameObjectToXML(const wstring& sceneName, const wstring& name, const Vec3& position, const Vec3& rotation, const Vec3& scale, shared_ptr<GameObject> parent)
 {
 	wstring path = L"Resource/Scene/" + sceneName + L".xml";

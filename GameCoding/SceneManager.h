@@ -33,6 +33,7 @@ public:
 	void LoadScene(wstring sceneName);
 	void LoadTestScene();
 	void LoadTestScene2();
+	void LoadTestInstancingScene();
 
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
 
