@@ -3,8 +3,8 @@
 struct VertexIn
 {
 	float3 PosL     : POSITION;
-	float2 Tex      : TEXCOORD0;
-	float2 BoundsY  : TEXCOORD1;
+	float2 Tex      : TEXCOORD;
+	float2 BoundsY  : BOUNDY;
 };
 
 struct VertexOut
