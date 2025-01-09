@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Model.h"
 struct Clip;
 struct Transition;
 class MonoBehaviour;
+
 
 struct AvailableFunction
 {
@@ -114,6 +116,9 @@ public:
 
 	vector<AvailableFunction> GetAvailableFunctions();
 
+	void HandleTransitionBlend(shared_ptr<Transition>& transition);
+	BlendAnimDesc GetBlendAnimDesc() { return _blendAnimDesc; }
+
 	shared_ptr<Clip> _entry;
 	shared_ptr<Clip> _currClip;
 	shared_ptr<Transition> _currTransition;
@@ -134,5 +139,10 @@ public:
 	bool GetBool(const string& name);
 	int GetInt(const string& name);
 	float GetFloat(const string& name);
+
+private:
+	BlendAnimDesc _blendAnimDesc;
+	float animationSumTime = 0.0f;
+	shared_ptr<Model> _model;
 };
 

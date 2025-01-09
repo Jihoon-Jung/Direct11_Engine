@@ -30,6 +30,14 @@ public:
 	shared_ptr<Model> GetModel() { return _model; }
 	shared_ptr<Texture> GetTexture() { return GetMaterial()->GetTexture(); }
 	shared_ptr<Buffer> GetMaterialBuffer();
+
+	InstanceID GetInstanceID_DefaultMesh() {
+		return make_pair((uint64)_mesh.get(), (uint64)_material.get());
+	}
+	InstanceID GetInstanceID_ModelMesh() {
+		return make_pair((uint64)_model.get(), (uint64)_material.get());
+	}
+
 private:
 	ComPtr<ID3D11Device> _device;
 

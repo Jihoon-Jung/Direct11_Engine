@@ -12,6 +12,7 @@
     </InputLayouts>
     <Slots>
         <Slot name="CameraBuffer" index="0"/>
+        <Slot name="CheckInstancingObject" index="6"/>
         <Slot name="LightAndCameraPos" index="4"/>
         <Slot name="LightDesc" index="3"/>
         <Slot name="LightMaterial" index="2"/>

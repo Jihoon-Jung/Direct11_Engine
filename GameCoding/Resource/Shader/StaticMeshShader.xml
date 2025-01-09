@@ -14,6 +14,7 @@
         <Slot name="BonIndex" index="6"/>
         <Slot name="BoneBuffer" index="5"/>
         <Slot name="CameraBuffer" index="0"/>
+        <Slot name="CheckInstancingObject" index="8"/>
         <Slot name="LightAndCameraPos" index="4"/>
         <Slot name="LightDesc" index="3"/>
         <Slot name="LightMaterial" index="2"/>

@@ -3,12 +3,20 @@
 #include "Pipeline.h"
 #include "Buffer.h"
 #include "GameObject.h"
+#include "InstancingBuffer.h"
+
+#define MAX_MODEL_INSTANCE 500
 
 enum class FilterType
 {
 	NORMAL,
 	SHADOW_MAP,
 	GAUSSIAN_BLUR
+};
+
+struct InstancedBlendDesc
+{
+	BlendAnimDesc blendDesc[MAX_MODEL_INSTANCE];
 };
 
 class RenderManager
@@ -36,6 +44,15 @@ public:
 	void ClearRenderObject();
 	bool GetShadowMapFlag() { return _drawShadowMapFlag; }
 
+	// for instancing
+	void ClearData();
+	void GetDefaultRenderObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects);
+	void DrawInstancingDefaultRenderObject(bool isEnv);
+	void GetStaticMeshObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects);
+	void DrawInstancingStaticMeshObject(bool isEnv);
+	void GetAnimatedMeshObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects);
+	void DrawInstancingAnimatedMeshObject(bool isEnv);
+	void AddData(InstanceID instanceId, InstancingData& data);
 	shared_ptr<Texture> _envTexture;
 
 private:
@@ -56,5 +73,10 @@ private:
 	FilterType _filterType = FilterType::SHADOW_MAP;
 	bool _drawShadowMapFlag = false;
 
+	map<InstanceID, shared_ptr<InstancingBuffer>> _buffers;
+	map<InstanceID, vector<shared_ptr<GameObject>>> cache_DefaultRender;
+	map<InstanceID, vector<shared_ptr<GameObject>>> cache_StaticMeshRender;
+	map<InstanceID, vector<shared_ptr<GameObject>>> cache_AnimatedRender;
+	shared_ptr<InstancedBlendDesc> _cache_blendDescs;
 };
 

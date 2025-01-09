@@ -179,6 +179,7 @@
     <ClInclude Include="ImZoomSlider.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathHelper.h" />
@@ -283,6 +284,7 @@
     </ClCompile>
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MathHelper.cpp" />

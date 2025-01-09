@@ -4,11 +4,13 @@
 #include "SamplerState.h"
 #include "BlendState.h"
 #include "RasterizerStateInfo.h"
+#include "InstancingBuffer.h"
 
 class MeshRenderer;
 class Animator;
 class Transition;
 struct RasterizerStateInfo;
+struct InstancedBlendDesc;
 
 enum class Pass
 {
@@ -35,6 +37,9 @@ public:
 
 	void Render(bool isEnv);
 	void DefaultRender(bool isEnv);
+	void DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer);
+	void StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer);
+	void AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer, const InstancedBlendDesc& desc);
 	void EnvironmentMapRender();
 	void OutlineRender(bool isEnv);
 	void GaussianBlurRender(bool isEnv);

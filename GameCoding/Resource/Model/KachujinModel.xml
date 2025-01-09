@@ -5,8 +5,8 @@
     <Shader>AnimatedMesh_Shader</Shader>
     <Material>Kachujin/Kachujin</Material>
     <Animations>
-        <Animation>Kachujin/Dismissing</Animation>
         <Animation>Kachujin/Run</Animation>
         <Animation>Kachujin/Slash</Animation>
+        <Animation>Kachujin/Dismissing</Animation>
     </Animations>
 </Model>

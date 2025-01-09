@@ -6,6 +6,7 @@
 
 void ResourceManager::Init()
 {
+	SaveResource();
 	AddResource();
 }
 
@@ -48,6 +49,7 @@ void ResourceManager::SaveResource()
 		{L"LightDesc", 3},
 		{L"LightAndCameraPos", 4},
 		{L"LightSpaceTransform", 5},
+		{L"CheckInstancingObject", 6},
 		{L"texture0", 0},
 		{L"normalMap", 1},
 		{L"specularMap", 2},
@@ -218,6 +220,7 @@ void ResourceManager::SaveResource()
 		{L"BoneBuffer", 5},
 		{L"BonIndex", 6},
 		{L"LightSpaceTransform", 7},
+		{L"CheckInstancingObject", 8},
 		{L"texture0", 0},
 		{L"normalMap", 1},
 		{L"specularMap", 2},
@@ -236,6 +239,7 @@ void ResourceManager::SaveResource()
 		{L"LightAndCameraPos", 4},
 		{L"BlendBuffer", 5},
 		{L"LightSpaceTransform", 6},
+		{L"CheckInstancingObject", 7},
 		{L"normalMap", 0},
 		{L"specularMap", 1},
 		{L"diffuseMap", 2},

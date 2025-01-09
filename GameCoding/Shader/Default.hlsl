@@ -2,12 +2,16 @@
 
 struct VS_INPUT
 {
-	float4 position : POSITION;
-	float2 uv : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
-	float4 blendIndices : BLENDINDICES;
-	float4 blendWeights : BLENDWEIGHTS;
+	float4 position : POSITION;    // => Slot 0 (PER_VERTEX)
+	float2 uv       : TEXCOORD;    // => Slot 0 (PER_VERTEX)
+	float3 normal   : NORMAL;      // => Slot 0 (PER_VERTEX)
+	float3 tangent  : TANGENT;     // => Slot 0 (PER_VERTEX)
+	float4 blendIndices : BLENDINDICES; // => Slot 0
+	float4 blendWeights : BLENDWEIGHTS; // => Slot 0
+
+	// 인스턴싱 데이터 => Slot 1 (PER_INSTANCE)
+	uint instanceID : SV_INSTANCEID;
+	row_major matrix world : INST;
 };
 
 struct VS_OUTPUT
@@ -59,6 +63,14 @@ cbuffer LightSpaceTransformBuffer : register(b5)
 	row_major matrix light_projectionMatrix;
 };
 
+cbuffer CheckInstancingObject : register(b6)
+{
+	float isInstancing;
+	float padding3;
+	float padding4;
+	float padding5;
+}
+
 SamplerState sampler0 : register(s0);
 SamplerState shadowSampler : register(s1);
 Texture2D texture0 : register(t0);
@@ -71,18 +83,25 @@ VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
-	output.position = mul(input.position, worldMatrix);
+	matrix world;
+	
+	if (isInstancing > 0.0)
+		world = input.world;
+	else
+		world = worldMatrix;
+
+	output.position = mul(input.position, world);
 	output.worldPosition = output.position.xyz;
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 
-	output.lightSpacePosition = mul(input.position, worldMatrix);
+	output.lightSpacePosition = mul(input.position, world);
 	output.lightSpacePosition = mul(output.lightSpacePosition, light_viewMatrix);
 	output.lightSpacePosition = mul(output.lightSpacePosition, light_projectionMatrix);
 
 	output.uv = input.uv;
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+	output.normal = mul(input.normal, (float3x3)world);
+	output.tangent = mul(input.tangent, (float3x3)world);
 
 	return output;
 }

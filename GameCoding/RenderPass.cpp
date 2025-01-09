@@ -79,7 +79,13 @@ void RenderPass::DefaultRender(bool isEnv)
 
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
+	CheckInstancingObject flag;
+	flag.isInstancing = 0.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
 
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
 
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -209,6 +215,502 @@ void RenderPass::DefaultRender(bool isEnv)
 	//DEVICECONTEXT->PSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightDesc"), 1, nullCB);
 	//DEVICECONTEXT->PSSetConstantBuffers(shader->GetShaderSlot()->GetSlotNumber(L"LightMaterial"), 1, nullCB);
 
+}
+
+void RenderPass::DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer)
+{
+	_transformPtr = _transform.lock();
+
+	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
+	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
+
+	if (_transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	else
+		assert(0);
+
+	if (isEnv)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
+	else if (RENDER.GetShadowMapFlag())
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
+	else
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
+
+	shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
+	if (lightObject != nullptr)
+	{
+		lightObject->GetLightBuffer();
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+	}
+
+	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+
+	LightAndCameraPos lightDirection;
+	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
+	Vec3 pos = cameraObject->transform()->GetLocalPosition();
+
+	shared_ptr<Buffer> light = make_shared<Buffer>();
+	light->CreateConstantBuffer<LightAndCameraPos>();
+	light->CopyData(lightDirection);
+
+	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
+
+	CheckInstancingObject flag;
+	flag.isInstancing = 1.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
+
+	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	shared_ptr<Buffer> buffer = _meshRenderer->GetMesh()->GetBuffer();
+	uint32 stride = buffer->GetStride();
+	uint32 offset = 0;
+
+	shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
+	shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+
+	RasterizerStateInfo rasterzerStateInfo = _meshRenderer->GetRasterzerStates();
+	/*if (isUseTessellation)
+		rasterzerStateInfo.fillMode = D3D11_FILL_WIREFRAME;*/
+	rasterizerState->CreateRasterizerState(rasterzerStateInfo);
+
+	// inputAssembler
+	DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+	DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+	instancingBuffer->PushData();
+	uint32 instancingStride = instancingBuffer->GetBuffer()->GetStride();
+	DEVICECONTEXT->IASetVertexBuffers(instancingBuffer->GetBuffer()->GetSlot(), 1, instancingBuffer->GetBuffer()->GetVertexBuffer().GetAddressOf(), &instancingStride, &offset);
+	
+	DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
+	DEVICECONTEXT->IASetPrimitiveTopology(topology);
+
+	// VertexShader
+	ComPtr<ID3D11VertexShader> vertexShader = shader->GetVertexShader();
+	ComPtr<ID3D11PixelShader> pixelShader = shader->GetPixelShader();
+
+	if (vertexShader != nullptr)
+		DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
+
+	if (pixelShader != nullptr)
+		DEVICECONTEXT->PSSetShader(pixelShader.Get(), nullptr, 0);
+
+
+	// Rasterizer
+	DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+	shared_ptr<Texture> defaultTexture = _meshRenderer->GetMaterial()->GetTexture();
+	shared_ptr<Texture> normalMap = _meshRenderer->GetMaterial()->GetNormalMap();
+	shared_ptr<Texture> specularMap = _meshRenderer->GetMaterial()->GetSpecularMap();
+	shared_ptr<Texture> diffuseMap = _meshRenderer->GetMaterial()->GetDiffuseMap();
+
+	// Set Default Texture
+	if (defaultTexture != nullptr)
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
+
+	// Set NormalMap
+	if (normalMap != nullptr)
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, normalMap->GetShaderResourceView());
+
+	// Set SpecularMap
+	if (specularMap != nullptr)
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
+
+	// Set DiffuseMap
+	if (diffuseMap != nullptr)
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
+
+	if (!RENDER.GetShadowMapFlag())
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
+
+	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
+	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+	samplerState->CreateSamplerState();
+
+	shared_ptr<SamplerState> shadow_SamplerState = make_shared<SamplerState>();
+	shadow_SamplerState->CreateShadowSamplerState();
+
+	shared_ptr<BlendState> blendState = make_shared<BlendState>();
+	blendState->CreateBlendState();
+
+	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+	DEVICECONTEXT->PSSetSamplers(1, 1, shadow_SamplerState->GetSamplerState().GetAddressOf());
+
+	// OutputMerger
+	DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+	DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+	DEVICECONTEXT->DrawIndexedInstanced(
+		_meshRenderer->GetMesh()->GetGeometry()->GetIndices().size(), // 인스턴스당 인덱스 수
+		instancingBuffer->GetCount(),  // 인스턴스 수 (InstancingBuffer에 추가된 데이터 개수)
+		0,  // 시작 인덱스
+		0,  // 기본 정점 위치
+		0   // 시작 인스턴스 위치
+	);
+
+	shader->ResetShaderResources();
+}
+
+void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer)
+{
+	_transformPtr = _transform.lock();
+
+	shared_ptr<Model> model = _meshRenderer->GetModel();
+	shared_ptr<Shader> shader = _meshRenderer->GetShader();
+
+	BoneBuffer boneDesc;
+
+	const uint32 boneCount = model->GetBoneCount();
+	for (uint32 i = 0; i < boneCount; i++)
+	{
+		shared_ptr<ModelBone> bone = model->GetBoneByIndex(i);
+		boneDesc.BoneTransforms[i] = bone->transform;
+	}
+
+	shared_ptr<Buffer> boneBuffer = make_shared<Buffer>();
+	boneBuffer->CreateConstantBuffer<BoneBuffer>();
+	boneBuffer->CopyData(boneDesc);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BoneBuffer", 1, boneBuffer);
+
+	CheckInstancingObject flag;
+	flag.isInstancing = 1.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
+
+	const auto& meshes = model->GetMeshes();
+	for (auto& mesh : meshes)
+	{
+		shared_ptr<Texture> normalMap;
+		shared_ptr<Texture> specularMap;
+		shared_ptr<Texture> diffuseMap;
+
+		if (mesh->material)
+		{
+			normalMap = mesh->material->GetNormalMap();
+			specularMap = mesh->material->GetSpecularMap();
+			diffuseMap = mesh->material->GetDiffuseMap();
+
+		}
+
+		// BoneIndex
+		BoneIndex boneIndex;
+		boneIndex.index = mesh->boneIndex;
+		shared_ptr<Buffer> boneIndexBuffer = make_shared<Buffer>();
+		boneIndexBuffer->CreateConstantBuffer<BoneIndex>();
+		boneIndexBuffer->CopyData(boneIndex);
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BonIndex", 1, boneIndexBuffer);
+
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
+
+		if (_transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		else
+			assert(0);
+
+		if (isEnv)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
+		else if (RENDER.GetShadowMapFlag())
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
+		else
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
+
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
+		if (lightObject != nullptr)
+		{
+			lightObject->GetLightBuffer();
+			shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		}
+
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+
+		// Light
+		LightAndCameraPos lightDirection;
+		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
+
+		shared_ptr<Buffer> light = make_shared<Buffer>();
+		light->CreateConstantBuffer<LightAndCameraPos>();
+		light->CopyData(lightDirection);
+
+
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
+
+
+
+		D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+		shared_ptr<Buffer> buffer = mesh->GetBuffer();
+		uint32 stride = buffer->GetStride();
+		uint32 offset = 0;
+
+		shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
+		shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+
+		RasterizerStateInfo rasterzerStateInfo = _meshRenderer->GetRasterzerStates();
+		/*if (isUseTessellation)
+			rasterzerStateInfo.fillMode = D3D11_FILL_WIREFRAME;*/
+		rasterizerState->CreateRasterizerState(rasterzerStateInfo);
+
+		// inputAssembler
+		DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+		DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+		instancingBuffer->PushData();
+		uint32 instancingStride = instancingBuffer->GetBuffer()->GetStride();
+		uint32 slot = instancingBuffer->GetBuffer()->GetSlot();
+		DEVICECONTEXT->IASetVertexBuffers(slot, 1, instancingBuffer->GetBuffer()->GetVertexBuffer().GetAddressOf(), &instancingStride, &offset);
+
+		DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
+		DEVICECONTEXT->IASetPrimitiveTopology(topology);
+
+		// VertexShader
+		ComPtr<ID3D11VertexShader> vertexShader = shader->GetVertexShader();
+		ComPtr<ID3D11PixelShader> pixelShader = shader->GetPixelShader();
+
+		normalMap = _meshRenderer->GetMaterial()->GetNormalMap();
+		specularMap = _meshRenderer->GetMaterial()->GetSpecularMap();
+		diffuseMap = _meshRenderer->GetMaterial()->GetDiffuseMap();
+
+
+		// Set NormalMap
+		if (normalMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, normalMap->GetShaderResourceView());
+
+		// Set SpecularMap
+		if (specularMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
+
+		// Set DiffuseMap
+		if (diffuseMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
+
+		if (!RENDER.GetShadowMapFlag())
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
+
+		if (vertexShader != nullptr)
+			DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
+
+		if (pixelShader != nullptr)
+			DEVICECONTEXT->PSSetShader(pixelShader.Get(), nullptr, 0);
+
+
+
+		// Rasterizer
+		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
+		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+		samplerState->CreateSamplerState();
+
+		shared_ptr<SamplerState> shadow_SamplerState = make_shared<SamplerState>();
+		shadow_SamplerState->CreateShadowSamplerState();
+
+		shared_ptr<BlendState> blendState = make_shared<BlendState>();
+		blendState->CreateBlendState();
+
+		DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+		DEVICECONTEXT->PSSetSamplers(1, 1, shadow_SamplerState->GetSamplerState().GetAddressOf());
+
+		// OutputMerger
+		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+		//DEVICECONTEXT->DrawIndexed(mesh->GetGeometry()->GetIndices().size(), 0, 0);
+
+		uint32 instanceCount = instancingBuffer->GetCount();
+		DEVICECONTEXT->DrawIndexedInstanced(
+			mesh->GetGeometry()->GetIndices().size(), // 인스턴스당 인덱스 수
+			instanceCount,  // 인스턴스 수 (InstancingBuffer에 추가된 데이터 개수)
+			0,  // 시작 인덱스
+			0,  // 기본 정점 위치
+			0   // 시작 인스턴스 위치
+		);
+	}
+
+	shader->ResetShaderResources();
+}
+
+void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer, const InstancedBlendDesc& desc)
+{
+	_transformPtr = _transform.lock();
+
+	shared_ptr<Animator> animator = _meshRenderer->GetGameObject()->GetComponent<Animator>();
+	shared_ptr<Model> model = _meshRenderer->GetModel();
+	shared_ptr<Shader> shader = _meshRenderer->GetShader();
+
+	shared_ptr<Buffer> blendBuffer = make_shared<Buffer>();
+
+
+	blendBuffer->CreateConstantBuffer<InstancedBlendDesc>();
+	blendBuffer->CopyData(desc);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BlendBuffer", 1, blendBuffer);
+	UINT animationTexture_Slot = shader->GetShaderSlot()->GetSlotNumber(L"TransformMap");
+	shader->PushShaderResourceToShader(ShaderType::VERTEX_SHADER, L"TransformMap", 1, model->GetAnimationTextureBuffer());
+
+	CheckInstancingObject flag;
+	flag.isInstancing = 1.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
+
+	const auto& meshes = model->GetMeshes();
+	for (auto& mesh : meshes)
+	{
+		shared_ptr<Texture> normalMap;
+		shared_ptr<Texture> specularMap;
+		shared_ptr<Texture> diffuseMap;
+
+		if (mesh->material)
+		{
+			normalMap = mesh->material->GetNormalMap();
+			specularMap = mesh->material->GetSpecularMap();
+			diffuseMap = mesh->material->GetDiffuseMap();
+
+		}
+
+		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
+
+		if (_transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		else
+			assert(0);
+
+		if (isEnv)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetEnvCameraBuffer());
+		else if (RENDER.GetShadowMapFlag())
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetShadowCameraBuffer());
+		else
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
+
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"LightSpaceTransform", 1, cameraObject->GetShadowCameraBuffer());
+
+		shared_ptr<GameObject> lightObject = SCENE.GetActiveScene()->GetMainLight();
+		if (lightObject != nullptr)
+		{
+			lightObject->GetLightBuffer();
+			shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightDesc", 1, lightObject->GetLightBuffer());
+		}
+
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
+
+		// Light
+		LightAndCameraPos lightDirection;
+		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
+
+		shared_ptr<Buffer> light = make_shared<Buffer>();
+		light->CreateConstantBuffer<LightAndCameraPos>();
+		light->CopyData(lightDirection);
+
+
+		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
+
+
+
+		D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+		shared_ptr<Buffer> buffer = mesh->GetBuffer();
+		uint32 stride = buffer->GetStride();
+		uint32 offset = 0;
+
+		shared_ptr<InputLayout> inputLayout = shader->GetInputLayout();
+		shared_ptr<RasterizerState> rasterizerState = make_shared<RasterizerState>();
+
+		RasterizerStateInfo rasterzerStateInfo = _meshRenderer->GetRasterzerStates();
+		rasterizerState->CreateRasterizerState(rasterzerStateInfo);
+
+		// inputAssembler
+		DEVICECONTEXT->IASetVertexBuffers(0, 1, buffer->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+		DEVICECONTEXT->IASetIndexBuffer(buffer->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+		instancingBuffer->PushData();
+		uint32 instancingStride = instancingBuffer->GetBuffer()->GetStride();
+		uint32 slot = instancingBuffer->GetBuffer()->GetSlot();
+		DEVICECONTEXT->IASetVertexBuffers(slot, 1, instancingBuffer->GetBuffer()->GetVertexBuffer().GetAddressOf(), &instancingStride, &offset);
+
+		DEVICECONTEXT->IASetInputLayout(shader->GetInputLayout()->GetInputLayout().Get());
+		DEVICECONTEXT->IASetPrimitiveTopology(topology);
+
+		// VertexShader
+		ComPtr<ID3D11VertexShader> vertexShader = shader->GetVertexShader();
+		ComPtr<ID3D11PixelShader> pixelShader = shader->GetPixelShader();
+
+		normalMap = _meshRenderer->GetMaterial()->GetNormalMap();
+		specularMap = _meshRenderer->GetMaterial()->GetSpecularMap();
+		diffuseMap = _meshRenderer->GetMaterial()->GetDiffuseMap();
+
+
+		// Set NormalMap
+		if (normalMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"normalMap", 1, normalMap->GetShaderResourceView());
+
+		// Set SpecularMap
+		if (specularMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"specularMap", 1, specularMap->GetShaderResourceView());
+
+		// Set DiffuseMap
+		if (diffuseMap != nullptr)
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"diffuseMap", 1, diffuseMap->GetShaderResourceView());
+
+		if (!RENDER.GetShadowMapFlag())
+			shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
+
+		if (vertexShader != nullptr)
+			DEVICECONTEXT->VSSetShader(vertexShader.Get(), nullptr, 0);
+
+		if (pixelShader != nullptr)
+			DEVICECONTEXT->PSSetShader(pixelShader.Get(), nullptr, 0);
+
+
+
+		// Rasterizer
+		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
+
+		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
+		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+
+		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
+		samplerState->CreateSamplerState();
+
+		shared_ptr<SamplerState> shadow_SamplerState = make_shared<SamplerState>();
+		shadow_SamplerState->CreateSamplerState();
+
+		shared_ptr<BlendState> blendState = make_shared<BlendState>();
+		blendState->CreateBlendState();
+
+		DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
+		DEVICECONTEXT->PSSetSamplers(1, 1, shadow_SamplerState->GetSamplerState().GetAddressOf());
+
+		// OutputMerger
+		DEVICECONTEXT->OMSetBlendState(blendState->GetBlendState().Get(), nullptr, 0xFFFFFFFF);
+		DEVICECONTEXT->OMSetDepthStencilState(depthStencilState->GetDepthStecilState().Get(), 1);
+		//DEVICECONTEXT->DrawIndexed(mesh->GetGeometry()->GetIndices().size(), 0, 0);
+
+		uint32 instanceCount = instancingBuffer->GetCount();
+		DEVICECONTEXT->DrawIndexedInstanced(
+			mesh->GetGeometry()->GetIndices().size(), // 인스턴스당 인덱스 수
+			instanceCount,  // 인스턴스 수 (InstancingBuffer에 추가된 데이터 개수)
+			0,  // 시작 인덱스
+			0,  // 기본 정점 위치
+			0   // 시작 인스턴스 위치
+		);
+	}
+
+	shader->ResetShaderResources();
 }
 
 void RenderPass::EnvironmentMapRender()
@@ -870,6 +1372,14 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BoneBuffer", 1, boneBuffer);
 
+	CheckInstancingObject flag;
+	flag.isInstancing = 1.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
+
 	const auto& meshes = model->GetMeshes();
 	for (auto& mesh : meshes)
 	{
@@ -1023,130 +1533,29 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 	if (animator != nullptr)
 	{
-		shared_ptr<Clip> currClip = animator->_currClip;
-		shared_ptr<Transition> currTransition = currClip->transition;// animator->_currTransition;
-		int currIndex = currClip->animIndex;
-		int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
-		_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
-
-		// 현재 애니메이션 업데이트
-		shared_ptr<ModelAnimation> current = model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
-		if (current)
-		{
-			// 현재 프레임의 시간 계산 (프레임 수를 프레임 레이트로 나누어 초 단위로 변환)
-			float clipLength = (current->frameCount - 1) / current->frameRate;
-			float currentTime = currClip->progressRatio * clipLength;
-
-			float currentRatio = currClip->progressRatio;
-			float frameStep = 1.0f / current->frameCount;  // 한 프레임당 증가량
-
-			// 이벤트 체크
-			for (auto& event : currClip->events)
-			{
-				// 현재 프레임 구간에 이벤트가 있는지 확인
-				if (!event.isFuctionCalled && event.time > (currentRatio - frameStep) && event.time <= currentRatio)
-				{
-					animator->InvokeAnimationEvent(event.function);
-					event.isFuctionCalled = true;
-				}
-			}
-
-			currClip->progressRatio = static_cast<float>(_blendAnimDesc.curr.currFrame) / (current->frameCount - 1);
-
-			// exitTime 도달 여부 체크
-			if (currClip->transition && currClip->transition->hasExitTime)
-			{
-				if (currClip->progressRatio >= currClip->transition->exitTime)
-				{
-					currClip->isEndFrame = true;
-				}
-			}
-
-			float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
-			_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
-
-			// 한 프레임이 끝났는지 체크
-			if (_blendAnimDesc.curr.sumTime >= timePerFrame)
-			{
-				_blendAnimDesc.curr.sumTime = 0.f;
-
-				// 마지막 프레임 체크
-				if (_blendAnimDesc.curr.currFrame >= current->frameCount - 1)
-				{
-					currClip->isEndFrame = true;
-
-					for (auto& event : currClip->events)
-					{
-						if (event.isFuctionCalled)
-							event.isFuctionCalled = false;
-					}
-
-					if (currClip->isLoop)
-					{
-						_blendAnimDesc.curr.currFrame = 0;
-						_blendAnimDesc.curr.nextFrame = 1;
-					}
-					else
-					{
-						_blendAnimDesc.curr.currFrame = current->frameCount - 1;
-						_blendAnimDesc.curr.nextFrame = current->frameCount - 1;
-					}
-				}
-				else
-				{
-					_blendAnimDesc.curr.currFrame++;
-					_blendAnimDesc.curr.nextFrame = min(_blendAnimDesc.curr.currFrame + 1, current->frameCount - 1);
-
-				}
-			}
-
-			_blendAnimDesc.curr.ratio = (_blendAnimDesc.curr.sumTime / timePerFrame);
-		}
-
-		// 트랜지션 처리
-		if (currTransition != nullptr)
-		{
-			// Case 1: Has Exit Time O + Condition O
-			if (currTransition->hasExitTime && currTransition->hasCondition)
-			{
-				if (currClip->isEndFrame && currTransition->flag)
-				{
-					HandleTransitionBlend(animator, currTransition, model);
-				}
-			}
-			// Case 2: Has Exit Time O + Condition X
-			else if (currTransition->hasExitTime && !currTransition->hasCondition)
-			{
-				if (currClip->isEndFrame)
-				{
-					HandleTransitionBlend(animator, currTransition, model);
-				}
-			}
-			// Case 3: Has Exit Time X + Condition O
-			else if (!currTransition->hasExitTime && currTransition->hasCondition)
-			{
-				if (currTransition->flag)
-				{
-					HandleTransitionBlend(animator, currTransition, model);
-				}
-			}
-			// Case 4: Has Exit Time X + Condition X는 의미 없으므로 구현하지 않음
-		}
-
-		_blendAnimDesc.curr.activeAnimation = 1;
-		_blendAnimDesc.next.activeAnimation = 1;
+		_blendAnimDesc = animator->GetBlendAnimDesc();
 	}
 	else
 	{
 		_blendAnimDesc.curr.activeAnimation = 0;
 		_blendAnimDesc.next.activeAnimation = 0;
 	}
+
 	blendBuffer->CreateConstantBuffer<BlendAnimDesc>();
 	blendBuffer->CopyData(_blendAnimDesc);
 
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BlendBuffer", 1, blendBuffer);
 	UINT animationTexture_Slot = shader->GetShaderSlot()->GetSlotNumber(L"TransformMap");
 	shader->PushShaderResourceToShader(ShaderType::VERTEX_SHADER, L"TransformMap", 1, model->GetAnimationTextureBuffer());
+
+	CheckInstancingObject flag;
+	flag.isInstancing = 1.0f;
+	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
+	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
+	instancingFlagBuffer->CopyData(flag);
+
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CheckInstancingObject", 1, instancingFlagBuffer);
+
 
 	const auto& meshes = model->GetMeshes();
 	for (auto& mesh : meshes)

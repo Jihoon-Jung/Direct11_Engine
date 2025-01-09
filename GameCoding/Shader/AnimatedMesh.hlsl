@@ -1,16 +1,21 @@
 
 #define MAX_MODEL_TRANSFORMS 250
 #define MAX_MODEL_KEYFRAMES 500
+#define MAX_MODEL_INSTANCE 500
 #include "LightHelper.hlsl"
 
 struct VS_INPUT
 {
-	float4 position : POSITION;
-	float2 uv : TEXCOORD;
-	float3 normal : NORMAL;
-	float3 tangent : TANGENT;
-	float4 blendIndices : BLENDINDICES;
-	float4 blendWeights : BLENDWEIGHTS;
+	float4 position : POSITION;    // => Slot 0 (PER_VERTEX)
+	float2 uv       : TEXCOORD;    // => Slot 0 (PER_VERTEX)
+	float3 normal   : NORMAL;      // => Slot 0 (PER_VERTEX)
+	float3 tangent  : TANGENT;     // => Slot 0 (PER_VERTEX)
+	float4 blendIndices : BLENDINDICES; // => Slot 0
+	float4 blendWeights : BLENDWEIGHTS; // => Slot 0
+
+	// 인스턴싱 데이터 => Slot 1 (PER_INSTANCE)
+	uint instanceID : SV_INSTANCEID;
+	row_major matrix world : INST;
 };
 
 struct VS_OUTPUT
@@ -79,7 +84,7 @@ struct blendFrameDesc
 
 cbuffer BlendBuffer : register(b5)
 {
-	blendFrameDesc blendFrames;
+	blendFrameDesc blendFrames[MAX_MODEL_INSTANCE];
 };
 
 cbuffer LightSpaceTransformBuffer : register(b6)
@@ -87,6 +92,14 @@ cbuffer LightSpaceTransformBuffer : register(b6)
 	row_major matrix light_viewMatrix;
 	row_major matrix light_projectionMatrix;
 };
+
+cbuffer CheckInstancingObject : register(b7)
+{
+	float isInstancing;
+	float padding3;
+	float padding4;
+	float padding5;
+}
 
 SamplerState sampler0 : register(s0);
 SamplerState shadowSampler : register(s1);
@@ -107,15 +120,15 @@ matrix GetAnimationMatrix(VS_INPUT input)
 	int nextFrame[2];
 	float ratio[2];
 
-	animIndex[0] = blendFrames.curr.animIndex;
-	currFrame[0] = blendFrames.curr.currFrame;
-	nextFrame[0] = blendFrames.curr.nextFrame;
-	ratio[0] = blendFrames.curr.ratio;
+	animIndex[0] = blendFrames[input.instanceID].curr.animIndex;
+	currFrame[0] = blendFrames[input.instanceID].curr.currFrame;
+	nextFrame[0] = blendFrames[input.instanceID].curr.nextFrame;
+	ratio[0] = blendFrames[input.instanceID].curr.ratio;
 
-	animIndex[1] = blendFrames.next.animIndex;
-	currFrame[1] = blendFrames.next.currFrame;
-	nextFrame[1] = blendFrames.next.nextFrame;
-	ratio[1] = blendFrames.next.ratio;
+	animIndex[1] = blendFrames[input.instanceID].next.animIndex;
+	currFrame[1] = blendFrames[input.instanceID].next.currFrame;
+	nextFrame[1] = blendFrames[input.instanceID].next.nextFrame;
+	ratio[1] = blendFrames[input.instanceID].next.ratio;
 
 	float4 c0, c1, c2, c3;
 	float4 n0, n1, n2, n3;
@@ -155,7 +168,7 @@ matrix GetAnimationMatrix(VS_INPUT input)
 			next = matrix(n0, n1, n2, n3);
 
 			matrix nextResult = lerp(curr, next, ratio[1]);
-			result = lerp(result, nextResult, blendFrames.blendRatio);
+			result = lerp(result, nextResult, blendFrames[input.instanceID].blendRatio);
 		}
 
 		transform += mul(weights[i], result);
@@ -168,7 +181,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	VS_OUTPUT output;
 	matrix m;
 
-	if (blendFrames.curr.activeAnimation == 1)
+	if (blendFrames[input.instanceID].curr.activeAnimation == 1)
 	{
 		m = GetAnimationMatrix(input); // 애니메이션 적용
 	}
@@ -181,9 +194,22 @@ VS_OUTPUT VS(VS_INPUT input)
 			0, 0, 0, 1
 			);
 	}
+
+	matrix world;
+
+	if (isInstancing > 0.0)
+		world = input.world;
+	else
+		world = matrix(  // identity matrix
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+			);
+
 	// 정점 변환
 	output.position = mul(input.position, m);
-	output.position = mul(output.position, worldMatrix);
+	output.position = mul(output.position, world);
 
 	// light space 변환
 	output.lightPosition = mul(output.position, light_viewMatrix);
@@ -197,10 +223,10 @@ VS_OUTPUT VS(VS_INPUT input)
 	// 노멀과 탄젠트에 애니메이션 행렬 적용 (회전 성분만 추출해서 곱함)
 	float3x3 rotationMatrix = (float3x3)m; // 애니메이션 매트릭스의 회전 부분만 사용
 	output.normal = normalize(mul(input.normal, rotationMatrix));
-	output.normal = normalize(mul(output.normal, (float3x3)worldMatrix));
+	output.normal = normalize(mul(output.normal, (float3x3)world));
 
 	output.tangent = mul(input.tangent, rotationMatrix); // 탄젠트 변환
-	output.tangent = mul(output.tangent, (float3x3)worldMatrix); // 월드 변환
+	output.tangent = mul(output.tangent, (float3x3)world); // 월드 변환
 
 	return output;
 }

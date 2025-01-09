@@ -317,6 +317,9 @@
     <ClInclude Include="ComponentFactory.h">
       <Filter>소스 파일\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="InstancingBuffer.h">
+      <Filter>소스 파일\Buffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -547,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="ComponentFactory.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingBuffer.cpp">
+      <Filter>소스 파일\Buffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

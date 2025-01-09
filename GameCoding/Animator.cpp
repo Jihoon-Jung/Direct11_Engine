@@ -4,7 +4,7 @@
 Animator::Animator()
 	:Super(ComponentType::Animator)
 {
-
+	
 }
 
 Animator::~Animator()
@@ -13,6 +13,8 @@ Animator::~Animator()
 
 void Animator::Start()
 {
+	
+
 	/*AddClip("Clip1", 2, false);
 	AddClip("Clip2", 0, false);
 	AddClip("Clip3", 1, false);
@@ -32,6 +34,122 @@ void Animator::Update()
 {
 	/*SetTransitionFlag(GetClip("Clip1")->transition, GP.test);
 	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);*/
+
+	if (_model == nullptr)
+		_model = GetGameObject()->GetComponent<MeshRenderer>()->GetModel();
+
+	shared_ptr<Clip> currClip = _currClip;
+	shared_ptr<Transition> currTransition = currClip->transition;// animator->_currTransition;
+	int currIndex = currClip->animIndex;
+	int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
+	_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
+
+	// 현재 애니메이션 업데이트
+	shared_ptr<ModelAnimation> current = _model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
+	if (current)
+	{
+		// 현재 프레임의 시간 계산 (프레임 수를 프레임 레이트로 나누어 초 단위로 변환)
+		float clipLength = (current->frameCount - 1) / current->frameRate;
+		float currentTime = currClip->progressRatio * clipLength;
+
+		float currentRatio = currClip->progressRatio;
+		float frameStep = 1.0f / current->frameCount;  // 한 프레임당 증가량
+
+		// 이벤트 체크
+		for (auto& event : currClip->events)
+		{
+			// 현재 프레임 구간에 이벤트가 있는지 확인
+			if (!event.isFuctionCalled && event.time > (currentRatio - frameStep) && event.time <= currentRatio)
+			{
+				InvokeAnimationEvent(event.function);
+				event.isFuctionCalled = true;
+			}
+		}
+
+		currClip->progressRatio = static_cast<float>(_blendAnimDesc.curr.currFrame) / (current->frameCount - 1);
+
+		// exitTime 도달 여부 체크
+		if (currClip->transition && currClip->transition->hasExitTime)
+		{
+			if (currClip->progressRatio >= currClip->transition->exitTime)
+			{
+				currClip->isEndFrame = true;
+			}
+		}
+
+		float timePerFrame = 1 / (current->frameRate * _blendAnimDesc.curr.speed);
+		_blendAnimDesc.curr.sumTime += TIME.GetDeltaTime();
+
+		// 한 프레임이 끝났는지 체크
+		if (_blendAnimDesc.curr.sumTime >= timePerFrame)
+		{
+			_blendAnimDesc.curr.sumTime = 0.f;
+
+			// 마지막 프레임 체크
+			if (_blendAnimDesc.curr.currFrame >= current->frameCount - 1)
+			{
+				currClip->isEndFrame = true;
+
+				for (auto& event : currClip->events)
+				{
+					if (event.isFuctionCalled)
+						event.isFuctionCalled = false;
+				}
+
+				if (currClip->isLoop)
+				{
+					_blendAnimDesc.curr.currFrame = 0;
+					_blendAnimDesc.curr.nextFrame = 1;
+				}
+				else
+				{
+					_blendAnimDesc.curr.currFrame = current->frameCount - 1;
+					_blendAnimDesc.curr.nextFrame = current->frameCount - 1;
+				}
+			}
+			else
+			{
+				_blendAnimDesc.curr.currFrame++;
+				_blendAnimDesc.curr.nextFrame = min(_blendAnimDesc.curr.currFrame + 1, current->frameCount - 1);
+
+			}
+		}
+
+		_blendAnimDesc.curr.ratio = (_blendAnimDesc.curr.sumTime / timePerFrame);
+	}
+
+	// 트랜지션 처리
+	if (currTransition != nullptr)
+	{
+		// Case 1: Has Exit Time O + Condition O
+		if (currTransition->hasExitTime && currTransition->hasCondition)
+		{
+			if (currClip->isEndFrame && currTransition->flag)
+			{
+				HandleTransitionBlend(currTransition);
+			}
+		}
+		// Case 2: Has Exit Time O + Condition X
+		else if (currTransition->hasExitTime && !currTransition->hasCondition)
+		{
+			if (currClip->isEndFrame)
+			{
+				HandleTransitionBlend(currTransition);
+			}
+		}
+		// Case 3: Has Exit Time X + Condition O
+		else if (!currTransition->hasExitTime && currTransition->hasCondition)
+		{
+			if (currTransition->flag)
+			{
+				HandleTransitionBlend(currTransition);
+			}
+		}
+		// Case 4: Has Exit Time X + Condition X는 의미 없으므로 구현하지 않음
+	}
+
+	_blendAnimDesc.curr.activeAnimation = 1;
+	_blendAnimDesc.next.activeAnimation = 1;
 }
 
 void Animator::AddClip(const string& name, int animIndex, bool isLoop)
@@ -133,6 +251,79 @@ void Animator::SetTransitionOffset(shared_ptr<Transition> transition, float offs
 void Animator::SetTransitionDuration(shared_ptr<Transition> transition, float duration)
 {
 	transition->transitionDuration = duration;
+}
+
+
+
+void Animator::HandleTransitionBlend(shared_ptr<Transition>& transition)
+{
+	// transitionOffset 적용: 다음 애니메이션의 시작 시점 조절
+	if (_blendAnimDesc.blendSumTime == 0.0f)  // 블렌딩 시작 시
+	{
+		shared_ptr<ModelAnimation> next = _model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+		if (next)
+		{
+			// Offset 위치로 다음 애니메이션 시작 프레임 설정
+			float offsetFrame = next->frameCount * transition->transitionOffset;
+			_blendAnimDesc.next.currFrame = static_cast<int>(offsetFrame);
+			_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+			_blendAnimDesc.next.sumTime = 0.f;
+		}
+	}
+
+	_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
+	_blendAnimDesc.blendRatio = _blendAnimDesc.blendSumTime / transition->transitionDuration;
+
+	if (_blendAnimDesc.blendRatio > 1.0f)
+	{
+		animationSumTime = 0.0f;
+		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
+
+		// 현재 클립의 isEndFrame 초기화
+		if (auto currClip = _currClip)
+		{
+			currClip->isEndFrame = false;
+			for (auto& event : currClip->events)
+			{
+				if (event.isFuctionCalled)
+					event.isFuctionCalled = false;
+			}
+		}
+
+
+		// 다음 클립의 isEndFrame도 초기화
+		if (auto nextClip = GetClip(transition->clipB.lock()->name))
+			nextClip->isEndFrame = false;
+
+		SetCurrentClip(transition->clipB.lock()->name);
+		SetCurrentTransition();
+
+	}
+	else
+	{
+		// 다음 애니메이션 업데이트
+		shared_ptr<ModelAnimation> next = _model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+		if (next)
+		{
+			// 다음 클립의 진행률 업데이트
+			if (auto nextClip = transition->clipB.lock())
+			{
+				nextClip->progressRatio = static_cast<float>(_blendAnimDesc.next.currFrame) / (next->frameCount - 1);
+			}
+
+			_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
+			float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
+
+			if (_blendAnimDesc.next.ratio >= 1.0f)
+			{
+				_blendAnimDesc.next.sumTime = 0.f;
+				_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+				_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+			}
+
+			_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
+		}
+	}
 }
 
 void Animator::AddParameter(const string& name, Parameter::Type type)

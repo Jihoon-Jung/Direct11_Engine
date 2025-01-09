@@ -56,6 +56,14 @@ struct CameraPos
 	Vec3 cameraPosition = Vec3(0.f, 0.f, 0.f);
 	float padding = 0.0f;
 };
+
+struct CheckInstancingObject
+{
+	float isInstancing = 0.0f;
+	float padding1 = 0.0f;
+	float padding2 = 0.0f;
+	float padding3 = 0.0f;
+};
 // Bone
 #define MAX_MODEL_TRANSFORMS 250
 // KeyFrame

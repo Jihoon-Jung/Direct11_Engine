@@ -13,8 +13,10 @@ public:
 	~Buffer();
 
 	template <typename T>
-	void CreateBuffer(BufferType type, vector<T> source, bool cpuWrite = false, bool gpuWrite = false)
+	void CreateBuffer(BufferType type, vector<T> source, uint32 slot = 0, bool cpuWrite = false, bool gpuWrite = false)
 	{
+		_slot = slot;
+
 		if (type == BufferType::VERTEX_BUFFER)
 		{
 			_stride = sizeof(T);
@@ -102,14 +104,19 @@ public:
 	}
 
 	uint32 GetStride() { return _stride; }
+	uint32 GetOffset() { return _offset; }
+	uint32 GetSlot() { return _slot; }
+
 	ComPtr<ID3D11Buffer> GetVertexBuffer() { return _vertexBuffer; }
 	ComPtr<ID3D11Buffer> GetIndexBuffer() { return _indexBuffer; }
 	ComPtr<ID3D11Buffer> GetConstantBuffer() { return _constantBuffer; }
+	
 private:
 	ComPtr<ID3D11Buffer> _vertexBuffer;
 	ComPtr<ID3D11Buffer> _indexBuffer;
 	ComPtr<ID3D11Buffer> _constantBuffer = nullptr;
 	uint32 _stride = 0;
 	uint32 _offset = 0;
+	uint32 _slot = 0;
 };
 
