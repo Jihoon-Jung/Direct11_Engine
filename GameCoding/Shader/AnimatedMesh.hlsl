@@ -200,12 +200,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	if (isInstancing > 0.0)
 		world = input.world;
 	else
-		world = matrix(  // identity matrix
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-			);
+		world = worldMatrix;
 
 	// 정점 변환
 	output.position = mul(input.position, m);

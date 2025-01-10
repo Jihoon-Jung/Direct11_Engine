@@ -80,7 +80,7 @@ void RenderPass::DefaultRender(bool isEnv)
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightAndCameraPos", 1, light);
 
 	CheckInstancingObject flag;
-	flag.isInstancing = 0.0f;
+	flag.isInstancing = -1.0f;
 	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
 	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
 	instancingFlagBuffer->CopyData(flag);
@@ -1373,7 +1373,7 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"BoneBuffer", 1, boneBuffer);
 
 	CheckInstancingObject flag;
-	flag.isInstancing = 1.0f;
+	flag.isInstancing = -1.0f;
 	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
 	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
 	instancingFlagBuffer->CopyData(flag);
@@ -1549,7 +1549,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 	shader->PushShaderResourceToShader(ShaderType::VERTEX_SHADER, L"TransformMap", 1, model->GetAnimationTextureBuffer());
 
 	CheckInstancingObject flag;
-	flag.isInstancing = 1.0f;
+	flag.isInstancing = -1.0f;
 	shared_ptr<Buffer> instancingFlagBuffer = make_shared<Buffer>();
 	instancingFlagBuffer->CreateConstantBuffer<CheckInstancingObject>();
 	instancingFlagBuffer->CopyData(flag);

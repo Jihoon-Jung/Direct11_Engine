@@ -1,8 +1,15 @@
 struct VS_INPUT
 {
-	float4 position : POSITION;
-	float2 uv : TEXCOORD;
-	float3 normal : NORMAL;
+	float4 position : POSITION;    // => Slot 0 (PER_VERTEX)
+	float2 uv       : TEXCOORD;    // => Slot 0 (PER_VERTEX)
+	float3 normal   : NORMAL;      // => Slot 0 (PER_VERTEX)
+	float3 tangent  : TANGENT;     // => Slot 0 (PER_VERTEX)
+	float4 blendIndices : BLENDINDICES; // => Slot 0
+	float4 blendWeights : BLENDWEIGHTS; // => Slot 0
+
+	// 인스턴싱 데이터 => Slot 1 (PER_INSTANCE)
+	uint instanceID : SV_INSTANCEID;
+	row_major matrix world : INST;
 };
 
 struct VS_OUTPUT
@@ -23,11 +30,26 @@ cbuffer TransformBuffer : register(b1)
 	row_major matrix inverseTransposeWorldMatrix;
 }
 
+cbuffer CheckInstancingObject : register(b2)
+{
+	float isInstancing;
+	float padding3;
+	float padding4;
+	float padding5;
+}
+
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
-	output.position = mul(input.position, worldMatrix);
+	matrix world;
+
+	if (isInstancing > 0.0)
+		world = input.world;
+	else
+		world = worldMatrix;
+
+	output.position = mul(input.position, world);
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 

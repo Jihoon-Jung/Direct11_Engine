@@ -934,6 +934,7 @@ void GUIManager::RenderUI()
                                                 if (ImGui::Selectable(meshName.c_str()))
                                                 {
                                                     meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(Utils::ToWString(meshName)));
+                                                    RENDER.GetRenderableObject();
                                                     SCENE.UpdateMeshInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(), meshName);
                                                     ImGui::CloseCurrentPopup();
                                                 }
@@ -991,6 +992,7 @@ void GUIManager::RenderUI()
                                                                 if (ImGui::Selectable(materialName.c_str()))
                                                                 {
                                                                     meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(Utils::ToWString(materialName)));
+                                                                    RENDER.GetRenderableObject();
                                                                     SCENE.UpdateMaterialInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(), materialName);
                                                                     ImGui::CloseCurrentPopup();
                                                                 }
@@ -1197,6 +1199,9 @@ void GUIManager::RenderUI()
 
     // project
     {
+
+        ImGui::SetNextWindowPos(ImVec2(0, GP.GetViewHeight()* (63.0f / 100.0f)), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(GP.GetViewWidth(), GP.GetViewHeight()* (37.0f / 100.0f)));
         ImGui::Begin("Project", nullptr,
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |

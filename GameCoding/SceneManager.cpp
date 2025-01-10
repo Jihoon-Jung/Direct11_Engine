@@ -24,7 +24,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestInstancingScene();
+	LoadTestScene();
 }
 void SceneManager::LoadTestScene2()
 {
@@ -1214,74 +1214,113 @@ void SceneManager::LoadTestInstancingScene()
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainLight", lightRenderer,
 		L"SimpleMaterial", L"Sphere");
 
+	// Terrain
+	SaveAndLoadGameObjectToXML(L"test_scene", L"Terrain_obj", Vec3::Zero);
+	auto terrainRenderer = make_shared<MeshRenderer>();
+	terrainRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Terrain"));
+	terrainRenderer->SetModel(nullptr);
+	terrainRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"TerrainMaterial"));
+	terrainRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	terrainRenderer->AddRenderPass();
+	terrainRenderer->GetRenderPasses()[0]->SetPass(Pass::TERRAIN_RENDER);
+	terrainRenderer->GetRenderPasses()[0]->SetMeshRenderer(terrainRenderer);
+	terrainRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"Terrain_obj")->transform());
+	terrainRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Terrain_obj", terrainRenderer,
+		L"TerrainMaterial", L"Terrain");
+
+	// Environment Sphere
+	SaveAndLoadGameObjectToXML(L"test_scene", L"Env_Sphere",
+		Vec3(4.0f, 1.f, 122.f));
+	auto envSphereRenderer = make_shared<MeshRenderer>();
+	envSphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	envSphereRenderer->SetModel(nullptr);
+	envSphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+	envSphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	envSphereRenderer->AddRenderPass();
+	envSphereRenderer->GetRenderPasses()[0]->SetPass(Pass::ENVIRONMENTMAP_RENDER);
+	envSphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(envSphereRenderer);
+	envSphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"Env_Sphere")->transform());
+	envSphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	envSphereRenderer->SetUseEnvironmentMap(true);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Env_Sphere", envSphereRenderer,
+		L"DefaultMaterial", L"Sphere");
+	auto sphereCollider = make_shared<SphereCollider>();
+	sphereCollider->SetRadius(0.5f);
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"Env_Sphere", sphereCollider);
+
 	// Normal Sphere
 	int count = 0;
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 20; i++)
 	{
-		wstring baseName = L"Cube";
-		wstring newName = baseName + to_wstring(count);
-		SaveAndLoadGameObjectToXML(L"test_scene", newName,
-			Vec3(rand() % 10, 0, rand() % 10));
-		auto sphereRenderer = make_shared<MeshRenderer>();
-		sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
-		sphereRenderer->SetModel(nullptr);
-		sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-		sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-		sphereRenderer->AddRenderPass();
-		sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-		sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
-		sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
-		sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-		AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereRenderer,
-			L"DefaultMaterial", L"Cube");
-		auto sphereCollider = make_shared<SphereCollider>();
-		sphereCollider->SetRadius(1.0f);
-		AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereCollider);
+		if (i < 1)
+		{
+			wstring baseName = L"Cube";
+			wstring newName = baseName + to_wstring(count);
+			SaveAndLoadGameObjectToXML(L"test_scene", newName,
+				Vec3(rand() % 10, 0, rand() % 10));
+			auto sphereRenderer = make_shared<MeshRenderer>();
+			sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+			sphereRenderer->SetModel(nullptr);
+			sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+			sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+			sphereRenderer->AddRenderPass();
+			sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+			sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
+			sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+			sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+			AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereRenderer,
+				L"DefaultMaterial", L"Cube");
+			auto sphereCollider = make_shared<SphereCollider>();
+			sphereCollider->SetRadius(1.0f);
+			AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereCollider);
+		}
+		
 
 		{
 			//if (i < 1)
-			//{
-			//	wstring baseName = L"Dreyar";
-			//	wstring newName = baseName + to_wstring(count);
-			//	SaveAndLoadGameObjectToXML(L"test_scene", newName,
-			//		Vec3(rand() % 10, 0, rand() % 10), Vec3(0, 0, 0), Vec3(0.001f, 0.001f, 0.001f));
+			{
+				wstring baseName = L"Dreyar";
+				wstring newName = baseName + to_wstring(count);
+				SaveAndLoadGameObjectToXML(L"test_scene", newName,
+					Vec3(rand() % 10, 0, rand() % 10), Vec3(0, 0, 0), Vec3(0.001f, 0.001f, 0.001f));
 
-			//	auto dreyarRenderer = make_shared<MeshRenderer>();
-			//	dreyarRenderer->SetMesh(nullptr);
-			//	dreyarRenderer->SetModel(RESOURCE.GetResource<Model>(L"Dreyar"));
-			//	dreyarRenderer->SetMaterial(dreyarRenderer->GetModel()->GetMaterials()[0]);
-			//	dreyarRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-			//	dreyarRenderer->AddRenderPass();
-			//	dreyarRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
-			//	dreyarRenderer->GetRenderPasses()[0]->SetMeshRenderer(dreyarRenderer);
-			//	dreyarRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
-			//	dreyarRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-			//	AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, dreyarRenderer,
-			//		L"", L"", L"Dreyar");
-			//	auto boxCollider = make_shared<BoxCollider>();
-			//	boxCollider->SetScale(Vec3(0.001f, 0.001f, 0.001f));
-			//	AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, boxCollider);
+				auto dreyarRenderer = make_shared<MeshRenderer>();
+				dreyarRenderer->SetMesh(nullptr);
+				dreyarRenderer->SetModel(RESOURCE.GetResource<Model>(L"Dreyar"));
+				dreyarRenderer->SetMaterial(dreyarRenderer->GetModel()->GetMaterials()[0]);
+				dreyarRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+				dreyarRenderer->AddRenderPass();
+				dreyarRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
+				dreyarRenderer->GetRenderPasses()[0]->SetMeshRenderer(dreyarRenderer);
+				dreyarRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+				dreyarRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+				AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, dreyarRenderer,
+					L"", L"", L"Dreyar");
+				auto boxCollider = make_shared<BoxCollider>();
+				boxCollider->SetScale(Vec3(0.001f, 0.001f, 0.001f));
+				AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, boxCollider);
 
-			//	auto animator = make_shared<Animator>();
-			//	std::vector<int> indices = { 0, 1, 2 };
+				auto animator = make_shared<Animator>();
+				std::vector<int> indices = { 0, 1, 2 };
 
-			//	// 랜덤 엔진 초기화
-			//	std::random_device rd;
-			//	std::mt19937 g(rd());
+				// 랜덤 엔진 초기화
+				std::random_device rd;
+				std::mt19937 g(rd());
 
-			//	// 리스트 셔플
-			//	std::shuffle(indices.begin(), indices.end(), g);
+				// 리스트 셔플
+				std::shuffle(indices.begin(), indices.end(), g);
 
-			//	// 섞인 순서로 AddClip 호출
-			//	animator->AddClip("Kick", indices[0], false);
-			//	animator->AddClip("Dance", indices[1], false);
-			//	animator->AddClip("Fall", indices[2], false);
-			//	animator->SetEntryClip("Kick");
-			//	animator->AddTransition("Kick", "Dance");
-			//	animator->AddTransition("Dance", "Fall");
-			//	animator->AddTransition("Fall", "Kick");
-			//	AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, animator);
-			//}
+				// 섞인 순서로 AddClip 호출
+				animator->AddClip("Kick", indices[0], false);
+				animator->AddClip("Dance", indices[1], false);
+				animator->AddClip("Fall", indices[2], false);
+				animator->SetEntryClip("Kick");
+				animator->AddTransition("Kick", "Dance");
+				animator->AddTransition("Dance", "Fall");
+				animator->AddTransition("Fall", "Kick");
+				AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, animator);
+			}
 			
 		}
 
@@ -2177,7 +2216,7 @@ shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sc
 	}
 
 	SaveAndLoadGameObjectToXML(sceneName, newName,
-		GP.centerPos - Vec3(2.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(0.01f));
+		 Vec3(0.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(0.01f));
 
 	auto kachujinRenderer = make_shared<MeshRenderer>();
 	kachujinRenderer->SetMesh(nullptr);

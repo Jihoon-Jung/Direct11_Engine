@@ -88,10 +88,8 @@ void RenderManager::GetRenderableObject()
 			_billboardObjs.push_back(gameObject);
 
 	}
-
-	GetDefaultRenderObjectsForInstancing(_renderObjects);
-	GetStaticMeshObjectsForInstancing(_renderObjects);
-	GetAnimatedMeshObjectsForInstancing(_renderObjects);
+	
+	UpdateInstancingObject();
 
 }
 void RenderManager::GetDefaultRenderObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects)
@@ -114,23 +112,32 @@ void RenderManager::GetDefaultRenderObjectsForInstancing(vector<shared_ptr<GameO
 		objectsToRemove.push_back(gameObject);  // 삭제할 객체 목록에 추가
 	}
 	
+	// cache에서 크기가 1인 벡터를 가진 항목들을 제거하고 objectsToRemove에서도 제거
+	vector<InstanceID> keysToRemove;
+	for (const auto& pair : cache)
+	{
+		if (pair.second.size() == 1)
+		{
+			keysToRemove.push_back(pair.first);
+			// objectsToRemove에서도 해당 객체 제거
+			const auto& objToRemove = pair.second[0];
+			auto it = find(objectsToRemove.begin(), objectsToRemove.end(), objToRemove);
+			if (it != objectsToRemove.end())
+			{
+				objectsToRemove.erase(it);
+			}
+		}
+	}
+
+	// cache에서 제거
+	for (const auto& key : keysToRemove)
+	{
+		cache.erase(key);
+	}
+
 	// 두 번째 순회: 객체 제거
 	for (const auto& obj : objectsToRemove)
 	{
-		if (objectsToRemove.size() == 1)
-		{
-			shared_ptr<MeshRenderer> meshRenderer = obj->GetComponent<MeshRenderer>();
-			if (meshRenderer)
-			{
-				const InstanceID instanceId = meshRenderer->GetInstanceID_DefaultMesh();
-				auto cacheIt = cache.find(instanceId);
-				if (cacheIt != cache.end())
-				{
-					cache.erase(cacheIt);
-				}
-			}
-			break;
-		}
 		auto it = find(gameObjects.begin(), gameObjects.end(), obj);
 		if (it != gameObjects.end())
 		{
@@ -147,40 +154,31 @@ void RenderManager::DrawInstancingDefaultRenderObject(bool isEnv)
 	{
 		const vector<shared_ptr<GameObject>>& vec = pair.second;
 
-		if (vec.size() == 1)
+		const InstanceID instanceId = pair.first;
+
+		for (int32 i = 0; i < vec.size(); i++)
 		{
-			//_renderObjects.push_back(vec[0]);
+			const shared_ptr<GameObject>& gameObject = vec[i];
+			InstancingData data;
+			data.world = gameObject->transform()->GetWorldMatrix();
+
+			AddData(instanceId, data);
 		}
-		else
+
+		//// 첫놈을 대표로 해서 모든걸 그리도록 함.
+		shared_ptr<MeshRenderer> meshRenderer = pair.second[0]->GetComponent<MeshRenderer>();
+
+		if (meshRenderer->GetRenderPasses().size() > 0)
 		{
-			const InstanceID instanceId = pair.first;
-
-			for (int32 i = 0; i < vec.size(); i++)
+			int count = meshRenderer->GetRenderPasses().size();
+			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
 			{
-				const shared_ptr<GameObject>& gameObject = vec[i];
-				InstancingData data;
-				data.world = gameObject->transform()->GetWorldMatrix();
-
-				AddData(instanceId, data);
-			}
-
-			//// 첫놈을 대표로 해서 모든걸 그리도록 함.
-			//shared_ptr<InstancingBuffer>& buffer = _buffers[instanceId];
-			//vec[0]->GetComponent<MeshRenderer>()->RenderInstancing(buffer);
-			shared_ptr<MeshRenderer> meshRenderer = pair.second[0]->GetComponent<MeshRenderer>();
-
-			if (meshRenderer->GetRenderPasses().size() > 0)
-			{
-				int count = meshRenderer->GetRenderPasses().size();
-				for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
+				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
+				renderPass->DefaultRenderInstance(isEnv, _buffers[instanceId]);
+				if (i + 1 < meshRenderer->GetRenderPasses().size())
 				{
-					shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
-					renderPass->DefaultRenderInstance(isEnv, _buffers[instanceId]);
-					if (i + 1 < meshRenderer->GetRenderPasses().size())
-					{
-						shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
-						nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
-					}
+					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
+					nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
 				}
 			}
 		}
@@ -206,23 +204,32 @@ void RenderManager::GetStaticMeshObjectsForInstancing(vector<shared_ptr<GameObje
 		objectsToRemove.push_back(gameObject);  // 삭제할 객체 목록에 추가
 	}
 
+	// cache에서 크기가 1인 벡터를 가진 항목들을 제거하고 objectsToRemove에서도 제거
+	vector<InstanceID> keysToRemove;
+	for (const auto& pair : cache)
+	{
+		if (pair.second.size() == 1)
+		{
+			keysToRemove.push_back(pair.first);
+			// objectsToRemove에서도 해당 객체 제거
+			const auto& objToRemove = pair.second[0];
+			auto it = find(objectsToRemove.begin(), objectsToRemove.end(), objToRemove);
+			if (it != objectsToRemove.end())
+			{
+				objectsToRemove.erase(it);
+			}
+		}
+	}
+
+	// cache에서 제거
+	for (const auto& key : keysToRemove)
+	{
+		cache.erase(key);
+	}
+
 	// 두 번째 순회: 객체 제거
 	for (const auto& obj : objectsToRemove)
 	{
-		if (objectsToRemove.size() == 1)
-		{
-			shared_ptr<MeshRenderer> meshRenderer = obj->GetComponent<MeshRenderer>();
-			if (meshRenderer)
-			{
-				const InstanceID instanceId = meshRenderer->GetInstanceID_ModelMesh();
-				auto cacheIt = cache.find(instanceId);
-				if (cacheIt != cache.end())
-				{
-					cache.erase(cacheIt);
-				}
-			}
-			break;
-		}
 		auto it = find(gameObjects.begin(), gameObjects.end(), obj);
 		if (it != gameObjects.end())
 		{
@@ -239,42 +246,33 @@ void RenderManager::DrawInstancingStaticMeshObject(bool isEnv)
 
 		const vector<shared_ptr<GameObject>>& vec = pair.second;
 
-		if (vec.size() == 1)
+		const InstanceID instanceId = pair.first;
+
+		_cache_blendDescs = make_shared<InstancedBlendDesc>();
+
+		for (int32 i = 0; i < vec.size(); i++)
 		{
-			//_renderObjects.push_back(vec[0]);
+			const shared_ptr<GameObject>& gameObject = vec[i];
+			InstancingData data;
+			data.world = gameObject->transform()->GetWorldMatrix();
+
+			AddData(instanceId, data);
 		}
-		else
+
+		//// 첫놈을 대표로 해서 모든걸 그리도록 함.
+		shared_ptr<MeshRenderer> meshRenderer = vec[0]->GetComponent<MeshRenderer>();
+
+		if (meshRenderer->GetRenderPasses().size() > 0)
 		{
-			const InstanceID instanceId = pair.first;
-
-			_cache_blendDescs = make_shared<InstancedBlendDesc>();
-
-			for (int32 i = 0; i < vec.size(); i++)
+			int count = meshRenderer->GetRenderPasses().size();
+			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
 			{
-				const shared_ptr<GameObject>& gameObject = vec[i];
-				InstancingData data;
-				data.world = gameObject->transform()->GetWorldMatrix();
-
-				AddData(instanceId, data);
-			}
-
-			//// 첫놈을 대표로 해서 모든걸 그리도록 함.
-			//shared_ptr<InstancingBuffer>& buffer = _buffers[instanceId];
-			//vec[0]->GetComponent<MeshRenderer>()->RenderInstancing(buffer);
-			shared_ptr<MeshRenderer> meshRenderer = vec[0]->GetComponent<MeshRenderer>();
-
-			if (meshRenderer->GetRenderPasses().size() > 0)
-			{
-				int count = meshRenderer->GetRenderPasses().size();
-				for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
+				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
+				renderPass->StaticMeshRenderInstance(isEnv, _buffers[instanceId]);
+				if (i + 1 < meshRenderer->GetRenderPasses().size())
 				{
-					shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
-					renderPass->StaticMeshRenderInstance(isEnv, _buffers[instanceId]);
-					if (i + 1 < meshRenderer->GetRenderPasses().size())
-					{
-						shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
-						nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
-					}
+					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
+					nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
 				}
 			}
 		}
@@ -301,23 +299,32 @@ void RenderManager::GetAnimatedMeshObjectsForInstancing(vector<shared_ptr<GameOb
 		objectsToRemove.push_back(gameObject);  // 삭제할 객체 목록에 추가
 	}
 
+	// cache에서 크기가 1인 벡터를 가진 항목들을 제거하고 objectsToRemove에서도 제거
+	vector<InstanceID> keysToRemove;
+	for (const auto& pair : cache)
+	{
+		if (pair.second.size() == 1)
+		{
+			keysToRemove.push_back(pair.first);
+			// objectsToRemove에서도 해당 객체 제거
+			const auto& objToRemove = pair.second[0];
+			auto it = find(objectsToRemove.begin(), objectsToRemove.end(), objToRemove);
+			if (it != objectsToRemove.end())
+			{
+				objectsToRemove.erase(it);
+			}
+		}
+	}
+
+	// cache에서 제거
+	for (const auto& key : keysToRemove)
+	{
+		cache.erase(key);
+	}
+
 	// 두 번째 순회: 객체 제거
 	for (const auto& obj : objectsToRemove)
 	{
-		if (objectsToRemove.size() == 1)
-		{
-			shared_ptr<MeshRenderer> meshRenderer = obj->GetComponent<MeshRenderer>();
-			if (meshRenderer)
-			{
-				const InstanceID instanceId = meshRenderer->GetInstanceID_ModelMesh();
-				auto cacheIt = cache.find(instanceId);
-				if (cacheIt != cache.end())
-				{
-					cache.erase(cacheIt);
-				}
-			}
-			break;
-		}
 		auto it = find(gameObjects.begin(), gameObjects.end(), obj);
 		if (it != gameObjects.end())
 		{
@@ -337,54 +344,45 @@ void RenderManager::DrawInstancingAnimatedMeshObject(bool isEnv)
 
 		const vector<shared_ptr<GameObject>>& vec = pair.second;
 
-		if (vec.size() == 1)
-		{
-			//_renderObjects.push_back(vec[0]);
-		}
-		else
-		{
-			const InstanceID instanceId = pair.first;
+		const InstanceID instanceId = pair.first;
 
-			_cache_blendDescs = make_shared<InstancedBlendDesc>();
+		_cache_blendDescs = make_shared<InstancedBlendDesc>();
 
-			for (int32 i = 0; i < vec.size(); i++)
+		for (int32 i = 0; i < vec.size(); i++)
+		{
+			const shared_ptr<GameObject>& gameObject = vec[i];
+			InstancingData data;
+			data.world = gameObject->transform()->GetWorldMatrix();
+
+			AddData(instanceId, data);
+
+			shared_ptr<Animator> animator = gameObject->GetComponent<Animator>();
+			if (animator)
+				_cache_blendDescs->blendDesc[i] = gameObject->GetComponent<Animator>()->GetBlendAnimDesc();
+			else
 			{
-				const shared_ptr<GameObject>& gameObject = vec[i];
-				InstancingData data;
-				data.world = gameObject->transform()->GetWorldMatrix();
-
-				AddData(instanceId, data);
-
-				shared_ptr<Animator> animator = gameObject->GetComponent<Animator>();
-				if (animator)
-					_cache_blendDescs->blendDesc[i] = gameObject->GetComponent<Animator>()->GetBlendAnimDesc();
-				else
-				{
-					BlendAnimDesc desc;
-					desc.curr.activeAnimation = 0;
-					desc.next.activeAnimation = 0;
-					_cache_blendDescs->blendDesc[i] = desc;
-				}
-					
+				BlendAnimDesc desc;
+				desc.curr.activeAnimation = 0;
+				desc.next.activeAnimation = 0;
+				_cache_blendDescs->blendDesc[i] = desc;
 			}
 
-			//// 첫놈을 대표로 해서 모든걸 그리도록 함.
-			//shared_ptr<InstancingBuffer>& buffer = _buffers[instanceId];
-			//vec[0]->GetComponent<MeshRenderer>()->RenderInstancing(buffer);
-			shared_ptr<MeshRenderer> meshRenderer = vec[0]->GetComponent<MeshRenderer>();
+		}
 
-			if (meshRenderer->GetRenderPasses().size() > 0)
+		//// 첫놈을 대표로 해서 모든걸 그리도록 함.
+		shared_ptr<MeshRenderer> meshRenderer = vec[0]->GetComponent<MeshRenderer>();
+
+		if (meshRenderer->GetRenderPasses().size() > 0)
+		{
+			int count = meshRenderer->GetRenderPasses().size();
+			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
 			{
-				int count = meshRenderer->GetRenderPasses().size();
-				for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
+				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
+				renderPass->AnimatedMeshRenderInstance(isEnv, _buffers[instanceId], *_cache_blendDescs);
+				if (i + 1 < meshRenderer->GetRenderPasses().size())
 				{
-					shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
-					renderPass->AnimatedMeshRenderInstance(isEnv, _buffers[instanceId], *_cache_blendDescs);
-					if (i + 1 < meshRenderer->GetRenderPasses().size())
-					{
-						shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
-						nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
-					}
+					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
+					nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
 				}
 			}
 		}
@@ -535,7 +533,7 @@ void RenderManager::RenderAllGameObject()
 		float deltaTime = TIME.GetDeltaTime();
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
-			if (true/*_envTexture == nullptr*/) {
+			if (_envTexture == nullptr) {
 
 				shared_ptr<Material> material = make_shared<Material>();
 				material->CreateEnvironmentMapTexture(gameObject);
@@ -556,6 +554,9 @@ void RenderManager::ClearRenderObject()
 	_renderObjects.clear();
 	_envMappedObjects.clear();
 	_billboardObjs.clear();
+	cache_DefaultRender.clear();
+	cache_StaticMeshRender.clear();
+	cache_AnimatedRender.clear();
 }
 
 void RenderManager::ClearData()
@@ -565,6 +566,13 @@ void RenderManager::ClearData()
 		shared_ptr<InstancingBuffer>& buffer = pair.second;
 		buffer->ClearData();
 	}
+}
+
+void RenderManager::UpdateInstancingObject()
+{
+	GetDefaultRenderObjectsForInstancing(_renderObjects);
+	GetStaticMeshObjectsForInstancing(_renderObjects);
+	GetAnimatedMeshObjectsForInstancing(_renderObjects);
 }
 
 

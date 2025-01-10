@@ -12,6 +12,7 @@
     </InputLayouts>
     <Slots>
         <Slot name="CameraBuffer" index="0"/>
+        <Slot name="CheckInstancingObject" index="2"/>
         <Slot name="TransformBuffer" index="1"/>
         <Slot name="texture0" index="0"/>
     </Slots>

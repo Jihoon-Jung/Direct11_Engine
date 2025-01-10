@@ -46,6 +46,7 @@ public:
 
 	// for instancing
 	void ClearData();
+	void UpdateInstancingObject();
 	void GetDefaultRenderObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects);
 	void DrawInstancingDefaultRenderObject(bool isEnv);
 	void GetStaticMeshObjectsForInstancing(vector<shared_ptr<GameObject>>& gameObjects);

@@ -205,6 +205,7 @@ void ResourceManager::SaveResource()
 	slots = {
 		{L"CameraBuffer", 0},
 		{L"TransformBuffer", 1},
+		{L"CheckInstancingObject", 2},
 		{L"texture0", 0}
 	};
 	WriteShaderToXML(L"Shader/SimpleShader.hlsl", L"Simple_Render_Shader", types, layouts, slots, L"Resource/Shader/SimpleShader.xml");
