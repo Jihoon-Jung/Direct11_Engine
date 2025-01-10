@@ -24,7 +24,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	LoadTestScene();
+	LoadTestInstancingScene();
 }
 void SceneManager::LoadTestScene2()
 {

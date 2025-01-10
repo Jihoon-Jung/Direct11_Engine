@@ -626,7 +626,7 @@ void GUIManager::RenderUI()
                     _isTransformChanged = true;
                 }
                 
-                if (_isTransformChanged)
+                if (_isTransformChanged && !ImGui::IsMouseDown(ImGuiMouseButton_Left))
                 {
                     SCENE.UpdateGameObjectTransformInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(),
                         position, transform->GetLocalRotation(), transform->GetLocalScale());
