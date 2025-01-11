@@ -4,6 +4,7 @@
 #include "MoveObject.h"
 #include "TestEvent.h"
 #include <algorithm>
+#include <fstream>
 
 void GUIManager::Init()
 {
@@ -126,6 +127,35 @@ std::string WStringToString(const std::wstring& wstr)
 
 void GUIManager::RenderUI()
 {
+    // 전역 빈 공간 클릭 처리
+    if (ImGui::GetIO().MouseClicked[ImGuiMouseButton_Left])
+    {
+        bool clickedWindow = false;
+
+        // 현재 마우스가 어떤 윈도우 위에 있는지 확인
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) ||
+            ImGui::IsAnyItemHovered())
+        {
+            clickedWindow = true;
+        }
+
+        // 뷰포트 영역을 클릭했을 때 Inspector 창 초기화
+        if (IsViewportHovered())
+        {
+            _selectedShaderFile.clear();
+            _selectedScriptFile.clear();
+            _selectedFileType = FileType::NONE;
+        }
+        // 빈 공간 클릭 시 초기화
+        else if (!clickedWindow)
+        {
+            _selectedShaderFile.clear();
+            _selectedScriptFile.clear();
+            _selectedFileType = FileType::NONE;
+            _selectedObject = nullptr;
+        }
+    }
+
     // 독립적인 팝업창 렌더링
     if (_showEmptyObjectPopup)
     {
@@ -487,6 +517,17 @@ void GUIManager::RenderUI()
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse);
+
+        // 선택된 셰이더 파일이 있는 경우
+        if (_selectedFileType == FileType::SHADER && !_selectedShaderFile.empty())
+        {
+            ShowShaderInspector(_selectedShaderFile);
+        }
+        // 선택된 스크립트 파일이 있는 경우
+        else if (_selectedFileType == FileType::Script && !_selectedScriptFile.empty())
+        {
+            ShowScriptInspector(_selectedScriptFile);
+        }
 
         if (_selectedObject != nullptr)
         {
@@ -1446,6 +1487,11 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     // 클릭 처리
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen())
     {
+        // Project 창의 선택 상태 초기화
+        _selectedShaderFile.clear();
+        _selectedScriptFile.clear();
+        _selectedFileType = FileType::NONE;
+
         _selectedObject = gameObject;
         SCENE.GetActiveScene()->AddPickedObject(gameObject);
 
@@ -1929,6 +1975,23 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 0.3f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
 
+    // 드래그 드롭 영역 설정
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EXTERNAL_FILE"))
+        {
+            wchar_t* path = (wchar_t*)payload->Data;
+            HandleExternalFilesDrop(path);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    static bool clickedItem = false;
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    {
+        clickedItem = false;
+    }
+
     for (const auto& entry : filesystem::directory_iterator(path))
     {
         if (!filesystem::is_directory(entry))
@@ -1961,7 +2024,23 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             {
                 icon = RESOURCE.GetResource<Texture>(L"Shader_Icon");
             }
+            // Script 폴더에서는 XML 파일만 처리하고 각각 cpp와 h 파일 아이콘으로 표시
+            if (parentFolder == "Script")
+            {
+                if (entry.path().extension() == ".xml")
+                {
+                    // Header 파일 아이콘
+                    icon = RESOURCE.GetResource<Texture>(L"H_Icon");
+                    RenderScriptIcon(icon, filenameWithoutExt + ".h", entry.path(), cellSize, iconSize, padding, maxTextWidth);
+                    ImGui::NextColumn();
 
+                    // CPP 파일 아이콘
+                    icon = RESOURCE.GetResource<Texture>(L"CPP_Icon");
+                    RenderScriptIcon(icon, filenameWithoutExt + ".cpp", entry.path(), cellSize, iconSize, padding, maxTextWidth);
+                    ImGui::NextColumn();
+                }
+                continue;
+            }
             if (icon)
             {
                 // 아이콘 중앙 배치
@@ -1972,6 +2051,39 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                 ImGui::ImageButton(filename.c_str(),
                     (ImTextureID)icon->GetShaderResourceView().Get(),
                     ImVec2(iconSize, iconSize));
+
+                // 파일 클릭 처리
+                if (ImGui::IsItemClicked())
+                {
+                    clickedItem = true;
+
+                    _selectedObject = nullptr;
+                    SCENE.GetActiveScene()->AddPickedObject(nullptr);
+
+                    if (parentFolder == "Shader")
+                    {
+                        _selectedShaderFile = entry.path();
+                        _selectedFileType = FileType::SHADER;
+
+                        // 셰이더 코드 읽기
+                        ifstream file(entry.path());
+                        if (file.is_open())
+                        {
+                            stringstream buffer;
+                            buffer << file.rdbuf();
+                            _shaderCode = buffer.str();
+                        }
+                    }
+                    else if (parentFolder == "Script")
+                    {
+                        // Hierarchy 창의 선택 상태 초기화
+                        _selectedObject = nullptr;
+                        SCENE.GetActiveScene()->AddPickedObject(nullptr);
+
+                        _selectedScriptFile = entry.path();
+                        _selectedFileType = FileType::Script;
+                    }
+                }
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
                 {
@@ -2016,6 +2128,14 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             ImGui::NextColumn();
         }
     }
+    // 모든 아이템 렌더링 후 빈 공간 클릭 처리
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !clickedItem)
+    {
+        _selectedShaderFile.clear();
+        _selectedScriptFile.clear();
+        _selectedFileType = FileType::NONE;
+    }
+    
 
     ImGui::PopStyleColor(3);
     ImGui::Columns(1);
@@ -3027,11 +3147,25 @@ void GUIManager::RenderTransitions()
                         _selectedAnimator->GetGameObject()->GetName(),
                         clipA->name, clipB->name);
 
+                    // 현재 트랜지션인 경우 초기화
                     if (_selectedAnimator->_currTransition == _rightClickedTransition)
                     {
                         _selectedAnimator->_currTransition = nullptr;
                     }
-                    // 메모리에서 삭제
+
+                    // clipA의 transitions 목록에서 삭제
+                    clipA->transitions.erase(
+                        std::remove(clipA->transitions.begin(), clipA->transitions.end(), _rightClickedTransition),
+                        clipA->transitions.end()
+                    );
+
+                    // clipA의 현재 transition이 삭제되는 트랜지션인 경우 초기화
+                    if (clipA->transition == _rightClickedTransition)
+                    {
+                        clipA->transition = nullptr;
+                    }
+
+                    // Animator의 transitions 목록에서 삭제
                     auto& transitions = _selectedAnimator->_transitions;
                     transitions.erase(
                         std::remove(transitions.begin(), transitions.end(), _rightClickedTransition),
@@ -3469,6 +3603,234 @@ bool GUIManager::IsCurrentTransitionNewer(shared_ptr<Transition> current, shared
 
     return std::distance(transitions.begin(), currentIt) >
         std::distance(transitions.begin(), otherIt);
+}
+
+void GUIManager::ShowShaderInspector(const filesystem::path& xmlPath)
+{
+    // XML 파일 로드
+    tinyxml2::XMLDocument doc;
+    if (doc.LoadFile(xmlPath.string().c_str()) != tinyxml2::XML_SUCCESS)
+        return;
+
+    auto root = doc.FirstChildElement("Shader");
+    if (!root)
+        return;
+
+    // 셰이더 정보 표시
+    if (auto nameElem = root->FirstChildElement("Name"))
+        ImGui::Text("Shader Name: %s", nameElem->GetText());
+
+    if (auto pathElem = root->FirstChildElement("Path"))
+    {
+        string shaderPath = pathElem->GetText();
+        ImGui::Text("Path: %s", shaderPath.c_str());
+
+        // XML 파일이 있는 Resource/Shader 폴더의 상위 폴더들로 이동
+        filesystem::path hlslPath = xmlPath.parent_path().parent_path().parent_path();
+        // HLSL 파일 경로 구성 (GameCoding/Shader/xxx.hlsl)
+        hlslPath /= shaderPath;
+
+        // HLSL 파일 읽기
+        ifstream file(hlslPath);
+        if (file.is_open())
+        {
+            stringstream buffer;
+            buffer << file.rdbuf();
+            _shaderCode = buffer.str();
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Text("Shader Code:");
+
+            ImGui::BeginChild("ShaderCode", ImVec2(0, 0), true,
+                ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.3f));
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+
+            ImGui::TextUnformatted(_shaderCode.c_str());
+
+            ImGui::PopFont();
+            ImGui::PopStyleColor();
+            ImGui::EndChild();
+        }
+        else
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                "Failed to open shader file: %s", hlslPath.string().c_str());
+        }
+    }
+}
+
+void GUIManager::ShowScriptInspector(const filesystem::path& xmlPath)
+{
+    // XML 파일 로드
+    tinyxml2::XMLDocument doc;
+    if (doc.LoadFile(xmlPath.string().c_str()) != tinyxml2::XML_SUCCESS)
+        return;
+
+    auto root = doc.FirstChildElement("Script");
+    if (!root)
+        return;
+
+    // 스크립트 정보 표시
+    if (auto classNameElem = root->FirstChildElement("ClassName"))
+        ImGui::Text("Class Name: %s", classNameElem->GetText());
+
+    if (auto displayNameElem = root->FirstChildElement("DisplayName"))
+        ImGui::Text("Display Name: %s", displayNameElem->GetText());
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // 헤더 파일 내용 표시
+    if (auto headerElem = root->FirstChildElement("HeaderContent"))
+    {
+        ImGui::Text("Header File (.h):");
+        ImGui::BeginChild("HeaderCode", ImVec2(0, ImGui::GetWindowHeight() * 0.4f), true,
+            ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.3f));
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+
+        ImGui::TextUnformatted(headerElem->GetText());
+
+        ImGui::PopFont();
+        ImGui::PopStyleColor();
+        ImGui::EndChild();
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // CPP 파일 내용 표시
+    if (auto cppElem = root->FirstChildElement("CppContent"))
+    {
+        ImGui::Text("Source File (.cpp):");
+        ImGui::BeginChild("CppCode", ImVec2(0, ImGui::GetWindowHeight() * 0.4f), true,
+            ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.3f));
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+
+        ImGui::TextUnformatted(cppElem->GetText());
+
+        ImGui::PopFont();
+        ImGui::PopStyleColor();
+        ImGui::EndChild();
+    }
+}
+
+void GUIManager::HandleExternalFilesDrop(const filesystem::path& sourcePath)
+{
+    // 이미지 파일인지 확인
+    if (!IsImageFile(sourcePath))
+        return;
+
+    // GameCoding 폴더 경로 구성 (현재 경로 사용)
+    filesystem::path basePath = filesystem::current_path();
+
+    // 대상 파일 경로 구성
+    filesystem::path destPath = basePath / sourcePath.filename();
+
+    // 파일 복사
+    CopyFileToResourceFolder(sourcePath, destPath);
+
+    // XML 생성을 위한 이름 구성 (확장자 제외)
+    wstring textureName = sourcePath.stem().wstring();
+    filesystem::path resourcePath = basePath / "Resource" / "Texture";
+    filesystem::path xmlPath = resourcePath / (textureName + L".xml");
+
+    // XML 파일 생성
+    RESOURCE.WriteTextureToXML(
+        sourcePath.filename().wstring(),  // 이미지 파일명
+        textureName,                      // 텍스처 이름
+        xmlPath.wstring()                 // XML 저장 경로
+    );
+
+    // 새로운 리소스만 로드
+    RESOURCE.LoadResourcesByType(resourcePath, ".xml", [](const wstring& path) {
+        RESOURCE.LoadTextureData(path);
+    });
+}
+
+bool GUIManager::IsViewportHovered()
+{
+    float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
+    float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
+    float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
+    float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+    return (mousePos.x >= viewportX && mousePos.x <= (viewportX + viewportWidth) &&
+        mousePos.y >= viewportY && mousePos.y <= (viewportY + viewportHeight));
+}
+
+bool GUIManager::IsImageFile(const filesystem::path& path)
+{
+    wstring ext = path.extension().wstring();
+    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+    return ext == L".png" || ext == L".jpg" || ext == L".jpeg"
+        || ext == L".bmp" || ext == L".tga" || ext == L".dds";
+}
+
+void GUIManager::CopyFileToResourceFolder(const filesystem::path& sourcePath, const filesystem::path& destPath)
+{
+    try {
+        // 대상 폴더가 없으면 생성
+        filesystem::create_directories(destPath.parent_path());
+
+        // 파일 복사
+        filesystem::copy_file(sourcePath, destPath,
+            filesystem::copy_options::overwrite_existing);
+    }
+    catch (const filesystem::filesystem_error& e) {
+        // 에러 처리
+        OutputDebugStringA(e.what());
+    }
+}
+
+void GUIManager::RenderScriptIcon(shared_ptr<Texture> icon, const string& filename, const filesystem::path& path, float cellSize, float iconSize, float padding, float maxTextWidth)
+{
+    float cursorPosX = ImGui::GetCursorPosX();
+    float iconPosX = cursorPosX + (cellSize - iconSize) * 0.5f;
+    ImGui::SetCursorPosX(iconPosX);
+
+    ImGui::ImageButton(filename.c_str(),
+        (ImTextureID)icon->GetShaderResourceView().Get(),
+        ImVec2(iconSize, iconSize));
+
+    if (ImGui::IsItemClicked())
+    {
+        _selectedScriptFile = path;
+        _selectedFileType = FileType::Script;
+    }
+
+    // 텍스트 처리 로직
+    string displayText = filename;
+    float textWidth = ImGui::CalcTextSize(displayText.c_str()).x;
+
+    if (textWidth > maxTextWidth)
+    {
+        // 텍스트와 "..." 길이를 고려하여 적절한 길이로 자름
+        int maxChars = 0;
+        string tempText;
+        for (int i = 0; i < displayText.length(); i++)
+        {
+            tempText = displayText.substr(0, i) + "...";
+            if (ImGui::CalcTextSize(tempText.c_str()).x > maxTextWidth)
+            {
+                maxChars = i - 1;
+                break;
+            }
+        }
+        displayText = displayText.substr(0, maxChars) + "...";
+        textWidth = ImGui::CalcTextSize(displayText.c_str()).x;
+    }
+
+    float textPosX = cursorPosX + (cellSize - textWidth) * 0.5f;
+    ImGui::SetCursorPosX(textPosX);
+    ImGui::Text("%s", displayText.c_str());
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding);
 }
 
 shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, const ImVec2& end)

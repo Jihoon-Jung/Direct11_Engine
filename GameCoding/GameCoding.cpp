@@ -70,7 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 float fps = frameCount / elapsedTime;
 
                 std::wstringstream wss;
-                wss << L"Client - FPS: " << std::fixed << std::setprecision(2) << fps;
+                wss << L"J_Engine - FPS: " << std::fixed << std::setprecision(2) << fps;
                 SetWindowText(hWnd, wss.str().c_str());
 
                 frameCount = 0;
@@ -108,14 +108,28 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+    hInst = hInstance;
 
     InitializeWindowSize();
     RECT windowRect = { 0, 0, GWinSizeX, GWinSizeY };
     ::AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, false);
 
-    hWnd = CreateWindowW(L"GameCoding", L"Client", WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, nullptr, nullptr, hInstance, nullptr);
+    // 화면 크기 구하기
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+    // 윈도우 크기 계산
+    int windowWidth = windowRect.right - windowRect.left;
+    int windowHeight = windowRect.bottom - windowRect.top;
+
+    // 화면 중앙 좌표 계산
+    int posX = (screenWidth - windowWidth) / 2;
+    int posY = (screenHeight - windowHeight) / 2;
+
+    hWnd = CreateWindowW(L"GameCoding", L"J_Engine", WS_OVERLAPPEDWINDOW,
+        posX, posY, // CW_USEDEFAULT 대신 계산된 위치 사용
+        windowWidth, windowHeight,
+        nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
     {
@@ -124,6 +138,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     ::ShowWindow(hWnd, nCmdShow);
     ::UpdateWindow(hWnd);
+
+    // 드래그 드롭 활성화
+    DragAcceptFiles(hWnd, TRUE);
 
     return TRUE;
 }
@@ -135,6 +152,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     switch (message)
     {
+    case WM_DROPFILES:
+    {
+        HDROP hDrop = (HDROP)wParam;
+        UINT fileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+
+        for (UINT i = 0; i < fileCount; i++)
+        {
+            wchar_t filePath[MAX_PATH];
+            DragQueryFile(hDrop, i, filePath, MAX_PATH);
+            GUI.HandleExternalFilesDrop(filePath);
+        }
+
+        DragFinish(hDrop);
+        return 0;
+    }
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);

@@ -7,6 +7,8 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Model.h"
+#include <filesystem>
+#include <fstream>
 
 class ResourceManager
 {
@@ -40,6 +42,12 @@ public:
 	void LoadShaderData(wstring path);
 	void LoadMaterialData(const wstring& path);
 	void LoadModelData(const wstring& path);
+	void LoadResourcesByType(const filesystem::path& folderPath,
+		const string& extension, function<void(const wstring&)> loadFunc);
+
+	void WriteScriptToXML(const string& className, const string& displayName, const wstring& finalPath);
+	void LoadScriptData(const wstring& path);
+	void SaveScripts();  // ComponentFactory에 등록된 모든 스크립트를 XML로 저장
 
 	template<typename T>
 	ResourceType GetResourceType()
@@ -113,5 +121,6 @@ private:
 	using ResourecMap = map<wstring, shared_ptr<ResourceBase>>;
 	ResourecMap _resources[RESOURCE_TYPE_COUNT];
 
+	string LoadScriptContent(const string& className, bool isHeader);  // 헤더파일도 로드하도록 수정
 };
 

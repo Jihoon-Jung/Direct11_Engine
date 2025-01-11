@@ -1253,32 +1253,28 @@ void SceneManager::LoadTestInstancingScene()
 	int count = 0;
 	for (int i = 0; i < 20; i++)
 	{
-		if (i < 1)
-		{
-			wstring baseName = L"Cube";
-			wstring newName = baseName + to_wstring(count);
-			SaveAndLoadGameObjectToXML(L"test_scene", newName,
-				Vec3(rand() % 10, 0, rand() % 10));
-			auto sphereRenderer = make_shared<MeshRenderer>();
-			sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
-			sphereRenderer->SetModel(nullptr);
-			sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
-			sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-			sphereRenderer->AddRenderPass();
-			sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
-			sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
-			sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
-			sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-			AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereRenderer,
-				L"DefaultMaterial", L"Cube");
-			auto sphereCollider = make_shared<SphereCollider>();
-			sphereCollider->SetRadius(1.0f);
-			AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereCollider);
-		}
+		wstring baseName = L"Cube";
+		wstring newName = baseName + to_wstring(count);
+		SaveAndLoadGameObjectToXML(L"test_scene", newName,
+			Vec3(rand() % 10, 0, rand() % 10));
+		auto sphereRenderer = make_shared<MeshRenderer>();
+		sphereRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Cube"));
+		sphereRenderer->SetModel(nullptr);
+		sphereRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"DefaultMaterial"));
+		sphereRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+		sphereRenderer->AddRenderPass();
+		sphereRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+		sphereRenderer->GetRenderPasses()[0]->SetMeshRenderer(sphereRenderer);
+		sphereRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+		sphereRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereRenderer,
+			L"DefaultMaterial", L"Cube");
+		auto sphereCollider = make_shared<SphereCollider>();
+		sphereCollider->SetRadius(1.0f);
+		AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, sphereCollider);
 		
-
 		{
-			//if (i < 1)
+			if (i < 1)
 			{
 				wstring baseName = L"Dreyar";
 				wstring newName = baseName + to_wstring(count);
@@ -1298,7 +1294,8 @@ void SceneManager::LoadTestInstancingScene()
 				AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, dreyarRenderer,
 					L"", L"", L"Dreyar");
 				auto boxCollider = make_shared<BoxCollider>();
-				boxCollider->SetScale(Vec3(0.001f, 0.001f, 0.001f));
+				boxCollider->SetScale(Vec3(443.388f, 1653.448f, 691.212f));
+				boxCollider->SetCenter(Vec3(0.0f, 0.8f, 0.0f));
 				AddComponentToGameObjectAndSaveToXML(L"test_scene", newName, boxCollider);
 
 				auto animator = make_shared<Animator>();

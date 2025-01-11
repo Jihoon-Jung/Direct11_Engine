@@ -367,6 +367,307 @@
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
     </GameObject>
+    <GameObject name="Dreyar1">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar2">
+        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Kick" animIndex="2" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar3">
+        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar4">
+        <Transform posX="9" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Kick" animIndex="2" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar5">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar6">
+        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar7">
+        <Transform posX="4" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar8">
+        <Transform posX="5" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
+            <Clip name="Kick" animIndex="2" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar9">
+        <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar10">
+        <Transform posX="4" posY="0" posZ="56.493614" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false" posX="673" posY="307"/>
+            <Clip name="Fall" animIndex="2" isLoop="false" posX="847" posY="82"/>
+            <Clip name="Kick" animIndex="0" isLoop="true" posX="356" posY="77" speed="1"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar11">
+        <Transform posX="5" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar12">
+        <Transform posX="7" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar13">
+        <Transform posX="3" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar14">
+        <Transform posX="4" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar15">
+        <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Kick" animIndex="2" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar16">
+        <Transform posX="5" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar17">
+        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="1" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar18">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="2" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
+            <Clip name="Kick" animIndex="0" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="Dreyar19">
+        <Transform posX="7" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Kick"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="2" isLoop="false"/>
+            <Clip name="Kick" animIndex="1" isLoop="false"/>
+            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
+        </Animator>
+    </GameObject>
     <GameObject name="MainCamera">
         <Transform posX="1" posY="2" posZ="107" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <Camera projectionType="0"/>
@@ -404,15 +705,15 @@
         <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="Dreyar0">
-        <Transform posX="7" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
+        <Transform posX="9.9108391" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
+        <BoxCollider scaleX="443.38812" scaleY="1653.4479" scaleZ="691.21198" centerX="0" centerY="0.80000001" centerZ="0"/>
         <Animator>
             <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
+            <Clip name="Dance" animIndex="0" isLoop="false"/>
+            <Clip name="Fall" animIndex="1" isLoop="false"/>
             <Clip name="Kick" animIndex="2" isLoop="false"/>
             <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
             <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
@@ -426,21 +727,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar1">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube1">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House1">
         <Transform posX="4" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -449,21 +741,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar2">
-        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube2">
+        <Transform posX="5" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House2">
         <Transform posX="5" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -472,21 +755,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar3">
-        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube3">
+        <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House3">
         <Transform posX="8" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -495,21 +769,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar4">
-        <Transform posX="9" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube4">
+        <Transform posX="9" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House4">
         <Transform posX="9" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -518,21 +783,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar5">
-        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube5">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House5">
         <Transform posX="6" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -541,21 +797,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar6">
-        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube6">
+        <Transform posX="5" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House6">
         <Transform posX="4" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -564,21 +811,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar7">
-        <Transform posX="4" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube7">
+        <Transform posX="4" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House7">
         <Transform posX="8" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -587,21 +825,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar8">
-        <Transform posX="5" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube8">
+        <Transform posX="5" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House8">
         <Transform posX="4" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -610,21 +839,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar9">
-        <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube9">
+        <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House9">
         <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -633,21 +853,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar10">
-        <Transform posX="4" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube10">
+        <Transform posX="4" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House10">
         <Transform posX="7" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -656,21 +867,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar11">
-        <Transform posX="5" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube11">
+        <Transform posX="5" posY="0" posZ="7" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House11">
         <Transform posX="3" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -679,21 +881,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar12">
-        <Transform posX="7" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube12">
+        <Transform posX="7" posY="0" posZ="3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House12">
         <Transform posX="6" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -702,21 +895,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar13">
-        <Transform posX="3" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube13">
+        <Transform posX="3" posY="0" posZ="5" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House13">
         <Transform posX="0" posY="0" posZ="4" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -725,21 +909,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar14">
-        <Transform posX="4" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube14">
+        <Transform posX="4" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House14">
         <Transform posX="8" posY="0" posZ="9" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -748,21 +923,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar15">
-        <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube15">
+        <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="1" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="2" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House15">
         <Transform posX="6" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -771,21 +937,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar16">
-        <Transform posX="5" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube16">
+        <Transform posX="5" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="0" isLoop="false"/>
-            <Clip name="Fall" animIndex="2" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House16">
         <Transform posX="1" posY="0" posZ="6" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -794,21 +951,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar17">
-        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube17">
+        <Transform posX="5" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="0" isLoop="false"/>
-            <Clip name="Kick" animIndex="1" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House17">
         <Transform posX="4" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -817,21 +965,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar18">
-        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube18">
+        <Transform posX="7" posY="0" posZ="8" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House18">
         <Transform posX="8" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>
@@ -840,21 +979,12 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Dreyar19">
-        <Transform posX="7" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
+    <GameObject name="Cube19">
+        <Transform posX="7" posY="0" posZ="1" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.001" scaleY="0.001" scaleZ="0.001" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false"/>
-            <Clip name="Fall" animIndex="1" isLoop="false"/>
-            <Clip name="Kick" animIndex="0" isLoop="false"/>
-            <Transition clipA="Kick" clipB="Dance" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Dance" clipB="Fall" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-            <Transition clipA="Fall" clipB="Kick" flag="false" hasCondition="false" hasExitTime="true" ExitTime="1" transitionOffset="0" transitionDuration="0.30000001"/>
-        </Animator>
+        <SphereCollider radius="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="House19">
         <Transform posX="8" posY="0" posZ="2" rotX="0" rotY="0" rotZ="0" scaleX="0.00050000002" scaleY="0.00050000002" scaleZ="0.00050000002"/>

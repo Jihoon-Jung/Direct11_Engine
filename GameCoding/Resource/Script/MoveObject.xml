@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Script>
+    <ClassName>MoveObject</ClassName>
+    <DisplayName>MoveObject</DisplayName>
+    <CppContent>#include "pch.h"
+#include "MoveObject.h"
+
+MoveObject::MoveObject()
+{
+}
+
+MoveObject::~MoveObject()
+{
+}
+
+void MoveObject::Start()
+{
+}
+
+void MoveObject::Update()
+{
+    if (INPUT.GetButton(KEY_TYPE::RBUTTON))
+    {
+        if (!_isResetMouse)
+        {
+            ResetMouse();
+            _isResetMouse = true;
+        }
+        float dt = TIME.GetDeltaTime();
+
+        if (auto gameObject = GetGameObject())
+        {
+            // 키보드를 이용한 이동
+            Vec3 pos = gameObject-&gt;transform()-&gt;GetWorldPosition();
+
+            if (INPUT.GetButton(KEY_TYPE::W))
+                pos += GetTransform()-&gt;GetLook() * _speed * dt;
+
+            if (INPUT.GetButton(KEY_TYPE::S))
+                pos -= GetTransform()-&gt;GetLook() * _speed * dt;
+
+            if (INPUT.GetButton(KEY_TYPE::A))
+                pos -= GetTransform()-&gt;GetRight() * _speed * dt;
+
+            if (INPUT.GetButton(KEY_TYPE::D))
+                pos += GetTransform()-&gt;GetRight() * _speed * dt;
+
+            gameObject-&gt;transform()-&gt;SetPosition(pos);
+
+            // 마우스 회전 처리
+            POINT cursorPos;
+            if (GetCursorPos(&amp;cursorPos))
+            {
+                float deltaX = static_cast&lt;float&gt;(cursorPos.x - _prevMousePos.x);
+                float deltaY = static_cast&lt;float&gt;(cursorPos.y - _prevMousePos.y);
+
+                if (abs(deltaX) &gt; 1000.f || abs(deltaY) &gt; 1000.f)
+                {
+                    _prevMousePos = cursorPos;
+                    return;
+                }
+
+                float MOUSE_SENSITIVITY = 0.3f;
+
+                // 현재 누적된 각도 업데이트
+                _accumulatedRotX += deltaY * MOUSE_SENSITIVITY;
+                _accumulatedRotY += deltaX * MOUSE_SENSITIVITY;
+
+                // X축 회전(Pitch) 제한
+                _accumulatedRotX = Clamp(_accumulatedRotX, -89.0f, 89.0f);
+
+                // 회전 적용
+                float pitch = XMConvertToRadians(_accumulatedRotX);
+                float yaw = XMConvertToRadians(_accumulatedRotY);
+
+                Quaternion newRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
+                GetTransform()-&gt;SetQTRotation(newRotation);
+
+                _prevMousePos = cursorPos;
+            }
+            else
+            {
+                char buffer[100];
+                sprintf_s(buffer, "Failed to get cursor position.\n");
+                OutputDebugStringA(buffer);
+            }
+        }
+        
+    }
+    else
+    {
+        _isResetMouse = false;
+        _isFirstMove = true;
+    }
+}
+
+void MoveObject::ResetMouse()
+{
+    POINT cursorPos;
+    GetCursorPos(&amp;cursorPos);
+    _prevMousePos = cursorPos;
+}
+
+void MoveObject::InitializeRotationFromTransform()
+{
+    // 현재 Transform의 회전값을 가져와서 누적값 초기화
+    Quaternion currentRotation = GetTransform()-&gt;GetQTRotation();
+    Vec3 eulerAngles = GetTransform()-&gt;ToEulerAngles(currentRotation);
+
+    // 라디안을 도(degree)로 변환
+    _accumulatedRotX = XMConvertToDegrees(eulerAngles.x);
+    _accumulatedRotY = XMConvertToDegrees(eulerAngles.y);
+}
+</CppContent>
+    <HeaderContent>#pragma once
+#include "Component.h"
+#include "MonoBehaviour.h"
+
+class MoveObject : public MonoBehaviour
+{
+	using Supder = MonoBehaviour;
+public:
+	MoveObject();
+	~MoveObject();
+
+	virtual void Start();
+	virtual void Update();
+
+	void ResetMouse();
+
+	float Clamp(float value, float min, float max)
+	{
+		if (value &lt; min) return min;
+		if (value &gt; max) return max;
+		return value;
+	}
+
+	void InitializeRotationFromTransform();
+	float GetSpeed() const { return _speed; }
+private:
+
+	bool _isFirstMove = true;
+	float _speed = 10.f;
+	POINT _prevMousePos;
+	bool _isResetMouse = false;
+	float _accumulatedRotX = 0.0f;  // 누적된 X축 회전 각도
+	float _accumulatedRotY = 0.0f;  // 누적된 Y축 회전 각도
+};
+
+REGISTER_SCRIPT(MoveObject, "MoveObject");</HeaderContent>
+</Script>

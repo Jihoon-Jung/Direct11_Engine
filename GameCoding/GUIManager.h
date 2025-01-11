@@ -26,8 +26,11 @@ public:
 	void RenderFileGrid(const filesystem::path& path);
 
 	void OnResourceDroppedToViewport(const std::string& fullPath);  // 뷰포트에 리소스가 드롭되었을 때 호출되는 함수
+	void HandleExternalFilesDrop(const filesystem::path& sourcePath);
 
 private:
+	bool IsViewportHovered();
+
 	shared_ptr<GameObject> _selectedObject = nullptr;
 	bool _isColliderEditMode = false;  // 콜라이더 편집 모드인지 여부
 	bool _isCameraMoving = false;
@@ -131,5 +134,32 @@ private:
 		_rightClickedNode = nullptr;
 		_rightClickedTransition = nullptr;
 	}
+
+private:
+	// 셰이더 파일 관련
+	enum class FileType
+	{
+		NONE,
+		SHADER,
+		TEXTURE,
+		MESH,
+		MATERIAL,
+		Script
+	};
+
+	filesystem::path _selectedShaderFile;
+	filesystem::path _selectedScriptFile;
+	string _shaderCode;
+	string _scriptCode;
+	FileType _selectedFileType = FileType::NONE;
+
+	void ShowShaderInspector(const filesystem::path& xmlPath);
+	void ShowScriptInspector(const filesystem::path& xmlPath);
+private:
+	
+	bool IsImageFile(const filesystem::path& path);
+	void CopyFileToResourceFolder(const filesystem::path& sourcePath, const filesystem::path& destPath);
+	void RenderScriptIcon(shared_ptr<Texture> icon, const string& filename, const filesystem::path& path,
+		float cellSize, float iconSize, float padding, float maxTextWidth);
 };
 
