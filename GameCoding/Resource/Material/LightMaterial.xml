@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Material>
     <Name>LightMaterial</Name>
-    <Texture>Panda</Texture>
+    <Texture>CMake_ICon</Texture>
     <Shader>Light_Render_Shader</Shader>
     <MaterialDesc>
-        <Ambient r="1" g="1" b="1" a="1"/>
+        <Ambient r="0.58431375" g="1" b="1" a="1"/>
         <Diffuse r="1" g="1" b="1" a="1"/>
         <Specular r="1" g="1" b="1" a="1"/>
     </MaterialDesc>

@@ -149,17 +149,77 @@ private:
 
 	filesystem::path _selectedShaderFile;
 	filesystem::path _selectedScriptFile;
+	filesystem::path _selectedMaterialFile;
+	filesystem::path _selectedTextureFile;
+
 	string _shaderCode;
 	string _scriptCode;
 	FileType _selectedFileType = FileType::NONE;
 
 	void ShowShaderInspector(const filesystem::path& xmlPath);
 	void ShowScriptInspector(const filesystem::path& xmlPath);
+	void ShowMaterialInspector(const filesystem::path& xmlPath);
+	void ShowTextureInspector(const filesystem::path& xmlPath);
+
 private:
 	
 	bool IsImageFile(const filesystem::path& path);
 	void CopyFileToResourceFolder(const filesystem::path& sourcePath, const filesystem::path& destPath);
 	void RenderScriptIcon(shared_ptr<Texture> icon, const string& filename, const filesystem::path& path,
 		float cellSize, float iconSize, float padding, float maxTextWidth);
+
+	private:
+		string ToLower(string str)
+		{
+			transform(str.begin(), str.end(), str.begin(), ::tolower);
+			return str;
+		}
+
+		void RenderTextureOption(const string& name, shared_ptr<Texture> icon,
+			float cellSize, float iconSize, float padding,
+			tinyxml2::XMLElement* textureElem, bool& isModified)
+		{
+			ImGui::PushID(name.c_str());
+
+			ImGui::BeginGroup();
+			{
+				// 아이콘 영역
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 0.2f));
+
+				if (icon)
+				{
+					if (ImGui::ImageButton(name.c_str(), (ImTextureID)icon->GetShaderResourceView().Get(),
+						ImVec2(iconSize, iconSize), ImVec2(0, 0), ImVec2(1, 1),
+						ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
+					{
+						textureElem->SetText(name.c_str());
+						isModified = true;
+						ImGui::CloseCurrentPopup();
+					}
+				}
+				else // None 옵션
+				{
+					if (ImGui::Button("##empty", ImVec2(iconSize, iconSize)))
+					{
+						textureElem->SetText("None");
+						isModified = true;
+						ImGui::CloseCurrentPopup();
+					}
+				}
+
+				ImGui::PopStyleColor(2);
+
+				// 텍스트 표시
+				float textWidth = ImGui::CalcTextSize(name.c_str()).x;
+				float textPosX = ImGui::GetCursorPosX() + (cellSize - textWidth) * 0.5f;
+				ImGui::SetCursorPosX(textPosX);
+				ImGui::TextWrapped("%s", name.c_str());
+			}
+			ImGui::EndGroup();
+
+			ImGui::PopID();
+			ImGui::NextColumn();
+		}
 };
 

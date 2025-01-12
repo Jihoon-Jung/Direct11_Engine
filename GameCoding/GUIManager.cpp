@@ -131,26 +131,32 @@ void GUIManager::RenderUI()
     if (ImGui::GetIO().MouseClicked[ImGuiMouseButton_Left])
     {
         bool clickedWindow = false;
+        bool isAnyPopupOpen = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId);  // 열린 팝업 확인
 
         // 현재 마우스가 어떤 윈도우 위에 있는지 확인
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) ||
-            ImGui::IsAnyItemHovered())
+            ImGui::IsAnyItemHovered() ||
+            isAnyPopupOpen)  // 수정: 팝업창이 열려있으면 클릭된 것으로 처리
         {
             clickedWindow = true;
         }
 
         // 뷰포트 영역을 클릭했을 때 Inspector 창 초기화
-        if (IsViewportHovered())
+        if (IsViewportHovered() && !isAnyPopupOpen)
         {
             _selectedShaderFile.clear();
             _selectedScriptFile.clear();
+            _selectedMaterialFile.clear();
+            _selectedTextureFile.clear();
             _selectedFileType = FileType::NONE;
         }
         // 빈 공간 클릭 시 초기화
-        else if (!clickedWindow)
+        else if (!clickedWindow && !isAnyPopupOpen)
         {
             _selectedShaderFile.clear();
             _selectedScriptFile.clear();
+            _selectedMaterialFile.clear();
+            _selectedTextureFile.clear();
             _selectedFileType = FileType::NONE;
             _selectedObject = nullptr;
         }
@@ -521,14 +527,26 @@ void GUIManager::RenderUI()
         // 선택된 셰이더 파일이 있는 경우
         if (_selectedFileType == FileType::SHADER && !_selectedShaderFile.empty())
         {
+            _selectedObject = nullptr;  // 오브젝트 선택 해제
             ShowShaderInspector(_selectedShaderFile);
         }
         // 선택된 스크립트 파일이 있는 경우
         else if (_selectedFileType == FileType::Script && !_selectedScriptFile.empty())
         {
+            _selectedObject = nullptr;  // 오브젝트 선택 해제
             ShowScriptInspector(_selectedScriptFile);
         }
-
+        
+        if (_selectedFileType == FileType::MATERIAL && !_selectedMaterialFile.empty())
+        {
+            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ShowMaterialInspector(_selectedMaterialFile);
+        }
+        if (_selectedFileType == FileType::TEXTURE && !_selectedTextureFile.empty())
+        {
+            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ShowTextureInspector(_selectedTextureFile);
+        }
         if (_selectedObject != nullptr)
         {
             // 오브젝트 이름 표시
@@ -1061,6 +1079,62 @@ void GUIManager::RenderUI()
                 }
             }
 
+            // 드래그 앤 드롭 영역 생성
+            ImGui::InvisibleButton("##dropzone", ImGui::GetContentRegionAvail());
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE"))
+                {
+                    const char* fullPath = (const char*)payload->Data;
+                    filesystem::path path(fullPath);
+
+                    // Script 폴더의 XML 파일인지 확인
+                    if (path.parent_path().filename() == "Script" && path.extension() == ".xml")
+                    {
+                        string className = path.stem().string();  // XML 파일명에서 확장자를 제외한 클래스 이름
+
+                        // ComponentFactory에서 스크립트 정보 찾기
+                        const auto& scripts = CF.GetRegisteredScripts();
+                        for (const auto& [typeName, info] : scripts)
+                        {
+                            if (info.displayName == className)
+                            {
+                                // 이미 추가된 스크립트인지 확인
+                                bool hasScript = false;
+                                for (const auto& component : _selectedObject->GetComponents())
+                                {
+                                    if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
+                                    {
+                                        if (typeid(*script).name() == typeName)
+                                        {
+                                            hasScript = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // 스크립트가 아직 추가되지 않았다면 추가
+                                if (!hasScript)
+                                {
+                                    auto script = info.createFunc();
+                                    _selectedObject->AddComponent(script);
+
+                                    // XML 업데이트
+                                    SCENE.AddComponentToGameObjectAndSaveToXML(
+                                        SCENE.GetActiveScene()->GetSceneName(),
+                                        _selectedObject->GetName(),
+                                        script
+                                    );
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+
             // 컴포넌트 추가 메뉴
             if (ImGui::BeginPopupContextWindow("AddComponentMenu", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
             {
@@ -1216,9 +1290,7 @@ void GUIManager::RenderUI()
                 }
                 ImGui::EndPopup();
             }
-        }
-        if (_selectedObject != nullptr)
-        {
+
             shared_ptr<Animator> animator = _selectedObject->GetComponent<Animator>();
 
             if (animator != nullptr)
@@ -1232,8 +1304,8 @@ void GUIManager::RenderUI()
                 }
 
             }
+
         }
-        
         
         ImGui::End();
     }
@@ -1490,6 +1562,8 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
         // Project 창의 선택 상태 초기화
         _selectedShaderFile.clear();
         _selectedScriptFile.clear();
+        _selectedMaterialFile.clear();
+        _selectedTextureFile.clear();
         _selectedFileType = FileType::NONE;
 
         _selectedObject = gameObject;
@@ -2083,6 +2157,18 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                         _selectedScriptFile = entry.path();
                         _selectedFileType = FileType::Script;
                     }
+                    // Material 파일 클릭 처리 추가
+                    else if (parentFolder == "Material")
+                    {
+                        _selectedMaterialFile = entry.path();
+                        _selectedFileType = FileType::MATERIAL;
+                    }
+                    else if (parentFolder == "Texture")  // 텍스처 파일 선택 처리 추가
+                    {
+                        _selectedObject = nullptr;
+                        _selectedTextureFile = entry.path();
+                        _selectedFileType = FileType::TEXTURE;
+                    }
                 }
 
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -2133,6 +2219,8 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
     {
         _selectedShaderFile.clear();
         _selectedScriptFile.clear();
+        _selectedMaterialFile.clear();
+        _selectedTextureFile.clear();
         _selectedFileType = FileType::NONE;
     }
     
@@ -3718,6 +3806,480 @@ void GUIManager::ShowScriptInspector(const filesystem::path& xmlPath)
     }
 }
 
+void GUIManager::ShowMaterialInspector(const filesystem::path& xmlPath)
+{
+    // XML 파일 로드
+    tinyxml2::XMLDocument doc;
+    if (doc.LoadFile(xmlPath.string().c_str()) != tinyxml2::XML_SUCCESS)
+        return;
+
+    auto root = doc.FirstChildElement("Material");
+    if (!root)
+        return;
+
+    // Material 이름 먼저 가져오기
+    auto nameElem = root->FirstChildElement("Name");
+    if (!nameElem)
+        return;
+
+    // 메모리에 로드된 Material 가져오기
+    auto material = RESOURCE.GetResource<Material>(Utils::ToWString(nameElem->GetText()));
+    if (!material)
+        return;
+
+    bool isModified = false;
+
+    // Material 이름 표시
+    if (auto nameElem = root->FirstChildElement("Name"))
+        ImGui::Text("Material Name: %s", nameElem->GetText());
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // 스타일 설정
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 10));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+
+    // Texture 선택
+    if (auto textureElem = root->FirstChildElement("Texture"))
+    {
+        string currentTexture = textureElem->GetText();
+        ImGui::Text("Texture");
+        ImGui::SameLine(100);
+
+        // 텍스처 선택 버튼 스타일
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
+        if (ImGui::Button(currentTexture.c_str(), ImVec2(-1, 0)))
+        {
+            ImGui::OpenPopup("Select Texture");
+        }
+        ImGui::PopStyleVar();
+
+        // 팝업 스타일 설정
+        ImGui::SetNextWindowSize(ImVec2(500, 600));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 8));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.94f, 0.94f, 0.94f, 1.0f));
+
+        if (ImGui::BeginPopupModal("Select Texture", nullptr, ImGuiWindowFlags_NoResize))
+        {
+            // 검색창 스타일 및 구현
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+            static char searchBuffer[128] = "";
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputTextWithHint("##Search", "Search textures...", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 그리드 영역
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            if (ImGui::BeginChild("TextureGrid", ImVec2(0, -40), true))
+            {
+                float cellSize = 100.0f;
+                float iconSize = 80.0f;
+                float padding = 10.0f;
+
+                // 그리드 레이아웃 계산
+                float availWidth = ImGui::GetContentRegionAvail().x;
+                int columnCount = static_cast<int>(availWidth / cellSize);
+                if (columnCount < 1) columnCount = 1;
+
+                ImGui::Columns(columnCount, nullptr, false);
+
+                // None 옵션
+                RenderTextureOption("None", nullptr, cellSize, iconSize, padding, textureElem, isModified);
+
+                // 텍스처 목록
+                string searchStr = ToLower(string(searchBuffer));
+                for (const auto& entry : filesystem::directory_iterator("Resource/Texture"))
+                {
+                    if (entry.path().extension() == ".xml")
+                    {
+                        string textureName = entry.path().stem().string();
+                        if (searchStr.empty() || ToLower(textureName).find(searchStr) != string::npos)
+                        {
+                            shared_ptr<Texture> icon = RESOURCE.GetResource<Texture>(Utils::ToWString(textureName));
+                            RenderTextureOption(textureName, icon, cellSize, iconSize, padding, textureElem, isModified);
+                        }
+                    }
+                }
+
+                ImGui::Columns(1);
+                ImGui::EndChild();
+            }
+            ImGui::PopStyleColor();
+
+            // 하단 버튼
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 6));
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleVar();
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
+    }
+
+    ImGui::Spacing();
+
+    // NormalMap 선택
+    if (auto normalMapElem = root->FirstChildElement("NormalMap"))
+    {
+        string currentNormalMap = normalMapElem->GetText();
+        ImGui::Text("NormalMap");
+        ImGui::SameLine(100);
+
+        // 텍스처 선택 버튼 스타일
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
+        if (ImGui::Button(currentNormalMap.c_str(), ImVec2(-1, 0)))
+        {
+            ImGui::OpenPopup("Select NormalMap");
+        }
+        ImGui::PopStyleVar();
+
+        // 팝업 스타일 설정
+        ImGui::SetNextWindowSize(ImVec2(500, 600));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 8));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.94f, 0.94f, 0.94f, 1.0f));
+
+        if (ImGui::BeginPopupModal("Select NormalMap", nullptr, ImGuiWindowFlags_NoResize))
+        {
+            // 검색창 스타일 및 구현
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+            static char searchBuffer[128] = "";
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputTextWithHint("##Search", "Search normal maps...", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 그리드 영역
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            if (ImGui::BeginChild("NormalMapGrid", ImVec2(0, -40), true))
+            {
+                float cellSize = 100.0f;
+                float iconSize = 80.0f;
+                float padding = 10.0f;
+
+                // 그리드 레이아웃 계산
+                float availWidth = ImGui::GetContentRegionAvail().x;
+                int columnCount = static_cast<int>(availWidth / cellSize);
+                if (columnCount < 1) columnCount = 1;
+
+                ImGui::Columns(columnCount, nullptr, false);
+
+                // None 옵션
+                RenderTextureOption("None", nullptr, cellSize, iconSize, padding, normalMapElem, isModified);
+
+                // NormalMap 목록
+                string searchStr = ToLower(string(searchBuffer));
+                for (const auto& entry : filesystem::directory_iterator("Resource/Texture"))
+                {
+                    if (entry.path().extension() == ".xml")
+                    {
+                        string textureName = entry.path().stem().string();
+                        if (searchStr.empty() || ToLower(textureName).find(searchStr) != string::npos)
+                        {
+                            shared_ptr<Texture> icon = RESOURCE.GetResource<Texture>(Utils::ToWString(textureName));
+                            RenderTextureOption(textureName, icon, cellSize, iconSize, padding, normalMapElem, isModified);
+                        }
+                    }
+                }
+
+                ImGui::Columns(1);
+                ImGui::EndChild();
+            }
+            ImGui::PopStyleColor();
+
+            // 하단 버튼
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 6));
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleVar();
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
+    }
+
+    ImGui::Spacing();
+
+    // Shader 선택
+    if (auto shaderElem = root->FirstChildElement("Shader"))
+    {
+        string currentShader = shaderElem->GetText();
+        ImGui::Text("Shader");
+        ImGui::SameLine(100);
+
+        // 셰이더 선택 버튼 스타일
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
+        if (ImGui::Button(currentShader.c_str(), ImVec2(-1, 0)))
+        {
+            ImGui::OpenPopup("Select Shader");
+        }
+        ImGui::PopStyleVar();
+
+        // 팝업 스타일 설정
+        ImGui::SetNextWindowSize(ImVec2(500, 600));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15, 15));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 8));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.94f, 0.94f, 0.94f, 1.0f));
+
+        if (ImGui::BeginPopupModal("Select Shader", nullptr, ImGuiWindowFlags_NoResize))
+        {
+            // 검색창 스타일 및 구현
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+            static char searchBuffer[128] = "";
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputTextWithHint("##Search", "Search shaders...", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 그리드 영역
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            if (ImGui::BeginChild("ShaderGrid", ImVec2(0, -40), true))
+            {
+                float cellSize = 100.0f;
+                float iconSize = 80.0f;
+                float padding = 10.0f;
+
+                // 그리드 레이아웃 계산
+                float availWidth = ImGui::GetContentRegionAvail().x;
+                int columnCount = static_cast<int>(availWidth / cellSize);
+                if (columnCount < 1) columnCount = 1;
+
+                ImGui::Columns(columnCount, nullptr, false);
+
+                // Shader_Icon 로드
+                shared_ptr<Texture> shaderIcon = RESOURCE.GetResource<Texture>(L"Shader_Icon");
+
+                // Shader 목록
+                string searchStr = ToLower(string(searchBuffer));
+                for (const auto& entry : filesystem::directory_iterator("Resource/Shader"))
+                {
+                    if (entry.path().extension() == ".xml")
+                    {
+                        string shaderName = entry.path().stem().string();
+                        if (searchStr.empty() || ToLower(shaderName).find(searchStr) != string::npos)
+                        {
+                            RenderTextureOption(shaderName, shaderIcon, cellSize, iconSize, padding, shaderElem, isModified);
+                        }
+                    }
+                }
+
+                ImGui::Columns(1);
+                ImGui::EndChild();
+            }
+            ImGui::PopStyleColor();
+
+            // 하단 버튼
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 6));
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleVar();
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(2);
+    }
+
+    // 첫 번째 스타일 세트 Pop
+    ImGui::PopStyleColor(3);  // 버튼 관련 스타일
+    ImGui::PopStyleVar(2);    // FramePadding, ItemSpacing
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Material Properties 섹션
+    ImGui::Text("Material Properties");
+    ImGui::Spacing();
+
+    if (auto descElem = root->FirstChildElement("MaterialDesc"))
+    {
+        // 새로운 스타일 Push
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 3));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+
+        // Ambient, Diffuse, Specular 색상 편집 (더 세련된 레이아웃)
+        const float colorEditWidth = 180.0f;
+        const char* colorLabels[] = { "Ambient", "Diffuse", "Specular" };
+        const char* elemNames[] = { "Ambient", "Diffuse", "Specular" };
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (auto elem = descElem->FirstChildElement(elemNames[i]))
+            {
+                float color[3] = {
+                    elem->FloatAttribute("r"),
+                    elem->FloatAttribute("g"),
+                    elem->FloatAttribute("b")
+                };
+
+                ImGui::Text(colorLabels[i]);
+                ImGui::SameLine(100);
+                ImGui::SetNextItemWidth(colorEditWidth);
+                if (ImGui::ColorEdit3(("##" + string(colorLabels[i])).c_str(), color))
+                {
+                    elem->SetAttribute("r", color[0]);
+                    elem->SetAttribute("g", color[1]);
+                    elem->SetAttribute("b", color[2]);
+                    isModified = true;
+                }
+                ImGui::Spacing();
+            }
+        }
+
+        // 두 번째 스타일 세트 Pop
+        ImGui::PopStyleColor(3);  // FrameBg 관련 스타일
+        ImGui::PopStyleVar();     // FramePadding
+    }
+
+    // 변경사항이 있으면 파일 저장
+    if (isModified)
+    {
+        doc.SaveFile(xmlPath.string().c_str());
+        // Material 리소스 다시 로드
+        RESOURCE.LoadMaterialData(xmlPath.wstring());
+
+        // 메모리에 로드된 Material 업데이트
+        auto material = RESOURCE.GetResource<Material>(Utils::ToWString(nameElem->GetText()));
+        if (material)
+        {
+            // Shader 업데이트
+            if (auto shaderElem = root->FirstChildElement("Shader"))
+            {
+                material->SetShader(RESOURCE.GetResource<Shader>(Utils::ToWString(shaderElem->GetText())));
+            }
+
+            // Texture 업데이트
+            if (auto textureElem = root->FirstChildElement("Texture"))
+            {
+                material->SetTexture(RESOURCE.GetResource<Texture>(Utils::ToWString(textureElem->GetText())));
+            }
+
+            // NormalMap 업데이트
+            if (auto normalMapElem = root->FirstChildElement("NormalMap"))
+            {
+                material->SetNormalMap(RESOURCE.GetResource<Texture>(Utils::ToWString(normalMapElem->GetText())));
+            }
+            // MaterialDesc 업데이트
+            if (auto descElem = root->FirstChildElement("MaterialDesc"))
+            {
+                MaterialDesc matDesc;
+
+                // Ambient 업데이트
+                if (auto ambientElem = descElem->FirstChildElement("Ambient"))
+                {
+                    matDesc.ambient.x = ambientElem->FloatAttribute("r");
+                    matDesc.ambient.y = ambientElem->FloatAttribute("g");
+                    matDesc.ambient.z = ambientElem->FloatAttribute("b");
+                    matDesc.ambient.w = ambientElem->FloatAttribute("a");
+                }
+
+                // Diffuse 업데이트
+                if (auto diffuseElem = descElem->FirstChildElement("Diffuse"))
+                {
+                    matDesc.diffuse.x = diffuseElem->FloatAttribute("r");
+                    matDesc.diffuse.y = diffuseElem->FloatAttribute("g");
+                    matDesc.diffuse.z = diffuseElem->FloatAttribute("b");
+                    matDesc.diffuse.w = diffuseElem->FloatAttribute("a");
+                }
+
+                // Specular 업데이트
+                if (auto specularElem = descElem->FirstChildElement("Specular"))
+                {
+                    matDesc.specular.x = specularElem->FloatAttribute("r");
+                    matDesc.specular.y = specularElem->FloatAttribute("g");
+                    matDesc.specular.z = specularElem->FloatAttribute("b");
+                    matDesc.specular.w = specularElem->FloatAttribute("a");
+                }
+
+                // Material의 MaterialDesc 업데이트
+                material->SetMaterialDesc(matDesc);
+            }
+        
+        }
+    }
+}
+
+void GUIManager::ShowTextureInspector(const filesystem::path& xmlPath)
+{
+    // XML 파일 로드
+    tinyxml2::XMLDocument doc;
+    if (doc.LoadFile(xmlPath.string().c_str()) != tinyxml2::XML_SUCCESS)
+        return;
+
+    auto root = doc.FirstChildElement("Texture");
+    if (!root)
+        return;
+
+    // 텍스처 정보 표시
+    if (auto nameElem = root->FirstChildElement("Name"))
+    {
+        ImGui::Text("Texture Name: %s", nameElem->GetText());
+
+        // 메모리에 로드된 텍스처 가져오기
+        auto texture = RESOURCE.GetResource<Texture>(Utils::ToWString(nameElem->GetText()));
+        if (texture)
+        {
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            // 텍스처 미리보기
+            float previewSize = ImGui::GetContentRegionAvail().x;
+            ImGui::Image((ImTextureID)texture->GetShaderResourceView().Get(),
+                ImVec2(previewSize, previewSize));
+
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            // 해상도 정보
+            Vec2 size = texture->GetSize();
+            ImGui::Text("Resolution: %.0f x %.0f", size.x, size.y);
+
+            // 파일 경로 표시
+            if (auto fileElem = root->FirstChildElement("File"))
+            {
+                ImGui::Text("File Path: %s", fileElem->GetText());
+            }
+        }
+    }
+}
+
 void GUIManager::HandleExternalFilesDrop(const filesystem::path& sourcePath)
 {
     // 이미지 파일인지 확인
@@ -3798,10 +4360,24 @@ void GUIManager::RenderScriptIcon(shared_ptr<Texture> icon, const string& filena
         (ImTextureID)icon->GetShaderResourceView().Get(),
         ImVec2(iconSize, iconSize));
 
-    if (ImGui::IsItemClicked())
+    // 드래그 중이 아닐 때만 스크립트 선택 처리
+    if (ImGui::IsItemClicked() && !ImGui::IsMouseDragging(0))
     {
         _selectedScriptFile = path;
         _selectedFileType = FileType::Script;
+    }
+
+    // 드래그 소스 설정
+    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+    {
+        // 드래그가 시작되면 스크립트 선택 해제
+        _selectedScriptFile.clear();
+        _selectedFileType = FileType::NONE;
+
+        string fullPath = path.string();
+        ImGui::SetDragDropPayload("RESOURCE_FILE", fullPath.c_str(), fullPath.size() + 1);
+        ImGui::Text("%s", filename.c_str());
+        ImGui::EndDragDropSource();
     }
 
     // 텍스트 처리 로직
