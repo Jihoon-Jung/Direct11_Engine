@@ -759,7 +759,8 @@ void GUIManager::RenderUI()
 
                                 // 오브젝트에서 컴포넌트 제거
                                 _selectedObject->RemoveComponent(component);
-
+                                ImGui::EndPopup();
+                                break;
                             }
                             ImGui::EndPopup();
                         }
@@ -1079,64 +1080,25 @@ void GUIManager::RenderUI()
                 }
             }
 
-            // 드래그 앤 드롭 영역 생성
-            ImGui::InvisibleButton("##dropzone", ImGui::GetContentRegionAvail());
+            // 투명한 Child 윈도우 시작
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+            ImGui::BeginChild("ComponentArea", ImGui::GetContentRegionAvail(), false);
 
-            if (ImGui::BeginDragDropTarget())
-            {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE"))
-                {
-                    const char* fullPath = (const char*)payload->Data;
-                    filesystem::path path(fullPath);
+            // 버튼 스타일 설정 - 완전히 투명하게
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));          // 기본 상태: 완전 투명
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));   // 호버 상태: 완전 투명
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));    // 클릭 상태: 완전 투명
 
-                    // Script 폴더의 XML 파일인지 확인
-                    if (path.parent_path().filename() == "Script" && path.extension() == ".xml")
-                    {
-                        string className = path.stem().string();  // XML 파일명에서 확장자를 제외한 클래스 이름
+            ImVec2 startPos = ImGui::GetCursorPos();
+            ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+            ImGui::Button("##ComponentAreaButton", ImGui::GetContentRegionAvail());
+            ImGui::PopStyleVar();
 
-                        // ComponentFactory에서 스크립트 정보 찾기
-                        const auto& scripts = CF.GetRegisteredScripts();
-                        for (const auto& [typeName, info] : scripts)
-                        {
-                            if (info.displayName == className)
-                            {
-                                // 이미 추가된 스크립트인지 확인
-                                bool hasScript = false;
-                                for (const auto& component : _selectedObject->GetComponents())
-                                {
-                                    if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
-                                    {
-                                        if (typeid(*script).name() == typeName)
-                                        {
-                                            hasScript = true;
-                                            break;
-                                        }
-                                    }
-                                }
+            // 스타일 복원
+            ImGui::PopStyleColor(3);
 
-                                // 스크립트가 아직 추가되지 않았다면 추가
-                                if (!hasScript)
-                                {
-                                    auto script = info.createFunc();
-                                    _selectedObject->AddComponent(script);
-
-                                    // XML 업데이트
-                                    SCENE.AddComponentToGameObjectAndSaveToXML(
-                                        SCENE.GetActiveScene()->GetSceneName(),
-                                        _selectedObject->GetName(),
-                                        script
-                                    );
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-                ImGui::EndDragDropTarget();
-            }
-
-            // 컴포넌트 추가 메뉴
-            if (ImGui::BeginPopupContextWindow("AddComponentMenu", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+            // 우클릭 메뉴
+            if (ImGui::BeginPopupContextItem("##ComponentAreaButton"))
             {
                 if (ImGui::BeginMenu("Add Component"))
                 {
@@ -1290,6 +1252,62 @@ void GUIManager::RenderUI()
                 }
                 ImGui::EndPopup();
             }
+            
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE"))
+                {
+                    const char* fullPath = (const char*)payload->Data;
+                    filesystem::path path(fullPath);
+
+                    // Script 폴더의 XML 파일인지 확인
+                    if (path.parent_path().filename() == "Script" && path.extension() == ".xml")
+                    {
+                        string className = path.stem().string();  // XML 파일명에서 확장자를 제외한 클래스 이름
+
+                        // ComponentFactory에서 스크립트 정보 찾기
+                        const auto& scripts = CF.GetRegisteredScripts();
+                        for (const auto& [typeName, info] : scripts)
+                        {
+                            if (info.displayName == className)
+                            {
+                                // 이미 추가된 스크립트인지 확인
+                                bool hasScript = false;
+                                for (const auto& component : _selectedObject->GetComponents())
+                                {
+                                    if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
+                                    {
+                                        if (typeid(*script).name() == typeName)
+                                        {
+                                            hasScript = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // 스크립트가 아직 추가되지 않았다면 추가
+                                if (!hasScript)
+                                {
+                                    auto script = info.createFunc();
+
+                                    // XML 업데이트
+                                    SCENE.AddComponentToGameObjectAndSaveToXML(
+                                        SCENE.GetActiveScene()->GetSceneName(),
+                                        _selectedObject->GetName(),
+                                        script
+                                    );
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            // 컴포넌트 표시를 위해 커서 위치 복원
+            ImGui::SetCursorPos(startPos);
 
             shared_ptr<Animator> animator = _selectedObject->GetComponent<Animator>();
 
@@ -1305,6 +1323,8 @@ void GUIManager::RenderUI()
 
             }
 
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
         }
         
         ImGui::End();
@@ -1605,7 +1625,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     // 더블 클릭 처리 (카메라 포커스)
     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
     {
-        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
         Vec3 targetPos = gameObject->transform()->GetWorldPosition();
         Vec3 offset = Vec3(0.0f, 2.0f, -5.0f);
         Vec3 cameraTargetPos = targetPos + offset;
@@ -1666,7 +1686,7 @@ void GUIManager::RenderGuizmo()
     if (pickedObj != nullptr)
     {
         _selectedObject = pickedObj;
-        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
         if (camera && camera->GetComponent<Camera>())
         {
             Matrix view = camera->GetComponent<Camera>()->GetViewMatrix();
@@ -4455,7 +4475,7 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
 
     // 레이캐스팅
     Matrix worldMatrix;
-    shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"MainCamera");
+    shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
     shared_ptr<Camera> cameraComponent = camera->GetComponent<Camera>();
     Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
     Matrix viewMatrix = cameraComponent->GetViewMatrix();

@@ -22,7 +22,9 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	INPUT.Init(hwnd);
 	TIME.Init();
 	RESOURCE.Init();
-	SCENE.LoadScene(L"Test");
+	SCENE.LoadScene(L"test_scene");
+    _editScene = SCENE.GetActiveScene();
+
     SCENE.Init();
 	RENDER.Init();
 	GUI.Init();
@@ -71,7 +73,9 @@ void EngineBody::Play()
 
 void EngineBody::Stop()
 {
-    SCENE.LoadScene(L"Test");
+    SCENE.LoadScene(L"test_scene");
+    SCENE.Init();
+    RENDER.Init();
     UpdateGame();
     isStop = true;
 }
@@ -86,8 +90,26 @@ void EngineBody::RenderInitialScreen()
     
 }
 
+void EngineBody::SetEngineMode(EngineMode mode)
+{
+    if (_engineMode == mode)
+        return;
 
+    if (mode == EngineMode::Play)
+    {
+        // 현재 씬을 복사해서 플레이에 사용
+        _editScene = SCENE.GetActiveScene();
+        _playScene = SCENE.LoadPlayScene(_editScene->GetSceneName());
+        SCENE.GetActiveScene() = _playScene;
+    }
+    else if (mode == EngineMode::Edit)
+    {
+        // 편집 씬으로 복구
+        SCENE.GetActiveScene() = _editScene;
+        _playScene = nullptr;
+    }
 
-//////////////////
-// Stop 후에 다시 시작하면 그림자가 돌지 않음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    _engineMode = mode;
+}
+
 

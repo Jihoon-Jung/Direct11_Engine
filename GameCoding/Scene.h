@@ -24,6 +24,8 @@ public:
 	shared_ptr<GameObject> GetMainLight() { return _mainLignt; }
 	Vec3 GetCameraPos();
 	wstring GetSceneName() { return _sceneName; }
+
+
 private:
 	vector<shared_ptr<GameObject>> _gameObjects;
 	shared_ptr<GameObject> _billboard_obj = make_shared<GameObject>();

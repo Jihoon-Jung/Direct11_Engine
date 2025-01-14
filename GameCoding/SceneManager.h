@@ -31,9 +31,10 @@ public:
 	void Init();
 	void Update();
 	void LoadScene(wstring sceneName);
-	void LoadTestScene();
-	void LoadTestScene2();
+	void LoadTestScene(wstring sceneName);
+	void LoadTestScene2(wstring sceneName);
 	void LoadTestInstancingScene();
+	shared_ptr<Scene> LoadPlayScene(wstring sceneName);
 
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
 

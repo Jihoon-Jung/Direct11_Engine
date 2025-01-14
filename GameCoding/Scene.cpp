@@ -274,3 +274,5 @@ Vec3 Scene::GetCameraPos()
 	}
 	return Vec3();
 }
+
+

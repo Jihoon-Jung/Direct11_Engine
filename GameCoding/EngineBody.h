@@ -15,6 +15,14 @@
 #include "MethodRegistry.h"
 #include "ComponentFactory.h"
 
+
+enum class EngineMode
+{
+    Edit,   // 에디터 모드
+    Play,   // 실행 모드
+    Pause   // 일시정지 모드
+};
+
 class EngineBody
 {
 private:
@@ -48,6 +56,14 @@ public:
     bool IsPaused() const { return isPaused; }
     bool IsStopped() const { return isStop; }
     void RenderInitialScreen();
+
+public:
+    EngineMode GetEngineMode() { return _engineMode; }
+    void SetEngineMode(EngineMode mode);
+    bool IsEditMode() { return _engineMode == EngineMode::Edit; }
+    bool IsPlayMode() { return _engineMode == EngineMode::Play; }
+    bool IsPausedMode() { return _engineMode == EngineMode::Pause; }
+
 private:
     void UpdateGame();    // 게임 로직 업데이트
     void UpdateEditor();  // 에디터(GUI) 업데이트
@@ -64,6 +80,10 @@ private:
     ResourceManager& _resourceManager;
     MethodRegistry& _methodRegistry;
     ComponentFactory& _componentFactory;
+
+    EngineMode _engineMode = EngineMode::Edit;
+    shared_ptr<Scene> _editScene;
+    shared_ptr<Scene> _playScene;
 
     bool isStop = false;
     bool isPaused = false;

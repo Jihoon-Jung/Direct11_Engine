@@ -16,15 +16,15 @@ enum class ComponentType : uint8
 	Button,
 	Billboard,
 	Particle,
-	Script,
 	BoxCollider,
 	SphereCollider,
 	ParticleSystem,
+	Script,
 	None
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 15
+	FIXED_COMPONENT_COUNT = 13
 };
 
 class Component
