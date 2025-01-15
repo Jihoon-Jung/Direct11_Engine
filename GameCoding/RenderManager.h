@@ -32,6 +32,20 @@ public:
 		return instance;
 	}
 
+	void Reset() {
+		_pipeline = nullptr;
+		_renderObjects.clear();
+		_envMappedObjects.clear();
+		_billboardObjs.clear();
+		_UIObjects.clear();
+		_terrainObject = nullptr;
+		_lightObject = nullptr;
+		_buffers.clear();
+		cache_DefaultRender.clear();
+		cache_StaticMeshRender.clear();
+		cache_AnimatedRender.clear();
+	}
+
 	void Init();
 	void Update();
 

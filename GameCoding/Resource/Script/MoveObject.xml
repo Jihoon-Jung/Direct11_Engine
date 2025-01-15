@@ -26,7 +26,8 @@ void MoveObject::Update()
             ResetMouse();
             _isResetMouse = true;
         }
-        float dt = TIME.GetDeltaTime();
+        // Edit 모드일 때는 editorDeltaTime 사용
+        float dt = ENGINE.IsEditMode() ? TIME.GetEditorDeltaTime() : TIME.GetDeltaTime();
 
         if (auto gameObject = GetGameObject())
         {

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameObject.h"
 #include "tinyxml2.h"
+#include "MoveObject.h"
 
 GameObject::GameObject()
 {
@@ -24,8 +25,29 @@ void GameObject::Update()
 {
 	for (shared_ptr<Component>& component : _components)
 	{
-		if (component)
-			component->Update();
+		if (ENGINE.GetEngineMode() == EngineMode::Edit)
+		{
+			if (component)
+			{
+				if (component->GetType() == ComponentType::Transform 
+					|| component->GetType() == ComponentType::Camera
+					|| component->GetType() == ComponentType::Light
+					|| component->GetType() == ComponentType::MeshRenderer
+					|| component->GetType() == ComponentType::Collider
+					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<MoveObject>(component) != nullptr))
+					component->Update();
+				else
+					break;
+			}
+			
+		}
+		else
+		{
+			if (component)
+			{
+				component->Update();
+			}
+		}
 	}
 }
 
@@ -33,8 +55,29 @@ void GameObject::LateUpdate()
 {
 	for (shared_ptr<Component>& component : _components)
 	{
-		if (component)
-			component->LateUpdate();
+		if (ENGINE.GetEngineMode() == EngineMode::Edit)
+		{
+			if (component)
+			{
+				if (component->GetType() == ComponentType::Transform
+					|| component->GetType() == ComponentType::Camera
+					|| component->GetType() == ComponentType::Light
+					|| component->GetType() == ComponentType::MeshRenderer
+					|| component->GetType() == ComponentType::Collider
+					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<MoveObject>(component) != nullptr))
+					component->LateUpdate();
+				else
+					break;
+			}
+
+		}
+		else
+		{
+			if (component)
+			{
+				component->LateUpdate();
+			}
+		}
 	}
 }
 

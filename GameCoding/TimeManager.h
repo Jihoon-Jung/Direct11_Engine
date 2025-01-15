@@ -1,5 +1,6 @@
 #pragma once
 
+
 class TimeManager
 {
 protected:
@@ -16,13 +17,20 @@ public:
 	void Update();
 
 	uint32 GetFps() { return _fps; }
-	float GetDeltaTime() { return _isPaused ? 0.0f : _deltaTime; }
+	//float GetDeltaTime() { return _isPaused ? 0.0f : _deltaTime; }
+	float GetDeltaTime();
+	float GetEditorDeltaTime() { return _editorDeltaTime; }
 	float GetTotalTime() { return _totalTime; }
 	void SetPause(bool pause) { _isPaused = pause; }
+	void SetEnginePause(bool pause) { _isEnginePause = pause; }
+
+	bool GetEnginePause() { return _isEnginePause; }
+
 private:
 	uint64	_frequency = 0;
 	uint64	_prevCount = 0;
 	float	_deltaTime = 0.f;
+	float   _editorDeltaTime = 0.f;
 
 private:
 	uint32	_frameCount = 0;
@@ -32,5 +40,6 @@ private:
 
 private:
 	bool _isPaused = false;
+	bool _isEnginePause = false;
 };
 

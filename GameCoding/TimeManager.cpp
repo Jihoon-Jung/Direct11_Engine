@@ -9,29 +9,38 @@ void TimeManager::Init()
 
 void TimeManager::Update()
 {
-	uint64 currentCount;
-	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
+    uint64 currentCount;
+    ::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
 
-	// 일시정지 상태면 deltaTime을 0으로 설정
-	if (_isPaused)
-	{
-		_deltaTime = 0.0f;
-		_prevCount = currentCount; // 일시정지 해제 시 갑자기 큰 델타값이 나오는 것 방지
-		return;
-	}
+    // Editor deltaTime은 항상 계산
+    _editorDeltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
 
-	_deltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
-	_prevCount = currentCount;
+    // Edit 모드이거나 Pause 모드일 때는 deltaTime을 0으로 설정
+    if (_isEnginePause || _isPaused || ENGINE.GetEngineMode() != EngineMode::Play)
+    {
+        _deltaTime = 0.0f;
+        _prevCount = currentCount; // 모드 전환 시 큰 델타타임이 발생하는 것 방지
+        return;
+    }
 
-	_frameCount++;
-	_frameTime += _deltaTime;
-	_totalTime += _deltaTime;
+    _deltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
+    _prevCount = currentCount;
 
-	if (_frameTime > 1.f)
-	{
-		_fps = static_cast<uint32>(_frameCount / _frameTime);
+    _frameCount++;
+    _frameTime += _deltaTime;
+    _totalTime += _deltaTime;
 
-		_frameTime = 0.f;
-		_frameCount = 0;
-	}
+    if (_frameTime > 1.f)
+    {
+        _fps = static_cast<uint32>(_frameCount / _frameTime);
+        _frameTime = 0.f;
+        _frameCount = 0;
+    }
+}
+
+float TimeManager::GetDeltaTime()
+{
+    if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+        return 0.0f;
+    return _deltaTime;
 }

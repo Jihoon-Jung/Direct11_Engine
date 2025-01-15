@@ -533,7 +533,8 @@ void RenderManager::RenderAllGameObject()
 		float deltaTime = TIME.GetDeltaTime();
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
-			if (_envTexture == nullptr) {
+			if (_envTexture == nullptr) 
+			{
 
 				shared_ptr<Material> material = make_shared<Material>();
 				material->CreateEnvironmentMapTexture(gameObject);

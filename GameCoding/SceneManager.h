@@ -28,6 +28,11 @@ public:
 	}
 public:
 
+	void Reset() {
+		_activeScene = nullptr;
+		_scenes.clear();
+	}
+
 	void Init();
 	void Update();
 	void LoadScene(wstring sceneName);
@@ -37,7 +42,7 @@ public:
 	shared_ptr<Scene> LoadPlayScene(wstring sceneName);
 
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
-
+	void SetActiveScene(shared_ptr<Scene> scene) { _activeScene = scene; }
 	void SaveAndLoadGameObjectToXML(const wstring& sceneName, const wstring& name,
 		const Vec3& position = Vec3::Zero,
 		const Vec3& rotation = Vec3::Zero,

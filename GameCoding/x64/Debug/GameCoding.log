@@ -1,2 +1,8 @@
-﻿  EngineBody.cpp
+﻿  RenderManager.cpp
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(173,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(267,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(377,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(408,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(438,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\RenderManager.cpp(465,54): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   GameCoding.vcxproj -> D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe

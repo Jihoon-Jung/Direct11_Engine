@@ -389,29 +389,27 @@ void GUIManager::RenderUI()
         // 이미지 버튼 생성
         if (ImGui::ImageButton("Play", (ImTextureID)(RESOURCE.GetResource<Texture>(L"startButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
         {
-            if (ENGINE.IsStopped() || ENGINE.IsPaused())
+            if (ENGINE.IsEditMode() || ENGINE.IsPlayMode())
             {
-                ENGINE.Play();
+                ENGINE.SetEngineMode(EngineMode::Play);
             }
         }
         ImGui::SameLine(0, spacing);
 
         if (ImGui::ImageButton("Pause", (ImTextureID)(RESOURCE.GetResource<Texture>(L"pauseButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
         {
-            if (ENGINE.IsPlaying())
+            if (!TIME.GetEnginePause())
             {
-                ENGINE.Pause();
+                TIME.SetEnginePause(true);
             }
-            else if (ENGINE.IsPaused())
-            {
-                ENGINE.Resume();
-            }
+            else 
+                TIME.SetEnginePause(false);
         }
         ImGui::SameLine(0, spacing);
 
-        if (ImGui::ImageButton("Next", (ImTextureID)(RESOURCE.GetResource<Texture>(L"stopButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
+        if (ImGui::ImageButton("Stop", (ImTextureID)(RESOURCE.GetResource<Texture>(L"stopButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
         {
-            ENGINE.Stop();
+            ENGINE.SetEngineMode(EngineMode::Edit);
         }
 
         // 스타일 복원

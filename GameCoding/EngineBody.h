@@ -44,18 +44,6 @@ public:
     void Update();
     void Render();
 
-    /*void Play() { isStop = false; }
-    void Stop() { isStop = true; }*/
-    void Play();
-
-    //void Stop() { isStop = true; }
-    void Stop();
-    void Pause() { isPaused = true; }
-    void Resume() { isPaused = false; }
-    bool IsPlaying() const { return !isStop && !isPaused; }
-    bool IsPaused() const { return isPaused; }
-    bool IsStopped() const { return isStop; }
-    void RenderInitialScreen();
 
 public:
     EngineMode GetEngineMode() { return _engineMode; }
@@ -63,10 +51,6 @@ public:
     bool IsEditMode() { return _engineMode == EngineMode::Edit; }
     bool IsPlayMode() { return _engineMode == EngineMode::Play; }
     bool IsPausedMode() { return _engineMode == EngineMode::Pause; }
-
-private:
-    void UpdateGame();    // 게임 로직 업데이트
-    void UpdateEditor();  // 에디터(GUI) 업데이트
 
 private:
     int _rectWidth = 0;
@@ -85,6 +69,4 @@ private:
     shared_ptr<Scene> _editScene;
     shared_ptr<Scene> _playScene;
 
-    bool isStop = false;
-    bool isPaused = false;
 };
