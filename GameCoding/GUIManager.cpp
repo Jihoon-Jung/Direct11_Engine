@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include <string>
 #include "GUIManager.h"
-#include "MoveObject.h"
 #include "TestEvent.h"
+#include "EditorCamera.h"
 #include <algorithm>
 #include <fstream>
 
@@ -61,40 +61,57 @@ void GUIManager::Update()
 {
     if (_isCameraMoving)
     {
-        _cameraMoveTime += TIME.GetDeltaTime() * _cameraMoveSpeed;
+        _cameraMoveTime += TIME.GetEditorDeltaTime() * _cameraMoveSpeed;
         if (_cameraMoveTime >= 1.0f)
         {
             _cameraMoveTime = 1.0f;
             _isCameraMoving = false;
         }
 
-        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"EditorCamera");
         if (camera)
         {
-            // 부드러운 보간을 위해 easeInOutCubic 함수 사용
-            float t = EaseInOutCubic(_cameraMoveTime);
+            _cameraMoveTime += TIME.GetEditorDeltaTime() * _cameraMoveSpeed;
+            if (_cameraMoveTime >= 1.0f)
+            {
+                _cameraMoveTime = 1.0f;
+                _isCameraMoving = false;
+            }
 
-            // 위치 보간
-            Vec3 newPos = Vec3::Lerp(_cameraStartPos, _cameraTargetPos, t);
+            shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"EditorCamera");
+            if (camera)
+            {
+                // 부드러운 보간을 위해 easeInOutCubic 함수 사용
+                float t = EaseInOutCubic(_cameraMoveTime);
 
-            // 회전 보간 (쿼터니온 사용)
-            Quaternion startRot = Quaternion::CreateFromYawPitchRoll(
-                XMConvertToRadians(_cameraStartRot.y),
-                XMConvertToRadians(_cameraStartRot.x),
-                XMConvertToRadians(_cameraStartRot.z)
-            );
+                // 위치 보간
+                Vec3 newPos = Vec3::Lerp(_cameraStartPos, _cameraTargetPos, t);
 
-            Quaternion targetRot = Quaternion::CreateFromYawPitchRoll(
-                XMConvertToRadians(_cameraTargetRot.y),
-                XMConvertToRadians(_cameraTargetRot.x),
-                XMConvertToRadians(_cameraTargetRot.z)
-            );
+                // 회전 보간 (쿼터니온 사용)
+                Quaternion startRot = Quaternion::CreateFromYawPitchRoll(
+                    XMConvertToRadians(_cameraStartRot.y),
+                    XMConvertToRadians(_cameraStartRot.x),
+                    XMConvertToRadians(_cameraStartRot.z)
+                );
 
-            Quaternion newRot = Quaternion::Slerp(startRot, targetRot, t);
+                Quaternion targetRot = Quaternion::CreateFromYawPitchRoll(
+                    XMConvertToRadians(_cameraTargetRot.y),
+                    XMConvertToRadians(_cameraTargetRot.x),
+                    XMConvertToRadians(_cameraTargetRot.z)
+                );
 
-            // 변환된 값 적용
-            camera->transform()->SetLocalPosition(newPos);
-            camera->transform()->SetQTRotation(newRot);
+                Quaternion newRot = Quaternion::Slerp(startRot, targetRot, t);
+
+                // 변환된 값 적용
+                camera->transform()->SetLocalPosition(newPos);
+                camera->transform()->SetQTRotation(newRot);
+
+                // 카메라 이동이 완료되면 회전값 초기화
+                if (t >= 1.0f)
+                {
+                    camera->GetComponent<EditorCamera>()->InitializeRotationFromTransform();
+                }
+            }
         }
     }
 
@@ -382,34 +399,86 @@ void GUIManager::RenderUI()
 
         // 버튼 스타일 설정
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7.0f);
+
+        // Play 버튼 색상 설정
+        if (ENGINE.IsPlayMode() || ENGINE.IsPausedMode())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.8f, 0.4f, 1.0f));        // 녹색 계열
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.45f, 0.85f, 0.45f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.8f, 0.4f, 1.0f));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.65f, 0.65f, 0.65f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.75f, 0.75f, 1.0f));
+        }
+
+        // Play 버튼
+        if (ImGui::ImageButton("Play", (ImTextureID)(RESOURCE.GetResource<Texture>(L"startButton")->GetShaderResourceView().Get()),
+            ImVec2(buttonWidth, buttonHeight)))
+        {
+            if (ENGINE.IsEditMode())
+            {
+                ENGINE.SetEngineMode(EngineMode::Play);
+                TIME.SetEnginePause(false);
+            }
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine(0, spacing);
+
+        // Pause 버튼 색상 설정
+        if (ENGINE.IsEditMode())  // Edit 모드일 때는 회색으로 비활성화
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));        // 비활성화된 회색
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+        }
+        else if (ENGINE.IsPausedMode())  // Pause 모드일 때는 노란색
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.8f, 0.4f, 1.0f));        // 노란색 계열
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.85f, 0.45f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.8f, 0.4f, 1.0f));
+        }
+        else  // Play 모드일 때는 기본 색상
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.65f, 0.65f, 0.65f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.75f, 0.75f, 1.0f));
+        }
+
+        // Pause 버튼
+        if (ImGui::ImageButton("Pause", (ImTextureID)(RESOURCE.GetResource<Texture>(L"pauseButton")->GetShaderResourceView().Get()),
+            ImVec2(buttonWidth, buttonHeight)))
+        {
+            if (!ENGINE.IsEditMode())  // Edit 모드가 아닐 때만 동작
+            {
+                ENGINE.SetEngineMode(EngineMode::Pause);
+                if (!TIME.GetEnginePause())
+                {
+                    TIME.SetEnginePause(true);
+                    SCENE.GetActiveScene()->SetMainCamera(SCENE.GetActiveScene()->Find(L"EditorCamera"));
+                }
+                else
+                {
+                    TIME.SetEnginePause(false);
+                    SCENE.GetActiveScene()->SetMainCamera(SCENE.GetActiveScene()->Find(L"MainCamera"));
+                }
+            }
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine(0, spacing);
+
+        // Stop 버튼 (기존 색상 유지)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.65f, 0.65f, 0.65f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.75f, 0.75f, 1.0f));
 
-        // 이미지 버튼 생성
-        if (ImGui::ImageButton("Play", (ImTextureID)(RESOURCE.GetResource<Texture>(L"startButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
-        {
-            if (ENGINE.IsEditMode() || ENGINE.IsPlayMode())
-            {
-                ENGINE.SetEngineMode(EngineMode::Play);
-            }
-        }
-        ImGui::SameLine(0, spacing);
-
-        if (ImGui::ImageButton("Pause", (ImTextureID)(RESOURCE.GetResource<Texture>(L"pauseButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
-        {
-            if (!TIME.GetEnginePause())
-            {
-                TIME.SetEnginePause(true);
-            }
-            else 
-                TIME.SetEnginePause(false);
-        }
-        ImGui::SameLine(0, spacing);
-
-        if (ImGui::ImageButton("Stop", (ImTextureID)(RESOURCE.GetResource<Texture>(L"stopButton")->GetShaderResourceView().Get()), ImVec2(buttonWidth, buttonHeight)))
+        if (ImGui::ImageButton("Stop", (ImTextureID)(RESOURCE.GetResource<Texture>(L"stopButton")->GetShaderResourceView().Get()),
+            ImVec2(buttonWidth, buttonHeight)))
         {
             ENGINE.SetEngineMode(EngineMode::Edit);
+            TIME.SetEnginePause(false);
         }
 
         // 스타일 복원
@@ -734,8 +803,6 @@ void GUIManager::RenderUI()
                     componentName = "BoxCollider";
                 else if (dynamic_pointer_cast<SphereCollider>(component))
                     componentName = "SphereCollider";
-                /*else if (dynamic_pointer_cast<MoveObject>(component))
-                    componentName = "MoveObject";*/
                 else if (dynamic_pointer_cast<Animator>(component))
                     componentName = "Animator";
 
@@ -1123,7 +1190,6 @@ void GUIManager::RenderUI()
                             if (!hasScript && ImGui::MenuItem(info.displayName.c_str()))
                             {
                                 auto script = info.createFunc();
-                                _selectedObject->AddComponent(script);
 
                                 // XML 업데이트
                                 SCENE.AddComponentToGameObjectAndSaveToXML(
@@ -1163,7 +1229,6 @@ void GUIManager::RenderUI()
                         auto boxCollider = make_shared<BoxCollider>();
                         boxCollider->SetCenter(Vec3::Zero);
                         boxCollider->SetScale(Vec3::One);
-                        _selectedObject->AddComponent(boxCollider);
 
                         // XML 업데이트
                         SCENE.AddComponentToGameObjectAndSaveToXML(
@@ -1180,7 +1245,6 @@ void GUIManager::RenderUI()
                         auto sphereCollider = make_shared<SphereCollider>();
                         sphereCollider->SetCenter(Vec3::Zero);
                         sphereCollider->SetRadius(0.5f);
-                        _selectedObject->AddComponent(sphereCollider);
 
                         // XML 업데이트
                         SCENE.AddComponentToGameObjectAndSaveToXML(
@@ -1214,7 +1278,6 @@ void GUIManager::RenderUI()
                                 animIndex++;
                             }
 
-                            _selectedObject->AddComponent(animator);
                             SCENE.AddComponentToGameObjectAndSaveToXML(
                                 SCENE.GetActiveScene()->GetSceneName(),
                                 _selectedObject->GetName(),
@@ -1234,7 +1297,6 @@ void GUIManager::RenderUI()
                         meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
                         meshRenderer->GetRenderPasses()[0]->SetTransform(_selectedObject->transform());
                         meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-                        _selectedObject->AddComponent(meshRenderer);
 
                         // XML 업데이트
                         SCENE.AddComponentToGameObjectAndSaveToXML(
@@ -1476,13 +1538,23 @@ void GUIManager::RenderUI()
             ImGui::End();
         }
 
-        RenderGuizmo();
+        if (ENGINE.GetEngineMode() != EngineMode::Play)
+            RenderGuizmo();
     }
         
 }
 
 void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
 {
+    for (const auto& component : gameObject->GetComponents())
+    {
+        if (component && component->GetType() == ComponentType::Script)
+        {
+            if (dynamic_pointer_cast<EditorCamera>(component))
+                return;
+        }
+    }
+
     string objectName = WStringToString(gameObject->GetName());
     const vector<shared_ptr<GameObject>>& children = gameObject->GetChildren();
 
@@ -1623,7 +1695,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     // 더블 클릭 처리 (카메라 포커스)
     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
     {
-        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
+        shared_ptr<GameObject> camera = SCENE.GetActiveScene()->Find(L"EditorCamera");
         Vec3 targetPos = gameObject->transform()->GetWorldPosition();
         Vec3 offset = Vec3(0.0f, 2.0f, -5.0f);
         Vec3 cameraTargetPos = targetPos + offset;
@@ -1647,6 +1719,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
         _cameraTargetPos = cameraTargetPos;
         _cameraStartRot = camera->transform()->GetLocalRotation();
         _cameraTargetRot = targetRotation;
+
     }
 
     // 우클릭 메뉴
@@ -1985,6 +2058,148 @@ void GUIManager::RenderGuizmo()
                     float screenRadius = sphere.Radius * viewportHeight / (center.w * 2.0f);
                     drawList->AddCircle(screenCenter, screenRadius, colliderColor);
                 }
+            }
+
+            shared_ptr<Camera> camera = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>();
+            if (!camera)
+                return;
+
+            // 카메라 컴포넌트를 가진 오브젝트가 선택된 경우 카메라 기즈모 그리기
+            if (_selectedObject->GetComponent<Camera>())
+            {
+                ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+                // 뷰포트 위치와 크기
+                float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
+                float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
+                float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
+                float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+
+                // 선택된 카메라의 월드 위치
+                Vec3 cameraPos = _selectedObject->transform()->GetWorldPosition();
+
+                // EditorCamera의 View, Proj 행렬로 화면 좌표 계산
+                Matrix view = camera->GetViewMatrix();
+                Matrix proj = camera->GetProjectionMatrix();
+                Matrix viewProj = view * proj;
+
+                // 카메라 위치를 스크린 좌표로 변환
+                Vec4 screenPos = Vec4(cameraPos.x, cameraPos.y, cameraPos.z, 1.0f);
+                screenPos = XMVector4Transform(screenPos, viewProj);
+
+                if (screenPos.w <= 0.0f)
+                    return;
+
+                screenPos.x /= screenPos.w;
+                screenPos.y /= screenPos.w;
+
+                // 스크린 좌표 계산
+                ImVec2 center(
+                    (screenPos.x * 0.5f + 0.5f) * viewportWidth + viewportX,
+                    (-screenPos.y * 0.5f + 0.5f) * viewportHeight + viewportY
+                );
+
+                // 카메라 아이콘 크기
+                float size = 70.0f;
+                ImVec2 iconSize(size, size);
+
+                // 아이콘의 좌상단 좌표 계산 (중앙 기준)
+                ImVec2 iconPos(
+                    center.x - size / 2,
+                    center.y - size / 2
+                );
+
+                // 카메라 아이콘 텍스처 가져오기
+                shared_ptr<Texture> cameraIcon = RESOURCE.GetResource<Texture>(L"Camera_Guizmo");
+
+                // 아이콘 그리기
+                drawList->AddImage(
+                    (ImTextureID)cameraIcon->GetShaderResourceView().Get(),
+                    iconPos,
+                    ImVec2(iconPos.x + size, iconPos.y + size),
+                    ImVec2(0, 0),     // UV 좌표 시작
+                    ImVec2(1, 1),     // UV 좌표 끝
+                    IM_COL32(255, 255, 255, 255)  // 색상
+                );
+
+                // 시야각 라인 그리기
+                ImU32 lineColor = IM_COL32(255, 255, 255, 180); // 약간 투명한 흰색
+                float thickness = 2.0f;
+
+                // 선택된 카메라의 방향 벡터 가져오기
+                Vec3 cameraForward = _selectedObject->transform()->GetLook();
+                Vec3 cameraRight = _selectedObject->transform()->GetRight();
+                Vec3 cameraUp = _selectedObject->transform()->GetUp();
+
+                // EditorCamera와의 거리에 따른 선 길이 조절
+                Vec3 editorCamPos = camera->GetGameObject()->transform()->GetWorldPosition();
+                float distance = (cameraPos - editorCamPos).Length();
+                float baseLength = 1.0f;  // 기본 길이
+                float lineLength = baseLength * (distance * 0.1f);  // 거리에 따라 선형적으로 증가
+                lineLength = std::clamp(lineLength, 0.5f, 5.0f);   // 최소/최대 길이 제한
+
+                // 시야각 라인의 방향 계산 (카메라의 Look 방향 기준)
+                float fov = _selectedObject->GetComponent<Camera>()->GetFov() * 0.5f;  // 절반 FOV
+
+                // 위쪽 선의 방향
+                Vec3 upperDir = cameraForward + (cameraUp * tanf(fov));
+                upperDir.Normalize();
+                upperDir *= lineLength;
+
+                // 아래쪽 선의 방향
+                Vec3 lowerDir = cameraForward - (cameraUp * tanf(fov));
+                lowerDir.Normalize();
+                lowerDir *= lineLength;
+
+                // 월드 공간의 선 끝점을 스크린 공간으로 변환
+                Vec3 worldUpperEnd = cameraPos + upperDir;
+                Vec3 worldLowerEnd = cameraPos + lowerDir;
+
+                // 상단 선 끝점을 스크린 좌표로 변환
+                Vec4 screenUpperEnd = Vec4(worldUpperEnd.x, worldUpperEnd.y, worldUpperEnd.z, 1.0f);
+                screenUpperEnd = XMVector4Transform(screenUpperEnd, viewProj);
+                screenUpperEnd.x /= screenUpperEnd.w;
+                screenUpperEnd.y /= screenUpperEnd.w;
+
+                // 하단 선 끝점을 스크린 좌표로 변환
+                Vec4 screenLowerEnd = Vec4(worldLowerEnd.x, worldLowerEnd.y, worldLowerEnd.z, 1.0f);
+                screenLowerEnd = XMVector4Transform(screenLowerEnd, viewProj);
+                screenLowerEnd.x /= screenLowerEnd.w;
+                screenLowerEnd.y /= screenLowerEnd.w;
+
+                // 스크린 좌표로 변환
+                ImVec2 upperEndPos(
+                    (screenUpperEnd.x * 0.5f + 0.5f)* viewportWidth + viewportX,
+                    (-screenUpperEnd.y * 0.5f + 0.5f)* viewportHeight + viewportY
+                );
+
+                ImVec2 lowerEndPos(
+                    (screenLowerEnd.x * 0.5f + 0.5f)* viewportWidth + viewportX,
+                    (-screenLowerEnd.y * 0.5f + 0.5f)* viewportHeight + viewportY
+                );
+
+                ImVec2 trianglePoints[3] = {
+                    ImVec2(center.x, center.y + 13.0f),                 // 시작점 (카메라 위치)
+                    upperEndPos,           // 상단 끝점
+                    lowerEndPos            // 하단 끝점
+                };
+
+                // 채워진 삼각형 그리기 (반투명)
+                drawList->AddTriangleFilled(
+                    trianglePoints[0],
+                    trianglePoints[1],
+                    trianglePoints[2],
+                    IM_COL32(255, 255, 255, 30)  // 매우 투명한 흰색으로 채우기
+                );
+
+                // 삼각형 외곽선 그리기
+                drawList->AddTriangle(
+                    trianglePoints[0],
+                    trianglePoints[1],
+                    trianglePoints[2],
+                    lineColor,             // 기존 라인 색상 사용
+                    thickness             // 기존 라인 두께 사용
+                );
             }
         }
     }

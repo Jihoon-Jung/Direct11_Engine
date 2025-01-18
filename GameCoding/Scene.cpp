@@ -3,7 +3,11 @@
 
 void Scene::Start()
 {
-	_mainCamera = Find(L"MainCamera");
+	if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+		_mainCamera = Find(L"EditorCamera");
+	else
+		_mainCamera = Find(L"MainCamera");
+
 	_mainLignt = Find(L"MainLight");
 
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -11,7 +15,7 @@ void Scene::Start()
 		gameObject->Start();
 	}
 }
-#include "MoveObject.h"
+
 void Scene::Update()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -49,6 +53,9 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::Picking()
 {
+	if (ENGINE.GetEngineMode() == EngineMode::Play)
+		return;
+
 	// ImGui 윈도우가 마우스 입력을 캡처하고 있는지 확인
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.WantCaptureMouse)
@@ -243,7 +250,22 @@ shared_ptr<GameObject> Scene::FindWithComponent(ComponentType type)
 			break;
 		case ComponentType::Camera:
 			if (gameObject->GetComponent<Camera>() != nullptr)
-				return gameObject;
+			{
+				if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+				{
+					if (gameObject->GetName() != L"EditorCamera")
+						continue;
+					else
+						return gameObject;
+				}
+				else
+				{
+					if (gameObject->GetName() != L"MainCamera")
+						continue;
+					else
+						return gameObject;
+				}
+			}
 			break;
 		case ComponentType::Animator:
 			if (gameObject->GetComponent<Animator>() != nullptr)

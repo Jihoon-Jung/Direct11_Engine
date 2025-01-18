@@ -320,6 +320,9 @@
     <ClInclude Include="InstancingBuffer.h">
       <Filter>소스 파일\Buffer</Filter>
     </ClInclude>
+    <ClInclude Include="EditorCamera.h">
+      <Filter>소스 파일\CustomScript</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -553,6 +556,9 @@
     </ClCompile>
     <ClCompile Include="InstancingBuffer.cpp">
       <Filter>소스 파일\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorCamera.cpp">
+      <Filter>소스 파일\CustomScript</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

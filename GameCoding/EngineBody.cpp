@@ -54,9 +54,19 @@ void EngineBody::Render()
 void EngineBody::SetEngineMode(EngineMode mode)
 {
     if (_engineMode == mode)
-        return;
+    {
+        if (mode == EngineMode::Pause)
+            _engineMode = _prevEngineMode;
+        else
+            return;
+    }
 
-    if (mode == EngineMode::Play)
+    else if (mode == EngineMode::Pause)
+    {
+        _prevEngineMode = _engineMode;
+        _engineMode = mode;
+    }
+    else if (mode == EngineMode::Play)
     {
         // 현재 씬을 복사해서 플레이에 사용
         _editScene = SCENE.GetActiveScene();
@@ -65,7 +75,9 @@ void EngineBody::SetEngineMode(EngineMode mode)
 
         SCENE.Reset();  // 완전 초기화
         RENDER.Reset(); // 완전 초기화
+        GUI.ResetSelectedObject();
 
+        _engineMode = mode;
         SCENE.SetActiveScene(_playScene);
         SCENE.Init();
         RENDER.Init();
@@ -75,7 +87,9 @@ void EngineBody::SetEngineMode(EngineMode mode)
         // 편집 씬으로 복구
         SCENE.Reset();  // 완전 초기화
         RENDER.Reset(); // 완전 초기화
+        GUI.ResetSelectedObject();
 
+        _engineMode = mode;
         SCENE.SetActiveScene(_editScene);
         _playScene = nullptr;
 
@@ -83,7 +97,8 @@ void EngineBody::SetEngineMode(EngineMode mode)
         RENDER.Init();
     }
 
-    _engineMode = mode;
+    
 }
+
 
 

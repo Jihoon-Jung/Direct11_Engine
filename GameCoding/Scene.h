@@ -15,6 +15,7 @@ public:
 	void UIPicking();
 	void CheckCollision();
 	void AddPickedObject(shared_ptr<GameObject> pickedObject) { picked = pickedObject; }
+	void SetMainCamera(shared_ptr<GameObject> camera) { _mainCamera = camera; }
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 	shared_ptr<GameObject> Find(const wstring& name);
 

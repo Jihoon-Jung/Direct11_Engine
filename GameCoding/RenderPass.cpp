@@ -1697,15 +1697,16 @@ void RenderPass::ParticleRender(bool isEnv)
 
 	Matrix viewMat;
 	Matrix projMat;
+	shared_ptr<GameObject> mainCamera = SCENE.GetActiveScene()->GetMainCamera();
 	if (isEnv)
 	{
-		viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvViewMatrix();
-		projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetEnvProjectionMatrix();
+		viewMat = mainCamera->GetComponent<Camera>()->GetEnvViewMatrix();
+		projMat = mainCamera->GetComponent<Camera>()->GetEnvProjectionMatrix();
 	}
 	else
 	{
-		viewMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetViewMatrix();
-		projMat = SCENE.GetActiveScene()->GetMainCamera()->GetComponent<Camera>()->GetProjectionMatrix();
+		viewMat = mainCamera->GetComponent<Camera>()->GetViewMatrix();
+		projMat = mainCamera->GetComponent<Camera>()->GetProjectionMatrix();
 	}
 
 
@@ -1721,7 +1722,7 @@ void RenderPass::ParticleRender(bool isEnv)
 	pBuffer.gProj = projMat;
 	pBuffer.gGameTime = TIME.GetTotalTime();
 	pBuffer.gTimeStep = TIME.GetDeltaTime() / 7.0f;
-	pBuffer.gEyePosW = SCENE.GetActiveScene()->FindWithComponent(ComponentType::Camera)->transform()->GetWorldPosition();
+	pBuffer.gEyePosW = mainCamera->transform()->GetWorldPosition();
 	pBuffer.gEmitPosW = _emitPosW;
 	pBuffer.gEmitDirW = _emitDirW;
 

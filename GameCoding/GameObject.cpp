@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "tinyxml2.h"
 #include "MoveObject.h"
+#include "EditorCamera.h"
 
 GameObject::GameObject()
 {
@@ -16,8 +17,29 @@ void GameObject::Start()
 {
 	for (shared_ptr<Component>& component : _components)
 	{
-		if (component)
-			component->Start();
+		if (ENGINE.GetEngineMode() == EngineMode::Edit)
+		{
+			if (component)
+			{
+				if (component->GetType() == ComponentType::Transform
+					|| component->GetType() == ComponentType::Camera
+					|| component->GetType() == ComponentType::Light
+					|| component->GetType() == ComponentType::MeshRenderer
+					|| component->GetType() == ComponentType::Collider
+					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<EditorCamera>(component) != nullptr))
+					component->Start();
+				else
+					break;
+			}
+
+		}
+		else
+		{
+			if (component)
+			{
+				component->Start();
+			}
+		}
 	}
 }
 
@@ -34,7 +56,7 @@ void GameObject::Update()
 					|| component->GetType() == ComponentType::Light
 					|| component->GetType() == ComponentType::MeshRenderer
 					|| component->GetType() == ComponentType::Collider
-					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<MoveObject>(component) != nullptr))
+					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<EditorCamera>(component) != nullptr))
 					component->Update();
 				else
 					break;

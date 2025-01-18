@@ -15,6 +15,7 @@
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "Animator.h"
+#include "EditorCamera.h"
 
 enum class GameObjectType
 {
@@ -82,6 +83,9 @@ public:
 			type = ComponentType::Animator;
 
 		uint8 index = static_cast<uint8>(type);
+		if (std::is_same_v<T, EditorCamera>)
+			index = 13;
+
 		shared_ptr<Component> component = _components[index];
 		if (component == nullptr)
 			return nullptr;

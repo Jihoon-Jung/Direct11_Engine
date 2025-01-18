@@ -16,7 +16,9 @@ void TimeManager::Update()
     _editorDeltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
 
     // Edit 모드이거나 Pause 모드일 때는 deltaTime을 0으로 설정
-    if (_isEnginePause || _isPaused || ENGINE.GetEngineMode() != EngineMode::Play)
+    EngineMode mode = ENGINE.GetEngineMode();
+    EngineMode mode2 = EngineMode::Play;
+    if (_isEnginePause || _isPaused || ENGINE.GetEngineMode() == EngineMode::Edit)
     {
         _deltaTime = 0.0f;
         _prevCount = currentCount; // 모드 전환 시 큰 델타타임이 발생하는 것 방지

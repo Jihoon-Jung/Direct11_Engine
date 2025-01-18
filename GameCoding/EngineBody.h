@@ -48,6 +48,7 @@ public:
 public:
     EngineMode GetEngineMode() { return _engineMode; }
     void SetEngineMode(EngineMode mode);
+  
     bool IsEditMode() { return _engineMode == EngineMode::Edit; }
     bool IsPlayMode() { return _engineMode == EngineMode::Play; }
     bool IsPausedMode() { return _engineMode == EngineMode::Pause; }
@@ -65,6 +66,7 @@ private:
     MethodRegistry& _methodRegistry;
     ComponentFactory& _componentFactory;
 
+    EngineMode _prevEngineMode = EngineMode::Edit;
     EngineMode _engineMode = EngineMode::Edit;
     shared_ptr<Scene> _editScene;
     shared_ptr<Scene> _playScene;

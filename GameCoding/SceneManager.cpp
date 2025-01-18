@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "GameObject.h"
 #include "MoveObject.h"
+#include "EditorCamera.h"
 #include "RenderPass.h"
 #include "TestEvent.h"
 
@@ -399,13 +400,22 @@ void SceneManager::LoadTestScene(wstring sceneName)
 {
 	_activeScene = make_shared<Scene>();
 
+
+	// EditorCamera
+	SaveAndLoadGameObjectToXML(sceneName, L"EditorCamera",
+		GP.centerPos + Vec3(-2.0f, 2.f, -10.0f));
+	auto editorCameraComp = make_shared<Camera>();
+	editorCameraComp->SetProjectionType(ProjectionType::Perspective);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"EditorCamera", editorCameraComp);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"EditorCamera", make_shared<EditorCamera>());
+
 	 // MainCamera
 	SaveAndLoadGameObjectToXML(sceneName, L"MainCamera",
 		GP.centerPos + Vec3(-2.0f, 2.f, -10.0f));
 	auto camera = make_shared<Camera>();
 	camera->SetProjectionType(ProjectionType::Perspective);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"MainCamera", camera);
-	AddComponentToGameObjectAndSaveToXML(sceneName, L"MainCamera", make_shared<MoveObject>());
+	//AddComponentToGameObjectAndSaveToXML(sceneName, L"MainCamera", make_shared<EditorCamera>());
 
 	// UICamera
 	SaveAndLoadGameObjectToXML(sceneName, L"UICamera", Vec3(0, 0, -3));
@@ -580,7 +590,7 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	button->AddOnClickedEvent([this]() {
 		_activeScene->RemoveGameObject(_activeScene->Find(L"UI_Button"));
 		});
-	button->SetTransformAndRect(Vec2(100, 100), Vec2(100, 100));
+	button->SetTransformAndRect(Vec2(500, 500), Vec2(100, 100));
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Button", button);
 	auto buttonRenderer = make_shared<MeshRenderer>();
 	buttonRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
@@ -700,7 +710,7 @@ void SceneManager::LoadTestInstancingScene()
 	auto camera = make_shared<Camera>();
 	camera->SetProjectionType(ProjectionType::Perspective);
 	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainCamera", camera);
-	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainCamera", make_shared<MoveObject>());
+	AddComponentToGameObjectAndSaveToXML(L"test_scene", L"MainCamera", make_shared<EditorCamera>());
 
 	// UICamera
 	SaveAndLoadGameObjectToXML(L"test_scene", L"UICamera", Vec3(0, 0, -3));
@@ -880,6 +890,12 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 		// 기본 정보 설정
 		wstring name = Utils::ToWString(gameObjElem->Attribute("name"));
 		gameObj->SetName(name);
+
+		if (name == L"EditorCamera")
+		{
+			shared_ptr<EditorCamera> editorCameraComp = make_shared<EditorCamera>();
+			gameObj->AddComponent(editorCameraComp);
+		}
 
 		// Transform 컴포넌트 처리
 		if (auto transformElem = gameObjElem->FirstChildElement("Transform"))
@@ -1262,6 +1278,9 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 		gameObject->AddComponent(component);
 	}
 
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	// 기존 XML 파일 로드
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(path) + ".xml";
@@ -1497,6 +1516,9 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 
 void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, const wstring& objectName, const shared_ptr<Component>& component)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	tinyxml2::XMLDocument doc;
 	if (doc.LoadFile(pathStr.c_str()) != tinyxml2::XML_SUCCESS)
@@ -1563,6 +1585,9 @@ void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, 
 
 void SceneManager::UpdateGameObjectTransformInXML(const wstring& sceneName, const wstring& objectName, const Vec3& position, const Vec3& rotation, const Vec3& scale)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1605,6 +1630,9 @@ void SceneManager::UpdateGameObjectTransformInXML(const wstring& sceneName, cons
 
 void SceneManager::SaveGameObjectToXML(const wstring& path, const wstring& name, const Vec3* position, const Vec3* rotation, const Vec3* scale, const shared_ptr<GameObject>& parent)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 
 	// 기존 파일이 있으면 로드
@@ -1657,6 +1685,9 @@ void SceneManager::SaveGameObjectToXML(const wstring& path, const wstring& name,
 void SceneManager::UpdateGameObjectColliderInXML(const wstring& sceneName, const wstring& objectName,
 	const Vec3& center, const Vec3& scale, bool isBoxCollider)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1692,6 +1723,9 @@ void SceneManager::UpdateGameObjectColliderInXML(const wstring& sceneName, const
 void SceneManager::UpdateGameObjectSphereColliderInXML(const wstring& sceneName, const wstring& objectName,
 	const Vec3& center, float radius)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1719,6 +1753,9 @@ void SceneManager::UpdateGameObjectSphereColliderInXML(const wstring& sceneName,
 
 void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	tinyxml2::XMLDocument doc;
 	doc.LoadFile(pathStr.c_str());
@@ -1743,6 +1780,9 @@ void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstri
 
 void SceneManager::UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1771,6 +1811,9 @@ void SceneManager::UpdateMeshInXML(const wstring& sceneName, const wstring& obje
 
 void SceneManager::UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1800,6 +1843,9 @@ void SceneManager::UpdateMaterialInXML(const wstring& sceneName, const wstring& 
 void SceneManager::UpdateAnimatorClipInXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipName, float speed, bool isLoop)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1838,6 +1884,9 @@ void SceneManager::UpdateAnimatorTransitionInXML(const wstring& sceneName, const
 	const string& clipAName, const string& clipBName,
 	float duration, float offset, float exitTime, bool hasExitTime)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1877,6 +1926,9 @@ void SceneManager::UpdateAnimatorTransitionInXML(const wstring& sceneName, const
 
 void SceneManager::AddAnimatorParameterToXML(const wstring& sceneName, const wstring& objectName, const string& paramName, Parameter::Type paramType)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -1924,6 +1976,9 @@ void SceneManager::AddAnimatorParameterToXML(const wstring& sceneName, const wst
 void SceneManager::UpdateAnimatorParameterInXML(const wstring& sceneName, const wstring& objectName,
 	const string& paramName, const Parameter& param)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2159,6 +2214,9 @@ void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneNa
 	const string& clipAName, const string& clipBName,
 	const vector<Condition>& conditions)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2229,6 +2287,9 @@ void SceneManager::UpdateAnimatorTransitionConditionInXML(const wstring& sceneNa
 void SceneManager::RemoveAnimatorTransitionFromXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipAName, const string& clipBName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2263,6 +2324,9 @@ void SceneManager::RemoveAnimatorTransitionFromXML(const wstring& sceneName, con
 void SceneManager::UpdateAnimatorEntryClipInXML(const wstring& sceneName, const wstring& objectName,
 	const string& entryClipName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2299,6 +2363,9 @@ void SceneManager::UpdateAnimatorEntryClipInXML(const wstring& sceneName, const 
 void SceneManager::AddAnimatorTransitionToXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipAName, const string& clipBName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2331,6 +2398,9 @@ void SceneManager::AddAnimatorTransitionToXML(const wstring& sceneName, const ws
 }
 void SceneManager::RemoveAnimatorParameterFromXML(const wstring& sceneName, const wstring& objectName, const string& paramName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2384,6 +2454,9 @@ void SceneManager::RemoveAnimatorParameterFromXML(const wstring& sceneName, cons
 void SceneManager::UpdateAnimatorNodePositionInXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipName, const ImVec2& position)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2418,6 +2491,9 @@ void SceneManager::UpdateAnimatorNodePositionInXML(const wstring& sceneName, con
 ImVec2 SceneManager::GetAnimatorNodePositionFromXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipName)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return ImVec2(0, 0);
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2453,6 +2529,9 @@ ImVec2 SceneManager::GetAnimatorNodePositionFromXML(const wstring& sceneName, co
 void SceneManager::UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipAName, const string& clipBName, bool flag, bool hasCondition)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());
@@ -2488,6 +2567,9 @@ void SceneManager::UpdateAnimatorTransitionFlagInXML(const wstring& sceneName, c
 void SceneManager::UpdateAnimatorClipEventsInXML(const wstring& sceneName, const wstring& objectName,
 	const string& clipName, const vector<AnimationEvent>& events)
 {
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
 	doc.LoadFile(pathStr.c_str());

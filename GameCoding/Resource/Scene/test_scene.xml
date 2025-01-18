@@ -1,8 +1,12 @@
 <Scene>
+    <GameObject name="EditorCamera">
+        <Transform posX="1" posY="2" posZ="107" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="0"/>
+        <Script type="EditorCamera"/>
+    </GameObject>
     <GameObject name="MainCamera">
         <Transform posX="1" posY="2" posZ="107" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <Camera projectionType="0"/>
-        <Script type="MoveObject"/>
     </GameObject>
     <GameObject name="UICamera">
         <Transform posX="0" posY="0" posZ="-3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
@@ -16,7 +20,7 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="Env_Sphere">
-        <Transform posX="9.1631994" posY="2.1463842" posZ="111.79276" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="4" posY="1" posZ="122" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
             <RenderPass pass="7" depthStencilState="0"/>
         </MeshRenderer>

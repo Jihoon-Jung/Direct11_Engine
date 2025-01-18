@@ -29,6 +29,12 @@ public:
 	shared_ptr<Buffer> GetShadowCameraBuffer() { return _shadowCameraBuffer; }
 
 	ProjectionType GetProjectionType() { return _type; }
+
+	float GetAspectRatio() { return _aspectRatio; }
+	float GetFov() { return _fov; }
+	float GetNearZ() { return _nearZ; }
+	float GetFarZ() { return _farZ; }
+
 private:
 
 	Matrix _matView;
@@ -45,5 +51,10 @@ private:
 	ProjectionType _type;
 
 	BoundingSphere _sceneBounds;
+
+	float _aspectRatio;
+	float _fov;
+	float _nearZ;
+	float _farZ;
 };
 

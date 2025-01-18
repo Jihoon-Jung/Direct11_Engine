@@ -28,6 +28,8 @@ public:
 	void OnResourceDroppedToViewport(const std::string& fullPath);  // 뷰포트에 리소스가 드롭되었을 때 호출되는 함수
 	void HandleExternalFilesDrop(const filesystem::path& sourcePath);
 
+	void ResetSelectedObject() { _selectedObject = nullptr; }
+
 private:
 	bool IsViewportHovered();
 
