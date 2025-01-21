@@ -6,6 +6,7 @@ class Transform;
 enum class ComponentType : uint8
 {
 	Transform,
+	RectTransform,
 	MeshRenderer,
 	Camera,
 	Animator,
@@ -24,7 +25,7 @@ enum class ComponentType : uint8
 };
 enum
 {
-	FIXED_COMPONENT_COUNT = 13
+	FIXED_COMPONENT_COUNT = 14
 };
 
 class Component

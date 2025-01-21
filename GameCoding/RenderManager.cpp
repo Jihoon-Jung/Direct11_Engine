@@ -72,9 +72,11 @@ void RenderManager::GetRenderableObject()
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<ParticleSystem> particleSystem = gameObject->GetComponent<ParticleSystem>();
 		shared_ptr<UIImage> uiImage = gameObject->GetComponent<UIImage>();
+		shared_ptr<Button> uiButton = gameObject->GetComponent<Button>();
+
 		if (meshRenderer != nullptr)
 		{
-			if (uiImage != nullptr)
+			if (uiImage != nullptr || uiButton != nullptr)
 				_UIObjects.push_back(gameObject);
 			else if (!meshRenderer->CheckUseEnvironmentMap())
 				_renderObjects.push_back(gameObject);
@@ -426,7 +428,7 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 
 }
 
-void RenderManager::DrawUIObject(ComPtr<ID3D11ShaderResourceView> srv)
+void RenderManager::DrawUIObject()
 {
 	for (const shared_ptr<GameObject>& gameObject : _UIObjects)
 	{
@@ -439,7 +441,6 @@ void RenderManager::DrawUIObject(ComPtr<ID3D11ShaderResourceView> srv)
 			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
 			{
 				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
-				renderPass->SetInputSRV(srv);
 				renderPass->Render(false);
 				if (i + 1 < meshRenderer->GetRenderPasses().size())
 				{
@@ -500,7 +501,7 @@ void RenderManager::Render()
 
 	RenderAllGameObject();
 
-	//DrawUIObject(GP.GetShadowMapSRV());
+	DrawUIObject();
 
 	if (_filterType == FilterType::GAUSSIAN_BLUR)
 		GP.RenderQuad();

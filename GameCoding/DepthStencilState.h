@@ -6,6 +6,7 @@ enum class DSState
 	CUSTOM1,
 	CUSTOM2,
 	CUSTOM3,
+	UI
 };
 
 class DepthStencilState

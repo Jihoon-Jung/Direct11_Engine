@@ -564,44 +564,46 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"Terrain_obj", terrainRenderer,
 		L"TerrainMaterial", L"Terrain");
 
-	// UI Quad
-	SaveAndLoadGameObjectToXML(sceneName, L"UI_Quad", Vec3::Zero, Vec3::Zero, Vec3::One,
-		nullptr);
-	auto uiImage = make_shared<UIImage>();
-	uiImage->SetTransformAndRect(Vec2(900, 200), Vec2(240, 180));
-	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiImage);
-	auto uiRenderer = make_shared<MeshRenderer>();
-	uiRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
-	uiRenderer->SetModel(nullptr);
-	uiRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
-	uiRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	uiRenderer->AddRenderPass();
-	uiRenderer->GetRenderPasses()[0]->SetPass(Pass::DEBUG_2D_RENDER);
-	uiRenderer->GetRenderPasses()[0]->SetMeshRenderer(uiRenderer);
-	uiRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"UI_Quad")->transform());
-	uiRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiRenderer,
-		L"Debug_UI_Material", L"Quad");
+	//// UI Quad
+	//SaveAndLoadGameObjectToXML(sceneName, L"UI_Quad", Vec3::Zero);
+	//auto uiImage = make_shared<UIImage>();
+	//uiImage->SetTransformAndRect(Vec2(900, 200), Vec2(240, 180));
+	//AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiImage);
+	//_activeScene->Find(L"UI_Quad")->transform()->SetLocalPosition(uiImage->GetNDCPosition());
+	//_activeScene->Find(L"UI_Quad")->transform()->SetLocalScale(uiImage->GetSize());
+	//auto uiRenderer = make_shared<MeshRenderer>();
+	//uiRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
+	//uiRenderer->SetModel(nullptr);
+	//uiRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
+	//uiRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	//uiRenderer->AddRenderPass();
+	//uiRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
+	//uiRenderer->GetRenderPasses()[0]->SetMeshRenderer(uiRenderer);
+	//uiRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"UI_Quad")->transform());
+	//uiRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
+	//AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiRenderer,
+	//	L"Debug_UI_Material", L"Quad");
 
 	// UI Button
-	SaveAndLoadGameObjectToXML(sceneName, L"UI_Button", Vec3::Zero, Vec3::Zero, Vec3::One,
-		nullptr);
+	SaveAndLoadGameObjectToXML(sceneName, L"UI_Button", Vec3::Zero);
 	auto button = make_shared<Button>();
 	button->AddOnClickedEvent([this]() {
 		_activeScene->RemoveGameObject(_activeScene->Find(L"UI_Button"));
 		});
 	button->SetTransformAndRect(Vec2(500, 500), Vec2(100, 100));
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Button", button);
+	_activeScene->Find(L"UI_Button")->transform()->SetLocalPosition(button->GetNDCPosition());
+	_activeScene->Find(L"UI_Button")->transform()->SetLocalScale(button->GetSize());
 	auto buttonRenderer = make_shared<MeshRenderer>();
 	buttonRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 	buttonRenderer->SetModel(nullptr);
 	buttonRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
 	buttonRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
 	buttonRenderer->AddRenderPass();
-	buttonRenderer->GetRenderPasses()[0]->SetPass(Pass::DEBUG_2D_RENDER);
+	buttonRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
 	buttonRenderer->GetRenderPasses()[0]->SetMeshRenderer(buttonRenderer);
 	buttonRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"UI_Button")->transform());
-	buttonRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	buttonRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Button", buttonRenderer,
 		L"Debug_UI_Material", L"Quad");
 

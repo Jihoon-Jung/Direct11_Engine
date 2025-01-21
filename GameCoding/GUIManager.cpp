@@ -973,8 +973,8 @@ void GUIManager::RenderUI()
                                 case Pass::PARTICLE_RENDER:
                                     passName = L"PARTICLE_RENDER";
                                     break;
-                                case Pass::DEBUG_2D_RENDER:
-                                    passName = L"DEBUG_2D_RENDER";
+                                case Pass::UI_RENDER:
+                                    passName = L"UI_RENDER";
                                     break;
                                 default:
                                     break;

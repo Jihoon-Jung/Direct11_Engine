@@ -36,7 +36,7 @@ void RenderPass::Render(bool isEnv)
 		AnimatedMeshRender(isEnv);
 	else if (_pass == Pass::PARTICLE_RENDER)
 		ParticleRender(isEnv);
-	else if (_pass == Pass::DEBUG_2D_RENDER)
+	else if (_pass == Pass::UI_RENDER)
 		DebugQuadRender();
 }
 
@@ -1882,7 +1882,7 @@ void RenderPass::DebugQuadRender()
 
 	// Set Default Texture
 	if (defaultTexture != nullptr)
-		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, _inputSRV);
+		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, defaultTexture->GetShaderResourceView());
 
 
 
