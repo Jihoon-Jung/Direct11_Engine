@@ -51,7 +51,7 @@ public:
 
 	void GetRenderableObject();
 	void DrawRenderableObject(bool isEnv);
-	void DrawUIObject(ComPtr<ID3D11ShaderResourceView> srv);
+	void DrawUIObject();
 	void RenderEnvironmentMappedObjects(shared_ptr<GameObject> gameObject, shared_ptr<Texture> envTexture);
 	void Render();
 	void RenderAllGameObject();

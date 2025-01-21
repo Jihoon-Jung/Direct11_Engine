@@ -41,10 +41,12 @@ void Button::SetTransformAndRect(Vec2 screenPos, Vec2 size)
 	_ndcPos = Vec3(x, y, 0);
 	_size = Vec3(size.x, size.y, 1.0f);
 
+	float viewOffsetX = width * (1.0f / 10.0f);
+	float viewOffsetY = height * (3.0f / 100.0f);
 	// screen공간에서 중심을 기준으로 left top, right bottom 구하기
-	_rect.left = screenPos.x - size.x / 2;
-	_rect.right = screenPos.x + size.x / 2;
-	_rect.top = screenPos.y - size.y / 2;
-	_rect.bottom = screenPos.y + size.y / 2;
+	_rect.left = (screenPos.x - size.x / 2) + viewOffsetX;
+	_rect.right = (screenPos.x + size.x / 2) + viewOffsetX;
+	_rect.top = (screenPos.y - size.y / 2) + viewOffsetY;
+	_rect.bottom = (screenPos.y + size.y / 2) + viewOffsetY;
 
 }
