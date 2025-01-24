@@ -13,18 +13,38 @@ Button::~Button()
 
 bool Button::Picked(POINT screenPos)
 {
-	return ::PtInRect(&_rect, screenPos);
+	screenPos.x -= GP.GetProjectWidth() * (1.0f / 10.0f);
+	screenPos.y -= GP.GetProjectHeight() * (3.0f / 100.0f);
+
+	char buffer[256];
+	sprintf_s(buffer, "RECT: left=%d, top=%d, right=%d, bottom=%d\n",
+		_rect.left, _rect.top, _rect.right, _rect.bottom);
+	OutputDebugStringA(buffer);
+	sprintf_s(buffer, "Screen Pos: x=%ld, y=%ld\n",
+		screenPos.x, screenPos.y);
+	OutputDebugStringA(buffer);
+
+	bool result = ::PtInRect(&_rect, screenPos);
+	sprintf_s(buffer, "result: %d\n",
+		result);
+	OutputDebugStringA(buffer);
+	return result;
 }
 
-void Button::AddOnClickedEvent(std::function<void(void)> func)
+void Button::AddOnClickedEvent(const string& functionKey)
 {
-	_onClicked = func;
+	_onClickedFunctionKey = functionKey;
 }
 
 void Button::InvokeOnClicked()
 {
-	if (_onClicked)
-		_onClicked();
+	if (!_onClickedFunctionKey.empty())
+	{
+		if (auto method = MR.getMethod(_onClickedFunctionKey))
+		{
+			method(nullptr);
+		}
+	}
 }
 
 void Button::SetTransformAndRect(Vec2 screenPos, Vec2 size)
@@ -32,21 +52,37 @@ void Button::SetTransformAndRect(Vec2 screenPos, Vec2 size)
 	float width = GP.GetViewWidth();
 	float height = GP.GetViewHeight();
 
-	// 스크린 공간에선 왼쪽 위 부터 시작해서 (0,0)인데
-	// NDC공간에서는 중앙을 기준으로 (0,0)임.
-	// 현재 화면 크기가 800x600이니까 
-	// NDC공간에서는 x가 -400 ~ 400, y가 -300~300이 됨.
 	float x = screenPos.x - width / 2;
 	float y = height / 2 - screenPos.y;
 	_ndcPos = Vec3(x, y, 0);
+	size /= 2.0f;
 	_size = Vec3(size.x, size.y, 1.0f);
 
-	float viewOffsetX = width * (1.0f / 10.0f);
-	float viewOffsetY = height * (3.0f / 100.0f);
-	// screen공간에서 중심을 기준으로 left top, right bottom 구하기
-	_rect.left = (screenPos.x - size.x / 2) + viewOffsetX;
-	_rect.right = (screenPos.x + size.x / 2) + viewOffsetX;
-	_rect.top = (screenPos.y - size.y / 2) + viewOffsetY;
-	_rect.bottom = (screenPos.y + size.y / 2) + viewOffsetY;
+	_rect.left = screenPos.x - size.x;
+	_rect.right = screenPos.x + size.x;
+	_rect.top = screenPos.y - size.y;
+	_rect.bottom = screenPos.y + size.y;
+
+}
+
+void Button::SetScreenTransformAndRect(Vec2 pos, Vec2 size, RECT rect)
+{
+	_ndcPos = Vec3(pos.x, pos.y, 0);
+	_size = Vec3(size.x, size.y, 0);
+	_rect = rect;
+}
+
+void Button::UpdateRect(Vec2 ndcPos, Vec2 size)
+{
+	float width = GP.GetViewWidth();
+	float height = GP.GetViewHeight();
+
+	float screenPosX = ndcPos.x + width / 2;
+	float screenPosY = height / 2 - ndcPos.y;
+
+	_rect.left = screenPosX - size.x;
+	_rect.right = screenPosX + size.x;
+	_rect.top = screenPosY - size.y;
+	_rect.bottom = screenPosY + size.y;
 
 }

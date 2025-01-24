@@ -6,8 +6,8 @@ void Graphics::CreateDeviceAndSwapChain()
 	DXGI_SWAP_CHAIN_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
 	{
-		desc.BufferDesc.Width = GWinSizeX;
-		desc.BufferDesc.Height = GWinSizeY;
+		desc.BufferDesc.Width = GetProjectWidth();
+		desc.BufferDesc.Height = GetProjectHeight();
 		desc.BufferDesc.RefreshRate.Numerator = 60;
 		desc.BufferDesc.RefreshRate.Denominator = 1;
 		desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -57,8 +57,8 @@ void Graphics::CreateOffscreenRenderTarget()
 {
 	D3D11_TEXTURE2D_DESC texDesc;
 
-	texDesc.Width = GetViewWidth();
-	texDesc.Height = GetViewHeight();
+	texDesc.Width = GetProjectWidth();
+	texDesc.Height = GetProjectHeight();
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -83,8 +83,8 @@ void Graphics::CreateOffscreenRenderTarget()
 	// depthStenciView 생성
 
 	D3D11_TEXTURE2D_DESC depthDesc = {};
-	depthDesc.Width = GetViewWidth();  // 렌더 타겟과 동일한 너비
-	depthDesc.Height = GetViewHeight(); // 렌더 타겟과 동일한 높이
+	depthDesc.Width = GetProjectWidth();  // 렌더 타겟과 동일한 너비
+	depthDesc.Height = GetProjectHeight(); // 렌더 타겟과 동일한 높이
 	depthDesc.MipLevels = 1;
 	depthDesc.ArraySize = 1;
 	depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -105,8 +105,8 @@ void Graphics::CreateDepthStencilView()
 	{
 		D3D11_TEXTURE2D_DESC desc = { 0 };
 		ZeroMemory(&desc, sizeof(desc));
-		desc.Width = static_cast<uint32>(GP.GetViewWidth());
-		desc.Height = static_cast<uint32>(GP.GetViewHeight());
+		desc.Width = static_cast<uint32>(GP.GetProjectWidth());
+		desc.Height = static_cast<uint32>(GP.GetProjectHeight());
 		desc.MipLevels = 1;
 		desc.ArraySize = 1;
 		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -155,8 +155,8 @@ void Graphics::SetOffscreenRenderTarget()
 {
 	// viewport 설정
 	D3D11_VIEWPORT viewport = {};
-	viewport.Width = GetViewWidth();
-	viewport.Height = GetViewHeight();
+	viewport.Width = GetProjectWidth();
+	viewport.Height = GetProjectHeight();
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0.0f;
@@ -175,8 +175,8 @@ void Graphics::SetShadowMapRenderTarget()
 {
 	// viewport 설정
 	D3D11_VIEWPORT viewport = {};
-	viewport.Width = GetViewWidth();
-	viewport.Height = GetViewHeight();
+	viewport.Width = GetProjectWidth();//GetViewWidth();
+	viewport.Height = GetProjectHeight();//GetViewHeight();
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0.0f;
@@ -201,8 +201,8 @@ void Graphics::CreateShadowMapRenderTarget()
 	// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going to interpret
 	// the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS.
 	D3D11_TEXTURE2D_DESC texDesc;
-	texDesc.Width = GetViewWidth();
-	texDesc.Height = GetViewHeight();
+	texDesc.Width = GetProjectWidth();//GetViewWidth();
+	texDesc.Height = GetProjectHeight();//GetViewHeight();
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;

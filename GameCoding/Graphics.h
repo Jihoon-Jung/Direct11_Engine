@@ -40,19 +40,23 @@ public:
 	void Initialize(HWND hwnd, int width, int height)
 	{
 		_hwnd = hwnd;
-		_viewWidth = width;
-		_viewHeight = height;
+		_viewWidth = width * (7.0f / 10.0f);
+		_viewHeight = height * (6.0f / 10.0f);
+		_projectWidth = width;
+		_projectHeight = height;
 
 		CreateDeviceAndSwapChain();
 		CreateRenderTarget();
 		CreateOffscreenRenderTarget();
 		CreateShadowMapRenderTarget();
 		CreateDepthStencilView();
-		CreateViewport(width * (7.0f/10.0f), height * (6.0f/10.0f), width * (1.0f/10.0f), height * (3.0f/100.0f), 0, 1);
+		CreateViewport(_viewWidth, _viewHeight, width * (1.0f/10.0f), height * (3.0f/100.0f), 0, 1);
 		
 	}
 	int GetViewWidth() { return _viewWidth; }
 	int GetViewHeight() { return _viewHeight; }
+	int GetProjectWidth() { return _projectWidth; }
+	int GetProjectHeight() { return _projectHeight; }
 	int GetEnvironmentMapWidth() { return _environmentMapWidth; }
 	int GetEnvironmentMapHeight() { return _environmentMapHeight; }
 	void CreateDeviceAndSwapChain();
@@ -77,6 +81,8 @@ public:
 	HWND GetWindowHandle() { return _hwnd; }
 	int _viewWidth = 0;
 	int _viewHeight = 0;
+	int _projectWidth = 0;
+	int _projectHeight = 0;
 
 	int _environmentMapWidth = 256;
 	int _environmentMapHeight = 256;

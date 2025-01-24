@@ -21,7 +21,7 @@ public:
 	void RenderUI_End();
 	void RenderGuizmo();
 	void RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject);
-	
+
 	void RenderFolderTree(const filesystem::path& path, filesystem::path& selectedFolder);
 	void RenderFileGrid(const filesystem::path& path);
 

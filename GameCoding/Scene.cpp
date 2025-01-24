@@ -191,7 +191,21 @@ void Scene::UIPicking()
 		if (gameObject->GetComponent<Button>() != nullptr)
 		{
 			if (gameObject->GetComponent<Button>()->Picked(screenPoint))
-				gameObject->GetComponent<Button>()->InvokeOnClicked();
+			{
+				if (ENGINE.GetEngineMode() == EngineMode::Play)
+					gameObject->GetComponent<Button>()->InvokeOnClicked();
+				else
+					picked = gameObject;
+			}
+		}
+		else if (gameObject->GetComponent<UIImage>() != nullptr)
+		{
+			if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+			{
+				if (gameObject->GetComponent<UIImage>()->Picked(screenPoint))
+					picked = gameObject;
+			}
+
 		}
 	}
 

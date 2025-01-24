@@ -371,9 +371,9 @@ void GUIManager::RenderUI()
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
 
-        float windowSizeX = GP.GetViewWidth() * (7.0f / 10.0f);
-        float windowSizeY = GP.GetViewHeight() * (3.0f / 100.0f);
-        ImGui::SetNextWindowPos(ImVec2(GP.GetViewWidth() * (1.0f / 10.0f), 0), ImGuiCond_Always);
+        float windowSizeX = GP.GetProjectWidth() * (7.0f / 10.0f);
+        float windowSizeY = GP.GetProjectHeight() * (3.0f / 100.0f);
+        ImGui::SetNextWindowPos(ImVec2(GP.GetProjectWidth() * (1.0f / 10.0f), 0), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(windowSizeX, windowSizeY));
         ImGui::Begin("Manual", nullptr,
             ImGuiWindowFlags_NoMove |
@@ -497,7 +497,7 @@ void GUIManager::RenderUI()
     // Hierachy
     {
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetViewWidth() * (1.0f / 10.0f), GP.GetViewHeight() * (63.0f / 100.0f)));
+        ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth() * (1.0f / 10.0f), GP.GetProjectHeight() * (63.0f / 100.0f)));
         ImGui::Begin("Hierachy", nullptr,
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
@@ -584,8 +584,8 @@ void GUIManager::RenderUI()
 
     // Inspector
     {
-        ImGui::SetNextWindowPos(ImVec2(GP.GetViewWidth()* (8.0f / 10.0f), 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetViewWidth()* (2.0f / 10.0f), GP.GetViewHeight()* (63.0f / 100.0f)));
+        ImGui::SetNextWindowPos(ImVec2(GP.GetProjectWidth()* (8.0f / 10.0f), 0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth()* (2.0f / 10.0f), GP.GetProjectHeight()* (63.0f / 100.0f)));
         ImGui::Begin("Inspector", nullptr,
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
@@ -754,6 +754,11 @@ void GUIManager::RenderUI()
                 
                 if (_isTransformChanged && !ImGui::IsMouseDown(ImGuiMouseButton_Left))
                 {
+                    if (_selectedObject->GetComponent<UIImage>() != nullptr)
+                        _selectedObject->GetComponent<UIImage>()->UpdateRect(Vec2(position.x, position.y), Vec2(scale.x, scale.y));
+                    if (_selectedObject->GetComponent<Button>() != nullptr)
+                        _selectedObject->GetComponent<Button>()->UpdateRect(Vec2(position.x, position.y), Vec2(scale.x, scale.y));
+
                     SCENE.UpdateGameObjectTransformInXML(SCENE.GetActiveScene()->GetSceneName(), _selectedObject->GetName(),
                         position, transform->GetLocalRotation(), transform->GetLocalScale());
                     _isTransformChanged = false;
@@ -1393,8 +1398,8 @@ void GUIManager::RenderUI()
     // project
     {
 
-        ImGui::SetNextWindowPos(ImVec2(0, GP.GetViewHeight()* (63.0f / 100.0f)), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetViewWidth(), GP.GetViewHeight()* (37.0f / 100.0f)));
+        ImGui::SetNextWindowPos(ImVec2(0, GP.GetProjectHeight()* (63.0f / 100.0f)), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth(), GP.GetProjectHeight()* (37.0f / 100.0f)));
         ImGui::Begin("Project", nullptr,
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
@@ -1474,14 +1479,13 @@ void GUIManager::RenderUI()
         ImGui::End();
     }
 
-
     if (!_showAnimatorEditor)
     {
         // 뷰포트 영역 계산
-        float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
-        float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
-        float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
-        float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+        float viewportX = GP.GetProjectWidth() * (1.0f / 10.0f);
+        float viewportY = GP.GetProjectHeight() * (3.0f / 100.0f);
+        float viewportWidth = GP.GetProjectWidth() * (7.0f / 10.0f);
+        float viewportHeight = GP.GetProjectHeight() * (6.0f / 10.0f);
 
         // 드래그 중일 때만 드롭 영역 활성화
         bool isDragging = ImGui::GetDragDropPayload() != nullptr;
@@ -1743,6 +1747,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
         }
         ImGui::TreePop();
     }
+
 }
 
 void GUIManager::RenderUI_End()
@@ -1758,16 +1763,27 @@ void GUIManager::RenderGuizmo()
     {
         _selectedObject = pickedObj;
         shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
+
+        // UI 오브젝트인 경우 UICamera 사용
+        bool isUIObject = (pickedObj->GetComponent<UIImage>() != nullptr ||
+            pickedObj->GetComponent<Button>() != nullptr);
+
+        if (isUIObject)
+        {
+            // UI 카메라 찾기 
+            camera = SCENE.GetActiveScene()->Find(L"UICamera");
+        }
+
         if (camera && camera->GetComponent<Camera>())
         {
             Matrix view = camera->GetComponent<Camera>()->GetViewMatrix();
             Matrix proj = camera->GetComponent<Camera>()->GetProjectionMatrix();
             Matrix world = pickedObj->transform()->GetWorldMatrix();
 
-            float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
-            float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
-            float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
-            float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+            float viewportX = GP.GetProjectWidth() * (1.0f / 10.0f);
+            float viewportY = GP.GetProjectHeight() * (3.0f / 100.0f);
+            float viewportWidth = GP.GetProjectWidth() * (7.0f / 10.0f);
+            float viewportHeight = GP.GetProjectHeight() * (6.0f / 10.0f);
             
             // Frustum 생성
             BoundingFrustum frustum;
@@ -2070,10 +2086,10 @@ void GUIManager::RenderGuizmo()
                 ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
                 // 뷰포트 위치와 크기
-                float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
-                float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
-                float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
-                float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+                float viewportX = GP.GetProjectWidth() * (1.0f / 10.0f);
+                float viewportY = GP.GetProjectHeight() * (3.0f / 100.0f);
+                float viewportWidth = GP.GetProjectWidth() * (7.0f / 10.0f);
+                float viewportHeight = GP.GetProjectHeight() * (6.0f / 10.0f);
 
                 // 선택된 카메라의 월드 위치
                 Vec3 cameraPos = _selectedObject->transform()->GetWorldPosition();
@@ -4548,10 +4564,10 @@ void GUIManager::HandleExternalFilesDrop(const filesystem::path& sourcePath)
 
 bool GUIManager::IsViewportHovered()
 {
-    float viewportX = GP.GetViewWidth() * (1.0f / 10.0f);
-    float viewportY = GP.GetViewHeight() * (3.0f / 100.0f);
-    float viewportWidth = GP.GetViewWidth() * (7.0f / 10.0f);
-    float viewportHeight = GP.GetViewHeight() * (6.0f / 10.0f);
+    float viewportX = GP.GetProjectWidth() * (1.0f / 10.0f);
+    float viewportY = GP.GetProjectHeight() * (3.0f / 100.0f);
+    float viewportWidth = GP.GetProjectWidth() * (7.0f / 10.0f);
+    float viewportHeight = GP.GetProjectHeight() * (6.0f / 10.0f);
 
     ImVec2 mousePos = ImGui::GetMousePos();
     return (mousePos.x >= viewportX && mousePos.x <= (viewportX + viewportWidth) &&

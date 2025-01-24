@@ -9,63 +9,48 @@ void InputManager::Init(HWND hwnd)
 
 void InputManager::Update()
 {
-	HWND hwnd = ::GetActiveWindow();
-	if (_hwnd != hwnd)
-	{
-		for (uint32 key = 0; key < KEY_TYPE_COUNT; key++)
-			_states[key] = KEY_STATE::NONE;
+    // 키보드 상태 업데이트
+    BYTE asciiKeys[KEY_TYPE_COUNT] = {};
+    if (::GetKeyboardState(asciiKeys))
+    {
+        for (uint32 key = 0; key < KEY_TYPE_COUNT; key++)
+        {
+            KEY_STATE& state = _states[key];
 
-		return;
-	}
+            if (asciiKeys[key] & 0x80) // 키가 눌려있음
+            {
+                if (state == KEY_STATE::NONE || state == KEY_STATE::UP)
+                    state = KEY_STATE::DOWN;
+                else if (state == KEY_STATE::DOWN)
+                    state = KEY_STATE::PRESS;
+            }
+            else // 키가 눌려있지 않음
+            {
+                if (state == KEY_STATE::PRESS || state == KEY_STATE::DOWN)
+                    state = KEY_STATE::UP;
+                else
+                    state = KEY_STATE::NONE;
+            }
+        }
+    }
 
-	BYTE asciiKeys[KEY_TYPE_COUNT] = {};
-	if (::GetKeyboardState(asciiKeys) == false)
-		return;
+    // 이전 마우스 위치 저장
+    POINT prevMousePos = _mousePos;
 
-	for (uint32 key = 0; key < KEY_TYPE_COUNT; key++)
-	{
-		// 키가 눌려 있으면 true
-		if (asciiKeys[key] & 0x80)
-		{
-			KEY_STATE& state = _states[key];
+    // 현재 마우스 위치 업데이트
+    ::GetCursorPos(&_mousePos);
+    ::ScreenToClient(_hwnd, &_mousePos);
 
-			// 이전 프레임에 키를 누른 상태라면 PRESS
-			if (state == KEY_STATE::PRESS || state == KEY_STATE::DOWN)
-				state = KEY_STATE::PRESS;
-			else
-				state = KEY_STATE::DOWN;
-		}
-		else
-		{
-			KEY_STATE& state = _states[key];
+    // 클라이언트 영역 체크
+    RECT clientRect;
+    GetClientRect(_hwnd, &clientRect);
 
-			// 이전 프레임에 키를 누른 상태라면 UP
-			if (state == KEY_STATE::PRESS || state == KEY_STATE::DOWN)
-				state = KEY_STATE::UP;
-			else
-				state = KEY_STATE::NONE;
-		}
-	}
+    bool prevMouseOutside = isMouseOutsideWindow;
+    isMouseOutsideWindow = !PtInRect(&clientRect, _mousePos);
 
-	::GetCursorPos(&_mousePos);
-	::ScreenToClient(_hwnd, &_mousePos);
-
-
-	
-
-	RECT clientRect;
-	GetClientRect(_hwnd, &clientRect);
-	if (PtInRect(&clientRect, _mousePos))
-	{
-		isMouseOutsideWindow = false;
-		if (isMouseEnter)
-			_mousePos = savedMousePos;
-		isMouseEnter = false;
-	}
-	else
-	{
-		isMouseOutsideWindow = true;
-		savedMousePos = _mousePos;
-		isMouseEnter = true;
-	}
+    // 마우스가 창 밖으로 나갔을 때만 마지막 위치 저장
+    if (!prevMouseOutside && isMouseOutsideWindow)
+    {
+        savedMousePos = prevMousePos;
+    }
 }

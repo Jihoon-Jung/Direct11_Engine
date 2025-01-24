@@ -25,6 +25,7 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
+	//LoadTestScene2(sceneName);
 	LoadTestScene(sceneName);
 	//LoadTestInstancingScene();
 }
@@ -213,7 +214,63 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 			particleSystem->SetTransform(gameObj->transform());
 			gameObj->AddComponent(particleSystem);
 		}
+		// UIImage 컴포넌트 처리
+		if (auto uiImageElem = gameObjElem->FirstChildElement("UIImage"))
+		{
+			auto uiImage = make_shared<UIImage>();
+			float posX = uiImageElem->FloatAttribute("posX");
+			float posY = uiImageElem->FloatAttribute("posY");
+			float sizeX = uiImageElem->FloatAttribute("sizeX");
+			float sizeY = uiImageElem->FloatAttribute("sizeY");
+			float rectLeft = uiImageElem->FloatAttribute("rectLeft");
+			float rectTop = uiImageElem->FloatAttribute("rectTop");
+			float rectRight = uiImageElem->FloatAttribute("rectRight");
+			float rectBottom = uiImageElem->FloatAttribute("rectBottom");
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+			uiImage->SetScreenTransformAndRect(Vec2(posX, posY), Vec2(sizeX, sizeY), rect);
+			gameObj->AddComponent(uiImage);
+			gameObj->SetObjectType(GameObjectType::UIObject);
+		}
 
+		// Button 컴포넌트 처리
+		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
+		{
+			auto button = make_shared<Button>();
+
+			// 위치와 크기 설정
+			Vec2 pos(
+				buttonElem->FloatAttribute("posX"),
+				buttonElem->FloatAttribute("posY")
+			);
+			Vec2 size(
+				buttonElem->FloatAttribute("sizeX"),
+				buttonElem->FloatAttribute("sizeY")
+			);
+			float rectLeft = buttonElem->FloatAttribute("rectLeft");
+			float rectTop = buttonElem->FloatAttribute("rectTop");
+			float rectRight = buttonElem->FloatAttribute("rectRight");
+			float rectBottom = buttonElem->FloatAttribute("rectBottom");
+
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+
+			button->SetScreenTransformAndRect(pos, size, rect);
+
+			// 클릭 이벤트 함수 설정
+			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
+			{
+				button->AddOnClickedEvent(functionKey);
+			}
+
+			gameObj->AddComponent(button);
+		}
 		vector<AnimatorEventLoadData> eventLoadDataList;  // 임시 저장용 구조체
 
 		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
@@ -398,6 +455,14 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 }
 void SceneManager::LoadTestScene(wstring sceneName)
 {
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+
+	// 기존 XML 파일이 있다면 삭제
+	if (filesystem::exists(pathStr))
+	{
+		filesystem::remove(pathStr);
+	}
+
 	_activeScene = make_shared<Scene>();
 
 
@@ -564,41 +629,48 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"Terrain_obj", terrainRenderer,
 		L"TerrainMaterial", L"Terrain");
 
-	//// UI Quad
-	//SaveAndLoadGameObjectToXML(sceneName, L"UI_Quad", Vec3::Zero);
-	//auto uiImage = make_shared<UIImage>();
-	//uiImage->SetTransformAndRect(Vec2(900, 200), Vec2(240, 180));
-	//AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiImage);
-	//_activeScene->Find(L"UI_Quad")->transform()->SetLocalPosition(uiImage->GetNDCPosition());
-	//_activeScene->Find(L"UI_Quad")->transform()->SetLocalScale(uiImage->GetSize());
-	//auto uiRenderer = make_shared<MeshRenderer>();
-	//uiRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
-	//uiRenderer->SetModel(nullptr);
-	//uiRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
-	//uiRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	//uiRenderer->AddRenderPass();
-	//uiRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
-	//uiRenderer->GetRenderPasses()[0]->SetMeshRenderer(uiRenderer);
-	//uiRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"UI_Quad")->transform());
-	//uiRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
-	//AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiRenderer,
-	//	L"Debug_UI_Material", L"Quad");
+	// UI Quad
+	SaveAndLoadGameObjectToXML(sceneName, L"UI_Quad", Vec3::Zero);
+	auto uiImage = make_shared<UIImage>();
+	Vec2 imageSize = RESOURCE.GetResource<Material>(L"Debug_UI_Material")->GetTexture()->GetSize() * 0.09765625f;
+	uiImage->SetTransformAndRect(Vec2(900, 200), imageSize);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiImage);
+	_activeScene->Find(L"UI_Quad")->transform()->SetLocalPosition(uiImage->GetNDCPosition());
+	_activeScene->Find(L"UI_Quad")->transform()->SetLocalScale(uiImage->GetSize());
+	UpdateGameObjectTransformInXML(sceneName, L"UI_Quad", uiImage->GetNDCPosition(), Vec3(0, 0, 0), uiImage->GetSize());
+	auto uiRenderer = make_shared<MeshRenderer>();
+	uiRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
+	uiRenderer->SetModel(nullptr);
+	uiRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
+	uiRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_NONE, false);
+	uiRenderer->AddRenderPass();
+	uiRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
+	uiRenderer->GetRenderPasses()[0]->SetMeshRenderer(uiRenderer);
+	uiRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"UI_Quad")->transform());
+	uiRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Quad", uiRenderer,
+		L"Debug_UI_Material", L"Quad");
 
 	// UI Button
 	SaveAndLoadGameObjectToXML(sceneName, L"UI_Button", Vec3::Zero);
+
 	auto button = make_shared<Button>();
-	button->AddOnClickedEvent([this]() {
-		_activeScene->RemoveGameObject(_activeScene->Find(L"UI_Button"));
-		});
-	button->SetTransformAndRect(Vec2(500, 500), Vec2(100, 100));
+	string className = typeid(TestEvent).name();
+	string functionKey = className + "::TestLog";
+	button->AddOnClickedEvent(functionKey);
+
+	imageSize = RESOURCE.GetResource<Material>(L"Debug_UI_Material")->GetTexture()->GetSize() * 0.09765625f;
+	button->SetTransformAndRect(Vec2(50, 574), imageSize);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"UI_Button", button);
 	_activeScene->Find(L"UI_Button")->transform()->SetLocalPosition(button->GetNDCPosition());
 	_activeScene->Find(L"UI_Button")->transform()->SetLocalScale(button->GetSize());
+	UpdateGameObjectTransformInXML(sceneName, L"UI_Button", button->GetNDCPosition(), Vec3(0, 0, 0), button->GetSize());
+
 	auto buttonRenderer = make_shared<MeshRenderer>();
 	buttonRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
 	buttonRenderer->SetModel(nullptr);
 	buttonRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"Debug_UI_Material"));
-	buttonRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	buttonRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_NONE, false);
 	buttonRenderer->AddRenderPass();
 	buttonRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
 	buttonRenderer->GetRenderPasses()[0]->SetMeshRenderer(buttonRenderer);
@@ -1062,6 +1134,64 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			gameObj->AddComponent(particleSystem);
 		}
 
+		// UIImage 컴포넌트 처리
+		if (auto uiImageElem = gameObjElem->FirstChildElement("UIImage"))
+		{
+			auto uiImage = make_shared<UIImage>();
+			float posX = uiImageElem->FloatAttribute("posX");
+			float posY = uiImageElem->FloatAttribute("posY");
+			float sizeX = uiImageElem->FloatAttribute("sizeX");
+			float sizeY = uiImageElem->FloatAttribute("sizeY");
+			float rectLeft = uiImageElem->FloatAttribute("rectLeft");
+			float rectTop = uiImageElem->FloatAttribute("rectTop");
+			float rectRight = uiImageElem->FloatAttribute("rectRight");
+			float rectBottom = uiImageElem->FloatAttribute("rectBottom");
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+			uiImage->SetScreenTransformAndRect(Vec2(posX, posY), Vec2(sizeX, sizeY), rect);
+			gameObj->AddComponent(uiImage);
+			gameObj->SetObjectType(GameObjectType::UIObject);
+		}
+
+		// Button 컴포넌트 처리
+		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
+		{
+			auto button = make_shared<Button>();
+
+			// 위치와 크기 설정
+			Vec2 pos(
+				buttonElem->FloatAttribute("posX"),
+				buttonElem->FloatAttribute("posY")
+			);
+			Vec2 size(
+				buttonElem->FloatAttribute("sizeX"),
+				buttonElem->FloatAttribute("sizeY")
+			);
+			float rectLeft = buttonElem->FloatAttribute("rectLeft");
+			float rectTop = buttonElem->FloatAttribute("rectTop");
+			float rectRight = buttonElem->FloatAttribute("rectRight");
+			float rectBottom = buttonElem->FloatAttribute("rectBottom");
+
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+
+			button->SetScreenTransformAndRect(pos, size, rect);
+
+			// 클릭 이벤트 함수 설정
+			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
+			{
+				button->AddOnClickedEvent(functionKey);
+			}
+
+			gameObj->AddComponent(button);
+		}
+
 		vector<AnimatorEventLoadData> eventLoadDataList;  // 임시 저장용 구조체
 
 		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
@@ -1409,19 +1539,34 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 		tinyxml2::XMLElement* uiElem = doc.NewElement("UIImage");
 		const Vec3& pos = uiImage->GetNDCPosition();
 		const Vec3& size = uiImage->GetSize();
+		const RECT& rect = uiImage->GetRect();
 		uiElem->SetAttribute("posX", pos.x);
 		uiElem->SetAttribute("posY", pos.y);
 		uiElem->SetAttribute("sizeX", size.x);
 		uiElem->SetAttribute("sizeY", size.y);
+		uiElem->SetAttribute("rectLeft", (float)rect.left);
+		uiElem->SetAttribute("rectTop", (float)rect.top);
+		uiElem->SetAttribute("rectRight", (float)rect.right);
+		uiElem->SetAttribute("rectBottom", (float)rect.bottom);
 		gameObj->InsertEndChild(uiElem);
 	}
-	//else if (auto moveObject = dynamic_pointer_cast<MoveObject>(component))
-	//{
-	//	tinyxml2::XMLElement* scriptElem = doc.NewElement("Script");
-	//	scriptElem->SetAttribute("type", "MoveObject");
-	//	scriptElem->SetAttribute("speed", moveObject->GetSpeed());
-	//	gameObj->InsertEndChild(scriptElem);
-	//}
+	else if (auto button = dynamic_pointer_cast<Button>(component))
+	{
+		tinyxml2::XMLElement* buttonElem = doc.NewElement("Button");
+		const Vec3& pos = button->GetNDCPosition();
+		const Vec3& size = button->GetSize();
+		const RECT& rect = button->GetRect();
+		buttonElem->SetAttribute("posX", pos.x);
+		buttonElem->SetAttribute("posY", pos.y);
+		buttonElem->SetAttribute("sizeX", size.x);
+		buttonElem->SetAttribute("sizeY", size.y);
+		buttonElem->SetAttribute("rectLeft", (float)rect.left);
+		buttonElem->SetAttribute("rectTop", (float)rect.top);
+		buttonElem->SetAttribute("rectRight", (float)rect.right);
+		buttonElem->SetAttribute("rectBottom", (float)rect.bottom);
+		buttonElem->SetAttribute("onClickedFunctionKey", button->GetOnClickedFuntionKey().c_str());
+		gameObj->InsertEndChild(buttonElem);
+	}
 	else if (auto particleSystem = dynamic_pointer_cast<ParticleSystem>(component))
 	{
 		tinyxml2::XMLElement* particleElem = doc.NewElement("ParticleSystem");
@@ -1623,7 +1768,47 @@ void SceneManager::UpdateGameObjectTransformInXML(const wstring& sceneName, cons
 				transformElem->SetAttribute("scaleZ", scale.z);
 
 				doc.SaveFile(pathStr.c_str());
-				break;
+				
+			}
+
+			// UIImage 엘리먼트 찾기
+			if (auto uiImageElem = gameObjElem->FirstChildElement("UIImage"))
+			{
+				// 위치 업데이트
+				uiImageElem->SetAttribute("posX", position.x);
+				uiImageElem->SetAttribute("posY", position.y);
+
+				// 스케일 업데이트
+				uiImageElem->SetAttribute("scaleX", scale.x);
+				uiImageElem->SetAttribute("scaleY", scale.y);
+
+				RECT rect = SCENE.GetActiveScene()->Find(objectName)->GetComponent<UIImage>()->GetRect();
+				uiImageElem->SetAttribute("rectLeft", (float)rect.left);
+				uiImageElem->SetAttribute("rectTop", (float)rect.top);
+				uiImageElem->SetAttribute("rectRight", (float)rect.right);
+				uiImageElem->SetAttribute("rectBottom", (float)rect.bottom);
+				
+				doc.SaveFile(pathStr.c_str());
+			}
+
+			// Button 엘리먼트 찾기
+			if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
+			{
+				// 위치 업데이트
+				buttonElem->SetAttribute("posX", position.x);
+				buttonElem->SetAttribute("posY", position.y);
+
+				// 스케일 업데이트
+				buttonElem->SetAttribute("scaleX", scale.x);
+				buttonElem->SetAttribute("scaleY", scale.y);
+
+				RECT rect = SCENE.GetActiveScene()->Find(objectName)->GetComponent<Button>()->GetRect();
+				buttonElem->SetAttribute("rectLeft", (float)rect.left);
+				buttonElem->SetAttribute("rectTop", (float)rect.top);
+				buttonElem->SetAttribute("rectRight", (float)rect.right);
+				buttonElem->SetAttribute("rectBottom", (float)rect.bottom);
+				
+				doc.SaveFile(pathStr.c_str());
 			}
 		}
 	}
