@@ -26,14 +26,20 @@ public:
 	void RenderFileGrid(const filesystem::path& path);
 
 	void OnResourceDroppedToViewport(const std::string& fullPath);  // 뷰포트에 리소스가 드롭되었을 때 호출되는 함수
+	void OnResourceDragEnd();
+
 	void HandleExternalFilesDrop(const filesystem::path& sourcePath);
 
 	void ResetSelectedObject() { _selectedObject = nullptr; }
 
+	bool isSceneView() { return _isSceneView; }
+
+	void ReleaseSelectedObject();
 private:
 	bool IsViewportHovered();
 
 	shared_ptr<GameObject> _selectedObject = nullptr;
+	int _tempBoneIndex = INT_MAX;
 	bool _isColliderEditMode = false;  // 콜라이더 편집 모드인지 여부
 	bool _isCameraMoving = false;
 	Vec3 _cameraStartPos;
@@ -43,6 +49,19 @@ private:
 	float _cameraMoveTime = 0.0f;
 	const float _cameraMoveSpeed = 3.0f;  // 이동 속도 (값이 클수록 빠름)
 	bool _isTransformChanged = false;
+	shared_ptr<GameObject> _draggedObject = nullptr;
+	bool _isDragging = false;
+	bool _isSceneView = true;
+
+private:
+	bool _isInitialized = false;
+	float _hierarchyWidth;
+	float _inspectorWidth;
+	float _minHierarchyWidth;
+	float _minInspectorWidth;
+	bool _isResizingHierarchy = false;
+	bool _isResizingInspector = false;
+
 private:
 	// EmptyObject 생성 관련 변수들
 	bool _showEmptyObjectPopup = false;
@@ -76,7 +95,7 @@ private:
 	bool _isFirstFrame = true;  // 첫 프레임 체크를 위한 변수
 
 	shared_ptr<GameObject> _droppedObject;
-
+	string _droppedTexturePath;
 private:
 
 	// 노드 관련 변수들
@@ -101,6 +120,9 @@ private:
 	static constexpr float NODE_WIDTH = 150.0f;
 	static constexpr float NODE_HEIGHT = 50.0f;
 	static constexpr float TITLE_HEIGHT = 20.0f;
+
+	// SkyBox
+	bool _showSkyBoxMaterialPopup = false;
 
 	// 트랜지션 생성을 위한 변수들
 	bool _isCreatingTransition = false;
@@ -170,7 +192,7 @@ private:
 	void RenderScriptIcon(shared_ptr<Texture> icon, const string& filename, const filesystem::path& path,
 		float cellSize, float iconSize, float padding, float maxTextWidth);
 
-	private:
+private:
 		string ToLower(string str)
 		{
 			transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -223,5 +245,38 @@ private:
 			ImGui::PopID();
 			ImGui::NextColumn();
 		}
+
+private:
+	bool _showCreateScenePopup = false;
+	char _newSceneName[256] = "NewScene";  // Scene 이름을 저장할 버퍼
+
+private:
+	bool _showCreateMaterialPopup = false;
+	char _newMaterialName[256] = "NewMaterial";
+	string _selectedTexture = "None";
+	string _selectedNormalMap = "None";
+	string _selectedShader = "Default_Shader";
+	MaterialDesc _newMaterialDesc = {
+		Vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		Vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		Vec4(1.0f, 1.0f, 1.0f, 1.0f)
+	};
+
+private:
+	void HandleBoneObjectParenting(shared_ptr<GameObject> child, shared_ptr<GameObject> newParent)
+	{
+		if (newParent && newParent->GetBoneObjectFlag())
+		{
+			newParent->GetBoneParentObject().lock()->AddActiveBoneIndex(newParent->GetBoneIndex());
+			_tempBoneIndex = INT_MAX;
+			if (!child->GetBoneObjectFlag())
+			{
+				newParent->SetHasNoneBoneChildrenFlag(true);
+				child->SetNonBoneChildrenParent(newParent);
+			}
+				
+		}
+	}
+
 };
 

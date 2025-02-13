@@ -1,7 +1,7 @@
 #pragma once
 #include "Buffer.h"
 
-class Transform :public Component
+class Transform :public Component, public std::enable_shared_from_this<Transform>
 {
 	using Super = Component;
 
@@ -17,7 +17,19 @@ public:
 
 	Matrix GetWorldMatrix() { return _worldMat; }
 	Vec3 GetWorldPosition() { return _worldPosition; }
-	Vec3 GetWorldRotation() { return _worldRotation; }
+	/*Vec3 GetWorldRotation() { return _worldRotation; }*/
+	Quaternion GetWorldRotation(){
+		if (HasParent()) {
+			return _parent->GetWorldRotation() * _qtLocalRotation;
+		}
+		return _qtLocalRotation;
+	}
+	static Quaternion InverseQuaternion(const Quaternion& q)
+	{
+		Quaternion result;
+		XMStoreFloat4(&result, XMQuaternionInverse(XMLoadFloat4(&q)));
+		return result;
+	}
 	Vec3 GetWorldScale() { return _worldScale; }
 
 	Vec3 GetLocalPosition() { return _localPosition; }
@@ -64,6 +76,8 @@ public:
 	void SetPosition(const Vec3& position);
 	void SetRotation(const Vec3& rotation);
 	void SetQTRotation(const Quaternion& rotation);
+	
+	Quaternion GetTotalParentRotation();
 	void SetScale(const Vec3& scale);
 
 	Quaternion GetQTRotation() { return _qtLocalRotation; }
@@ -72,9 +86,31 @@ public:
 	Vec3 GetRight() { return Vec3::TransformNormal(Vec3::Right,_worldMat); }
 
 	void SetParent(shared_ptr<Transform> parent) { _parent = parent; }
-	void AddChild(shared_ptr<Transform> child) { _children.push_back(child); }
+	void AddChild(shared_ptr<Transform> child) {
+		_children.push_back(child); 
+		UpdateTransform();
+	}
 
 	shared_ptr<Transform>& GetParent() { return _parent; }
+	void DetachFromParent()
+	{
+		if (_parent)
+		{
+			// 부모의 자식 Transform 목록에서 제거
+			auto it = std::find(_parent->_children.begin(), _parent->_children.end(), shared_from_this());
+			if (it != _parent->_children.end())
+				_parent->_children.erase(it);
+
+			// 월드 변환 유지하면서 로컬 변환 재계산
+			_localPosition = GetWorldPosition();
+			_qtLocalRotation = Quaternion::CreateFromRotationMatrix(GetWorldMatrix());
+			_localScale = GetWorldScale();
+
+			_parent = nullptr;
+		}
+		UpdateTransform();
+	}
+
 	shared_ptr<Buffer> GetTransformBuffer() { return _transformBuffer; }
 
 	//test

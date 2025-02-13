@@ -498,6 +498,18 @@ void Model::CreateTexture()
 	}
 }
 
+Matrix Model::GetAnimationTransform(int boneIndex, int frame, int animIndex)
+{
+	if (_animTransforms.empty() || animIndex >= _animTransforms.size())
+		return Matrix::Identity;
+
+	const auto& transforms = _animTransforms[animIndex].transforms;  // AnimTransform의 transforms 배열에 접근
+	if (frame >= MAX_MODEL_KEYFRAMES || boneIndex < 0)  // MAX_MODEL_KEYFRAMES와 비교
+		return Matrix::Identity;
+
+	return transforms[frame][boneIndex];
+}
+
 void Model::BindCacheInfo()
 {
 	// Mesh에 Material 캐싱

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Maria</Name>
+    <Path>Maria/Maria</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Maria/Maria</Material>
+    <Animations>
+        <Animation>Maria/Idle</Animation>
+        <Animation>Maria/Maria_Kick</Animation>
+        <Animation>Maria/Maria_Backhand</Animation>
+    </Animations>
+</Model>

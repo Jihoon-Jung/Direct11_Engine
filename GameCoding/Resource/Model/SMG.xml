@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>SMGModel</Name>
+    <Path>SMG/SMG</Path>
+    <Shader>StaticMesh_Shader</Shader>
+    <Material>SMG/SMG</Material>
+</Model>

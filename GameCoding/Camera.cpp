@@ -14,7 +14,7 @@ Camera::~Camera()
 
 void Camera::Update()
 {
-	SetViewProjectionMatrix();
+	/*SetViewProjectionMatrix();*/
 }
 
 void Camera::Start()
@@ -23,7 +23,7 @@ void Camera::Start()
 
 void Camera::LateUpdate()
 {
-	
+	SetViewProjectionMatrix();
 }
 
 void Camera::SetViewProjectionMatrix()
@@ -103,37 +103,22 @@ void Camera::SetEnvironmentMapViewProjectionMatrix(Vec3 worldPosition, Vec3 look
 void Camera::SetShadowMapViewProjectionMatrix()
 {
 	shared_ptr<GameObject> light = SCENE.GetActiveScene()->GetMainLight();
+	Vec3 main_cameraPos = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition();
 	Vec3 eye = light->transform()->GetWorldPosition();
-	Vec3 at = GP.centerPos;
+	Vec3 at = Vec3(main_cameraPos.x, 0, main_cameraPos.z);//GP.centerPos;
 	Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
 	_shadowView = ::XMMatrixLookAtLH(eye, at, up);
 
-	_sceneBounds.Radius = 20.0f;
+	int width = GP.GetProjectWidth();
+	int height = GP.GetProjectHeight();
+	float nearZ = 1.0f;
+	float farZ = 100.0f;
+	float orthoSize = 100.0f;
+	float aspect = width / height;
 
-	// Transform bounding sphere to light space.
-	XMFLOAT3 sphereCenterLS;
-	::XMStoreFloat3(&sphereCenterLS, ::XMVector3TransformCoord(at, _shadowView));
-
-	// Ortho frustum in light space encloses scene.
-	float l = sphereCenterLS.x - _sceneBounds.Radius;
-	float b = sphereCenterLS.y - _sceneBounds.Radius;
-	float n = sphereCenterLS.z - _sceneBounds.Radius;
-	float r = sphereCenterLS.x + _sceneBounds.Radius;
-	float t = sphereCenterLS.y + _sceneBounds.Radius;
-	float f = sphereCenterLS.z + _sceneBounds.Radius;
-
-	_shadowProjection = ::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
-
+	_shadowProjection = ::XMMatrixOrthographicLH(orthoSize * aspect, orthoSize, nearZ, farZ);
 
 	
-	//int width = 100; //Graphics::GetInstance().GetViewWidth();
-	//int height = 100;// Graphics::GetInstance().GetViewHeight();
-	//float nearZ = 0.1f;
-	//float farZ = 250.f;
-
-	//_shadowProjection = ::XMMatrixOrthographicLH(width, height, nearZ, farZ);
-	
-
 	_shadowCameraBuffer = make_shared<Buffer>();
 	CameraBuffer _cameraBufferData;
 	_cameraBufferData.viewMatrix = _shadowView;

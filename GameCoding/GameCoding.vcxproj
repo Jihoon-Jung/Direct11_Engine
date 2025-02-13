@@ -253,6 +253,7 @@
     <ClInclude Include="ModelMesh.h" />
     <ClInclude Include="MonoBehaviour.h" />
     <ClInclude Include="MoveObject.h" />
+    <ClInclude Include="MovePlayerWithCamera.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Pipeline.h" />
@@ -369,6 +370,7 @@
     <ClCompile Include="ModelMesh.cpp" />
     <ClCompile Include="MonoBehaviour.cpp" />
     <ClCompile Include="MoveObject.cpp" />
+    <ClCompile Include="MovePlayerWithCamera.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

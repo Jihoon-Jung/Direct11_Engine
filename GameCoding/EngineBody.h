@@ -14,7 +14,7 @@
 #include "RenderManager.h"
 #include "MethodRegistry.h"
 #include "ComponentFactory.h"
-
+#include "GUIManager.h"
 
 enum class EngineMode
 {
@@ -65,6 +65,7 @@ private:
     ResourceManager& _resourceManager;
     MethodRegistry& _methodRegistry;
     ComponentFactory& _componentFactory;
+    GUIManager& _guiManager;
 
     EngineMode _prevEngineMode = EngineMode::Edit;
     EngineMode _engineMode = EngineMode::Edit;

@@ -25,10 +25,22 @@ void Texture::CreateTexture(const wstring& path)
 
 	DirectX::TexMetadata md;
 	DirectX::ScratchImage img;
-	HRESULT hr = ::LoadFromWICFile(path.c_str(), WIC_FLAGS_NONE, &md, img);
+	HRESULT hr = ::LoadFromWICFile(path.c_str(), WIC_FLAGS_FORCE_RGB, &md, img);
 	CHECK(hr);
 
-	hr = ::CreateShaderResourceView(DEVICE.Get(), img.GetImages(), img.GetImageCount(), md, _shaderResourceView.GetAddressOf());
+	// Generate Mipmaps
+	DirectX::ScratchImage mipChain;
+	hr = DirectX::GenerateMipMaps(
+		img.GetImages(), img.GetImageCount(), img.GetMetadata(),
+		DirectX::TEX_FILTER_DEFAULT, 0, mipChain);
+	CHECK(hr);
+
+	// Create shader resource view with mipmaps
+	hr = ::CreateShaderResourceView(DEVICE.Get(),
+		mipChain.GetImages(),
+		mipChain.GetImageCount(),
+		mipChain.GetMetadata(),
+		_shaderResourceView.GetAddressOf());
 	CHECK(hr);
 
 	// 텍스처 포맷 확인

@@ -202,6 +202,23 @@ void Transform::SetQTRotation(const Quaternion& rotation)
 	UpdateTransform();
 }
 
+Quaternion Transform::GetTotalParentRotation()
+{
+    if (!HasParent())
+        return Quaternion::Identity;
+
+    // 모든 부모의 회전을 누적
+    Quaternion totalRotation = Quaternion::Identity;
+    shared_ptr<Transform> current = _parent;
+
+    while (current != nullptr)
+    {
+        totalRotation = current->GetQTRotation() * totalRotation;
+        current = current->GetParent();
+    }
+
+    return totalRotation;
+}
 void Transform::SetScale(const Vec3& scale)
 {
 	if (HasParent())

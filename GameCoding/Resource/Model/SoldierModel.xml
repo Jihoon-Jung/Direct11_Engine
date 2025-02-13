@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Soldier</Name>
+    <Path>Soldier/Soldier</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Soldier/Soldier</Material>
+    <Animations>
+        <Animation>Soldier/Run</Animation>
+        <Animation>Soldier/Fire</Animation>
+        <Animation>Soldier/Strafing</Animation>
+    </Animations>
+</Model>

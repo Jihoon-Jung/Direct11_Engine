@@ -2,7 +2,7 @@
 #include "EngineBody.h"
 
 EngineBody::EngineBody()
-	: _graphics(GP), _resourceManager(RESOURCE),
+	: _graphics(GP), _resourceManager(RESOURCE), _guiManager(GUI),
 	_inputManager(INPUT), _timeManager(TIME),
 	_sceneManager(SCENE), _methodRegistry(MR), _componentFactory(CF)
 {
@@ -25,8 +25,8 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	SCENE.LoadScene(L"test_scene");
     _editScene = SCENE.GetActiveScene();
 
-    SCENE.Init();
-	RENDER.Init();
+    /*SCENE.Init();
+	RENDER.Init();*/
 	GUI.Init();
 
 }

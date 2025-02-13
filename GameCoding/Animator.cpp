@@ -28,6 +28,8 @@ void Animator::Start()
 	SetTransitionFlag(GetClip("Clip2")->transition, false);
 
 	SetCurrentTransition();*/
+
+	
 }
 
 void Animator::Update()
@@ -36,13 +38,17 @@ void Animator::Update()
 	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);*/
 
 	if (_model == nullptr)
+	{
 		_model = GetGameObject()->GetComponent<MeshRenderer>()->GetModel();
+	}
+		
 
 	shared_ptr<Clip> currClip = _currClip;
 	shared_ptr<Transition> currTransition = currClip->transition;// animator->_currTransition;
 	int currIndex = currClip->animIndex;
 	int nextIndex = currTransition != nullptr ? currTransition->clipB.lock()->animIndex : INT_MAX;
 	_blendAnimDesc.SetAnimIndex(currIndex, nextIndex);
+	_blendAnimDesc.curr.speed = currClip->speed;
 
 	// 현재 애니메이션 업데이트
 	shared_ptr<ModelAnimation> current = _model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
@@ -150,6 +156,9 @@ void Animator::Update()
 
 	_blendAnimDesc.curr.activeAnimation = 1;
 	_blendAnimDesc.next.activeAnimation = 1;
+
+
+	UpdateBoneTransforms();
 }
 
 void Animator::AddClip(const string& name, int animIndex, bool isLoop)
@@ -765,4 +774,69 @@ void Animator::SetClipCurrentTransition(shared_ptr<Clip> clip)
 			clip->transition = nullptr;
 		}
 	}
+}
+
+void Animator::UpdateBoneTransforms()
+{
+	if (!_model || !_currClip)
+		return;
+
+	shared_ptr<Transition> currTransition = _currClip->transition;
+	
+	bool isBlending = (currTransition != nullptr && _blendAnimDesc.blendSumTime > 0.0f);
+
+	for (int boneIndex : GetGameObject()->GetActiveBoneIndices())
+	{
+		const auto& bone = _model->GetBoneByIndex(boneIndex);
+
+		shared_ptr<GameObject> boneObject = FindBoneObjectByIndex(bone->index);
+		if (!boneObject || bone->index < 0)
+			continue;
+
+		Matrix finalTransform;
+
+		if (isBlending)
+		{
+			// 현재 애니메이션 프레임 보간
+			Matrix curr1 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
+			Matrix next1 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
+			Matrix anim1 = Matrix::Lerp(curr1, next1, _blendAnimDesc.curr.ratio);
+
+			// 다음 애니메이션 프레임 보간
+			Matrix curr2 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.next.currFrame, _blendAnimDesc.next.animIndex);
+			Matrix next2 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.next.nextFrame, _blendAnimDesc.next.animIndex);
+			Matrix anim2 = Matrix::Lerp(curr2, next2, _blendAnimDesc.next.ratio);
+
+			// 두 애니메이션 간 블렌딩
+			Matrix blendedAnim = Matrix::Lerp(anim1, anim2, _blendAnimDesc.blendRatio);
+			finalTransform = bone->transform * blendedAnim;
+		}
+		else
+		{
+			// 단일 애니메이션 보간
+			Matrix curr = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
+			Matrix next = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
+			Matrix animTransform = Matrix::Lerp(curr, next, _blendAnimDesc.curr.ratio);
+			finalTransform = bone->transform * animTransform;
+		}
+
+		Vec3 scale, translation;
+		Quaternion rotation;
+		finalTransform.Decompose(scale, rotation, translation);
+
+		auto boneTransform = boneObject->transform();
+		boneTransform->SetLocalPosition(translation);
+		boneTransform->SetQTRotation(rotation);
+		boneTransform->SetLocalScale(scale);
+	}
+}
+
+shared_ptr<GameObject> Animator::FindBoneObjectByIndex(int index)
+{
+	auto it = _boneObjects.find(index);
+	if (it != _boneObjects.end())
+	{
+		return it->second;
+	}
+	return nullptr;
 }

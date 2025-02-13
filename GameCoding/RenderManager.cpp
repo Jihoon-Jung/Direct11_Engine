@@ -38,20 +38,23 @@ void RenderManager::Init()
 
 void RenderManager::Update()
 {
-	const float ROTATION_SPEED = 30.0f;  // 초당 회전 각도
-	float deltaAngle = ROTATION_SPEED * TIME.GetDeltaTime();
+	//// 현재 카메라 위치 가져오기
+	//Vec3 cameraPos = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition();
 
-	// 공전 중심점과 회전 각도 설정
-	_lightObject->transform()->SetRevolutionCenter(GP.centerPos);
-	_lightObject->transform()->RotateAround(
-		GP.centerPos,         // 공전 중심
-		Vec3::Up,            // 회전 축 (Y축)
-		deltaAngle           // 이번 프레임의 회전 각도
-	);
+	//const float ROTATION_SPEED = 30.0f;  // 초당 회전 각도
+	//float deltaAngle = ROTATION_SPEED * TIME.GetDeltaTime();
 
-	//// 자전
-	//Vec3 localRotation(0.0f, deltaAngle, 0.0f);
-	//_lightObject->transform()->SetLocalRotation(localRotation);
+	//// 공전 중심점과 회전 각도 설정
+	//_lightObject->transform()->SetRevolutionCenter(Vec3(0,0,0));
+	//_lightObject->transform()->RotateAround(
+	//	cameraPos,         // 공전 중심
+	//	Vec3::Up,            // 회전 축 (Y축)
+	//	deltaAngle           // 이번 프레임의 회전 각도
+	//);
+
+	////// 자전
+	////Vec3 localRotation(0.0f, deltaAngle, 0.0f);
+	////_lightObject->transform()->SetLocalRotation(localRotation);
 
 	
 	GP.SetRenderTarget();
@@ -457,7 +460,8 @@ void RenderManager::RenderEnvironmentMappedObjects(shared_ptr<GameObject> gameOb
 	shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 	shared_ptr<Model> model = meshRenderer->GetModel();
 
-	meshRenderer->GetRenderPasses()[0]->SetTexture(envTexture);
+	if (envTexture != nullptr)
+		meshRenderer->GetRenderPasses()[0]->SetEnvTexture(envTexture);
 
 	if (model == nullptr)
 	{
@@ -524,8 +528,7 @@ void RenderManager::RenderAllGameObject()
 	{
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
-			shared_ptr<Texture> envTexture = make_shared<Texture>();
-			RenderEnvironmentMappedObjects(gameObject, envTexture);
+			RenderEnvironmentMappedObjects(gameObject, nullptr);
 		}
 	}
 	else
@@ -534,16 +537,17 @@ void RenderManager::RenderAllGameObject()
 		float deltaTime = TIME.GetDeltaTime();
 		for (const shared_ptr<GameObject>& gameObject : _envMappedObjects)
 		{
-			if (_envTexture == nullptr) 
+			shared_ptr<Texture> envTexture = gameObject->GetComponent<MeshRenderer>()->GetRenderPasses()[0]->GetEnvTexture();
+			if (envTexture == nullptr)
 			{
 
 				shared_ptr<Material> material = make_shared<Material>();
 				material->CreateEnvironmentMapTexture(gameObject);
 			
-				_envTexture = make_shared<Texture>();
-				_envTexture->SetShaderResourceView(material->GetCubeMapSRV());
+				envTexture = make_shared<Texture>();
+				envTexture->SetShaderResourceView(material->GetCubeMapSRV());
 			}
-			RenderEnvironmentMappedObjects(gameObject, _envTexture);
+			RenderEnvironmentMappedObjects(gameObject, envTexture);
 		}
 
 		TIME.SetPause(false);
@@ -554,6 +558,7 @@ void RenderManager::RenderAllGameObject()
 void RenderManager::ClearRenderObject()
 {
 	_renderObjects.clear();
+	_UIObjects.clear();
 	_envMappedObjects.clear();
 	_billboardObjs.clear();
 	cache_DefaultRender.clear();

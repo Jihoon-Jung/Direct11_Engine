@@ -10,12 +10,16 @@ public:
 
 public:
 	void AddGameObject(shared_ptr<GameObject> gameObject);
+	void AddBoneGameObject(shared_ptr<GameObject> boneGameObject);
 	void RemoveGameObject(shared_ptr<GameObject> gameObject);
 	void Picking();
 	void UIPicking();
 	void CheckCollision();
 	void AddPickedObject(shared_ptr<GameObject> pickedObject) { picked = pickedObject; }
 	void SetMainCamera(shared_ptr<GameObject> camera) { _mainCamera = camera; }
+	void SetSceneName(wstring sceneName) { _sceneName = sceneName; }
+	void SwitchMainCameraToEditorCamera() { _mainCamera = Find(L"EditorCamera"); }
+	void SwitchMainCameraToMainCamera() { _mainCamera = Find(L"MainCamera"); }
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 	shared_ptr<GameObject> Find(const wstring& name);
 
@@ -29,6 +33,7 @@ public:
 
 private:
 	vector<shared_ptr<GameObject>> _gameObjects;
+	vector<shared_ptr<GameObject>> _boneGameobjects;
 	shared_ptr<GameObject> _billboard_obj = make_shared<GameObject>();
 	shared_ptr<Transform> _billboard_Terrain_transform = make_shared<Transform>();
 	shared_ptr<Billboard> _billboard = make_shared<Billboard>();

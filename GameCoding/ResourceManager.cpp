@@ -287,6 +287,12 @@ void ResourceManager::SaveResource()
 	WriteModelToXML(L"House/House", L"StaticMesh_Shader", L"House/House", L"HouseModel",
 		vector<wstring>(), L"Resource/Model/HouseModel.xml");
 
+	WriteModelToXML(L"Cottage/Cottage", L"StaticMesh_Shader", L"Cottage/Cottage", L"CottageModel",
+		vector<wstring>(), L"Resource/Model/Cottage.xml");
+
+	WriteModelToXML(L"SMG/SMG", L"StaticMesh_Shader", L"SMG/SMG", L"SMGModel",
+		vector<wstring>(), L"Resource/Model/SMG.xml");
+
 	vector<wstring> kachujinAnims = { L"Kachujin/Run", L"Kachujin/Slash", L"Kachujin/Dismissing" };
 	WriteModelToXML(L"Kachujin/Kachujin", L"AnimatedMesh_Shader", L"Kachujin/Kachujin", L"Kachujin",
 		kachujinAnims, L"Resource/Model/KachujinModel.xml");
@@ -294,6 +300,18 @@ void ResourceManager::SaveResource()
 	vector<wstring> dreyarAnims = { L"Dreyar/Kick", L"Dreyar/Fall", L"Dreyar/Dance" };
 	WriteModelToXML(L"Dreyar/Dreyar", L"AnimatedMesh_Shader", L"Dreyar/Dreyar", L"Dreyar",
 		dreyarAnims, L"Resource/Model/DreyarModel.xml");
+
+	vector<wstring> mariaAnims = { L"Maria/Idle", L"Maria/Maria_Kick", L"Maria/Maria_Backhand" };
+	WriteModelToXML(L"Maria/Maria", L"AnimatedMesh_Shader", L"Maria/Maria", L"Maria",
+		mariaAnims, L"Resource/Model/MariaModel.xml");
+
+	vector<wstring> soldierAnims = { L"Soldier/Run", L"Soldier/Fire", L"Soldier/Strafing"};
+	WriteModelToXML(L"Soldier/Soldier", L"AnimatedMesh_Shader", L"Soldier/Soldier", L"Soldier",
+		soldierAnims, L"Resource/Model/SoldierModel.xml");
+
+	vector<wstring> elyAnims = { L"Ely/Run", L"Ely/Fire", L"Ely/Strafing" };
+	WriteModelToXML(L"Ely/Ely", L"AnimatedMesh_Shader", L"Ely/Ely", L"Ely",
+		elyAnims, L"Resource/Model/ElyAnimsModel.xml");
 
 	SaveScripts();
 }
@@ -319,77 +337,6 @@ void ResourceManager::AddResource()
 		RESOURCE.AddResource(randomTexture->GetName(), randomTexture);
 	}
 	
-
-	
-	/*LoadMeshData(L"Resource/Mesh/Sphere.xml");
-	LoadMeshData(L"Resource/Mesh/Cube.xml");
-	LoadMeshData(L"Resource/Mesh/Grid.xml");
-	LoadMeshData(L"Resource/Mesh/Terrain.xml");
-	LoadMeshData(L"Resource/Mesh/Quad.xml");
-	LoadMeshData(L"Resource/Mesh/Cylinder.xml");
-
-
-
-	LoadTextureData(L"Resource/Texture/Bricks.xml");
-	LoadTextureData(L"Resource/Texture/Leather.xml");
-	LoadTextureData(L"Resource/Texture/Yellow.xml");
-	LoadTextureData(L"Resource/Texture/Grass.xml");
-	LoadTextureData(L"Resource/Texture/Panda.xml");
-	LoadTextureData(L"Resource/Texture/Tree.xml");
-	LoadTextureData(L"Resource/Texture/startButton.xml");
-	LoadTextureData(L"Resource/Texture/pauseButton.xml");
-	LoadTextureData(L"Resource/Texture/stopButton.xml");
-	LoadTextureData(L"Resource/Texture/skyboxTexture.xml");
-	LoadTextureData(L"Resource/Texture/NormalMap.xml");
-	LoadTextureData(L"Resource/Texture/Solid_white.xml");
-	LoadTextureData(L"Resource/Texture/DefaultNormal.xml");
-	LoadTextureData(L"Resource/Texture/Material_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Mesh_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Model_Icon.xml");
-	LoadTextureData(L"Resource/Texture/Shader_Icon.xml"); 
-	LoadTextureData(L"Resource/Texture/CPP_Icon.xml");
-	
-
-
-	LoadShaderData(L"Resource/Shader/DefaultShader.xml");
-	LoadShaderData(L"Resource/Shader/TerrainShader.xml");
-	LoadShaderData(L"Resource/Shader/DebugUIShader.xml");
-	LoadShaderData(L"Resource/Shader/InitParticleShader.xml");
-	LoadShaderData(L"Resource/Shader/RenderParticleShader.xml");
-	LoadShaderData(L"Resource/Shader/TessellationShader.xml");
-	LoadShaderData(L"Resource/Shader/EnvironmentMapShader.xml");
-	LoadShaderData(L"Resource/Shader/QuadShader.xml");
-	LoadShaderData(L"Resource/Shader/BillboardShader.xml");
-	LoadShaderData(L"Resource/Shader/AdjustTextureShader.xml");
-	LoadShaderData(L"Resource/Shader/GaussianHorizontalShader.xml");
-	LoadShaderData(L"Resource/Shader/GaussianVerticalShader.xml");
-	LoadShaderData(L"Resource/Shader/SkyboxShader.xml");
-	LoadShaderData(L"Resource/Shader/SimpleShader.xml");
-	LoadShaderData(L"Resource/Shader/StaticMeshShader.xml");
-	LoadShaderData(L"Resource/Shader/AnimatedMeshShader.xml");
-	LoadMaterialData(L"Resource/Material/DefaultMaterial.xml");
-	LoadMaterialData(L"Resource/Material/SolidWhiteMaterial.xml");
-
-
-
-
-	LoadMaterialData(L"Resource/Material/ParticleMaterial.xml");
-	LoadMaterialData(L"Resource/Material/GridMaterial.xml");
-	LoadMaterialData(L"Resource/Material/DebugUIMaterial.xml");
-	LoadMaterialData(L"Resource/Material/TessellationMaterial.xml");
-	LoadMaterialData(L"Resource/Material/BillboardMaterial.xml");
-	LoadMaterialData(L"Resource/Material/SkyboxMaterial.xml");
-	LoadMaterialData(L"Resource/Material/TerrainMaterial.xml");
-	LoadMaterialData(L"Resource/Material/SimpleMaterial.xml");
-
-
-
-
-	LoadModelData(L"Resource/Model/TowerModel.xml");
-	LoadModelData(L"Resource/Model/HouseModel.xml");
-	LoadModelData(L"Resource/Model/KachujinModel.xml");
-	LoadModelData(L"Resource/Model/DreyarModel.xml");*/
-
 
 	// Resource 폴더의 모든 리소스 로드
 	filesystem::path resourcePath = "Resource";

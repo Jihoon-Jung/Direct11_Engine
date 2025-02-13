@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Ely</Name>
+    <Path>Ely/Ely</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Ely/Ely</Material>
+    <Animations>
+        <Animation>Ely/Run</Animation>
+        <Animation>Ely/Fire</Animation>
+        <Animation>Ely/Strafing</Animation>
+    </Animations>
+</Model>

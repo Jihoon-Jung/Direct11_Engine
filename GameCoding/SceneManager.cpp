@@ -25,14 +25,22 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	//LoadTestScene2(sceneName);
-	LoadTestScene(sceneName);
+	SCENE.Reset();  // 완전 초기화
+	RENDER.Reset(); // 완전 초기화
+	GUI.ResetSelectedObject();
+
+	LoadTestScene2(sceneName);
+	//LoadTestScene(sceneName);
 	//LoadTestInstancingScene();
+
+	SCENE.Init();
+	RENDER.Init();
+	//GUI.Init();
 }
 void SceneManager::LoadTestScene2(wstring sceneName)
 {
 	_activeScene = make_shared<Scene>();
-
+	_activeScene->SetSceneName(sceneName);
 	// XML 파일 로드
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
@@ -41,6 +49,8 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
 	if (!root)
 		return;
+
+	vector<shared_ptr<GameObject>> modelObjects;
 
 	// 모든 GameObject 순회
 	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
@@ -143,6 +153,7 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 				auto model = RESOURCE.GetResource<Model>(Utils::ToWString(modelName));
 				meshRenderer->SetModel(model);
 				meshRenderer->SetMaterial(model->GetMaterials()[0]); // Model의 Material 직접 사용
+				modelObjects.push_back(gameObj);
 			}
 			else
 			{
@@ -311,6 +322,7 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 				string clipName = clipElem->Attribute("name");
 				int animIndex = clipElem->IntAttribute("animIndex");
 				bool isLoop = clipElem->BoolAttribute("isLoop");
+				float speed = clipElem->FloatAttribute("speed", 1.0f);
 
 				// 노드 위치 정보 로드
 				float posX = clipElem->FloatAttribute("posX", 0.0f);  // 기본값 0
@@ -323,6 +335,7 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 				// UI에 표시될 노드 위치 설정
 				if (auto clip = animator->GetClip(clipName))
 				{
+					clip->speed = speed;
 					clip->pos = ImVec2(posX, posY);
 				}
 
@@ -355,8 +368,21 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 
 				animator->AddTransition(clipAName, clipBName);
 
-				auto transition = animator->GetClip(clipAName)->transition;
-				if (transition)
+				// clipA에서 clipB로 가는 특정 트랜지션을 찾아야 함
+				auto clipA = animator->GetClip(clipAName);
+				if (!clipA) continue;
+
+				shared_ptr<Transition> targetTransition = nullptr;
+				for (const auto& trans : clipA->transitions)
+				{
+					if (trans->clipB.lock() == animator->GetClip(clipBName))
+					{
+						targetTransition = trans;
+						break;
+					}
+				}
+
+				if (targetTransition)
 				{
 					bool flag = transitionElem->BoolAttribute("flag");
 					bool hasCondition = transitionElem->BoolAttribute("hasCondition");
@@ -365,15 +391,15 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 					float duration = transitionElem->FloatAttribute("transitionDuration");
 					float exitTime = transitionElem->FloatAttribute("ExitTime");
 
-					animator->SetTransitionFlag(transition, flag);
-					transition->hasCondition = hasCondition;
-					transition->hasExitTime = hasExitTime;
-					animator->SetTransitionOffset(transition, offset);
-					animator->SetTransitionDuration(transition, duration);
-					animator->SetTransitionExitTime(transition, exitTime);
+					animator->SetTransitionFlag(targetTransition, flag);
+					targetTransition->hasCondition = hasCondition;
+					targetTransition->hasExitTime = hasExitTime;
+					animator->SetTransitionOffset(targetTransition, offset);
+					animator->SetTransitionDuration(targetTransition, duration);
+					animator->SetTransitionExitTime(targetTransition, exitTime);
 
-					// Conditions 로드 추가
-					transition->conditions.clear();
+					// Conditions 로드
+					targetTransition->conditions.clear();
 					for (auto conditionElem = transitionElem->FirstChildElement("Condition");
 						conditionElem; conditionElem = conditionElem->NextSiblingElement("Condition"))
 					{
@@ -381,13 +407,11 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 						Parameter::Type paramType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
 						Condition::CompareType compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
 
-						// AddCondition 함수 사용
-						animator->AddCondition(transition, paramName, paramType, compareType);
+						animator->AddCondition(targetTransition, paramName, paramType, compareType);
 
-						// 값 설정
-						if (!transition->conditions.empty())
+						if (!targetTransition->conditions.empty())
 						{
-							Condition& condition = transition->conditions.back();
+							Condition& condition = targetTransition->conditions.back();
 							switch (paramType)
 							{
 							case Parameter::Type::Bool:
@@ -401,7 +425,6 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 								break;
 							}
 						}
-
 					}
 				}
 			}
@@ -413,7 +436,17 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 		for (auto scriptElem = gameObjElem->FirstChildElement("Script");
 			scriptElem; scriptElem = scriptElem->NextSiblingElement("Script"))
 		{
+
 			string type = scriptElem->Attribute("type");
+
+			// EditorCamera 특별 처리
+			if (type == "EditorCamera")
+			{
+				shared_ptr<EditorCamera> editorCamera = make_shared<EditorCamera>();
+				gameObj->AddComponent(editorCamera);
+				continue;
+			}
+
 			// "class " 접두사가 있다면 제거
 			if (type.substr(0, 6) == "class ")
 			{
@@ -449,6 +482,61 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 					}
 					break;
 				}
+			}
+		}
+	}
+
+	for (shared_ptr<GameObject> obj : modelObjects)
+	{
+		shared_ptr<Model> model = obj->GetComponent<MeshRenderer>()->GetModel();
+		vector<shared_ptr<ModelBone>> bones = model->GetBones();
+
+		map<int32, shared_ptr<GameObject>> boneObjects;
+
+		for (shared_ptr<ModelBone> bone : bones)
+		{
+			shared_ptr<GameObject> boneObject = make_shared<GameObject>();
+			boneObject->SetName(bone->name);
+			shared_ptr<Transform> transform = make_shared<Transform>();
+
+			Matrix localTransform = bone->transform;
+
+			Vec3 position;
+			Quaternion rotation;
+			Vec3 scale;
+			localTransform.Decompose(scale, rotation, position);
+
+			transform->SetLocalPosition(position);
+			transform->SetQTRotation(rotation);
+			transform->SetLocalScale(scale);
+
+			boneObject->AddComponent(transform);
+
+			boneObjects[bone->index] = boneObject;
+
+			boneObject->SetParent(obj);
+
+			boneObject->SetBoneObjectFlag(true);
+			boneObject->SetBoneParentObject(obj);
+			boneObject->SetBoneIndex(bone->index);
+			_activeScene->AddBoneGameObject(boneObject);
+		}
+	}
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (const char* parentAttr = gameObjElem->Attribute("parent"))
+		{
+			wstring childName = Utils::ToWString(gameObjElem->Attribute("name"));
+			wstring parentName = Utils::ToWString(parentAttr);
+
+			auto childObj = SCENE.GetActiveScene()->Find(childName);
+			auto parentObj = SCENE.GetActiveScene()->Find(parentName);
+
+			if (childObj && parentObj)
+			{
+				childObj->SetParent(parentObj);
 			}
 		}
 	}
@@ -942,6 +1030,89 @@ void SceneManager::LoadTestInstancingScene()
 		count++;
 	}
 }
+void SceneManager::CreateNewScene(wstring sceneName)
+{
+	_isCreateNewScene = true;
+
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+
+	// 기존 XML 파일이 있다면 삭제
+	if (filesystem::exists(pathStr))
+	{
+		filesystem::remove(pathStr);
+	}
+
+
+	// EditorCamera
+	wstring path = L"Resource/Scene/" + sceneName + L".xml";
+	Vec3 editorCameraPos = Vec3(0.0f, 5.0f, -10.0f);
+	Vec3 editorCameraRotation = Vec3(22.0f, 0.0f, 0.0f);
+	Vec3 editorCameraScale = Vec3(1.0f, 1.0f, 1.0f);
+	SaveGameObjectToXML(path, L"EditorCamera", &editorCameraPos, &editorCameraRotation, &editorCameraScale, nullptr);
+	auto editorCameraComp = make_shared<Camera>();
+	editorCameraComp->SetProjectionType(ProjectionType::Perspective);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"EditorCamera", editorCameraComp);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"EditorCamera", make_shared<EditorCamera>());
+
+	// MainCamera
+	Vec3 mainCameraPos = Vec3(0.0f, 5.0f, -10.0f);
+	Vec3 mainCameraRotation = Vec3(22.0f, 0.0f, 0.0f);
+	Vec3 mainCameraScale = Vec3(1.0f, 1.0f, 1.0f);
+	SaveGameObjectToXML(path, L"MainCamera", &mainCameraPos, &mainCameraRotation, &mainCameraScale, nullptr);
+	auto camera = make_shared<Camera>();
+	camera->SetProjectionType(ProjectionType::Perspective);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"MainCamera", camera);
+
+	// UICamera
+	Vec3 uiCameraPos = Vec3(0, 0, -3);
+	Vec3 uiCameraRotation = Vec3::Zero;
+	Vec3 uiCameraScale = Vec3(1.0f, 1.0f, 1.0f);
+	SaveGameObjectToXML(path, L"UICamera", &uiCameraPos, &uiCameraRotation, &uiCameraScale, nullptr);
+	auto uiCamera = make_shared<Camera>();
+	uiCamera->SetProjectionType(ProjectionType::Orthographic);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"UICamera", uiCamera);
+
+	// MainLight
+	Vec3 mainLightPos = Vec3(-50.0f, 37.0f, 0.0f);
+	Vec3 mainLightRotation = Vec3::Zero;
+	Vec3 mainLightScale = Vec3(10.0f, 10.0f, 10.0f);
+	SaveGameObjectToXML(path, L"MainLight", &mainLightPos, &mainLightRotation, &mainLightScale, nullptr);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"MainLight", make_shared<Light>());
+	auto lightRenderer = make_shared<MeshRenderer>();
+	lightRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	lightRenderer->SetModel(nullptr);
+	lightRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SimpleMaterial"));
+	lightRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	lightRenderer->AddRenderPass();
+	lightRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	lightRenderer->GetRenderPasses()[0]->SetMeshRenderer(lightRenderer);
+	lightRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"MainLight")->transform());
+	lightRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"MainLight", lightRenderer,
+		L"SimpleMaterial", L"Sphere");
+
+
+	// SkyBox
+	Vec3 skyboxPosition = Vec3::Zero;
+	Vec3 skyboxRotation = Vec3::Zero;
+	Vec3 skyboxScale = Vec3::One;
+	SaveGameObjectToXML(path, L"skyBox", &skyboxPosition, &skyboxRotation, &skyboxScale, nullptr);
+	auto skyBoxRenderer = make_shared<MeshRenderer>();
+	skyBoxRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
+	skyBoxRenderer->SetModel(nullptr);
+	skyBoxRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
+	skyBoxRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, true);
+	skyBoxRenderer->AddRenderPass();
+	skyBoxRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	skyBoxRenderer->GetRenderPasses()[0]->SetMeshRenderer(skyBoxRenderer);
+	skyBoxRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"skyBox")->transform());
+	skyBoxRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, L"skyBox", skyBoxRenderer,
+		L"SkyBoxMaterial", L"Sphere");
+
+	_isCreateNewScene = false;
+}
+
 shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 {
 	shared_ptr<Scene> playScene = make_shared<Scene>();
@@ -954,6 +1125,8 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
 	if (!root)
 		return nullptr;
+
+	vector<shared_ptr<GameObject>> modelObjects;
 
 	// 모든 GameObject 순회
 	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
@@ -1062,6 +1235,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 				auto model = RESOURCE.GetResource<Model>(Utils::ToWString(modelName));
 				meshRenderer->SetModel(model);
 				meshRenderer->SetMaterial(model->GetMaterials()[0]); // Model의 Material 직접 사용
+				modelObjects.push_back(gameObj);
 			}
 			else
 			{
@@ -1232,6 +1406,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 				string clipName = clipElem->Attribute("name");
 				int animIndex = clipElem->IntAttribute("animIndex");
 				bool isLoop = clipElem->BoolAttribute("isLoop");
+				float speed = clipElem->FloatAttribute("speed", 1.0f);
 
 				// 노드 위치 정보 로드
 				float posX = clipElem->FloatAttribute("posX", 0.0f);  // 기본값 0
@@ -1244,6 +1419,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 				// UI에 표시될 노드 위치 설정
 				if (auto clip = animator->GetClip(clipName))
 				{
+					clip->speed = speed;
 					clip->pos = ImVec2(posX, posY);
 				}
 
@@ -1276,8 +1452,21 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 
 				animator->AddTransition(clipAName, clipBName);
 
-				auto transition = animator->GetClip(clipAName)->transition;
-				if (transition)
+				// clipA에서 clipB로 가는 특정 트랜지션을 찾아야 함
+				auto clipA = animator->GetClip(clipAName);
+				if (!clipA) continue;
+
+				shared_ptr<Transition> targetTransition = nullptr;
+				for (const auto& trans : clipA->transitions)
+				{
+					if (trans->clipB.lock() == animator->GetClip(clipBName))
+					{
+						targetTransition = trans;
+						break;
+					}
+				}
+
+				if (targetTransition)
 				{
 					bool flag = transitionElem->BoolAttribute("flag");
 					bool hasCondition = transitionElem->BoolAttribute("hasCondition");
@@ -1286,15 +1475,15 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 					float duration = transitionElem->FloatAttribute("transitionDuration");
 					float exitTime = transitionElem->FloatAttribute("ExitTime");
 
-					animator->SetTransitionFlag(transition, flag);
-					transition->hasCondition = hasCondition;
-					transition->hasExitTime = hasExitTime;
-					animator->SetTransitionOffset(transition, offset);
-					animator->SetTransitionDuration(transition, duration);
-					animator->SetTransitionExitTime(transition, exitTime);
+					animator->SetTransitionFlag(targetTransition, flag);
+					targetTransition->hasCondition = hasCondition;
+					targetTransition->hasExitTime = hasExitTime;
+					animator->SetTransitionOffset(targetTransition, offset);
+					animator->SetTransitionDuration(targetTransition, duration);
+					animator->SetTransitionExitTime(targetTransition, exitTime);
 
-					// Conditions 로드 추가
-					transition->conditions.clear();
+					// Conditions 로드
+					targetTransition->conditions.clear();
 					for (auto conditionElem = transitionElem->FirstChildElement("Condition");
 						conditionElem; conditionElem = conditionElem->NextSiblingElement("Condition"))
 					{
@@ -1302,13 +1491,11 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 						Parameter::Type paramType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
 						Condition::CompareType compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
 
-						// AddCondition 함수 사용
-						animator->AddCondition(transition, paramName, paramType, compareType);
+						animator->AddCondition(targetTransition, paramName, paramType, compareType);
 
-						// 값 설정
-						if (!transition->conditions.empty())
+						if (!targetTransition->conditions.empty())
 						{
-							Condition& condition = transition->conditions.back();
+							Condition& condition = targetTransition->conditions.back();
 							switch (paramType)
 							{
 							case Parameter::Type::Bool:
@@ -1322,7 +1509,6 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 								break;
 							}
 						}
-
 					}
 				}
 			}
@@ -1374,6 +1560,78 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 		}
 	}
 
+	for (shared_ptr<GameObject> obj : modelObjects)
+	{
+		shared_ptr<Model> model = obj->GetComponent<MeshRenderer>()->GetModel();
+		vector<shared_ptr<ModelBone>> bones = model->GetBones();
+
+		map<int32, shared_ptr<GameObject>> boneObjects;
+
+		for (shared_ptr<ModelBone> bone : bones)
+		{
+			shared_ptr<GameObject> boneObject = make_shared<GameObject>();
+			boneObject->SetName(bone->name);
+			shared_ptr<Transform> transform = make_shared<Transform>();
+
+			// World 공간의 본 행렬을 Local 공간으로 변환
+			Matrix localTransform = bone->transform;
+
+			Vec3 position;
+			Quaternion rotation;
+			Vec3 scale;
+			localTransform.Decompose(scale, rotation, position);
+
+			transform->SetLocalPosition(position);
+			transform->SetQTRotation(rotation);
+			transform->SetLocalScale(scale);
+
+			boneObject->AddComponent(transform);
+			boneObjects[bone->index] = boneObject;
+
+			boneObject->SetParent(obj);
+			boneObject->SetBoneObjectFlag(true);
+			boneObject->SetBoneParentObject(obj);
+			boneObject->SetBoneIndex(bone->index);
+			playScene->AddBoneGameObject(boneObject);
+		}
+
+		shared_ptr<Animator> animator = obj->GetComponent<Animator>();
+		if (animator)
+		{
+			animator->SetBoneObjects(boneObjects);
+
+		}
+			
+	}
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (const char* parentAttr = gameObjElem->Attribute("parent"))
+		{
+			wstring childName = Utils::ToWString(gameObjElem->Attribute("name"));
+			wstring parentName = Utils::ToWString(parentAttr);
+
+			auto childObj = playScene->Find(childName);
+			auto parentObj = playScene->Find(parentName);
+
+			if (childObj && parentObj)
+			{
+				childObj->SetParent(parentObj);
+				if (parentObj->GetBoneObjectFlag())
+				{
+					parentObj->GetBoneParentObject().lock()->AddActiveBoneIndex(parentObj->GetBoneIndex());
+					if (!childObj->GetBoneObjectFlag())
+					{
+						parentObj->SetHasNoneBoneChildrenFlag(true);
+						childObj->SetNonBoneChildrenParent(parentObj);
+					}
+
+				}
+			}
+		}
+	}
+
 	return playScene;
 }
 
@@ -1405,9 +1663,12 @@ void SceneManager::SaveAndLoadGameObjectToXML(const wstring& sceneName, const ws
 void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, const wstring& name, const shared_ptr<Component>& component, const wstring& material, const wstring& mesh, const wstring& model)
 {
 	// 실제 GameObject에 컴포넌트 추가
-	if (auto gameObject = _activeScene->Find(name))
+	if (!_isCreateNewScene)
 	{
-		gameObject->AddComponent(component);
+		if (auto gameObject = _activeScene->Find(name))
+		{
+			gameObject->AddComponent(component);
+		}
 	}
 
 	if (ENGINE.GetEngineMode() != EngineMode::Edit)
@@ -1703,6 +1964,27 @@ void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, 
 					gameObjElem->DeleteChild(rendererElem);
 				}
 			}
+			else if (dynamic_pointer_cast<Button>(component))
+			{
+				if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
+				{
+					gameObjElem->DeleteChild(buttonElem);
+				}
+			}
+			else if (dynamic_pointer_cast<UIImage>(component))
+			{
+				if (auto uiImageElem = gameObjElem->FirstChildElement("UIImage"))
+				{
+					gameObjElem->DeleteChild(uiImageElem);
+				}
+			}
+			else if (dynamic_pointer_cast<Animator>(component))
+			{
+				if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+				{
+					gameObjElem->DeleteChild(animatorElem);
+				}
+			}
 			else if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
 			{
 				// Script 엘리먼트들을 순회하면서 해당하는 타입의 스크립트 찾기
@@ -1959,6 +2241,58 @@ void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstri
 		{
 			// GameObject를 찾으면 삭제
 			root->DeleteChild(gameObjElem);
+			doc.SaveFile(pathStr.c_str());
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateGameObjectParentInXML(const wstring& sceneName, const wstring& objectName, const Vec3& localPosition, const Quaternion& localRotation, const Vec3& localScale, const wstring& parentName)
+{
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root)
+		return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// 부모 설정
+			if (parentName.empty())
+				gameObjElem->DeleteAttribute("parent");
+			else
+				gameObjElem->SetAttribute("parent", Utils::ToString(parentName).c_str());
+
+			// Transform 업데이트
+			if (auto transformElem = gameObjElem->FirstChildElement("Transform"))
+			{
+				// 위치 업데이트
+				transformElem->SetAttribute("posX", localPosition.x);
+				transformElem->SetAttribute("posY", localPosition.y);
+				transformElem->SetAttribute("posZ", localPosition.z);
+
+				// 회전 업데이트 (쿼터니온을 오일러 각도로 변환)
+				Transform tempTransform;  // 임시 Transform 객체 생성
+				Vec3 eulerAngles = tempTransform.ToEulerAngles(localRotation);
+				transformElem->SetAttribute("rotX", XMConvertToDegrees(eulerAngles.x));
+				transformElem->SetAttribute("rotY", XMConvertToDegrees(eulerAngles.y));
+				transformElem->SetAttribute("rotZ", XMConvertToDegrees(eulerAngles.z));
+
+				// 스케일 업데이트
+				transformElem->SetAttribute("scaleX", localScale.x);
+				transformElem->SetAttribute("scaleY", localScale.y);
+				transformElem->SetAttribute("scaleZ", localScale.z);
+			}
+
 			doc.SaveFile(pathStr.c_str());
 			break;
 		}
@@ -2322,6 +2656,152 @@ shared_ptr<GameObject> SceneManager::CreateCylinderToScene(const wstring& sceneN
 	return _activeScene->Find(newName);
 }
 
+shared_ptr<GameObject> SceneManager::CreateQuadToScene(const wstring& sceneName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"Quad";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
+		Vec3(0.0f, 0.0f, 0.0f));
+	auto cylinderRenderer = make_shared<MeshRenderer>();
+	cylinderRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
+	cylinderRenderer->SetModel(nullptr);
+	cylinderRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cylinderRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_NONE, false);
+	cylinderRenderer->AddRenderPass();
+	cylinderRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cylinderRenderer->GetRenderPasses()[0]->SetMeshRenderer(cylinderRenderer);
+	cylinderRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	cylinderRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, cylinderRenderer,
+		L"SolidWhiteMaterial", L"Quad");
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetScale(Vec3(2.0f, 2.0f, 0.001f));
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	RENDER.GetRenderableObject();
+
+	return _activeScene->Find(newName);
+}
+
+shared_ptr<GameObject> SceneManager::CreateGridToScene(const wstring& sceneName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"Grid";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	SaveAndLoadGameObjectToXML(sceneName, newName,
+		Vec3(0.0f, 0.0f, 0.0f));
+	auto cylinderRenderer = make_shared<MeshRenderer>();
+	cylinderRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
+	cylinderRenderer->SetModel(nullptr);
+	cylinderRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SolidWhiteMaterial"));
+	cylinderRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_NONE, false);
+	cylinderRenderer->AddRenderPass();
+	cylinderRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+	cylinderRenderer->GetRenderPasses()[0]->SetMeshRenderer(cylinderRenderer);
+	cylinderRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	cylinderRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, cylinderRenderer,
+		L"SolidWhiteMaterial", L"Grid");
+	auto boxCollider = make_shared<BoxCollider>();
+	boxCollider->SetCenter(Vec3(50.0f, 0.0f, 50.0f));
+	boxCollider->SetScale(Vec3(100.0f, 0.001f, 100.0f));
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	RENDER.GetRenderableObject();
+
+	return _activeScene->Find(newName);
+}
+
+shared_ptr<GameObject> SceneManager::CreateTerrainToScene(const wstring& sceneName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"Terrain";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	// Terrain
+	SaveAndLoadGameObjectToXML(sceneName, newName, Vec3::Zero);
+	auto terrainRenderer = make_shared<MeshRenderer>();
+	terrainRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Terrain"));
+	terrainRenderer->SetModel(nullptr);
+	terrainRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"TerrainMaterial"));
+	terrainRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	terrainRenderer->AddRenderPass();
+	terrainRenderer->GetRenderPasses()[0]->SetPass(Pass::TERRAIN_RENDER);
+	terrainRenderer->GetRenderPasses()[0]->SetMeshRenderer(terrainRenderer);
+	terrainRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	terrainRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, terrainRenderer,
+		L"TerrainMaterial", L"Terrain");
+
+	RENDER.GetRenderableObject();
+
+	return _activeScene->Find(newName);
+}
+
+shared_ptr<GameObject> SceneManager::CreateParticleToScene(const wstring& sceneName)
+{
+	// 새로운 오브젝트 생성 시 기본 이름 설정
+	int count = 1;
+	wstring baseName = L"Particle";
+	wstring newName = baseName;
+
+	// 이미 존재하는 오브젝트 이름인지 확인
+	while (_activeScene->Find(newName) != nullptr)
+	{
+		newName = baseName + to_wstring(count);
+		count++;
+	}
+
+	// Particle System
+	SaveAndLoadGameObjectToXML(sceneName, baseName,
+		GP.centerPos - Vec3(2.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(1.0f));
+	auto particleRenderer = make_shared<MeshRenderer>();
+	particleRenderer->SetMesh(nullptr);
+	particleRenderer->SetModel(nullptr);
+	particleRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"ParticleMaterial"));
+	particleRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	particleRenderer->AddRenderPass();
+	particleRenderer->GetRenderPasses()[0]->SetPass(Pass::PARTICLE_RENDER);
+	particleRenderer->GetRenderPasses()[0]->SetMeshRenderer(particleRenderer);
+	particleRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(baseName)->transform());
+	particleRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM3);
+	AddComponentToGameObjectAndSaveToXML(sceneName, baseName, particleRenderer, L"ParticleMaterial");
+	auto particleSystem = make_shared<ParticleSystem>();
+	particleSystem->SetTransform(_activeScene->Find(baseName)->transform());
+	AddComponentToGameObjectAndSaveToXML(sceneName, baseName, particleSystem);
+
+	RENDER.GetRenderableObject();
+
+	return _activeScene->Find(newName);
+}
+
 shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sceneName, const wstring& modelName)
 {
 	// 새로운 오브젝트 생성 시 기본 이름 설정
@@ -2339,21 +2819,55 @@ shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sc
 	SaveAndLoadGameObjectToXML(sceneName, newName,
 		 Vec3(0.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(0.01f));
 
-	auto kachujinRenderer = make_shared<MeshRenderer>();
-	kachujinRenderer->SetMesh(nullptr);
-	kachujinRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
-	kachujinRenderer->SetMaterial(kachujinRenderer->GetModel()->GetMaterials()[0]);
-	kachujinRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	kachujinRenderer->AddRenderPass();
-	kachujinRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
-	kachujinRenderer->GetRenderPasses()[0]->SetMeshRenderer(kachujinRenderer);
-	kachujinRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
-	kachujinRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(sceneName, newName, kachujinRenderer,
+	auto meshRenderer = make_shared<MeshRenderer>();
+	meshRenderer->SetMesh(nullptr);
+	meshRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
+	meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
+	meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	meshRenderer->AddRenderPass();
+	meshRenderer->GetRenderPasses()[0]->SetPass(Pass::ANIMATED_MESH_RENDER);
+	meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+	meshRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, meshRenderer,
 		L"", L"", modelName);
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	shared_ptr<Model> model = meshRenderer->GetModel();
+	vector<shared_ptr<ModelBone>> bones = model->GetBones();
+
+	map<int32, shared_ptr<GameObject>> boneObjects;
+
+	for (shared_ptr<ModelBone> bone : bones)
+	{
+		shared_ptr<GameObject> boneObject = make_shared<GameObject>();
+		boneObject->SetName(bone->name);
+		shared_ptr<Transform> transform = make_shared<Transform>();
+
+		Matrix localTransform = bone->transform;
+
+		Vec3 position;
+		Quaternion rotation;
+		Vec3 scale;
+		localTransform.Decompose(scale, rotation, position);
+
+		transform->SetLocalPosition(position);
+		transform->SetQTRotation(rotation);
+		transform->SetLocalScale(scale);
+
+		boneObject->AddComponent(transform);
+
+		boneObjects[bone->index] = boneObject;
+
+		boneObject->SetParent(_activeScene->Find(newName));
+
+		boneObject->SetBoneObjectFlag(true);
+		boneObject->SetBoneParentObject(_activeScene->Find(newName));
+		boneObject->SetBoneIndex(bone->index);
+		_activeScene->AddBoneGameObject(boneObject);
+	}
 
 	RENDER.GetRenderableObject();
 
@@ -2376,21 +2890,55 @@ shared_ptr<GameObject> SceneManager::CreateStaticMeshToScene(const wstring& scen
 
 	SaveAndLoadGameObjectToXML(sceneName, newName,
 		Vec3(0.f, 0.f, 130.f), Vec3::Zero, Vec3(0.005f));
-	auto houseRenderer = make_shared<MeshRenderer>();
-	houseRenderer->SetMesh(nullptr);
-	houseRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
-	houseRenderer->SetMaterial(houseRenderer->GetModel()->GetMaterials()[0]);
-	houseRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
-	houseRenderer->AddRenderPass();
-	houseRenderer->GetRenderPasses()[0]->SetPass(Pass::STATIC_MESH_RENDER);
-	houseRenderer->GetRenderPasses()[0]->SetMeshRenderer(houseRenderer);
-	houseRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
-	houseRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
-	AddComponentToGameObjectAndSaveToXML(sceneName, newName, houseRenderer,
+	auto meshRenderer = make_shared<MeshRenderer>();
+	meshRenderer->SetMesh(nullptr);
+	meshRenderer->SetModel(RESOURCE.GetResource<Model>(modelName));
+	meshRenderer->SetMaterial(meshRenderer->GetModel()->GetMaterials()[0]);
+	meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, false);
+	meshRenderer->AddRenderPass();
+	meshRenderer->GetRenderPasses()[0]->SetPass(Pass::STATIC_MESH_RENDER);
+	meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+	meshRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
+	meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, meshRenderer,
 		L"", L"", modelName);
 	auto boxCollider = make_shared<BoxCollider>();
 	boxCollider->SetScale(Vec3(1.0f, 1.0f, 1.0f));
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, boxCollider);
+
+	shared_ptr<Model> model = meshRenderer->GetModel();
+	vector<shared_ptr<ModelBone>> bones = model->GetBones();
+
+	map<int32, shared_ptr<GameObject>> boneObjects;
+
+	for (shared_ptr<ModelBone> bone : bones)
+	{
+		shared_ptr<GameObject> boneObject = make_shared<GameObject>();
+		boneObject->SetName(bone->name);
+		shared_ptr<Transform> transform = make_shared<Transform>();
+
+		Matrix localTransform = bone->transform;
+
+		Vec3 position;
+		Quaternion rotation;
+		Vec3 scale;
+		localTransform.Decompose(scale, rotation, position);
+
+		transform->SetLocalPosition(position);
+		transform->SetQTRotation(rotation);
+		transform->SetLocalScale(scale);
+
+		boneObject->AddComponent(transform);
+
+		boneObjects[bone->index] = boneObject;
+
+		boneObject->SetParent(_activeScene->Find(newName));
+
+		boneObject->SetBoneObjectFlag(true);
+		boneObject->SetBoneParentObject(_activeScene->Find(newName));
+		boneObject->SetBoneIndex(bone->index);
+		_activeScene->AddBoneGameObject(boneObject);
+	}
 
 	RENDER.GetRenderableObject();
 
@@ -2571,9 +3119,10 @@ void SceneManager::AddAnimatorTransitionToXML(const wstring& sceneName, const ws
 				auto transitionElem = doc.NewElement("Transition");
 				transitionElem->SetAttribute("clipA", clipAName.c_str());
 				transitionElem->SetAttribute("clipB", clipBName.c_str());
-				transitionElem->SetAttribute("transitionDuration", 1.0f);
+				transitionElem->SetAttribute("transitionDuration", 0.3f);
 				transitionElem->SetAttribute("transitionOffset", 0.0f);
-				transitionElem->SetAttribute("hasExitTime", false);
+				transitionElem->SetAttribute("hasExitTime", true);
+				transitionElem->SetAttribute("ExitTime", 1.0f);
 
 				animatorElem->InsertEndChild(transitionElem);
 				doc.SaveFile(pathStr.c_str());
@@ -2798,6 +3347,74 @@ void SceneManager::UpdateAnimatorClipEventsInXML(const wstring& sceneName, const
 						break;
 					}
 				}
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateGameObjectMaterialInXML(const wstring& sceneName, const wstring& objectName, const wstring& materialName)
+{
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto meshRendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+			{
+				// material은 MeshRenderer의 attribute로 존재
+				meshRendererElem->SetAttribute("material", Utils::ToString(materialName).c_str());
+				doc.SaveFile(pathStr.c_str());
+			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateGameObjectRenderPassInXML(const wstring& sceneName, const wstring& objectName, Pass pass, bool useEnvironmentMap)
+{
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			if (auto meshRendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+			{
+				// useEnvironmentMap 업데이트
+				meshRendererElem->SetAttribute("useEnvironmentMap", useEnvironmentMap);
+
+				// RenderPass 업데이트
+				if (auto passElem = meshRendererElem->FirstChildElement("RenderPass"))
+				{
+					passElem->SetAttribute("pass", static_cast<int>(pass));
+					if (static_cast<int>(pass) == 1)
+						passElem->SetAttribute("depthStencilState", 1);
+					else if (static_cast<int>(pass) == 11)
+						passElem->SetAttribute("depthStencilState", 4);
+					else
+						passElem->SetAttribute("depthStencilState", 0);
+				}
+				doc.SaveFile(pathStr.c_str());
 			}
 			break;
 		}

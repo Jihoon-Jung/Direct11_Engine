@@ -323,6 +323,9 @@
     <ClInclude Include="EditorCamera.h">
       <Filter>소스 파일\CustomScript</Filter>
     </ClInclude>
+    <ClInclude Include="MovePlayerWithCamera.h">
+      <Filter>소스 파일\CustomScript</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameCoding.rc">
@@ -558,6 +561,9 @@
       <Filter>소스 파일\Buffer</Filter>
     </ClCompile>
     <ClCompile Include="EditorCamera.cpp">
+      <Filter>소스 파일\CustomScript</Filter>
+    </ClCompile>
+    <ClCompile Include="MovePlayerWithCamera.cpp">
       <Filter>소스 파일\CustomScript</Filter>
     </ClCompile>
   </ItemGroup>

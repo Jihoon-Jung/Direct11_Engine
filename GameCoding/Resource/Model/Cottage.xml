@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>CottageModel</Name>
+    <Path>Cottage/Cottage</Path>
+    <Shader>StaticMesh_Shader</Shader>
+    <Material>Cottage/Cottage</Material>
+</Model>

@@ -52,7 +52,9 @@ public:
 	void DebugQuadRender();
 	void SetRenderTarget(int width, int height);
 	void SetMesh(shared_ptr<Mesh> mesh) { _mesh = mesh; }
-	void SetTexture(shared_ptr<Texture> texture) { _envTexture = texture; }
+	void SetEnvTexture(shared_ptr<Texture> texture) { 
+		_envTexture = texture; 
+	}
 	void SetDiffuseMap(shared_ptr<Texture> diffuseMap) { _diffuseMap = diffuseMap; }
 	void SetNormalMap(shared_ptr<Texture> normalMap) { _normalMap = normalMap; }
 	void SetSpecularMap(shared_ptr<Texture> specularMap) { _specularMap = specularMap; }
@@ -67,6 +69,9 @@ public:
 	void SetDepthStencilStateType(DSState state) { _dsStateType = state; }
 	void HandleTransitionBlend(shared_ptr<Animator>& animator, shared_ptr<Transition>& transition, shared_ptr<Model>& model);
 
+	shared_ptr<Texture> GetEnvTexture() { 
+		return _envTexture; 
+	}
 	Pass GetPass() const { return _pass; }
 	DSState GetDepthStencilStateType() const { return _dsStateType; }
 
@@ -77,7 +82,7 @@ public:
 public:
 	ComPtr<ID3D11RenderTargetView> _renderTargetView;
 	shared_ptr<Mesh> _mesh;
-	shared_ptr<Texture> _envTexture;
+	shared_ptr<Texture> _envTexture = nullptr;
 	shared_ptr<Texture> _diffuseMap;
 	shared_ptr<Texture> _normalMap;
 	shared_ptr<Texture> _specularMap;

@@ -1,5 +1,6 @@
 #pragma once
 
+
 enum class KEY_TYPE
 {
 	UP = VK_UP,
@@ -61,15 +62,50 @@ public:
 	void Init(HWND hwnd);
 	void Update();
 
+	//// Scene View 전용 입력 함수들
+	//bool GetSceneButton(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::PRESS; }
+	//bool GetSceneButtonDown(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::DOWN; }
+	//bool GetSceneButtonUp(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::UP; }
+	//const POINT& GetSceneMousePos()
+	//{
+	//	return GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+	//}
+
+	//// 누르고 있을 때
+	//bool GetButton(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::PRESS; }
+	//// 맨 처음 눌렀을 때
+	//bool GetButtonDown(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::DOWN; }
+	//// 맨 처음 눌렀다 뗐을 때
+	//bool GetButtonUp(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::UP; }
+	//bool isMouseOut() { return isMouseOutsideWindow; }
+
+	//const POINT& GetMousePos() 
+	//{ 
+	//	return !GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+	//}
+	//const POINT& GetSavedMousePos() { return savedMousePos; }
+
+	// Scene View 전용 입력 함수들
+	bool GetSceneButton(KEY_TYPE key);
+	bool GetSceneButtonDown(KEY_TYPE key);
+	bool GetSceneButtonUp(KEY_TYPE key);
+	const POINT& GetSceneMousePos();
+
 	// 누르고 있을 때
-	bool GetButton(KEY_TYPE key) { return GetState(key) == KEY_STATE::PRESS; }
+	bool GetButton(KEY_TYPE key);
 	// 맨 처음 눌렀을 때
-	bool GetButtonDown(KEY_TYPE key) { return GetState(key) == KEY_STATE::DOWN; }
+	bool GetButtonDown(KEY_TYPE key);
 	// 맨 처음 눌렀다 뗐을 때
-	bool GetButtonUp(KEY_TYPE key) { return GetState(key) == KEY_STATE::UP; }
+	bool GetButtonUp(KEY_TYPE key);
+
+	bool GetPublicButton(KEY_TYPE key) { return GetState(key) == KEY_STATE::PRESS; }
+	bool GetPublicButtonDown(KEY_TYPE key) { return GetState(key) == KEY_STATE::DOWN; }
+	bool GetPublicButtonUp(KEY_TYPE key) { return GetState(key) == KEY_STATE::UP; }
+	const POINT& GetPublicMousePos() { return _mousePos; }
+
 	bool isMouseOut() { return isMouseOutsideWindow; }
 
-	const POINT& GetMousePos() { return _mousePos; }
+	const POINT& GetMousePos();
 	const POINT& GetSavedMousePos() { return savedMousePos; }
 private:
 	inline KEY_STATE GetState(KEY_TYPE key) { return _states[static_cast<uint8>(key)]; }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+    <Name>SunSetSkybox_Material</Name>
+    <Texture>sunsetcube1024</Texture>
+    <NormalMap>None</NormalMap>
+    <Shader>SkyBox_Shader</Shader>
+    <MaterialDesc>
+        <Ambient r="1" g="1" b="1" a="1"/>
+        <Diffuse r="1" g="1" b="1" a="1"/>
+        <Specular r="1" g="1" b="1" a="1"/>
+    </MaterialDesc>
+</Material>

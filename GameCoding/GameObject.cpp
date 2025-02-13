@@ -28,8 +28,6 @@ void GameObject::Start()
 					|| component->GetType() == ComponentType::Collider
 					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<EditorCamera>(component) != nullptr))
 					component->Start();
-				else
-					break;
 			}
 
 		}
@@ -45,6 +43,31 @@ void GameObject::Start()
 
 void GameObject::Update()
 {
+	/*for (int i = 0; i < _components.size(); i++)
+	{
+		if (ENGINE.GetEngineMode() == EngineMode::Edit)
+		{
+			if (_components[i])
+			{
+				if (_components[i]->GetType() == ComponentType::Transform
+					|| _components[i]->GetType() == ComponentType::Camera
+					|| _components[i]->GetType() == ComponentType::Light
+					|| _components[i]->GetType() == ComponentType::MeshRenderer
+					|| _components[i]->GetType() == ComponentType::Collider
+					|| (_components[i]->GetType() == ComponentType::Script && dynamic_pointer_cast<EditorCamera>(_components[i]) != nullptr))
+					_components[i]->Update();
+				
+			}
+
+		}
+		else
+		{
+			if (_components[i])
+			{
+				_components[i]->Update();
+			}
+		}
+	}*/
 	for (shared_ptr<Component>& component : _components)
 	{
 		if (ENGINE.GetEngineMode() == EngineMode::Edit)
@@ -58,8 +81,6 @@ void GameObject::Update()
 					|| component->GetType() == ComponentType::Collider
 					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<EditorCamera>(component) != nullptr))
 					component->Update();
-				else
-					break;
 			}
 			
 		}
@@ -88,8 +109,6 @@ void GameObject::LateUpdate()
 					|| component->GetType() == ComponentType::Collider
 					|| (component->GetType() == ComponentType::Script && dynamic_pointer_cast<MoveObject>(component) != nullptr))
 					component->LateUpdate();
-				else
-					break;
 			}
 
 		}
@@ -153,10 +172,13 @@ void GameObject::RemoveComponent(shared_ptr<Component> component)
 
 void GameObject::SetParent(shared_ptr<GameObject> parent)
 {
+	DetachFromParent();
+
 	_parent = parent;
 	shared_from_this()->transform()->SetParent(_parent->transform());
 	_parent->AddChild(shared_from_this());
 	_parent->transform()->AddChild(shared_from_this()->transform());
+
 }
 
 void GameObject::AddChild(shared_ptr<GameObject> child)

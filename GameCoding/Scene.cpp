@@ -4,9 +4,9 @@
 void Scene::Start()
 {
 	if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
-		_mainCamera = Find(L"EditorCamera");
+		SwitchMainCameraToEditorCamera();
 	else
-		_mainCamera = Find(L"MainCamera");
+		SwitchMainCameraToMainCamera();
 
 	_mainLignt = Find(L"MainLight");
 
@@ -40,20 +40,46 @@ void Scene::AddGameObject(shared_ptr<GameObject> gameObject)
 {
 	_gameObjects.push_back(gameObject);
 }
-
+void Scene::AddBoneGameObject(shared_ptr<GameObject> gameObject)
+{
+	_boneGameobjects.push_back(gameObject);
+}
 void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 {
+	gameObject->DetachFromParent();
+
+	shared_ptr<GameObject> nonBoneChildrenParent = gameObject->GetNoneBoneChildrenParent();
+	if (nonBoneChildrenParent)
+	{
+		nonBoneChildrenParent->GetBoneParentObject().lock()->RemoveActiveBoneIndex(nonBoneChildrenParent->GetBoneIndex());
+		nonBoneChildrenParent->SetHasNoneBoneChildrenFlag(false);
+	}
+
+	vector<shared_ptr<GameObject>> children = gameObject->GetChildren(); // 복사본 생성
+	for (shared_ptr<GameObject> child : children)
+	{
+		child->DetachFromParent();
+		RemoveGameObject(child); // 재귀적으로 자식들도 제거
+		SCENE.RemoveGameObjectFromXML(SCENE.GetActiveScene()->GetSceneName(), child->GetName());
+	}
+
 	auto it = std::find(_gameObjects.begin(), _gameObjects.end(), gameObject);
 	if (it != _gameObjects.end())
 	{
 		_gameObjects.erase(it);
+	}
+
+	it = std::find(_boneGameobjects.begin(), _boneGameobjects.end(), gameObject);
+	if (it != _boneGameobjects.end())
+	{
+		_boneGameobjects.erase(it);
 	}
 	RENDER.GetRenderableObject();
 }
 
 void Scene::Picking()
 {
-	if (ENGINE.GetEngineMode() == EngineMode::Play)
+	if (!GUI.isSceneView()/*ENGINE.GetEngineMode() == EngineMode::Play*/)
 		return;
 
 	// ImGui 윈도우가 마우스 입력을 캡처하고 있는지 확인
@@ -68,10 +94,10 @@ void Scene::Picking()
 	Matrix viewMatrix = cameraComponent->GetViewMatrix();
 	shared_ptr<GameObject> billboard_Terrain;
 
-	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON) && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
+	if (INPUT.GetPublicButtonDown(KEY_TYPE::LBUTTON) && !ImGuizmo::IsUsing() && !ImGuizmo::IsOver())
 	{
-		firstClickedMouseX = INPUT.GetMousePos().x;
-		firstClickedMouseY = INPUT.GetMousePos().y;
+		firstClickedMouseX = INPUT.GetPublicMousePos().x;
+		firstClickedMouseY = INPUT.GetPublicMousePos().y;
 
 		const auto& gameObjects = GetGameObjects();
 
@@ -162,14 +188,14 @@ void Scene::Picking()
 
 	//}
 	
-	if (INPUT.GetButtonUp(KEY_TYPE::LBUTTON))
+	if (INPUT.GetPublicButtonUp(KEY_TYPE::LBUTTON))
 	{
 		firstClickedMouseX = 0;
 		firstClickedMouseY = 0;
 		//picked = nullptr;
 	}
 	// ESC 키를 누르면 선택 해제하도록 추가 (선택사항)
-    if (INPUT.GetButtonDown(KEY_TYPE::ESC))
+    if (INPUT.GetPublicButtonDown(KEY_TYPE::ESC))
     {
         picked = nullptr;
     }
@@ -177,9 +203,9 @@ void Scene::Picking()
 
 void Scene::UIPicking()
 {
-	if (INPUT.GetButtonDown(KEY_TYPE::LBUTTON) == false)
+	if (INPUT.GetPublicButtonDown(KEY_TYPE::LBUTTON) == false)
 		return;
-	POINT screenPoint = INPUT.GetMousePos();
+	POINT screenPoint = INPUT.GetPublicMousePos();
 
 	const vector<shared_ptr<GameObject>>& gameObjects = GetGameObjects();
 
@@ -193,14 +219,19 @@ void Scene::UIPicking()
 			if (gameObject->GetComponent<Button>()->Picked(screenPoint))
 			{
 				if (ENGINE.GetEngineMode() == EngineMode::Play)
-					gameObject->GetComponent<Button>()->InvokeOnClicked();
+				{
+					if (!GUI.isSceneView())
+						gameObject->GetComponent<Button>()->InvokeOnClicked();
+					else
+						picked = gameObject;
+				}
 				else
 					picked = gameObject;
 			}
 		}
 		else if (gameObject->GetComponent<UIImage>() != nullptr)
 		{
-			if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+			if (GUI.isSceneView()/*ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause*/)
 			{
 				if (gameObject->GetComponent<UIImage>()->Picked(screenPoint))
 					picked = gameObject;
@@ -245,6 +276,11 @@ shared_ptr<GameObject> Scene::Find(const wstring& name)
 		if (gameObject->GetName() == name)
 			return gameObject;
 	}
+	for (shared_ptr<GameObject> gameObject : _boneGameobjects)
+	{
+		if (gameObject->GetName() == name)
+			return gameObject;
+	}
 	return nullptr;
 }
 
@@ -265,7 +301,7 @@ shared_ptr<GameObject> Scene::FindWithComponent(ComponentType type)
 		case ComponentType::Camera:
 			if (gameObject->GetComponent<Camera>() != nullptr)
 			{
-				if (ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause)
+				if (GUI.isSceneView()/*ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause*/)
 				{
 					if (gameObject->GetName() != L"EditorCamera")
 						continue;

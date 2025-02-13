@@ -16,18 +16,7 @@ bool Button::Picked(POINT screenPos)
 	screenPos.x -= GP.GetProjectWidth() * (1.0f / 10.0f);
 	screenPos.y -= GP.GetProjectHeight() * (3.0f / 100.0f);
 
-	char buffer[256];
-	sprintf_s(buffer, "RECT: left=%d, top=%d, right=%d, bottom=%d\n",
-		_rect.left, _rect.top, _rect.right, _rect.bottom);
-	OutputDebugStringA(buffer);
-	sprintf_s(buffer, "Screen Pos: x=%ld, y=%ld\n",
-		screenPos.x, screenPos.y);
-	OutputDebugStringA(buffer);
-
 	bool result = ::PtInRect(&_rect, screenPos);
-	sprintf_s(buffer, "result: %d\n",
-		result);
-	OutputDebugStringA(buffer);
 	return result;
 }
 

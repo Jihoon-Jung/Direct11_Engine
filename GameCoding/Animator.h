@@ -103,6 +103,8 @@ public:
 	void RemoveParameter(const string& name);
 	void CheckConditionsAndSetFlag();
 
+	void UpdateBoneTransforms();
+
 	void InvokeAnimationEvent(const std::string& functionName);
 	void InvokeAnimationEvent(const AvailableFunction& function);
 
@@ -139,10 +141,16 @@ public:
 	bool GetBool(const string& name);
 	int GetInt(const string& name);
 	float GetFloat(const string& name);
+	void SetBoneObjects(const map<int32, shared_ptr<GameObject>>& boneObjects) { _boneObjects = boneObjects; }
+
+	shared_ptr<GameObject> FindBoneObjectByIndex(int index);
 
 private:
+
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
 	shared_ptr<Model> _model;
+
+	map<int32, shared_ptr<GameObject>> _boneObjects;
 };
 

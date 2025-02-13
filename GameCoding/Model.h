@@ -56,6 +56,8 @@ public:
 	void SetModelName(wstring name) { _modelName = name; }
 	wstring GetModelName() { return _modelName; }
 
+	Matrix GetAnimationTransform(int boneIndex, int frame, int animIndex);
+
 private:
 	void BindCacheInfo();
 

@@ -43,7 +43,21 @@ public:
 	GameObjectType GetObjectType() { return _type; }
 	void SetTreeNodeOpen(bool open) { _isTreeNodeOpen = open; }
 	bool IsTreeNodeOpen() const { return _isTreeNodeOpen; }
+	void DetachFromParent()
+	{
+		if (_parent)
+		{
+			// 부모의 자식 목록에서 제거
+			auto it = std::find(_parent->_children.begin(), _parent->_children.end(), shared_from_this());
+			if (it != _parent->_children.end())
+				_parent->_children.erase(it);
 
+			// Transform 관계도 해제
+			transform()->DetachFromParent();
+
+			_parent = nullptr;
+		}
+	}
 
 	template <typename T>
 	shared_ptr<T> GetComponent()
@@ -126,9 +140,77 @@ public:
 		shared_ptr<Transform> castedComponent = static_pointer_cast<Transform>(transformComponent);
 		return castedComponent->GetTransformBuffer();
 	}
+
 	void SetName(const wstring& name) { _name = name; }
 	wstring& GetName() { return _name; }
 
+	void SetRenderPassDefault()
+	{
+		shared_ptr<MeshRenderer> meshRenderer = GetComponent<MeshRenderer>();
+		if (meshRenderer)
+		{
+			meshRenderer->GetRenderPasses()[0]->SetEnvTexture(nullptr);
+			meshRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
+			meshRenderer->SetUseEnvironmentMap(false);
+			meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		}
+		
+	}
+	void SetRenderPassEnvironmentMap()
+	{
+		shared_ptr<MeshRenderer> meshRenderer = GetComponent<MeshRenderer>();
+		if (meshRenderer)
+		{
+			meshRenderer->GetRenderPasses()[0]->SetPass(Pass::ENVIRONMENTMAP_RENDER);
+			meshRenderer->SetUseEnvironmentMap(true);
+			meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
+		}
+		
+	}
+	void SetRenderPassOutLine()
+	{
+		shared_ptr<MeshRenderer> meshRenderer = GetComponent<MeshRenderer>();
+		if (meshRenderer)
+		{
+			meshRenderer->GetRenderPasses()[0]->SetEnvTexture(nullptr);
+			meshRenderer->GetRenderPasses()[0]->SetPass(Pass::OUTLINE_RENDER);
+			meshRenderer->SetUseEnvironmentMap(false);
+			meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM1);
+		}
+	}
+	void SetRenderPassUI()
+	{
+		shared_ptr<MeshRenderer> meshRenderer = GetComponent<MeshRenderer>();
+		if (meshRenderer)
+		{
+			meshRenderer->GetRenderPasses()[0]->SetEnvTexture(nullptr);
+			meshRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
+			meshRenderer->SetUseEnvironmentMap(false);
+			meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
+		}
+	}
+
+	void SetBoneObjectFlag(bool flag) { _isBoneObject = flag; }
+	bool GetBoneObjectFlag() { return _isBoneObject; }
+	void SetBoneParentObject(shared_ptr<GameObject> parent) { _boneParentObject = parent; }
+	weak_ptr<GameObject> GetBoneParentObject() { return _boneParentObject; }
+	void SetHasNoneBoneChildrenFlag(bool flag) { _hasNonBoneChildren = flag; }
+	bool GetHasNoneBoneChildrenFlag() { return _hasNonBoneChildren; }
+	void SetBoneIndex(int index) { _boneIndex = index; }
+	int GetBoneIndex() { return _boneIndex; }
+	vector<int> GetActiveBoneIndices() { return _activeBoneIndices; }
+
+	void AddActiveBoneIndex(int index) { 
+		_activeBoneIndices.push_back(index); 
+
+		std::sort(_activeBoneIndices.begin(), _activeBoneIndices.end());
+		auto last = std::unique(_activeBoneIndices.begin(), _activeBoneIndices.end());
+		_activeBoneIndices.erase(last, _activeBoneIndices.end());
+	}
+
+	void RemoveActiveBoneIndex(int index) { _activeBoneIndices.erase(std::remove(_activeBoneIndices.begin(), _activeBoneIndices.end(), index), _activeBoneIndices.end()); }
+	void SetNonBoneChildrenParent(shared_ptr<GameObject> parent) { _nonBoneChildrenParent = parent; }
+	shared_ptr<GameObject> GetNoneBoneChildrenParent() { return _nonBoneChildrenParent.lock(); }
 private:
 	vector<shared_ptr<Component>> _components;
 	vector<shared_ptr<GameObject>> _children;
@@ -136,5 +218,13 @@ private:
 	GameObjectType _type;
 	shared_ptr<GameObject> _parent;
 	bool _isTreeNodeOpen = false;  // 트리 노드의 펼침 상태를 저장
+	int _boneIndex;
+
+private:
+	bool _isBoneObject = false;
+	bool _hasNonBoneChildren = false;
+	vector<int> _activeBoneIndices;
+	weak_ptr<GameObject> _nonBoneChildrenParent;
+	weak_ptr<GameObject> _boneParentObject;
 };
 

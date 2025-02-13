@@ -69,8 +69,9 @@ void RenderPass::DefaultRender(bool isEnv)
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() - lightObject->transform()->GetWorldPosition(); //Vec3(0.498214066f, -0.798440516f, -0.338046610f);// GP.centerPos - lightObject->transform()->GetWorldPosition();
 	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition.Normalize();
 	Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
 	shared_ptr<Buffer> light = make_shared<Buffer>();
@@ -248,7 +249,7 @@ void RenderPass::DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>&
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() - lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 	Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
@@ -437,7 +438,7 @@ void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffe
 
 		// Light
 		LightAndCameraPos lightDirection;
-		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition(); //Vec3(0.498214066f, -0.798440516f, -0.338046610f);// GP.centerPos - lightObject->transform()->GetWorldPosition();
 		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 
 		shared_ptr<Buffer> light = make_shared<Buffer>();
@@ -610,7 +611,7 @@ void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuf
 
 		// Light
 		LightAndCameraPos lightDirection;
-		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();// Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 
 		shared_ptr<Buffer> light = make_shared<Buffer>();
@@ -740,7 +741,7 @@ void RenderPass::EnvironmentMapRender()
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 	Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
@@ -861,7 +862,7 @@ void RenderPass::TessellationRender(bool isEnv)
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 	Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
@@ -1011,7 +1012,7 @@ void RenderPass::OutlineRender(bool isEnv)
 		shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 		LightAndCameraPos lightDirection;
-		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 		Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
@@ -1219,7 +1220,7 @@ void RenderPass::TerrainRender(bool isEnv)
 	shader->PushConstantBufferToShader(ShaderType::PIXEL_SHADER, L"LightMaterial", 1, _meshRenderer->GetMaterialBuffer());
 
 	LightAndCameraPos lightDirection;
-	lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+	lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 	lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 	Vec3 pos = cameraObject->transform()->GetLocalPosition();
 
@@ -1430,7 +1431,7 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 		// Light
 		LightAndCameraPos lightDirection;
-		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 
 		shared_ptr<Buffer> light = make_shared<Buffer>();
@@ -1599,7 +1600,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 		// Light
 		LightAndCameraPos lightDirection;
-		lightDirection.lightPosition = GP.centerPos - lightObject->transform()->GetWorldPosition();
+		lightDirection.lightPosition = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition() -lightObject->transform()->GetWorldPosition();//Vec3(0.498214066f, -0.798440516f, -0.338046610f);//GP.centerPos - lightObject->transform()->GetWorldPosition();
 		lightDirection.cameraPosition = cameraObject->transform()->GetWorldPosition();
 
 		shared_ptr<Buffer> light = make_shared<Buffer>();

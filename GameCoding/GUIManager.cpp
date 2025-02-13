@@ -50,6 +50,12 @@ void GUIManager::Init()
     _newObjectPosition = Vec3::Zero;
     _newObjectRotation = Vec3::Zero;
     _newObjectScale = Vec3(1.0f, 1.0f, 1.0f);
+
+    _minHierarchyWidth = GP.GetProjectWidth() * (1.0f / 10.0f);
+    _minInspectorWidth = GP.GetProjectWidth() * (2.0f / 10.0f);
+    _hierarchyWidth = _minHierarchyWidth;
+    _inspectorWidth = _minInspectorWidth;
+    _isInitialized = true;
 }
 
 float EaseInOutCubic(float t)
@@ -175,7 +181,7 @@ void GUIManager::RenderUI()
             _selectedMaterialFile.clear();
             _selectedTextureFile.clear();
             _selectedFileType = FileType::NONE;
-            _selectedObject = nullptr;
+            ReleaseSelectedObject();
         }
     }
 
@@ -371,9 +377,9 @@ void GUIManager::RenderUI()
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
 
-        float windowSizeX = GP.GetProjectWidth() * (7.0f / 10.0f);
+        float windowSizeX = GP.GetProjectWidth();
         float windowSizeY = GP.GetProjectHeight() * (3.0f / 100.0f);
-        ImGui::SetNextWindowPos(ImVec2(GP.GetProjectWidth() * (1.0f / 10.0f), 0), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(windowSizeX, windowSizeY));
         ImGui::Begin("Manual", nullptr,
             ImGuiWindowFlags_NoMove |
@@ -422,6 +428,7 @@ void GUIManager::RenderUI()
             {
                 ENGINE.SetEngineMode(EngineMode::Play);
                 TIME.SetEnginePause(false);
+                _isSceneView = false;
             }
         }
         ImGui::PopStyleColor(3);
@@ -458,12 +465,15 @@ void GUIManager::RenderUI()
                 {
                     TIME.SetEnginePause(true);
                     SCENE.GetActiveScene()->SetMainCamera(SCENE.GetActiveScene()->Find(L"EditorCamera"));
+                    _isSceneView = true;
                 }
                 else
                 {
                     TIME.SetEnginePause(false);
                     SCENE.GetActiveScene()->SetMainCamera(SCENE.GetActiveScene()->Find(L"MainCamera"));
+                    _isSceneView = false;
                 }
+                
             }
         }
         ImGui::PopStyleColor(3);
@@ -479,12 +489,158 @@ void GUIManager::RenderUI()
         {
             ENGINE.SetEngineMode(EngineMode::Edit);
             TIME.SetEnginePause(false);
+            _isSceneView = true;
         }
 
         // 스타일 복원
         ImGui::PopStyleColor(3);
         ImGui::PopStyleVar();
         
+        // Scene/Game 탭 버튼
+        float tabButtonWidth = windowSizeX * (0.1f / 2.0f);
+        float tabButtonHeight = windowSizeY * (8.0f / 10.0f);
+        float tabStartX = 10.0f;
+
+        ImGui::SetCursorPos(ImVec2(tabStartX, windowSizeY - tabButtonHeight));
+
+        // 버튼 라운딩 스타일 추가
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f); // 라운딩 정도 조절 (값이 클수록 더 둥글어짐)
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+
+        // Scene 버튼
+        if (_isSceneView)
+        {
+            if (ImGui::Button("Scene", ImVec2(tabButtonWidth, tabButtonHeight)))
+            {
+                _isSceneView = true;
+                SCENE.GetActiveScene()->SwitchMainCameraToEditorCamera();
+            }
+        }
+        else
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.9f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+            if (ImGui::Button("Scene", ImVec2(tabButtonWidth, tabButtonHeight + 1)))
+            {
+                _isSceneView = true;
+                SCENE.GetActiveScene()->SwitchMainCameraToEditorCamera();
+            }
+                
+            ImGui::PopStyleColor(2);
+            ImGui::PopStyleVar();
+        }
+
+        ImGui::SameLine(0, 1.0f);
+
+        // Game 버튼
+        if (!_isSceneView)
+        {
+            if (ImGui::Button("Game", ImVec2(tabButtonWidth, tabButtonHeight)))
+            {
+                _isSceneView = false;
+                SCENE.GetActiveScene()->SwitchMainCameraToMainCamera();
+            }
+                
+        }
+        else
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.9f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+            if (ImGui::Button("Game", ImVec2(tabButtonWidth, tabButtonHeight + 1)))
+            {
+                _isSceneView = false;
+                SCENE.GetActiveScene()->SwitchMainCameraToMainCamera();
+            }
+                
+            ImGui::PopStyleColor(2);
+            ImGui::PopStyleVar();
+        }
+
+        // SkyBox 버튼 (오른쪽)
+        float skyboxStartX = windowSizeX - tabButtonWidth - 400.0f;  // 오른쪽 여백 10픽셀
+        ImGui::SetCursorPos(ImVec2(skyboxStartX, windowSizeY - tabButtonHeight));
+
+        if (ImGui::Button("SkyBox", ImVec2(tabButtonWidth, tabButtonHeight)))
+        {
+            _showSkyBoxMaterialPopup = true;
+            ImGui::OpenPopup("Select SkyBox Material");
+        }
+
+        // SkyBox Material 선택 팝업
+        ImGui::SetNextWindowSize(ImVec2(500, 600));
+        if (ImGui::BeginPopupModal("Select SkyBox Material", &_showSkyBoxMaterialPopup, ImGuiWindowFlags_NoResize))
+        {
+            // 검색창
+            static char searchBuffer[128] = "";
+            ImGui::InputTextWithHint("##Search", "Search materials...", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+            ImGui::Separator();
+
+            if (ImGui::BeginChild("MaterialList", ImVec2(0, -40)))
+            {
+                string searchStr = ToLower(string(searchBuffer));
+
+                // Material 목록 표시
+                for (const auto& entry : filesystem::directory_iterator("Resource/Material"))
+                {
+                    if (entry.path().extension() == ".xml")
+                    {
+                        // XML 파일 로드하여 Shader 확인
+                        tinyxml2::XMLDocument doc;
+                        if (doc.LoadFile(entry.path().string().c_str()) == tinyxml2::XML_SUCCESS)
+                        {
+                            if (auto root = doc.FirstChildElement("Material"))
+                            {
+                                if (auto shaderElem = root->FirstChildElement("Shader"))
+                                {
+                                    string shader = shaderElem->GetText();
+                                    if (shader == "SkyBox_Shader")
+                                    {
+                                        string materialName = entry.path().stem().string();
+                                        if (searchStr.empty() || ToLower(materialName).find(searchStr) != string::npos)
+                                        {
+                                            if (ImGui::Selectable(materialName.c_str()))
+                                            {
+                                                // SkyBox 오브젝트 찾기
+                                                wstring sceneName = SCENE.GetActiveScene()->GetSceneName();
+                                                auto skyboxObj = SCENE.GetActiveScene()->Find(L"skyBox");
+                                                if (skyboxObj)
+                                                {
+                                                    if (auto meshRenderer = skyboxObj->GetComponent<MeshRenderer>())
+                                                    {
+                                                        // Material 변경
+                                                        meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(Utils::ToWString(materialName)));
+
+                                                        // XML 업데이트
+                                                        SCENE.UpdateGameObjectMaterialInXML(sceneName, L"skyBox", Utils::ToWString(materialName));
+                                                    }
+                                                }
+                                                _showSkyBoxMaterialPopup = false;
+                                                ImGui::CloseCurrentPopup();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            ImGui::EndChild();
+
+            // 하단 버튼
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                _showSkyBoxMaterialPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
+        // 스타일 복원
+        ImGui::PopStyleVar(2);
 
         ImGui::End();
 
@@ -496,12 +652,40 @@ void GUIManager::RenderUI()
 
     // Hierachy
     {
-        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth() * (1.0f / 10.0f), GP.GetProjectHeight() * (63.0f / 100.0f)));
+        float currentWidth = _isInitialized ? _hierarchyWidth : GP.GetProjectWidth() * (1.0f / 10.0f);
+        ImGui::SetNextWindowPos(ImVec2(0.0f, GP.GetProjectHeight()* (3.0f / 100.0f)), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(currentWidth, GP.GetProjectHeight()* (60.0f / 100.0f)), ImGuiCond_FirstUseEver);
         ImGui::Begin("Hierachy", nullptr,
             ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse);
+
+        // 크기 조절 처리
+        if (ImGui::IsWindowHovered())
+        {
+            const float mouseX = ImGui::GetMousePos().x;
+            const float windowX = ImGui::GetWindowPos().x;
+            const float windowWidth = ImGui::GetWindowSize().x;
+
+            // 마우스가 창의 오른쪽 가장자리 근처에 있는지 확인
+            if (abs((windowX + windowWidth) - mouseX) < 5.0f)
+            {
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                if (ImGui::IsMouseDown(0))
+                {
+                    _isResizingHierarchy = true;
+                }
+            }
+        }
+
+        // 크기 조절 중이면 너비 업데이트
+        if (_isResizingHierarchy)
+        {
+            _hierarchyWidth = max(ImGui::GetMousePos().x, _minHierarchyWidth);
+            if (!ImGui::IsMouseDown(0))  // 마우스 버튼을 놓았을 때
+            {
+                _isResizingHierarchy = false;
+            }
+        }
 
         vector<shared_ptr<GameObject>> gameObjects = SCENE.GetActiveScene()->GetGameObjects();
 
@@ -559,20 +743,24 @@ void GUIManager::RenderUI()
                     SCENE.CreateCylinderToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
-                if (ImGui::MenuItem("Plane##CreateMenu5"))
+                if (ImGui::MenuItem("Quad##CreateMenu5"))
                 {
+                    SCENE.CreateQuadToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
-                if (ImGui::MenuItem("Quad##CreateMenu6"))
+                if (ImGui::MenuItem("Grid##CreateMenu6"))
                 {
+                    SCENE.CreateGridToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
                 if (ImGui::MenuItem("Terrain##CreateMenu7"))
                 {
+                    SCENE.CreateTerrainToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
                 if (ImGui::MenuItem("Particel System##CreateMenu8"))
                 {
+                    SCENE.CreateParticleToScene(SCENE.GetActiveScene()->GetSceneName());
                     // TODO: NULL3 구현 예정
                 }
                 ImGui::EndMenu();
@@ -584,34 +772,61 @@ void GUIManager::RenderUI()
 
     // Inspector
     {
-        ImGui::SetNextWindowPos(ImVec2(GP.GetProjectWidth()* (8.0f / 10.0f), 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth()* (2.0f / 10.0f), GP.GetProjectHeight()* (63.0f / 100.0f)));
+        float currentWidth = _isInitialized ? _inspectorWidth : GP.GetProjectWidth() * (2.0f / 10.0f);
+        ImGui::SetNextWindowPos(ImVec2(GP.GetProjectWidth() - currentWidth, GP.GetProjectHeight()* (3.0f / 100.0f)), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(currentWidth, GP.GetProjectHeight()* (60.0f / 100.0f)), ImGuiCond_FirstUseEver);
         ImGui::Begin("Inspector", nullptr,
             ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse);
+
+        // 크기 조절 처리
+        if (ImGui::IsWindowHovered())
+        {
+            const float mouseX = ImGui::GetMousePos().x;
+            const float windowX = ImGui::GetWindowPos().x;
+
+            if (abs(windowX - mouseX) < 5.0f)
+            {
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                if (ImGui::IsMouseDown(0))
+                {
+                    _isResizingInspector = true;
+                }
+            }
+        }
+
+        // 크기 조절 중이면 너비 업데이트
+        if (_isResizingInspector)
+        {
+            float newWidth = GP.GetProjectWidth() - ImGui::GetMousePos().x;
+            _inspectorWidth = max(newWidth, _minInspectorWidth);
+            if (!ImGui::IsMouseDown(0))  // 마우스 버튼을 놓았을 때
+            {
+                _isResizingInspector = false;
+            }
+        }
 
         // 선택된 셰이더 파일이 있는 경우
         if (_selectedFileType == FileType::SHADER && !_selectedShaderFile.empty())
         {
-            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ReleaseSelectedObject();  // 오브젝트 선택 해제
             ShowShaderInspector(_selectedShaderFile);
         }
         // 선택된 스크립트 파일이 있는 경우
         else if (_selectedFileType == FileType::Script && !_selectedScriptFile.empty())
         {
-            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ReleaseSelectedObject();  // 오브젝트 선택 해제
             ShowScriptInspector(_selectedScriptFile);
         }
         
         if (_selectedFileType == FileType::MATERIAL && !_selectedMaterialFile.empty())
         {
-            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ReleaseSelectedObject();  // 오브젝트 선택 해제
             ShowMaterialInspector(_selectedMaterialFile);
         }
         if (_selectedFileType == FileType::TEXTURE && !_selectedTextureFile.empty())
         {
-            _selectedObject = nullptr;  // 오브젝트 선택 해제
+            ReleaseSelectedObject();  // 오브젝트 선택 해제
             ShowTextureInspector(_selectedTextureFile);
         }
         if (_selectedObject != nullptr)
@@ -810,6 +1025,10 @@ void GUIManager::RenderUI()
                     componentName = "SphereCollider";
                 else if (dynamic_pointer_cast<Animator>(component))
                     componentName = "Animator";
+                else if (dynamic_pointer_cast<UIImage>(component))
+                    componentName = "UIImage";
+                else if (dynamic_pointer_cast<Button>(component))
+                    componentName = "Button";
 
                 if (!componentName.empty())
                 {
@@ -937,57 +1156,125 @@ void GUIManager::RenderUI()
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 
+                            // UI 컴포넌트 확인
+                            bool hasUIComponent = (_selectedObject->GetComponent<UIImage>() != nullptr ||
+                                _selectedObject->GetComponent<Button>() != nullptr);
+
                             // RenderPass
                             ImGui::Text("RenderPass"); ImGui::SameLine(labelWidth);
-                            if (ImGui::Button("..##RenderPass", ImVec2(20, 0))) ImGui::OpenPopup("RenderPassSelectPopup");
-                            ImGui::SameLine();
-                            Pass passType = meshRenderer->GetRenderPasses()[0]->GetPass();
-                            wstring passName = L"";
-                            switch (passType)
+
+                            Pass currentPass = meshRenderer->GetRenderPasses()[0]->GetPass();
+                            bool isDefaultRender = (currentPass == Pass::DEFAULT_RENDER);
+                            bool isEnvironmentOrOutline = (currentPass == Pass::ENVIRONMENTMAP_RENDER ||
+                                currentPass == Pass::OUTLINE_RENDER);
+
+                            // UI 컴포넌트가 있거나 DEFAULT_RENDER가 아니고 ENVIRONMENTMAP_RENDER나 OUTLINE_RENDER도 아닌 경우 버튼 비활성화
+                            if (hasUIComponent || (!isDefaultRender && !isEnvironmentOrOutline))
                             {
-                                case Pass::DEFAULT_RENDER:
-                                    passName = L"DEFAULT_RENDER";
-                                    break;
-                                case Pass::OUTLINE_RENDER:
-                                    passName = L"OUTLINE_RENDER";
-                                    break;
-                                case Pass::GAUSSIANBLUR_RENDER:
-                                    passName = L"GAUSSIANBLUR_RENDER";
-                                    break;
-                                case Pass::SHADOWMAP_RENDER:
-                                    passName = L"SHADOWMAP_RENDER";
-                                    break;
-                                case Pass::QUAD_RENDER:
-                                    passName = L"QUAD_RENDER";
-                                    break;
-                                case Pass::TESSELLATION_RENDER:
-                                    passName = L"TESSELLATION_RENDER";
-                                    break;
-                                case Pass::TERRAIN_RENDER:
-                                    passName = L"TERRAIN_RENDER";
-                                    break;
-                                case Pass::ENVIRONMENTMAP_RENDER:
-                                    passName = L"ENVIRONMENTMAP_RENDER";
-                                    break;
-                                case Pass::STATIC_MESH_RENDER:
-                                    passName = L"STATIC_MESH_RENDER";
-                                    break;
-                                case Pass::ANIMATED_MESH_RENDER:
-                                    passName = L"ANIMATED_MESH_RENDER";
-                                    break;
-                                case Pass::PARTICLE_RENDER:
-                                    passName = L"PARTICLE_RENDER";
-                                    break;
-                                case Pass::UI_RENDER:
-                                    passName = L"UI_RENDER";
-                                    break;
-                                default:
-                                    break;
+                                ImGui::BeginDisabled();
+                            }
+
+                            if (ImGui::Button("..##RenderPass", ImVec2(20, 0)))
+                            {
+                                ImGui::OpenPopup("RenderPassSelectPopup");
+                            }
+
+                            ImGui::SameLine();
+                            wstring passName = L"";
+                            switch (currentPass)
+                            {
+                            case Pass::DEFAULT_RENDER:
+                                passName = L"DEFAULT_RENDER";
+                                break;
+                            case Pass::OUTLINE_RENDER:
+                                passName = L"OUTLINE_RENDER";
+                                break;
+                            case Pass::GAUSSIANBLUR_RENDER:
+                                passName = L"GAUSSIANBLUR_RENDER";
+                                break;
+                            case Pass::SHADOWMAP_RENDER:
+                                passName = L"SHADOWMAP_RENDER";
+                                break;
+                            case Pass::QUAD_RENDER:
+                                passName = L"QUAD_RENDER";
+                                break;
+                            case Pass::TESSELLATION_RENDER:
+                                passName = L"TESSELLATION_RENDER";
+                                break;
+                            case Pass::TERRAIN_RENDER:
+                                passName = L"TERRAIN_RENDER";
+                                break;
+                            case Pass::ENVIRONMENTMAP_RENDER:
+                                passName = L"ENVIRONMENTMAP_RENDER";
+                                break;
+                            case Pass::STATIC_MESH_RENDER:
+                                passName = L"STATIC_MESH_RENDER";
+                                break;
+                            case Pass::ANIMATED_MESH_RENDER:
+                                passName = L"ANIMATED_MESH_RENDER";
+                                break;
+                            case Pass::PARTICLE_RENDER:
+                                passName = L"PARTICLE_RENDER";
+                                break;
+                            case Pass::UI_RENDER:
+                                passName = L"UI_RENDER";
+                                break;
+                            default:
+                                break;
                             }
                             string passNameStr = WStringToString(passName);
 
                             ImGui::SetNextItemWidth(valueWidth);
                             ImGui::InputText("##RenderPassValue", (char*)passNameStr.c_str(), passNameStr.size(), ImGuiInputTextFlags_ReadOnly);
+
+                            if (hasUIComponent || (!isDefaultRender && !isEnvironmentOrOutline))
+                            {
+                                ImGui::EndDisabled();
+                            }
+
+                            // RenderPass 선택 팝업
+                            if (ImGui::BeginPopup("RenderPassSelectPopup"))
+                            {
+                                if (ImGui::Selectable("DEFAULT_RENDER"))
+                                {
+                                    _selectedObject->SetRenderPassDefault();
+                                    SCENE.UpdateGameObjectRenderPassInXML(SCENE.GetActiveScene()->GetSceneName(),
+                                        _selectedObject->GetName(),
+                                        Pass::DEFAULT_RENDER,
+                                        false);
+                                }
+
+                                // DEFAULT_RENDER일 때만 추가 옵션 표시
+                                if (isDefaultRender)
+                                {
+                                    if (ImGui::Selectable("UI_RENDER"))
+                                    {
+                                        _selectedObject->SetRenderPassUI();
+                                        SCENE.UpdateGameObjectRenderPassInXML(SCENE.GetActiveScene()->GetSceneName(),
+                                            _selectedObject->GetName(),
+                                            Pass::UI_RENDER,
+                                            false);
+                                    }
+                                    if (ImGui::Selectable("ENVIRONMENTMAP_RENDER"))
+                                    {
+                                        _selectedObject->SetRenderPassEnvironmentMap();
+                                        SCENE.UpdateGameObjectRenderPassInXML(SCENE.GetActiveScene()->GetSceneName(),
+                                            _selectedObject->GetName(),
+                                            Pass::ENVIRONMENTMAP_RENDER,
+                                            true);
+                                    }
+                                    if (ImGui::Selectable("OUTLINE_RENDER"))
+                                    {
+                                        _selectedObject->SetRenderPassOutLine();
+                                        SCENE.UpdateGameObjectRenderPassInXML(SCENE.GetActiveScene()->GetSceneName(),
+                                            _selectedObject->GetName(),
+                                            Pass::OUTLINE_RENDER,
+                                            false);
+                                    }
+                                }
+                                RENDER.GetRenderableObject();
+                                ImGui::EndPopup();
+                            }
 
                             // Mesh
                             ImGui::Text("Mesh"); ImGui::SameLine(labelWidth);
@@ -1143,7 +1430,14 @@ void GUIManager::RenderUI()
                             ImGui::PopStyleVar();
                             ImGui::Separator();
                         }
+                        else if (auto uiImage = dynamic_pointer_cast<UIImage>(component))
+                        {
+                            
+                        }
+                        else if (auto button = dynamic_pointer_cast<Button>(component))
+                        {
 
+                        }
                         ImGui::Separator();
                     }
                     
@@ -1214,6 +1508,8 @@ void GUIManager::RenderUI()
                     bool hasSphereCollider = false;
                     bool hasMeshRenderer = false;
                     bool hasAnimator = false;
+                    bool hasUIImage = false;
+                    bool hasButton = false;
 
                     // 기존 컴포넌트 체크
                     for (const auto& component : components)
@@ -1226,6 +1522,10 @@ void GUIManager::RenderUI()
                             hasMeshRenderer = true;
                         else if (dynamic_pointer_cast<Animator>(component))
                             hasAnimator = true;
+                        else if (dynamic_pointer_cast<UIImage>(component))
+                            hasUIImage = true;
+                        else if (dynamic_pointer_cast<Button>(component))
+                            hasButton = true;
                     }
 
                     // BoxCollider 메뉴 아이템
@@ -1310,6 +1610,30 @@ void GUIManager::RenderUI()
                             meshRenderer,
                             L"DefaultMaterial",   // material name
                             L"Cube"       // mesh name
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+                    if (!hasUIImage && ImGui::MenuItem("UI Image"))
+                    {
+                        auto uiImage = make_shared<UIImage>();
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            uiImage
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+                    if (!hasButton && ImGui::MenuItem("Button"))
+                    {
+                        auto button = make_shared<Button>();
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            button
                         );
                         ImGui::CloseCurrentPopup();
                     }
@@ -1534,7 +1858,7 @@ void GUIManager::RenderUI()
                 {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_FILE"))
                     {
-                        _droppedObject = nullptr;
+                        OnResourceDragEnd();
                     }
                     ImGui::EndDragDropTarget();
                 }
@@ -1542,7 +1866,7 @@ void GUIManager::RenderUI()
             ImGui::End();
         }
 
-        if (ENGINE.GetEngineMode() != EngineMode::Play)
+        if (_isSceneView/*ENGINE.GetEngineMode() != EngineMode::Play*/)
             RenderGuizmo();
     }
         
@@ -1554,7 +1878,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     {
         if (component && component->GetType() == ComponentType::Script)
         {
-            if (dynamic_pointer_cast<EditorCamera>(component))
+            if (dynamic_pointer_cast<EditorCamera>(component) || gameObject->GetName() == L"skyBox")
                 return;
         }
     }
@@ -1596,9 +1920,13 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     {
         ImGui::SetDragDropPayload("GAMEOBJECT_DRAG", &gameObject, sizeof(gameObject));
         ImGui::Text("Move %s", objectName.c_str());
+
+        _draggedObject = gameObject;
+        _isDragging = true;
         ImGui::EndDragDropSource();
     }
 
+    bool isParentSet = false;
     // 드래그 타겟 설정
     if (ImGui::BeginDragDropTarget())
     {
@@ -1612,6 +1940,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
                 Quaternion worldRot = (*sourceObj)->transform()->GetQTRotation();
                 Vec3 worldScale = (*sourceObj)->transform()->GetWorldScale();
 
+                HandleBoneObjectParenting(*sourceObj, gameObject);
                 // 부모 설정
                 (*sourceObj)->SetParent(gameObject);
 
@@ -1643,8 +1972,18 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
                 );
                 (*sourceObj)->transform()->SetLocalScale(newLocalScale);
 
+                SCENE.UpdateGameObjectParentInXML(
+                    SCENE.GetActiveScene()->GetSceneName(),
+                    (*sourceObj)->GetName(),
+                    newLocalPos,
+                    newLocalRot,
+                    newLocalScale,
+                    gameObject->GetName()
+                );
+
                 // 부모 노드를 자동으로 펼침
                 gameObject->SetTreeNodeOpen(true);
+                isParentSet = true;
             }
         }
         ImGui::EndDragDropTarget();
@@ -1661,6 +2000,17 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
         _selectedFileType = FileType::NONE;
 
         _selectedObject = gameObject;
+        if (_selectedObject->GetBoneObjectFlag())
+        {
+            if (!_selectedObject->GetHasNoneBoneChildrenFlag())
+            {
+                _selectedObject->GetBoneParentObject().lock()->RemoveActiveBoneIndex(_tempBoneIndex);
+                _selectedObject->GetBoneParentObject().lock()->AddActiveBoneIndex(_selectedObject->GetBoneIndex());
+                _tempBoneIndex = _selectedObject->GetBoneIndex();
+            }
+        }
+            
+
         SCENE.GetActiveScene()->AddPickedObject(gameObject);
 
         // Animator 업데이트
@@ -1747,6 +2097,47 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
         }
         ImGui::TreePop();
     }
+    // Hierarchy 창의 빈 공간 드래그 드롭 처리
+    if (_draggedObject && _isDragging && ImGui::IsMouseReleased(0))
+    {
+        ImVec2 mousePos = ImGui::GetMousePos();
+        float hierarchyWidth = GP.GetProjectWidth() * (1.0f / 10.0f);
+        float hierarchyHeight = GP.GetProjectHeight() * (63.0f / 100.0f);
+
+        // Hierarchy 창 영역 내에 있는지 확인
+        if (!isParentSet)
+        {
+            // 현재 월드 변환 저장
+            Vec3 worldPos = _draggedObject->transform()->GetWorldPosition();
+            Quaternion worldRot = _draggedObject->transform()->GetQTRotation();
+            Vec3 worldScale = _draggedObject->transform()->GetWorldScale();
+
+            // 부모-자식 관계 해제
+            _draggedObject->DetachFromParent();
+            shared_ptr<GameObject> nonBoneChildrenParent = _draggedObject->GetNoneBoneChildrenParent();
+            if (nonBoneChildrenParent)
+            {
+                nonBoneChildrenParent->GetBoneParentObject().lock()->RemoveActiveBoneIndex(nonBoneChildrenParent->GetBoneIndex());
+                nonBoneChildrenParent->SetHasNoneBoneChildrenFlag(false);
+            }
+            // 월드 변환 유지
+            _draggedObject->transform()->SetPosition(worldPos);
+            _draggedObject->transform()->SetQTRotation(worldRot);
+            _draggedObject->transform()->SetScale(worldScale);
+
+            // XML 파일 업데이트
+            SCENE.UpdateGameObjectParentInXML(
+                SCENE.GetActiveScene()->GetSceneName(),
+                _draggedObject->GetName(),
+                worldPos,
+                worldRot,
+                worldScale,
+                L"" // 빈 문자열로 부모 제거
+            );
+        }
+        _draggedObject = nullptr;
+        _isDragging = false;
+    }
 
 }
 
@@ -1762,6 +2153,9 @@ void GUIManager::RenderGuizmo()
     if (pickedObj != nullptr)
     {
         _selectedObject = pickedObj;
+        /*if (_selectedObject->GetBoneObjectFlag())
+            _selectedObject->GetBoneParentObject().lock()->AddActiveBoneIndex(_selectedObject->GetBoneIndex());*/
+
         shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
 
         // UI 오브젝트인 경우 UICamera 사용
@@ -1823,9 +2217,9 @@ void GUIManager::RenderGuizmo()
 
                 ImGui::PushID("TransformGizmo");
 
-                if (INPUT.GetButtonDown(KEY_TYPE::W)) currentGizmoOperation = ImGuizmo::TRANSLATE;
-                if (INPUT.GetButtonDown(KEY_TYPE::E)) currentGizmoOperation = ImGuizmo::ROTATE;
-                if (INPUT.GetButtonDown(KEY_TYPE::R)) currentGizmoOperation = ImGuizmo::SCALE;
+                if (INPUT.GetSceneButtonDown(KEY_TYPE::W)) currentGizmoOperation = ImGuizmo::TRANSLATE;
+                if (INPUT.GetSceneButtonDown(KEY_TYPE::E)) currentGizmoOperation = ImGuizmo::ROTATE;
+                if (INPUT.GetSceneButtonDown(KEY_TYPE::R)) currentGizmoOperation = ImGuizmo::SCALE;
 
                 Matrix deltaMatrix;
                 currentGizmoMode = ImGuizmo::LOCAL;
@@ -1845,7 +2239,7 @@ void GUIManager::RenderGuizmo()
 
                     if (currentGizmoOperation == ImGuizmo::ROTATE)
                     {
-                        Matrix deltaRotationMatrix = Matrix(deltaMatrix);
+                        /*Matrix deltaRotationMatrix = Matrix(deltaMatrix);
                         Quaternion deltaRotation;
                         Vec3 deltaScale, deltaTranslation;
                         deltaRotationMatrix.Decompose(deltaScale, deltaRotation, deltaTranslation);
@@ -1854,6 +2248,48 @@ void GUIManager::RenderGuizmo()
                         Quaternion newRotation = currentRotation * deltaRotation;
 
                         pickedObj->transform()->SetQTRotation(newRotation);
+                        _rotationUpdated = true;*/
+                        Matrix deltaRotationMatrix = Matrix(deltaMatrix);
+                        Quaternion deltaRotation;
+                        Vec3 deltaScale, deltaTranslation;
+                        deltaRotationMatrix.Decompose(deltaScale, deltaRotation, deltaTranslation);
+
+                        if (pickedObj->transform()->HasParent())
+                        {
+                            // 1. 부모의 월드 회전을 가져옴
+                            shared_ptr<Transform> parentTransform = pickedObj->transform()->GetParent();
+                            Matrix parentWorldMatrix = parentTransform->GetWorldMatrix();
+
+                            // 2. 델타 회전을 월드 공간에서 적용
+                            Matrix worldRotation = Matrix::CreateFromQuaternion(deltaRotation);
+
+                            // 3. 현재 오브젝트의 월드 매트릭스를 가져옴
+                            Matrix currentWorldMatrix = pickedObj->transform()->GetWorldMatrix();
+
+                            // 4. 새로운 월드 매트릭스 계산
+                            Matrix newWorldMatrix = currentWorldMatrix * worldRotation;
+
+                            // 5. 부모의 역행렬을 이용해 로컬 변환 계산
+                            Matrix parentWorldMatrixInv = parentWorldMatrix.Invert();
+                            Matrix newLocalMatrix = newWorldMatrix * parentWorldMatrixInv;
+
+                            // 6. 새로운 로컬 회전 추출
+                            Vec3 newLocalScale;
+                            Quaternion newLocalRotation;
+                            Vec3 newLocalTranslation;
+                            newLocalMatrix.Decompose(newLocalScale, newLocalRotation, newLocalTranslation);
+
+                            // 7. 새로운 로컬 회전 적용
+                            pickedObj->transform()->SetQTRotation(newLocalRotation);
+                        }
+                        else
+                        {
+                            // 부모가 없는 경우 직접 델타 회전 적용
+                            Quaternion currentRot = pickedObj->transform()->GetQTRotation();
+                            Quaternion newRot = currentRot * deltaRotation;
+                            pickedObj->transform()->SetQTRotation(newRot);
+                        }
+
                         _rotationUpdated = true;
                     }
                     else
@@ -1884,6 +2320,7 @@ void GUIManager::RenderGuizmo()
                                 );
                                 pickedObj->transform()->SetLocalScale(localScale);
                             }
+                            
                         }
                         else
                         {
@@ -2220,7 +2657,7 @@ void GUIManager::RenderGuizmo()
         }
     }
     else
-        _selectedObject = nullptr;
+        ReleaseSelectedObject();
 }
 
 void GUIManager::RenderFolderTree(const filesystem::path& path, filesystem::path& selectedFolder)
@@ -2314,7 +2751,33 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
     {
         clickedItem = false;
     }
-
+    if (path.filename() == "Scene")
+    {
+        if (ImGui::BeginPopupContextWindow("SceneContextMenu", ImGuiPopupFlags_MouseButtonRight))
+        {
+            if (ImGui::MenuItem("Create New Scene"))
+            {
+                _showCreateScenePopup = true;
+                strcpy_s(_newSceneName, "NewScene");
+            }
+            ImGui::EndPopup();
+        }
+    }
+    if (path.filename() == "Material")
+    {
+        if (ImGui::BeginPopupContextWindow("MaterialContextMenu", ImGuiPopupFlags_MouseButtonRight))
+        {
+            if (ImGui::MenuItem("Create New Material"))
+            {
+                _showCreateMaterialPopup = true;
+                strcpy_s(_newMaterialName, "NewMaterial");
+                _selectedTexture = "None";
+                _selectedNormalMap = "None";
+                _selectedShader = "Default_Shader";
+            }
+            ImGui::EndPopup();
+        }
+    }
     for (const auto& entry : filesystem::directory_iterator(path))
     {
         if (!filesystem::is_directory(entry))
@@ -2347,6 +2810,43 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             {
                 icon = RESOURCE.GetResource<Texture>(L"Shader_Icon");
             }
+            else if (parentFolder == "Scene")
+            {
+                if (entry.path().extension() == ".xml")
+                {
+                    icon = RESOURCE.GetResource<Texture>(L"Scene_Icon");
+
+                    // 아이콘 중앙 배치
+                    float cursorPosX = ImGui::GetCursorPosX();
+                    float iconPosX = cursorPosX + (cellSize - iconSize) * 0.5f;
+                    ImGui::SetCursorPosX(iconPosX);
+
+                    ImGui::ImageButton(filename.c_str(),
+                        (ImTextureID)icon->GetShaderResourceView().Get(),
+                        ImVec2(iconSize, iconSize));
+
+                    // 더블클릭 처리
+                    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                    {
+                        if (ENGINE.GetEngineMode() == EngineMode::Edit)
+                        {
+                            string sceneName = filename.substr(0, filename.find_last_of("."));
+                            SCENE.LoadScene(Utils::ToWString(sceneName));
+                        }
+                    }
+
+                    // 텍스트 표시
+                    float textWidth = ImGui::CalcTextSize(filename.c_str()).x;
+                    float textPosX = cursorPosX + (cellSize - textWidth) * 0.5f;
+                    ImGui::SetCursorPosX(textPosX);
+                    ImGui::TextWrapped("%s", filename.c_str());
+
+                    ImGui::NextColumn();
+                    continue;
+                }
+
+            }
+
             // Script 폴더에서는 XML 파일만 처리하고 각각 cpp와 h 파일 아이콘으로 표시
             if (parentFolder == "Script")
             {
@@ -2380,7 +2880,7 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                 {
                     clickedItem = true;
 
-                    _selectedObject = nullptr;
+                    ReleaseSelectedObject();
                     SCENE.GetActiveScene()->AddPickedObject(nullptr);
 
                     if (parentFolder == "Shader")
@@ -2400,7 +2900,7 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                     else if (parentFolder == "Script")
                     {
                         // Hierarchy 창의 선택 상태 초기화
-                        _selectedObject = nullptr;
+                        ReleaseSelectedObject();
                         SCENE.GetActiveScene()->AddPickedObject(nullptr);
 
                         _selectedScriptFile = entry.path();
@@ -2414,7 +2914,7 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                     }
                     else if (parentFolder == "Texture")  // 텍스처 파일 선택 처리 추가
                     {
-                        _selectedObject = nullptr;
+                        ReleaseSelectedObject();
                         _selectedTextureFile = entry.path();
                         _selectedFileType = FileType::TEXTURE;
                     }
@@ -2461,6 +2961,218 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             }
 
             ImGui::NextColumn();
+        }
+    }
+
+    // Create New Scene 팝업
+    if (_showCreateScenePopup)
+    {
+        ImGui::OpenPopup("Create New Scene");
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Create New Scene", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Scene Name:");
+            ImGui::InputText("##SceneName", _newSceneName, sizeof(_newSceneName));
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                // 씬 생성
+                SCENE.CreateNewScene(Utils::ToWString(_newSceneName));
+                _showCreateScenePopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                _showCreateScenePopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+    if (_showCreateMaterialPopup)
+    {
+        ImGui::OpenPopup("Create New Material##Modal");
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(500, 600));
+
+        if (ImGui::BeginPopupModal("Create New Material##Modal", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            // Material 이름 입력
+            ImGui::Text("Material Name:");
+            ImGui::InputText("##MaterialNameInput", _newMaterialName, sizeof(_newMaterialName));
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Texture 선택
+            ImGui::Text("Texture"); ImGui::SameLine(100);
+            {
+                ImGui::PushID("TextureSelect");  // Unique ID for Texture section
+                if (ImGui::Button(("Texture: " + _selectedTexture).c_str(), ImVec2(-1, 0)))
+                {
+                    ImGui::OpenPopup("TextureSelectPopup");
+                }
+
+                if (ImGui::BeginPopup("TextureSelectPopup"))
+                {
+                    if (ImGui::MenuItem("None##Texture"))
+                    {
+                        _selectedTexture = "None";
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::Separator();
+
+                    for (const auto& entry : filesystem::directory_iterator("Resource/Texture"))
+                    {
+                        if (entry.path().extension() == ".xml")
+                        {
+                            string textureName = entry.path().stem().string();
+                            if (ImGui::MenuItem((textureName + "##Texture").c_str()))
+                            {
+                                _selectedTexture = textureName;
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+                ImGui::PopID();
+            }
+
+            // Normal Map 선택
+            ImGui::Text("Normal Map"); ImGui::SameLine(100);
+            {
+                ImGui::PushID("NormalMapSelect");  // Unique ID for NormalMap section
+                if (ImGui::Button(("NormalMap: " + _selectedNormalMap).c_str(), ImVec2(-1, 0)))
+                {
+                    ImGui::OpenPopup("NormalMapSelectPopup");
+                }
+
+                if (ImGui::BeginPopup("NormalMapSelectPopup"))
+                {
+                    if (ImGui::MenuItem("None##NormalMap"))
+                    {
+                        _selectedNormalMap = "None";
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::Separator();
+
+                    for (const auto& entry : filesystem::directory_iterator("Resource/Texture"))
+                    {
+                        if (entry.path().extension() == ".xml")
+                        {
+                            string textureName = entry.path().stem().string();
+                            if (ImGui::MenuItem((textureName + "##NormalMap").c_str()))
+                            {
+                                _selectedNormalMap = textureName;
+                                ImGui::CloseCurrentPopup();
+                            }
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+                ImGui::PopID();
+            }
+
+            // Material Properties
+            ImGui::Text("Material Properties:");
+            ImGui::PushItemWidth(200);
+            ImGui::ColorEdit4("##Ambient", &_newMaterialDesc.ambient.x, ImGuiColorEditFlags_Float);
+            ImGui::SameLine(); ImGui::Text("Ambient");
+            ImGui::ColorEdit4("##Diffuse", &_newMaterialDesc.diffuse.x, ImGuiColorEditFlags_Float);
+            ImGui::SameLine(); ImGui::Text("Diffuse");
+            ImGui::ColorEdit4("##Specular", &_newMaterialDesc.specular.x, ImGuiColorEditFlags_Float);
+            ImGui::SameLine(); ImGui::Text("Specular");
+            ImGui::PopItemWidth();
+
+            // Shader 선택
+            ImGui::Text("Shader"); ImGui::SameLine(100);
+            if (ImGui::Button(_selectedShader.c_str(), ImVec2(-1, 0)))
+            {
+                ImGui::OpenPopup("Select Shader##MaterialCreate");
+            }
+
+            if (ImGui::BeginPopup("Select Shader##MaterialCreate"))
+            {
+                static char searchBuffer[128] = "";
+                ImGui::InputTextWithHint("##ShaderSearch", "Search shaders...", searchBuffer, IM_ARRAYSIZE(searchBuffer));
+                ImGui::Separator();
+
+                string searchStr = ToLower(string(searchBuffer));
+                for (const auto& entry : filesystem::directory_iterator("Resource/Shader"))
+                {
+                    if (entry.path().extension() == ".xml")
+                    {
+                        // XML 파일 로드
+                        tinyxml2::XMLDocument doc;
+                        if (doc.LoadFile(entry.path().string().c_str()) == tinyxml2::XML_SUCCESS)
+                        {
+                            if (auto root = doc.FirstChildElement("Shader"))
+                            {
+                                if (auto nameElem = root->FirstChildElement("Name"))
+                                {
+                                    string shaderName = nameElem->GetText();
+                                    if (searchStr.empty() || ToLower(shaderName).find(searchStr) != string::npos)
+                                    {
+                                        if (ImGui::MenuItem(shaderName.c_str()))
+                                        {
+                                            _selectedShader = shaderName;
+                                            ImGui::CloseCurrentPopup();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ImGui::EndPopup();
+            }
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 버튼 중앙 정렬
+            float width = ImGui::GetWindowWidth();
+            float buttons_width = 250.0f; // OK + spacing + Cancel
+            ImGui::SetCursorPosX((width - buttons_width) * 0.5f);
+
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                // Material XML 생성
+                wstring materialPath = L"Resource/Material/" + Utils::ToWString(_newMaterialName) + L".xml";
+
+                // Material XML 생성
+                RESOURCE.WriteMaterialToXML(
+                    Utils::ToWString(_selectedTexture),
+                    Utils::ToWString(_selectedNormalMap),
+                    _newMaterialDesc,
+                    Utils::ToWString(_selectedShader),
+                    Utils::ToWString(_newMaterialName),
+                    materialPath
+                );
+
+                // 생성된 Material을 바로 메모리에 로드
+                RESOURCE.LoadMaterialData(materialPath);
+
+                _showCreateMaterialPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                _showCreateMaterialPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
         }
     }
     // 모든 아이템 렌더링 후 빈 공간 클릭 처리
@@ -3023,6 +3735,7 @@ void GUIManager::RenderInspectorPanel()
             if (ImGui::DragFloat("Speed", &speed, 0.1f, 0.0f, 10.0f))
             {
                 clip->speed = speed;
+
                 SCENE.UpdateAnimatorClipInXML(SCENE.GetActiveScene()->GetSceneName(),
                     _selectedAnimator->GetGameObject()->GetName(),
                     _selectedNode->clip->name, speed, _selectedNode->clip->isLoop);
@@ -3459,7 +4172,7 @@ void GUIManager::RenderTransitions()
         {
             ImVec2 mousePos = ImGui::GetMousePos();
             float dist = DistancePointToLineSegment(mousePos, start, end);
-            if (dist < 5.0f)  // 클릭 허용 범위
+            if (dist < 10.0f)  // 클릭 허용 범위
             {
                 _rightClickedTransition = transition;
                 ImGui::OpenPopup("TransitionContextMenu");
@@ -4562,6 +5275,14 @@ void GUIManager::HandleExternalFilesDrop(const filesystem::path& sourcePath)
     });
 }
 
+void GUIManager::ReleaseSelectedObject()
+{
+    if (_selectedObject != nullptr && _selectedObject->GetBoneObjectFlag())
+        _selectedObject->GetBoneParentObject().lock()->RemoveActiveBoneIndex(_selectedObject->GetBoneIndex());
+
+    _selectedObject = nullptr;
+}
+
 bool GUIManager::IsViewportHovered()
 {
     float viewportX = GP.GetProjectWidth() * (1.0f / 10.0f);
@@ -4702,6 +5423,13 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
     if (!lastSlash) return;
     string fileName = string(lastSlash + 1);
 
+    // Texture 폴더 처리
+    if (folderName == "Texture")
+    {
+        _droppedTexturePath = fullPath;
+        return;
+    }
+
     // 레이캐스팅
     Matrix worldMatrix;
     shared_ptr<GameObject> camera = SCENE.GetActiveScene()->GetMainCamera();
@@ -4709,8 +5437,8 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
     Matrix projectionMatrix = cameraComponent->GetProjectionMatrix();
     Matrix viewMatrix = cameraComponent->GetViewMatrix();
 
-    int32 mouseX = INPUT.GetMousePos().x;
-    int32 mouseY = INPUT.GetMousePos().y;
+    int32 mouseX = INPUT.GetSceneMousePos().x;
+    int32 mouseY = INPUT.GetSceneMousePos().y;
     Ray ray = GP.GetViewport().GetRayFromScreenPoint(mouseX, mouseY, worldMatrix, viewMatrix, projectionMatrix, camera->transform()->GetWorldPosition());
 
     // Y=0 평면과의 교차점 계산
@@ -4797,5 +5525,108 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
         {
             _droppedObject->transform()->SetPosition(intersectionPoint);
         }
+    }
+}
+
+void GUIManager::OnResourceDragEnd()
+{
+    if (!_droppedTexturePath.empty())
+    {
+        // 경로에서 폴더명 추출
+        const char* start = strstr(_droppedTexturePath.c_str(), "Resource/");
+        if (!start) return;
+
+        start += strlen("Resource/");
+        string folderName = string(start, strcspn(start, "\\"));
+
+        if (folderName == "Texture")
+        {
+            // XML 파일에서 텍스처 이름 추출
+            wstring textureName;
+            tinyxml2::XMLDocument doc;
+            if (doc.LoadFile(_droppedTexturePath.c_str()) == tinyxml2::XML_SUCCESS)
+            {
+                if (auto root = doc.FirstChildElement("Texture"))
+                {
+                    if (auto nameElem = root->FirstChildElement("Name"))
+                    {
+                        textureName = Utils::ToWString(nameElem->GetText());
+                    }
+                }
+            }
+
+            // UI 오브젝트 생성 및 설정
+            wstring sceneName = SCENE.GetActiveScene()->GetSceneName();
+            SCENE.SaveAndLoadGameObjectToXML(sceneName, textureName, Vec3::Zero, Vec3::Zero, Vec3::One);
+            auto gameObject = SCENE.GetActiveScene()->Find(textureName);
+            gameObject->SetObjectType(GameObjectType::UIObject);
+
+            // Material 생성
+            MaterialDesc matDesc;
+            matDesc.ambient = Vec4(255.0f, 255.0f, 255.0f, 255.0f);
+            matDesc.diffuse = Vec4(255.0f, 255.0f, 255.0f, 255.0f);
+            matDesc.specular = Vec4(255.0f, 255.0f, 255.0f, 255.0f);
+
+            wstring materialName = textureName + L"_Material";
+            wstring materialPath = L"Resource/Material/" + materialName + L".xml";
+
+            RESOURCE.WriteMaterialToXML(
+                textureName,        // texture name
+                L"",               // normal map (none)
+                matDesc,
+                L"Debug_UI_Shader",
+                materialName,
+                materialPath
+            );
+            RESOURCE.LoadMaterialData(materialPath);
+
+            // MeshRenderer 컴포넌트 추가
+            auto meshRenderer = make_shared<MeshRenderer>();
+            meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Quad"));
+            meshRenderer->SetModel(nullptr);
+            meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(materialName));
+            meshRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_NONE, false);
+            meshRenderer->AddRenderPass();
+            meshRenderer->GetRenderPasses()[0]->SetPass(Pass::UI_RENDER);
+            meshRenderer->GetRenderPasses()[0]->SetMeshRenderer(meshRenderer);
+            meshRenderer->GetRenderPasses()[0]->SetTransform(gameObject->transform());
+            meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
+
+            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, textureName, meshRenderer,
+                materialName, L"Quad");
+
+            // UIImage 컴포넌트 추가
+            auto uiImage = make_shared<UIImage>();
+            Vec2 imageSize = RESOURCE.GetResource<Material>(materialName)->GetTexture()->GetSize() * 0.09765625f;
+
+            POINT mousePos = INPUT.GetPublicMousePos();
+            mousePos.x -= GP.GetProjectWidth() * (1.0f / 10.0f);
+            mousePos.y -= GP.GetProjectHeight() * (3.0f / 100.0f);
+            uiImage->SetTransformAndRect(Vec2(mousePos.x, mousePos.y), imageSize);
+            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, textureName, uiImage);
+
+            // Transform 업데이트
+            gameObject->transform()->SetLocalPosition(uiImage->GetNDCPosition());
+            gameObject->transform()->SetLocalScale(uiImage->GetSize());
+            SCENE.UpdateGameObjectTransformInXML(sceneName, textureName,
+                uiImage->GetNDCPosition(), Vec3::Zero, uiImage->GetSize());
+        }
+
+        _droppedTexturePath.clear();  // 경로 초기화
+
+        RENDER.GetRenderableObject();
+    }
+    if (_droppedObject)
+    {
+        // 최종 위치로 XML 업데이트
+        SCENE.UpdateGameObjectTransformInXML(
+            SCENE.GetActiveScene()->GetSceneName(),
+            _droppedObject->GetName(),
+            _droppedObject->transform()->GetLocalPosition(),
+            _droppedObject->transform()->GetLocalRotation(),
+            _droppedObject->transform()->GetLocalScale()
+        );
+
+        _droppedObject = nullptr;
     }
 }

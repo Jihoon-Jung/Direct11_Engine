@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+    <Name>CameraIcon_Material</Name>
+    <Texture>CameraIcon</Texture>
+    <Shader>Debug_UI_Shader</Shader>
+    <MaterialDesc>
+        <Ambient r="1" g="1" b="1" a="255"/>
+        <Diffuse r="1" g="1" b="1" a="255"/>
+        <Specular r="1" g="1" b="1" a="255"/>
+    </MaterialDesc>
+</Material>

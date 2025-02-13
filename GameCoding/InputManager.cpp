@@ -54,3 +54,33 @@ void InputManager::Update()
         savedMousePos = prevMousePos;
     }
 }
+
+// Scene View 전용 입력 함수들
+bool InputManager::GetSceneButton(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::PRESS; }
+bool InputManager::GetSceneButtonDown(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::DOWN; }
+bool InputManager::GetSceneButtonUp(KEY_TYPE key) { return GUI.isSceneView() && GetState(key) == KEY_STATE::UP; }
+const POINT& InputManager::GetSceneMousePos()
+{
+    return GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+}
+//const POINT::& GetSceneMousePos()
+//{
+//    return GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+//}
+
+// 누르고 있을 때
+bool InputManager::GetButton(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::PRESS; }
+// 맨 처음 눌렀을 때
+bool InputManager::GetButtonDown(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::DOWN; }
+// 맨 처음 눌렀다 뗐을 때
+bool InputManager::GetButtonUp(KEY_TYPE key) { return !GUI.isSceneView() && GetState(key) == KEY_STATE::UP; }
+
+const POINT& InputManager::GetMousePos()
+{
+    return !GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+}
+
+//const POINT& GetMousePos()
+//{
+//    return !GUI.isSceneView() ? _mousePos : POINT{ 0, 0 };
+//}

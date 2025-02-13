@@ -39,6 +39,8 @@ public:
 	void LoadTestScene(wstring sceneName);
 	void LoadTestScene2(wstring sceneName);
 	void LoadTestInstancingScene();
+	void CreateNewScene(wstring sceneName);
+
 	shared_ptr<Scene> LoadPlayScene(wstring sceneName);
 
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
@@ -63,6 +65,10 @@ public:
 	void UpdateGameObjectSphereColliderInXML(const wstring& sceneName, const wstring& objectName,
 		const Vec3& center, float radius);
 	void RemoveGameObjectFromXML(const wstring& sceneName, const wstring& objectName);
+
+	void UpdateGameObjectParentInXML(const wstring& sceneName, const wstring& objectName,
+		const Vec3& localPosition, const Quaternion& localRotation, const Vec3& localScale,
+		const wstring& parentName);
 
 	void UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName);
 	void UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName);
@@ -108,9 +114,19 @@ public:
 	void UpdateAnimatorClipEventsInXML(const wstring& sceneName, const wstring& objectName,
 		const string& clipName, const vector<AnimationEvent>& events);
 
+	void UpdateGameObjectMaterialInXML(const wstring& sceneName, const wstring& objectName, const wstring& materialName);
+
+	void UpdateGameObjectRenderPassInXML(const wstring& sceneName, const wstring& objectName,
+		Pass pass, bool useEnvironmentMap);
+
+
 	shared_ptr<GameObject> CreateCubeToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateSphereToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateCylinderToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateQuadToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateGridToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateTerrainToScene(const wstring& sceneName);
+	shared_ptr<GameObject> CreateParticleToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateAnimatedMeshToScene(const wstring& sceneName, const wstring& modelName);
 	shared_ptr<GameObject> CreateStaticMeshToScene(const wstring& sceneName, const wstring& modelName);
 
@@ -122,5 +138,8 @@ private:
 
 	shared_ptr<Scene> _activeScene;
 	map<wstring, shared_ptr<Scene>> _scenes;
+
+	bool _isCreateNewScene = false;
+
 };
 
