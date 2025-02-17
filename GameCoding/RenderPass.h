@@ -67,7 +67,6 @@ public:
 	void SetMeshRenderer(shared_ptr<MeshRenderer> meshRenderer) { _meshRenderer = meshRenderer; }
 	void SetTransform(shared_ptr<Transform> transform) { _transform = transform; }
 	void SetDepthStencilStateType(DSState state) { _dsStateType = state; }
-	void HandleTransitionBlend(shared_ptr<Animator>& animator, shared_ptr<Transition>& transition, shared_ptr<Model>& model);
 
 	shared_ptr<Texture> GetEnvTexture() { 
 		return _envTexture; 
@@ -105,6 +104,5 @@ public:
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
 
-	shared_ptr<Transform> _transformPtr;
 };
 

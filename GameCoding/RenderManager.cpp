@@ -76,11 +76,13 @@ void RenderManager::GetRenderableObject()
 		shared_ptr<ParticleSystem> particleSystem = gameObject->GetComponent<ParticleSystem>();
 		shared_ptr<UIImage> uiImage = gameObject->GetComponent<UIImage>();
 		shared_ptr<Button> uiButton = gameObject->GetComponent<Button>();
-
+		
 		if (meshRenderer != nullptr)
 		{
 			if (uiImage != nullptr || uiButton != nullptr)
 				_UIObjects.push_back(gameObject);
+			else if (particleSystem)
+				_particleObjects.push_back(gameObject);
 			else if (!meshRenderer->CheckUseEnvironmentMap())
 				_renderObjects.push_back(gameObject);
 			else
@@ -405,8 +407,9 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 			continue;
 
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
-		shared_ptr<Model> model = meshRenderer->GetModel();
 
+		if (!meshRenderer)
+			continue;
 
 		if (meshRenderer->GetRenderPasses().size() > 0)
 		{
@@ -434,6 +437,30 @@ void RenderManager::DrawRenderableObject(bool isEnv)
 void RenderManager::DrawUIObject()
 {
 	for (const shared_ptr<GameObject>& gameObject : _UIObjects)
+	{
+		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
+		shared_ptr<Model> model = meshRenderer->GetModel();
+
+		if (meshRenderer->GetRenderPasses().size() > 0)
+		{
+			int count = meshRenderer->GetRenderPasses().size();
+			for (int i = 0; i < meshRenderer->GetRenderPasses().size(); i++)
+			{
+				shared_ptr<RenderPass> renderPass = meshRenderer->GetRenderPasses()[i];
+				renderPass->Render(false);
+				if (i + 1 < meshRenderer->GetRenderPasses().size())
+				{
+					shared_ptr<RenderPass> nextRenderPass = meshRenderer->GetRenderPasses()[i + 1];
+					nextRenderPass->SetInputSRV(renderPass->GetOutputSRV());
+				}
+			}
+		}
+	}
+}
+
+void RenderManager::DrawParticleObject()
+{
+	for (const shared_ptr<GameObject>& gameObject : _particleObjects)
 	{
 		shared_ptr<MeshRenderer> meshRenderer = gameObject->GetComponent<MeshRenderer>();
 		shared_ptr<Model> model = meshRenderer->GetModel();
@@ -506,6 +533,7 @@ void RenderManager::Render()
 	RenderAllGameObject();
 
 	DrawUIObject();
+	DrawParticleObject();
 
 	if (_filterType == FilterType::GAUSSIAN_BLUR)
 		GP.RenderQuad();
@@ -561,6 +589,7 @@ void RenderManager::ClearRenderObject()
 	_UIObjects.clear();
 	_envMappedObjects.clear();
 	_billboardObjs.clear();
+	_particleObjects.clear();
 	cache_DefaultRender.clear();
 	cache_StaticMeshRender.clear();
 	cache_AnimatedRender.clear();

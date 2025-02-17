@@ -165,8 +165,8 @@ struct ParticleBuffer
 	float padding3;
 	float gGameTime;
 	float gTimeStep;
+	float gEndParticle;
 	float padding4;
-	float padding5;
 	Matrix gView;
 	Matrix gProj;
 };

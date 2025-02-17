@@ -46,8 +46,8 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="UI_Button">
-        <Transform posX="19.599005" posY="64.300018" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="50" scaleY="50" scaleZ="1"/>
-        <Button posX="19.599005" posY="64.300018" sizeX="50" sizeY="50" rectLeft="641" rectTop="197" rectRight="741" rectBottom="297" onClickedFunctionKey="class TestEvent::TestLog" scaleX="50" scaleY="50"/>
+        <Transform posX="584.59875" posY="250.30005" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="50" scaleY="50" scaleZ="1"/>
+        <Button posX="584.59875" posY="250.30005" sizeX="50" sizeY="50" rectLeft="1206" rectTop="11" rectRight="1306" rectBottom="111" onClickedFunctionKey="class TestEvent::TestLog" scaleX="50" scaleY="50"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="Debug_UI_Material" mesh="Quad">
             <RenderPass pass="11" depthStencilState="4"/>
         </MeshRenderer>
@@ -93,11 +93,11 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
             <RenderPass pass="10" depthStencilState="3"/>
         </MeshRenderer>
-        <ParticleSystem/>
+        <ParticleSystem speed="4.6999998" endParticle="false"/>
     </GameObject>
     <GameObject name="skyBox">
         <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="SunSetSkybox_Material" mesh="Sphere">
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="GrassSkybox_Material" mesh="Sphere">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
     </GameObject>
@@ -151,6 +151,15 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
+        <Animator>
+            <EntryClip name="Run"/>
+            <Clip name="Dismissing" animIndex="2" isLoop="false" posX="455" posY="234"/>
+            <Clip name="Run" animIndex="0" isLoop="false" posX="326" posY="87"/>
+            <Clip name="Slash" animIndex="1" isLoop="false" posX="650" posY="100"/>
+            <Transition clipA="Run" clipB="Dismissing" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
+            <Transition clipA="Dismissing" clipB="Slash" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
+            <Transition clipA="Slash" clipB="Run" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
+        </Animator>
     </GameObject>
     <GameObject name="CottageModel">
         <Transform posX="19.137199" posY="0" posZ="-3.284374" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
@@ -257,11 +266,30 @@
         </MeshRenderer>
         <UIImage posX="-447.00006" posY="239" sizeX="58.59375" sizeY="35.15625" rectLeft="49" rectTop="-32" rectRight="400" rectBottom="178" scaleX="175.782" scaleY="105.468"/>
     </GameObject>
-    <GameObject name="cube">
-        <Transform posX="1.4901161e-08" posY="0.71393144" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
-            <RenderPass pass="7" depthStencilState="0"/>
+    <GameObject name="Ely1">
+        <Transform posX="7.9141588" posY="1.1920929e-07" posZ="-7.7938519" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Ely">
+            <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Run"/>
+            <Clip name="Fire" animIndex="1" isLoop="false" posX="499" posY="247"/>
+            <Clip name="Run" animIndex="0" isLoop="true" posX="450" posY="100" speed="1"/>
+            <Clip name="Strafing" animIndex="2" isLoop="false"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="NewObject">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Particle">
+        <Transform posX="-2" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
+            <RenderPass pass="10" depthStencilState="3"/>
+        </MeshRenderer>
+        <ParticleSystem speed="1" endParticle="false"/>
     </GameObject>
 </Scene>

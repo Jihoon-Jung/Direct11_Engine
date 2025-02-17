@@ -29,7 +29,6 @@ void ResourceManager::SaveResource()
 	WriteTextureToXML(L"start.png", L"startButton", L"Resource/Texture/startButton.xml");
 	WriteTextureToXML(L"pause.png", L"pauseButton", L"Resource/Texture/pauseButton.xml");
 	WriteTextureToXML(L"stop.png", L"stopButton", L"Resource/Texture/stopButton.xml");
-	WriteTextureToXML(L"grasscube1024.dds", L"skyboxTexture", L"Resource/Texture/skyboxTexture.xml");
 	WriteTextureToXML(L"bricks_nmap.png", L"NormalMap", L"Resource/Texture/NormalMap.xml");
 	WriteTextureToXML(L"Material_Icon.png", L"Material_Icon", L"Resource/Texture/Material_Icon.xml");
 	WriteTextureToXML(L"Mesh_Icon.png", L"Mesh_Icon", L"Resource/Texture/Mesh_Icon.xml");
@@ -278,7 +277,6 @@ void ResourceManager::SaveResource()
 
 	WriteMaterialToXML(L"Leather", L"", MaterialDesc(), L"Debug_UI_Shader", L"Debug_UI_Material", L"Resource/Material/DebugUIMaterial.xml");
 
-	WriteMaterialToXML(L"skyboxTexture", L"", MaterialDesc(), L"SkyBox_Shader", L"SkyBoxMaterial", L"Resource/Material/SkyboxMaterial.xml");
 
 	// model
 	WriteModelToXML(L"Tower/Tower", L"StaticMesh_Shader", L"Tower/Tower", L"TowerModel",

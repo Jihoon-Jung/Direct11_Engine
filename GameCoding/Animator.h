@@ -141,7 +141,13 @@ public:
 	bool GetBool(const string& name);
 	int GetInt(const string& name);
 	float GetFloat(const string& name);
-	void SetBoneObjects(const map<int32, shared_ptr<GameObject>>& boneObjects) { _boneObjects = boneObjects; }
+	void SetBoneObjects(const map<int32, shared_ptr<GameObject>>& boneObjects) 
+	{ 
+		for (const auto& [index, obj] : boneObjects)
+		{
+			_boneObjects[index] = obj;
+		}
+	}
 
 	shared_ptr<GameObject> FindBoneObjectByIndex(int index);
 
@@ -149,8 +155,8 @@ private:
 
 	BlendAnimDesc _blendAnimDesc;
 	float animationSumTime = 0.0f;
-	shared_ptr<Model> _model;
+	weak_ptr<Model> _model;
 
-	map<int32, shared_ptr<GameObject>> _boneObjects;
+	map<int32, weak_ptr<GameObject>> _boneObjects;
 };
 

@@ -27,7 +27,11 @@ public:
 	bool CheckUseEnvironmentMap() { return _isUseEnvironmentMap; }
 
 	shared_ptr<Mesh> GetMesh() { return _mesh; }
-	shared_ptr<Model> GetModel() { return _model; }
+	shared_ptr<Model> GetModel() { 
+		if (_model != nullptr)
+			return _model; 
+		return nullptr;
+	}
 	shared_ptr<Texture> GetTexture() { return GetMaterial()->GetTexture(); }
 	shared_ptr<Buffer> GetMaterialBuffer();
 

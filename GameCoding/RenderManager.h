@@ -38,6 +38,7 @@ public:
 		_envMappedObjects.clear();
 		_billboardObjs.clear();
 		_UIObjects.clear();
+		_particleObjects.clear();
 		_terrainObject = nullptr;
 		_lightObject = nullptr;
 		_buffers.clear();
@@ -52,6 +53,7 @@ public:
 	void GetRenderableObject();
 	void DrawRenderableObject(bool isEnv);
 	void DrawUIObject();
+	void DrawParticleObject();
 	void RenderEnvironmentMappedObjects(shared_ptr<GameObject> gameObject, shared_ptr<Texture> envTexture);
 	void Render();
 	void RenderAllGameObject();
@@ -77,6 +79,7 @@ private:
 	vector<shared_ptr<GameObject>> _envMappedObjects;
 	vector<shared_ptr<GameObject>> _billboardObjs;
 	vector<shared_ptr<GameObject>> _UIObjects;
+	vector<shared_ptr<GameObject>> _particleObjects;
 
 	shared_ptr<GameObject> _terrainObject;
 	shared_ptr<GameObject> _lightObject;

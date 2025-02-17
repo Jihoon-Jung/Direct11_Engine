@@ -11,8 +11,8 @@ cbuffer ParticleBuffer : register(b0)
     float padding3;        // x
     float gGameTime;       // x
     float gTimeStep;       // x
+    float gEndParticle;
     float padding4;
-    float padding5;
     row_major float4x4 gView;    // x
     row_major float4x4 gProj;
 }

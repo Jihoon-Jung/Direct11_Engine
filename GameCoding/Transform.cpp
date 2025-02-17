@@ -15,7 +15,6 @@ void Transform::Start()
 }
 void Transform::Update()
 {
-	UpdateTransform();
 }
 Vec3 Transform::ToEulerAngles(Quaternion q)
 {

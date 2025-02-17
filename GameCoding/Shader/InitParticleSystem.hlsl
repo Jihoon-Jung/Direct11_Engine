@@ -8,8 +8,8 @@ cbuffer ParticleBuffer : register(b0)
     float padding3;
     float gGameTime; // o
     float gTimeStep; // o
+    float gEndParticle;
     float padding4;
-    float padding5;
 	float4x4 gView;
 	float4x4 gProj;
 };
@@ -52,24 +52,27 @@ void GS(point Particle gin[1], inout PointStream<Particle> ptStream)
 
 	if (gin[0].Type == PT_EMITTER)
 	{
-		// time to emit a new particle?
-		if (gin[0].Age > 0.005f)
+		if (gEndParticle > 0.0f)
 		{
-			float3 vRandom = RandUnitVec3(0.0f);
-			vRandom.x *= 0.5f;
-			vRandom.z *= 0.5f;
+			// time to emit a new particle?
+			if (gin[0].Age > 0.005f)
+			{
+				float3 vRandom = RandUnitVec3(0.0f);
+				vRandom.x *= 0.5f;
+				vRandom.z *= 0.5f;
 
-			Particle p;
-			p.InitialPosW = gEmitPosW.xyz;
-			p.InitialVelW = 4.0f * vRandom;
-			p.SizeW = float2(3.0f, 3.0f);
-			p.Age = 0.0f;
-			p.Type = PT_FLARE;
+				Particle p;
+				p.InitialPosW = gEmitPosW.xyz;
+				p.InitialVelW = 4.0f * vRandom;
+				p.SizeW = float2(3.0f, 3.0f);
+				p.Age = 0.0f;
+				p.Type = PT_FLARE;
 
-			ptStream.Append(p);
+				ptStream.Append(p);
 
-			// reset the time to emit
-			gin[0].Age = 0.0f;
+				// reset the time to emit
+				gin[0].Age = 0.0f;
+			}
 		}
 
 		// always keep emitters

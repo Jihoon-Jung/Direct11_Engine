@@ -7,7 +7,7 @@ public:
 	void Start();
 	void Update();
 	void LateUpdate();
-
+	int cnt = 0;
 public:
 	void AddGameObject(shared_ptr<GameObject> gameObject);
 	void AddBoneGameObject(shared_ptr<GameObject> boneGameObject);

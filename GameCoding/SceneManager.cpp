@@ -222,7 +222,10 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 		if (auto particleElem = gameObjElem->FirstChildElement("ParticleSystem"))
 		{
 			auto particleSystem = make_shared<ParticleSystem>();
-			particleSystem->SetTransform(gameObj->transform());
+			float speed = particleElem->FloatAttribute("speed");
+			bool endParticle = particleElem->BoolAttribute("endParticle");
+			particleSystem->SetSpeed(speed);
+			particleSystem->SetEndParticleFlag(endParticle);
 			gameObj->AddComponent(particleSystem);
 		}
 		// UIImage 컴포넌트 처리
@@ -842,7 +845,6 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	particleRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM3);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"FireParticle", particleRenderer, L"ParticleMaterial");
 	auto particleSystem = make_shared<ParticleSystem>();
-	particleSystem->SetTransform(_activeScene->Find(L"FireParticle")->transform());
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"FireParticle", particleSystem);
 
 	// SkyBox
@@ -1282,6 +1284,15 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			boxCollider->SetCenter(center);
 			gameObj->AddComponent(boxCollider);
 		}
+		if (auto particleElem = gameObjElem->FirstChildElement("ParticleSystem"))
+		{
+			auto particleSystem = make_shared<ParticleSystem>();
+			float speed = particleElem->FloatAttribute("speed");
+			bool endParticle = particleElem->BoolAttribute("endParticle");
+			particleSystem->SetSpeed(speed);
+			particleSystem->SetEndParticleFlag(endParticle);
+			gameObj->AddComponent(particleSystem);
+		}
 		else if (auto colliderElem = gameObjElem->FirstChildElement("SphereCollider"))
 		{
 			auto sphereCollider = make_shared<SphereCollider>();
@@ -1300,12 +1311,6 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			sphereCollider->SetScale(Vec3(radius, radius, radius));
 
 			gameObj->AddComponent(sphereCollider);
-		}
-		if (auto particleElem = gameObjElem->FirstChildElement("ParticleSystem"))
-		{
-			auto particleSystem = make_shared<ParticleSystem>();
-			particleSystem->SetTransform(gameObj->transform());
-			gameObj->AddComponent(particleSystem);
 		}
 
 		// UIImage 컴포넌트 처리
@@ -1831,6 +1836,8 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 	else if (auto particleSystem = dynamic_pointer_cast<ParticleSystem>(component))
 	{
 		tinyxml2::XMLElement* particleElem = doc.NewElement("ParticleSystem");
+		particleElem->SetAttribute("speed", particleSystem->GetSpeed());
+		particleElem->SetAttribute("endParticle", particleSystem->GetEndParticleFlag());
 		gameObj->InsertEndChild(particleElem);
 	}
 	else if (auto animator = dynamic_pointer_cast<Animator>(component))
@@ -1983,6 +1990,13 @@ void SceneManager::RemoveComponentFromGameObjectInXML(const wstring& sceneName, 
 				if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
 				{
 					gameObjElem->DeleteChild(animatorElem);
+				}
+			}
+			else if (dynamic_pointer_cast<ParticleSystem>(component))
+			{
+				if (auto particleElem = gameObjElem->FirstChildElement("ParticleSystem"))
+				{
+					gameObjElem->DeleteChild(particleElem);
 				}
 			}
 			else if (auto script = dynamic_pointer_cast<MonoBehaviour>(component))
@@ -2780,7 +2794,7 @@ shared_ptr<GameObject> SceneManager::CreateParticleToScene(const wstring& sceneN
 	}
 
 	// Particle System
-	SaveAndLoadGameObjectToXML(sceneName, baseName,
+	SaveAndLoadGameObjectToXML(sceneName, newName,
 		GP.centerPos - Vec3(2.0f, 0.0f, 0.0f), Vec3::Zero, Vec3(1.0f));
 	auto particleRenderer = make_shared<MeshRenderer>();
 	particleRenderer->SetMesh(nullptr);
@@ -2790,12 +2804,11 @@ shared_ptr<GameObject> SceneManager::CreateParticleToScene(const wstring& sceneN
 	particleRenderer->AddRenderPass();
 	particleRenderer->GetRenderPasses()[0]->SetPass(Pass::PARTICLE_RENDER);
 	particleRenderer->GetRenderPasses()[0]->SetMeshRenderer(particleRenderer);
-	particleRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(baseName)->transform());
+	particleRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(newName)->transform());
 	particleRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM3);
-	AddComponentToGameObjectAndSaveToXML(sceneName, baseName, particleRenderer, L"ParticleMaterial");
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, particleRenderer, L"ParticleMaterial");
 	auto particleSystem = make_shared<ParticleSystem>();
-	particleSystem->SetTransform(_activeScene->Find(baseName)->transform());
-	AddComponentToGameObjectAndSaveToXML(sceneName, baseName, particleSystem);
+	AddComponentToGameObjectAndSaveToXML(sceneName, newName, particleSystem);
 
 	RENDER.GetRenderableObject();
 
@@ -3416,6 +3429,47 @@ void SceneManager::UpdateGameObjectRenderPassInXML(const wstring& sceneName, con
 				}
 				doc.SaveFile(pathStr.c_str());
 			}
+			break;
+		}
+	}
+}
+
+void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName, float speed, bool endParticle)
+{
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return;
+
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Scene/" + Utils::ToString(sceneName) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Scene");
+	if (!root) return;
+
+	// GameObject 찾기
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (Utils::ToWString(gameObjElem->Attribute("name")) == objectName)
+		{
+			// ParticleSystem 엘리먼트 찾기
+			auto particleElem = gameObjElem->FirstChildElement("ParticleSystem");
+			if (particleElem)
+			{
+				// 속성 업데이트
+				particleElem->SetAttribute("speed", speed);
+				particleElem->SetAttribute("endParticle", endParticle);
+			}
+			else
+			{
+				// ParticleSystem 엘리먼트가 없으면 새로 생성
+				particleElem = doc.NewElement("ParticleSystem");
+				particleElem->SetAttribute("speed", speed);
+				particleElem->SetAttribute("endParticle", endParticle);
+				gameObjElem->InsertEndChild(particleElem);
+			}
+
+			doc.SaveFile(pathStr.c_str());
 			break;
 		}
 	}

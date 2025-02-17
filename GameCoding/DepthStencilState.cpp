@@ -84,4 +84,15 @@ void DepthStencilState::SetDepthStencilState(DSState state)
 		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
 		CHECK(hr);
 	}
+	else if (state == DSState::UI)
+	{
+		D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
+		ZeroMemory(&depthStencilStateDesc, sizeof(depthStencilStateDesc));
+		depthStencilStateDesc.DepthEnable = TRUE;
+		depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
+		depthStencilStateDesc.StencilEnable = FALSE;
+		HRESULT hr = DEVICE->CreateDepthStencilState(&depthStencilStateDesc, _depthStencilState.GetAddressOf());
+		CHECK(hr);
+	}
 }

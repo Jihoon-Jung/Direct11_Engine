@@ -37,11 +37,13 @@ void Animator::Update()
 	/*SetTransitionFlag(GetClip("Clip1")->transition, GP.test);
 	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);*/
 
-	if (_model == nullptr)
+	if (_model.expired())
 	{
 		_model = GetGameObject()->GetComponent<MeshRenderer>()->GetModel();
+		if (_model.expired())  // model을 가져오지 못한 경우
+			return;
 	}
-		
+
 
 	shared_ptr<Clip> currClip = _currClip;
 	shared_ptr<Transition> currTransition = currClip->transition;// animator->_currTransition;
@@ -51,7 +53,7 @@ void Animator::Update()
 	_blendAnimDesc.curr.speed = currClip->speed;
 
 	// 현재 애니메이션 업데이트
-	shared_ptr<ModelAnimation> current = _model->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
+	shared_ptr<ModelAnimation> current = _model.lock()->GetAnimationByIndex(_blendAnimDesc.curr.animIndex);
 	if (current)
 	{
 		// 현재 프레임의 시간 계산 (프레임 수를 프레임 레이트로 나누어 초 단위로 변환)
@@ -159,6 +161,7 @@ void Animator::Update()
 
 
 	UpdateBoneTransforms();
+	
 }
 
 void Animator::AddClip(const string& name, int animIndex, bool isLoop)
@@ -267,72 +270,76 @@ void Animator::SetTransitionDuration(shared_ptr<Transition> transition, float du
 void Animator::HandleTransitionBlend(shared_ptr<Transition>& transition)
 {
 	// transitionOffset 적용: 다음 애니메이션의 시작 시점 조절
-	if (_blendAnimDesc.blendSumTime == 0.0f)  // 블렌딩 시작 시
+	if (auto model = _model.lock())
 	{
-		shared_ptr<ModelAnimation> next = _model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-		if (next)
+		if (_blendAnimDesc.blendSumTime == 0.0f)  // 블렌딩 시작 시
 		{
-			// Offset 위치로 다음 애니메이션 시작 프레임 설정
-			float offsetFrame = next->frameCount * transition->transitionOffset;
-			_blendAnimDesc.next.currFrame = static_cast<int>(offsetFrame);
-			_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-			_blendAnimDesc.next.sumTime = 0.f;
-		}
-	}
-
-	_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
-	_blendAnimDesc.blendRatio = _blendAnimDesc.blendSumTime / transition->transitionDuration;
-
-	if (_blendAnimDesc.blendRatio > 1.0f)
-	{
-		animationSumTime = 0.0f;
-		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
-
-		// 현재 클립의 isEndFrame 초기화
-		if (auto currClip = _currClip)
-		{
-			currClip->isEndFrame = false;
-			for (auto& event : currClip->events)
+			shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+			if (next)
 			{
-				if (event.isFuctionCalled)
-					event.isFuctionCalled = false;
-			}
-		}
-
-
-		// 다음 클립의 isEndFrame도 초기화
-		if (auto nextClip = GetClip(transition->clipB.lock()->name))
-			nextClip->isEndFrame = false;
-
-		SetCurrentClip(transition->clipB.lock()->name);
-		SetCurrentTransition();
-
-	}
-	else
-	{
-		// 다음 애니메이션 업데이트
-		shared_ptr<ModelAnimation> next = _model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-		if (next)
-		{
-			// 다음 클립의 진행률 업데이트
-			if (auto nextClip = transition->clipB.lock())
-			{
-				nextClip->progressRatio = static_cast<float>(_blendAnimDesc.next.currFrame) / (next->frameCount - 1);
-			}
-
-			_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
-			float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
-
-			if (_blendAnimDesc.next.ratio >= 1.0f)
-			{
-				_blendAnimDesc.next.sumTime = 0.f;
-				_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+				// Offset 위치로 다음 애니메이션 시작 프레임 설정
+				float offsetFrame = next->frameCount * transition->transitionOffset;
+				_blendAnimDesc.next.currFrame = static_cast<int>(offsetFrame);
 				_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+				_blendAnimDesc.next.sumTime = 0.f;
+			}
+		}
+
+		_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
+		_blendAnimDesc.blendRatio = _blendAnimDesc.blendSumTime / transition->transitionDuration;
+
+		if (_blendAnimDesc.blendRatio > 1.0f)
+		{
+			animationSumTime = 0.0f;
+			_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
+
+			// 현재 클립의 isEndFrame 초기화
+			if (auto currClip = _currClip)
+			{
+				currClip->isEndFrame = false;
+				for (auto& event : currClip->events)
+				{
+					if (event.isFuctionCalled)
+						event.isFuctionCalled = false;
+				}
 			}
 
-			_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
+
+			// 다음 클립의 isEndFrame도 초기화
+			if (auto nextClip = GetClip(transition->clipB.lock()->name))
+				nextClip->isEndFrame = false;
+
+			SetCurrentClip(transition->clipB.lock()->name);
+			SetCurrentTransition();
+
+		}
+		else
+		{
+			// 다음 애니메이션 업데이트
+			shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
+			if (next)
+			{
+				// 다음 클립의 진행률 업데이트
+				if (auto nextClip = transition->clipB.lock())
+				{
+					nextClip->progressRatio = static_cast<float>(_blendAnimDesc.next.currFrame) / (next->frameCount - 1);
+				}
+
+				_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
+				float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
+
+				if (_blendAnimDesc.next.ratio >= 1.0f)
+				{
+					_blendAnimDesc.next.sumTime = 0.f;
+					_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+					_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
+				}
+
+				_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
+			}
 		}
 	}
+	
 }
 
 void Animator::AddParameter(const string& name, Parameter::Type type)
@@ -778,56 +785,57 @@ void Animator::SetClipCurrentTransition(shared_ptr<Clip> clip)
 
 void Animator::UpdateBoneTransforms()
 {
-	if (!_model || !_currClip)
-		return;
-
-	shared_ptr<Transition> currTransition = _currClip->transition;
-	
-	bool isBlending = (currTransition != nullptr && _blendAnimDesc.blendSumTime > 0.0f);
-
-	for (int boneIndex : GetGameObject()->GetActiveBoneIndices())
+	if (auto model = _model.lock())  // weak_ptr를 shared_ptr로 변환
 	{
-		const auto& bone = _model->GetBoneByIndex(boneIndex);
+		if (!_currClip)
+			return;
 
-		shared_ptr<GameObject> boneObject = FindBoneObjectByIndex(bone->index);
-		if (!boneObject || bone->index < 0)
-			continue;
+		shared_ptr<Transition> currTransition = _currClip->transition;
+		bool isBlending = (currTransition != nullptr && _blendAnimDesc.blendSumTime > 0.0f);
 
-		Matrix finalTransform;
-
-		if (isBlending)
+		for (int boneIndex : GetGameObject()->GetActiveBoneIndices())
 		{
-			// 현재 애니메이션 프레임 보간
-			Matrix curr1 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
-			Matrix next1 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
-			Matrix anim1 = Matrix::Lerp(curr1, next1, _blendAnimDesc.curr.ratio);
+			const auto& bone = model->GetBoneByIndex(boneIndex);
+			shared_ptr<GameObject> boneObject = FindBoneObjectByIndex(bone->index);
+			if (!boneObject || bone->index < 0)
+				continue;
 
-			// 다음 애니메이션 프레임 보간
-			Matrix curr2 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.next.currFrame, _blendAnimDesc.next.animIndex);
-			Matrix next2 = _model->GetAnimationTransform(bone->index, _blendAnimDesc.next.nextFrame, _blendAnimDesc.next.animIndex);
-			Matrix anim2 = Matrix::Lerp(curr2, next2, _blendAnimDesc.next.ratio);
+			Matrix finalTransform;
 
-			// 두 애니메이션 간 블렌딩
-			Matrix blendedAnim = Matrix::Lerp(anim1, anim2, _blendAnimDesc.blendRatio);
-			finalTransform = bone->transform * blendedAnim;
+			if (isBlending)
+			{
+				// 현재 애니메이션 보간값 계산
+				Matrix curr1 = model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
+				Matrix next1 = model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
+				Matrix anim1 = Matrix::Lerp(curr1, next1, _blendAnimDesc.curr.ratio);
+
+				// 다음 애니메이션 보간값 계산
+				Matrix curr2 = model->GetAnimationTransform(bone->index, _blendAnimDesc.next.currFrame, _blendAnimDesc.next.animIndex);
+				Matrix next2 = model->GetAnimationTransform(bone->index, _blendAnimDesc.next.nextFrame, _blendAnimDesc.next.animIndex);
+				Matrix anim2 = Matrix::Lerp(curr2, next2, _blendAnimDesc.next.ratio);
+
+				// 두 애니메이션 간 보간
+				Matrix blendedAnim = Matrix::Lerp(anim1, anim2, _blendAnimDesc.blendRatio);
+				finalTransform = bone->transform * blendedAnim;
+			}
+			else
+			{
+				// 단일 애니메이션 적용
+				Matrix curr = model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
+				Matrix next = model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
+				Matrix animTransform = Matrix::Lerp(curr, next, _blendAnimDesc.curr.ratio);
+				finalTransform = bone->transform * animTransform;
+			}
+
+			Vec3 scale, translation;
+			Quaternion rotation;
+			finalTransform.Decompose(scale, rotation, translation);
+
+			auto boneTransform = boneObject->transform();
+			boneTransform->SetLocalPosition(translation);
+			boneTransform->SetQTRotation(rotation);
+			boneTransform->SetLocalScale(scale);
 		}
-		else
-		{
-			// 단일 애니메이션 보간
-			Matrix curr = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.currFrame, _blendAnimDesc.curr.animIndex);
-			Matrix next = _model->GetAnimationTransform(bone->index, _blendAnimDesc.curr.nextFrame, _blendAnimDesc.curr.animIndex);
-			Matrix animTransform = Matrix::Lerp(curr, next, _blendAnimDesc.curr.ratio);
-			finalTransform = bone->transform * animTransform;
-		}
-
-		Vec3 scale, translation;
-		Quaternion rotation;
-		finalTransform.Decompose(scale, rotation, translation);
-
-		auto boneTransform = boneObject->transform();
-		boneTransform->SetLocalPosition(translation);
-		boneTransform->SetQTRotation(rotation);
-		boneTransform->SetLocalScale(scale);
 	}
 }
 
@@ -836,7 +844,7 @@ shared_ptr<GameObject> Animator::FindBoneObjectByIndex(int index)
 	auto it = _boneObjects.find(index);
 	if (it != _boneObjects.end())
 	{
-		return it->second;
+		return it->second.lock();
 	}
 	return nullptr;
 }

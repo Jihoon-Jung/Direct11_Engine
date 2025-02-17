@@ -325,7 +325,7 @@ void GUIManager::RenderUI()
                 {
                     // GameObject 생성 및 저장
                     SCENE.SaveAndLoadGameObjectToXML(sceneName, objectName, _newObjectPosition, _newObjectRotation, _newObjectScale);
-
+                    RENDER.GetRenderableObject();
                     // MeshRenderer 추가
                     if (_newObjectUseMeshRenderer && _newObjectSelectedMesh < _meshList.size() && _newObjectSelectedMaterial < _materialList.size())
                     {
@@ -1029,6 +1029,8 @@ void GUIManager::RenderUI()
                     componentName = "UIImage";
                 else if (dynamic_pointer_cast<Button>(component))
                     componentName = "Button";
+                else if (dynamic_pointer_cast<ParticleSystem>(component))
+                    componentName = "ParticleSystem";
 
                 if (!componentName.empty())
                 {
@@ -1430,6 +1432,41 @@ void GUIManager::RenderUI()
                             ImGui::PopStyleVar();
                             ImGui::Separator();
                         }
+                        
+                        else if (auto particleSystem = dynamic_pointer_cast<ParticleSystem>(component))
+                        {
+                            // Speed Slider (1~10)
+                            float speed = particleSystem->GetSpeed();
+                            if (ImGui::SliderFloat("Speed", &speed, 1.0f, 10.0f, "%.1f"))
+                            {
+                                particleSystem->SetSpeed(speed);
+
+                                // XML 업데이트
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectParticleSystemInXML(
+                                    currentSceneName,
+                                    _selectedObject->GetName(),
+                                    speed,
+                                    particleSystem->GetEndParticleFlag()
+                                );
+                            }
+
+                            // EndParticle Checkbox
+                            bool endParticle = particleSystem->GetEndParticleFlag();
+                            if (ImGui::Checkbox("End Particle", &endParticle))
+                            {
+                                particleSystem->SetEndParticleFlag(endParticle);
+
+                                // XML 업데이트
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectParticleSystemInXML(
+                                    currentSceneName,
+                                    _selectedObject->GetName(),
+                                    particleSystem->GetSpeed(),
+                                    endParticle
+                                );
+                            }
+                        }
                         else if (auto uiImage = dynamic_pointer_cast<UIImage>(component))
                         {
                             
@@ -1510,6 +1547,7 @@ void GUIManager::RenderUI()
                     bool hasAnimator = false;
                     bool hasUIImage = false;
                     bool hasButton = false;
+                    bool hasParticleSystem = false;
 
                     // 기존 컴포넌트 체크
                     for (const auto& component : components)
@@ -1526,6 +1564,8 @@ void GUIManager::RenderUI()
                             hasUIImage = true;
                         else if (dynamic_pointer_cast<Button>(component))
                             hasButton = true;
+                        else if (dynamic_pointer_cast<ParticleSystem>(component))
+                            hasParticleSystem = true;
                     }
 
                     // BoxCollider 메뉴 아이템
@@ -1634,6 +1674,18 @@ void GUIManager::RenderUI()
                             SCENE.GetActiveScene()->GetSceneName(),
                             _selectedObject->GetName(),
                             button
+                        );
+                        ImGui::CloseCurrentPopup();
+                    }
+                    if (!hasParticleSystem && ImGui::MenuItem("ParticleSystem"))
+                    {
+                        auto particleSystem = make_shared<ParticleSystem>();
+
+                        // XML 업데이트
+                        SCENE.AddComponentToGameObjectAndSaveToXML(
+                            SCENE.GetActiveScene()->GetSceneName(),
+                            _selectedObject->GetName(),
+                            particleSystem
                         );
                         ImGui::CloseCurrentPopup();
                     }

@@ -5,13 +5,6 @@ ParticleSystem::ParticleSystem()
 	: Super(ComponentType::Particle)
 {
 	_firstRun = true;
-	_gameTime = 0.0f;
-	_timeStep = 0.0f;
-	_age = 0.0f;
-
-	/*_eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	_emitPosW = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	_emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);*/
 
 	ComPtr<ID3D11ShaderResourceView> texArraySRV = RESOURCE.GetResource<Texture>(L"Fire_Particle")->GetShaderResourceView();
 	ComPtr<ID3D11ShaderResourceView> randomTexSRV = RESOURCE.GetResource<Texture>(L"Random_Texture")->GetShaderResourceView();
@@ -101,11 +94,7 @@ void ParticleSystem::ReadStreamOutData()
 	stagingBuffer->Release();
 }
 
-void ParticleSystem::Reset()
-{
-	_firstRun = true;
-	_age = 0.0f;
-}
+
 
 void ParticleSystem::Update()
 {

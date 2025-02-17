@@ -118,7 +118,8 @@ public:
 
 	void UpdateGameObjectRenderPassInXML(const wstring& sceneName, const wstring& objectName,
 		Pass pass, bool useEnvironmentMap);
-
+	void UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName,
+		float speed, bool endParticle);
 
 	shared_ptr<GameObject> CreateCubeToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateSphereToScene(const wstring& sceneName);

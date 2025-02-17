@@ -14,8 +14,6 @@ RenderPass::~RenderPass()
 
 void RenderPass::Render(bool isEnv)
 {
-	_transformPtr = _transform.lock();
-
 	if (_pass == Pass::DEFAULT_RENDER)
 		DefaultRender(isEnv);
 	else if (_pass == Pass::GAUSSIANBLUR_RENDER)
@@ -45,8 +43,10 @@ void RenderPass::DefaultRender(bool isEnv)
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 
-	if (_transformPtr)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	auto transformPtr = _transform.lock();
+
+	if (transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	else
 		assert(0);
 
@@ -146,9 +146,9 @@ void RenderPass::DefaultRender(bool isEnv)
 
 	if (!RENDER.GetShadowMapFlag())
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
-
+	
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+	depthStencilState->SetDepthStencilState(_dsStateType);
 
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 	samplerState->CreateSamplerState();
@@ -220,13 +220,13 @@ void RenderPass::DefaultRender(bool isEnv)
 
 void RenderPass::DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer)
 {
-	_transformPtr = _transform.lock();
+	auto transformPtr = _transform.lock();
 
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 
-	if (_transformPtr)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	if (transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	else
 		assert(0);
 
@@ -330,7 +330,7 @@ void RenderPass::DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>&
 		shader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"shadowMap", 1, GP.GetShadowMapSRV());
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+	depthStencilState->SetDepthStencilState(_dsStateType);
 
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 	samplerState->CreateSamplerState();
@@ -360,7 +360,7 @@ void RenderPass::DefaultRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>&
 
 void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer)
 {
-	_transformPtr = _transform.lock();
+	auto transformPtr = _transform.lock();
 
 	shared_ptr<Model> model = _meshRenderer->GetModel();
 	shared_ptr<Shader> shader = _meshRenderer->GetShader();
@@ -413,8 +413,8 @@ void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffe
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
-		if (_transformPtr)
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		if (transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 		else
 			assert(0);
 
@@ -511,7 +511,7 @@ void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffe
 		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
 
 		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+		depthStencilState->SetDepthStencilState(_dsStateType);
 
 		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 		samplerState->CreateSamplerState();
@@ -545,7 +545,7 @@ void RenderPass::StaticMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffe
 
 void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuffer>& instancingBuffer, const InstancedBlendDesc& desc)
 {
-	_transformPtr = _transform.lock();
+	auto transformPtr = _transform.lock();
 
 	shared_ptr<Animator> animator = _meshRenderer->GetGameObject()->GetComponent<Animator>();
 	shared_ptr<Model> model = _meshRenderer->GetModel();
@@ -586,8 +586,8 @@ void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuf
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
-		if (_transformPtr)
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		if (transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 		else
 			assert(0);
 
@@ -682,7 +682,7 @@ void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuf
 		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
 
 		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+		depthStencilState->SetDepthStencilState(_dsStateType);
 
 		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 		samplerState->CreateSamplerState();
@@ -716,11 +716,13 @@ void RenderPass::AnimatedMeshRenderInstance(bool isEnv, shared_ptr<InstancingBuf
 
 void RenderPass::EnvironmentMapRender()
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = RESOURCE.GetResource<Shader>(L"EnvironmentMap_Shader");
 
-	if (_transformPtr)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	if (transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	else
 		assert(0);
 
@@ -836,10 +838,12 @@ void RenderPass::EnvironmentMapRender()
 
 void RenderPass::TessellationRender(bool isEnv)
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	if (_transformPtr)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	if (transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	else
 		assert(0);
 
@@ -970,7 +974,9 @@ void RenderPass::TessellationRender(bool isEnv)
 
 void RenderPass::OutlineRender(bool isEnv)
 {
-	Vec3 firstObjectScale = _transformPtr->GetLocalScale();
+	auto transformPtr = _transform.lock();
+
+	Vec3 firstObjectScale = transformPtr->GetLocalScale();
 	Vec3 secondObjectScale = firstObjectScale * 1.1f;
 	DSState firstObjectDStype = _dsStateType;
 	shared_ptr<Material> firstObjectMaterial = _meshRenderer->GetMaterial();
@@ -978,7 +984,7 @@ void RenderPass::OutlineRender(bool isEnv)
 	{
 		if (i > 0)
 		{
-			_transformPtr->SetLocalScale(secondObjectScale);
+			transformPtr->SetLocalScale(secondObjectScale);
 			_dsStateType = DSState::CUSTOM2;
 			_meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SimpleMaterial"));
 		}
@@ -988,8 +994,8 @@ void RenderPass::OutlineRender(bool isEnv)
 		
 		shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
 		shader = _meshRenderer->GetMaterial()->GetShader();
-		if (_transformPtr)
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		if (transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 		else
 			assert(0);
 
@@ -1114,7 +1120,7 @@ void RenderPass::OutlineRender(bool isEnv)
 	}
 	
 	// Restore
-	_transformPtr->SetLocalScale(firstObjectScale);
+	transformPtr->SetLocalScale(firstObjectScale);
 	_dsStateType = firstObjectDStype;
 	_meshRenderer->SetMaterial(firstObjectMaterial);
 }
@@ -1174,7 +1180,7 @@ void RenderPass::QuadRender(bool isEnv)
 	_meshRenderer->GetShader()->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"texture0", 1, _inputSRV);
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+	depthStencilState->SetDepthStencilState(_dsStateType);
 
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 	samplerState->CreateSamplerState();
@@ -1194,10 +1200,12 @@ void RenderPass::QuadRender(bool isEnv)
 
 void RenderPass::TerrainRender(bool isEnv)
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	if (_transformPtr)
-		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	if (transformPtr)
+		shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	else
 		assert(0);
 
@@ -1355,6 +1363,8 @@ void RenderPass::TerrainRender(bool isEnv)
 
 void RenderPass::StaticMeshRencer(bool isEnv)
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<Model> model = _meshRenderer->GetModel();
 	shared_ptr<Shader> shader = _meshRenderer->GetShader();
 
@@ -1406,8 +1416,8 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
-		if (_transformPtr)
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		if (transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 		else
 			assert(0);
 
@@ -1500,7 +1510,7 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
 
 		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+		depthStencilState->SetDepthStencilState(_dsStateType);
 
 		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 		samplerState->CreateSamplerState();
@@ -1526,6 +1536,8 @@ void RenderPass::StaticMeshRencer(bool isEnv)
 
 void RenderPass::AnimatedMeshRender(bool isEnv)
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<Animator> animator = _meshRenderer->GetGameObject()->GetComponent<Animator>();
 	shared_ptr<Model> model = _meshRenderer->GetModel();
 	shared_ptr<Shader> shader = _meshRenderer->GetShader();
@@ -1575,8 +1587,8 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 		shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->GetMainCamera();
 
-		if (_transformPtr)
-			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+		if (transformPtr)
+			shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 		else
 			assert(0);
 
@@ -1667,7 +1679,7 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 		DEVICECONTEXT->RSSetState(rasterizerState->GetRasterizerState().Get());
 
 		shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-		depthStencilState->SetDepthStencilState(DSState::NORMAL);
+		depthStencilState->SetDepthStencilState(_dsStateType);
 
 		shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 		samplerState->CreateSamplerState();
@@ -1693,6 +1705,8 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 
 void RenderPass::ParticleRender(bool isEnv)
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<Shader> initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticle_Shader");
 	shared_ptr<Shader> renderParticleShader = _meshRenderer->GetShader();// RESOURCE.GetResource<Shader>(L"RenderParticle_Shader");
 
@@ -1711,18 +1725,19 @@ void RenderPass::ParticleRender(bool isEnv)
 	}
 
 
-	shared_ptr<ParticleSystem> particleComponent = _transformPtr->GetGameObject()->GetComponent<ParticleSystem>();
+	shared_ptr<ParticleSystem> particleComponent = transformPtr->GetGameObject()->GetComponent<ParticleSystem>();
 	Vec3 _eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Vec3 _emitPosW = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	Vec3 _emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
 	Matrix viewProj = viewMat * projMat;
-
+	float spd = particleComponent->GetSpeed();
 	ParticleBuffer pBuffer;
 	pBuffer.gView = viewMat;
 	pBuffer.gProj = projMat;
 	pBuffer.gGameTime = TIME.GetTotalTime();
-	pBuffer.gTimeStep = TIME.GetDeltaTime() / 7.0f;
+	pBuffer.gTimeStep = TIME.GetDeltaTime() / 7.0f * particleComponent->GetSpeed();
+	pBuffer.gEndParticle = !particleComponent->GetEndParticleFlag();
 	pBuffer.gEyePosW = mainCamera->transform()->GetWorldPosition();
 	pBuffer.gEmitPosW = _emitPosW;
 	pBuffer.gEmitDirW = _emitDirW;
@@ -1793,7 +1808,7 @@ void RenderPass::ParticleRender(bool isEnv)
 	rasterizerState->CreateRasterizerState(states);
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::CUSTOM3);
+	depthStencilState->SetDepthStencilState(_dsStateType);
 
 	shared_ptr<BlendState> blendState = make_shared<BlendState>();
 	blendState->CreateAdditiveBlendState();
@@ -1820,7 +1835,7 @@ void RenderPass::ParticleRender(bool isEnv)
 
 	shared_ptr<Texture> fireParticleTexture = _meshRenderer->GetMaterial()->GetTexture();
 	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"ParticleBuffer", 1, particleBuffer);
-	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	renderParticleShader->PushConstantBufferToShader(ShaderType::GEOMETRY_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	renderParticleShader->PushShaderResourceToShader(ShaderType::PIXEL_SHADER, L"gTexArray", 1, fireParticleTexture->GetShaderResourceView());
 
 	DEVICECONTEXT->PSSetSamplers(0, 1, samplerState->GetSamplerState().GetAddressOf());
@@ -1841,9 +1856,11 @@ void RenderPass::ParticleRender(bool isEnv)
 
 void RenderPass::DebugQuadRender()
 {
+	auto transformPtr = _transform.lock();
+
 	shared_ptr<GameObject> cameraObject = SCENE.GetActiveScene()->Find(L"UICamera");
 	shared_ptr<Shader> shader = _meshRenderer->GetMaterial()->GetShader();
-	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, _transformPtr->GetTransformBuffer());
+	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"TransformBuffer", 1, transformPtr->GetTransformBuffer());
 	shader->PushConstantBufferToShader(ShaderType::VERTEX_SHADER, L"CameraBuffer", 1, cameraObject->GetCameraBuffer());
 
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1888,7 +1905,7 @@ void RenderPass::DebugQuadRender()
 
 
 	shared_ptr<DepthStencilState> depthStencilState = make_shared<DepthStencilState>();
-	depthStencilState->SetDepthStencilState(DSState::NORMAL);
+	depthStencilState->SetDepthStencilState(_dsStateType);
 
 	shared_ptr<SamplerState> samplerState = make_shared<SamplerState>();
 	samplerState->CreateSamplerState();
@@ -2028,73 +2045,3 @@ void RenderPass::SaveRenderTargetToFile(ID3D11RenderTargetView* renderTargetView
 	DEVICECONTEXT->Unmap(stagingTexture.Get(), 0);
 }
 
-void RenderPass::HandleTransitionBlend(shared_ptr<Animator>& animator, shared_ptr<Transition>& transition, shared_ptr<Model>& model)
-{
-	// transitionOffset 적용: 다음 애니메이션의 시작 시점 조절
-	if (_blendAnimDesc.blendSumTime == 0.0f)  // 블렌딩 시작 시
-	{
-		shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-		if (next)
-		{
-			// Offset 위치로 다음 애니메이션 시작 프레임 설정
-			float offsetFrame = next->frameCount * transition->transitionOffset;
-			_blendAnimDesc.next.currFrame = static_cast<int>(offsetFrame);
-			_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-			_blendAnimDesc.next.sumTime = 0.f;
-		}
-	}
-
-	_blendAnimDesc.blendSumTime += TIME.GetDeltaTime();
-	_blendAnimDesc.blendRatio = _blendAnimDesc.blendSumTime / transition->transitionDuration;
-
-	if (_blendAnimDesc.blendRatio > 1.0f)
-	{
-		animationSumTime = 0.0f;
-		_blendAnimDesc.ClearNextAnim(transition->clipB.lock()->animIndex);
-
-		// 현재 클립의 isEndFrame 초기화
-		if (auto currClip = animator->_currClip)
-		{
-			currClip->isEndFrame = false;
-			for (auto& event : currClip->events)
-			{
-				if (event.isFuctionCalled)
-					event.isFuctionCalled = false;
-			}
-		}
-			
-
-		// 다음 클립의 isEndFrame도 초기화
-		if (auto nextClip = animator->GetClip(transition->clipB.lock()->name))
-			nextClip->isEndFrame = false;
-
-		animator->SetCurrentClip(transition->clipB.lock()->name);
-		animator->SetCurrentTransition();
-
-	}
-	else
-	{
-		// 다음 애니메이션 업데이트
-		shared_ptr<ModelAnimation> next = model->GetAnimationByIndex(_blendAnimDesc.next.animIndex);
-		if (next)
-		{
-			// 다음 클립의 진행률 업데이트
-			if (auto nextClip = transition->clipB.lock())
-			{
-				nextClip->progressRatio = static_cast<float>(_blendAnimDesc.next.currFrame) / (next->frameCount - 1);
-			}
-
-			_blendAnimDesc.next.sumTime += TIME.GetDeltaTime();
-			float timePerFrame = 1 / (next->frameRate * _blendAnimDesc.next.speed);
-
-			if (_blendAnimDesc.next.ratio >= 1.0f)
-			{
-				_blendAnimDesc.next.sumTime = 0.f;
-				_blendAnimDesc.next.currFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-				_blendAnimDesc.next.nextFrame = (_blendAnimDesc.next.currFrame + 1) % next->frameCount;
-			}
-
-			_blendAnimDesc.next.ratio = (_blendAnimDesc.next.sumTime / timePerFrame);
-		}
-	}
-}
