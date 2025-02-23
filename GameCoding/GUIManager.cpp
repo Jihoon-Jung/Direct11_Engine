@@ -1812,85 +1812,149 @@ void GUIManager::RenderUI()
     // project
     {
 
+        static bool lastFrameInteraction = false;  // 이전 프레임의 상호작용 상태
+        static bool needsUpdate = true;           // 업데이트 필요 여부
+
         ImGui::SetNextWindowPos(ImVec2(0, GP.GetProjectHeight()* (63.0f / 100.0f)), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(GP.GetProjectWidth(), GP.GetProjectHeight()* (37.0f / 100.0f)));
-        ImGui::Begin("Project", nullptr,
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoCollapse);
 
-        float windowWidth = ImGui::GetContentRegionAvail().x;
-        float leftPanelWidth = windowWidth * 0.12f;
+        // 현재 프레임의 상호작용 상태 확인
+        bool currentInteraction = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) &&
+            (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || ImGui::IsMouseClicked(ImGuiMouseButton_Right));
 
-        ImVec2 windowPos = ImGui::GetWindowPos();
-        ImVec2 windowSize = ImGui::GetWindowSize();
-        ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
-            ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
-            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
-        );
-
-        // 왼쪽 패널 (폴더 트리)
+        // Edit 모드이거나, 새로운 상호작용이 발생했을 때만 업데이트
+        if (ENGINE.GetEngineMode() == EngineMode::Edit ||
+            (currentInteraction && !lastFrameInteraction))
         {
-            // 클리핑 영역 설정
-            ImGui::PushClipRect(
-                ImVec2(windowPos.x, windowPos.y),
-                ImVec2(windowPos.x + leftPanelWidth - 1, windowPos.y + windowSize.y),
-                true
+            needsUpdate = true;
+        }
+
+        // 편집 모드이거나 마우스 상호작용이 있을 때만 업데이트
+        if (needsUpdate)
+        {
+            
+            ImGui::Begin("Project", nullptr,
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoCollapse);
+
+
+            float windowWidth = ImGui::GetContentRegionAvail().x;
+            float leftPanelWidth = windowWidth * 0.12f;
+
+            ImVec2 windowPos = ImGui::GetWindowPos();
+            ImVec2 windowSize = ImGui::GetWindowSize();
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
+                ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
+                ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
             );
 
-            ImGui::BeginChild("FolderTree", ImVec2(leftPanelWidth - 1, 0), false);
+            // 왼쪽 패널 (폴더 트리)
+            {
+                // 클리핑 영역 설정
+                ImGui::PushClipRect(
+                    ImVec2(windowPos.x, windowPos.y),
+                    ImVec2(windowPos.x + leftPanelWidth - 1, windowPos.y + windowSize.y),
+                    true
+                );
 
-            // 트리 스타일 설정
-            ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
+                ImGui::BeginChild("FolderTree", ImVec2(leftPanelWidth - 1, 0), false);
 
-            static filesystem::path currentPath = "Resource/";
-            RenderFolderTree(currentPath, _selectedFolder);
+                // 트리 스타일 설정
+                ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 10.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
 
-            ImGui::PopStyleVar(3);
+                static filesystem::path currentPath = "Resource/";
+                RenderFolderTree(currentPath, _selectedFolder);
+
+                ImGui::PopStyleVar(3);
+                ImGui::EndChild();
+                ImGui::PopClipRect();
+            }
+
+            ImGui::SameLine(0, 1);
+
+            // 오른쪽 패널
+            ImGui::SameLine(0, 1);
+            ImGui::BeginChild("FilePanel", ImVec2(0, 0), false);
+
+            // 경로 표시 바
+            ImGui::BeginChild("PathBar", ImVec2(0, 25), false);
+            string relativePath = _selectedFolder.string();
+            if (relativePath.find("Resource/") == 0) {
+                relativePath = relativePath.substr(9);
+            }
+            ImGui::Text(" %s", relativePath.c_str());
             ImGui::EndChild();
-            ImGui::PopClipRect();
+
+            // 가로 구분선
+            ImVec2 panelPos = ImGui::GetWindowPos();
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(windowPos.x + leftPanelWidth, panelPos.y + 15),
+                ImVec2(panelPos.x + ImGui::GetWindowWidth(), panelPos.y + 15),
+                ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.5f))
+            );
+
+            // 세로 구분선
+            ImGui::GetWindowDrawList()->AddLine(
+                ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
+                ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
+                ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
+            );
+
+            // 파일 그리드
+            ImGui::BeginChild("FileGrid", ImVec2(0, 0), false);
+            RenderFileGrid(_selectedFolder);
+            ImGui::EndChild();
+
+            ImGui::EndChild();
+
+            ImGui::End();
+
+            // Edit 모드가 아닌 경우, 다음 프레임에서는 업데이트하지 않음
+            if (ENGINE.GetEngineMode() != EngineMode::Edit)
+            {
+                needsUpdate = false;
+            }
         }
+        else
+        {
+            // 업데이트가 필요없는 경우에도 창은 유지해야 함
+            ImGui::Begin("Project", nullptr,
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoInputs);  // 입력 비활성화
 
-        ImGui::SameLine(0, 1);
+            // 창 크기 가져오기
+            ImVec2 windowSize = ImGui::GetWindowSize();
 
-        // 오른쪽 패널
-        ImGui::SameLine(0, 1);
-        ImGui::BeginChild("FilePanel", ImVec2(0, 0), false);
+            // 이미지 크기 계산 (원본 비율 유지하면서 창의 1/3 정도 크기로)
+            float aspectRatio = 3840.0f / 2160.0f;
+            float targetHeight = windowSize.y * 0.7f;  // 창 높이의 30%
+            float targetWidth = targetHeight * aspectRatio;
 
-        // 경로 표시 바
-        ImGui::BeginChild("PathBar", ImVec2(0, 25), false);
-        string relativePath = _selectedFolder.string();
-        if (relativePath.find("Resource/") == 0) {
-            relativePath = relativePath.substr(9);
+            // 이미지를 창의 중앙에 배치하기 위한 위치 계산
+            float posX = (windowSize.x - targetWidth) * 0.5f;
+            float posY = (windowSize.y - targetHeight) * 0.5f;
+
+            // 계산된 위치로 커서 이동
+            ImGui::SetCursorPos(ImVec2(posX, posY));
+
+            // 이미지 렌더링
+            ImGui::Image(
+                (ImTextureID)RESOURCE.GetResource<Texture>(L"hide-layer")->GetShaderResourceView().Get(),
+                ImVec2(targetWidth, targetHeight),
+                ImVec2(0, 0),
+                ImVec2(1, 1),
+                ImVec4(1, 1, 1, 1)
+            );
+
+            ImGui::End();
         }
-        ImGui::Text(" %s", relativePath.c_str());
-        ImGui::EndChild();
-
-        // 가로 구분선
-        ImVec2 panelPos = ImGui::GetWindowPos();
-        ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(windowPos.x + leftPanelWidth, panelPos.y + 15),
-            ImVec2(panelPos.x + ImGui::GetWindowWidth(), panelPos.y + 15),
-            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.5f))
-        );
-
-        // 세로 구분선
-        ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(windowPos.x + leftPanelWidth, windowPos.y),
-            ImVec2(windowPos.x + leftPanelWidth, windowPos.y + windowSize.y),
-            ImGui::GetColorU32(ImVec4(0.5f, 0.5f, 0.5f, 0.3f))
-        );
-
-        // 파일 그리드
-        ImGui::BeginChild("FileGrid", ImVec2(0, 0), false);
-        RenderFileGrid(_selectedFolder);
-        ImGui::EndChild();
-
-        ImGui::EndChild();
-        ImGui::End();
+        
     }
 
     if (!_showAnimatorEditor)
