@@ -653,11 +653,15 @@ void GUIManager::RenderUI()
     // Hierachy
     {
         float currentWidth = _isInitialized ? _hierarchyWidth : GP.GetProjectWidth() * (1.0f / 10.0f);
+        float fixedHeight = GP.GetProjectHeight() * (60.0f / 100.0f);  // 고정 높이
+
         ImGui::SetNextWindowPos(ImVec2(0.0f, GP.GetProjectHeight()* (3.0f / 100.0f)), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(currentWidth, GP.GetProjectHeight()* (60.0f / 100.0f)), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(currentWidth, fixedHeight), ImGuiCond_Always);  // Always로 변경하여 항상 고정
+
         ImGui::Begin("Hierachy", nullptr,
             ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoCollapse);
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize);  // NoResize 플래그 추가
 
         // 크기 조절 처리
         if (ImGui::IsWindowHovered())
@@ -680,7 +684,10 @@ void GUIManager::RenderUI()
         // 크기 조절 중이면 너비 업데이트
         if (_isResizingHierarchy)
         {
-            _hierarchyWidth = max(ImGui::GetMousePos().x, _minHierarchyWidth);
+            float newWidth = ImGui::GetMousePos().x;
+            // 최소 너비 제한 적용
+            _hierarchyWidth = max(newWidth, _minHierarchyWidth);
+
             if (!ImGui::IsMouseDown(0))  // 마우스 버튼을 놓았을 때
             {
                 _isResizingHierarchy = false;
@@ -1398,8 +1405,20 @@ void GUIManager::RenderUI()
                                                     if (shaderElement)
                                                     {
                                                         const char* shaderType = shaderElement->GetText();
-                                                        if (shaderType && (strcmp(shaderType, "Simple_Render_Shader") == 0 ||
-                                                            strcmp(shaderType, "Default_Shader") == 0))
+                                                        bool isValidShader = false;
+
+                                                        // RenderPass에 따른 Shader 필터링
+                                                        if (currentPass == Pass::PARTICLE_RENDER)
+                                                        {
+                                                            isValidShader = (shaderType && strcmp(shaderType, "RenderParticle_Shader") == 0);
+                                                        }
+                                                        else
+                                                        {
+                                                            isValidShader = (shaderType && (strcmp(shaderType, "Simple_Render_Shader") == 0 ||
+                                                                strcmp(shaderType, "Default_Shader") == 0));
+                                                        }
+
+                                                        if (isValidShader)
                                                         {
                                                             string materialName = entry.path().stem().string();
 
@@ -1447,7 +1466,8 @@ void GUIManager::RenderUI()
                                     currentSceneName,
                                     _selectedObject->GetName(),
                                     speed,
-                                    particleSystem->GetEndParticleFlag()
+                                    particleSystem->GetEndParticleFlag(),
+                                    particleSystem->GetParticleType()
                                 );
                             }
 
@@ -1463,7 +1483,25 @@ void GUIManager::RenderUI()
                                     currentSceneName,
                                     _selectedObject->GetName(),
                                     particleSystem->GetSpeed(),
-                                    endParticle
+                                    endParticle,
+                                    particleSystem->GetParticleType()
+                                );
+                            }
+                            // Particle Type Combo
+                            const char* particleTypes[] = { "FLARE", "BOMB" };
+                            int currentType = static_cast<int>(particleSystem->GetParticleType());
+                            if (ImGui::Combo("Particle Type", &currentType, particleTypes, IM_ARRAYSIZE(particleTypes)))
+                            {
+                                particleSystem->SetParticleTyle(static_cast<ParticleType>(currentType));
+
+                                // XML 업데이트
+                                wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+                                SCENE.UpdateGameObjectParticleSystemInXML(
+                                    currentSceneName,
+                                    _selectedObject->GetName(),
+                                    particleSystem->GetSpeed(),
+                                    particleSystem->GetEndParticleFlag(),
+                                    static_cast<ParticleType>(currentType)
                                 );
                             }
                         }
@@ -2024,13 +2062,26 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
                 );
                 (*sourceObj)->transform()->SetLocalScale(newLocalScale);
 
+
+                wstring parentName = gameObject->GetName();
+                wstring boneRootParentName = L"";
+                if (gameObject->GetBoneObjectFlag())
+                {
+                    auto boneParent = gameObject->GetBoneParentObject().lock();
+                    if (boneParent)
+                    {
+                        boneRootParentName = boneParent->GetName();
+                    }
+                }
+
                 SCENE.UpdateGameObjectParentInXML(
                     SCENE.GetActiveScene()->GetSceneName(),
                     (*sourceObj)->GetName(),
                     newLocalPos,
                     newLocalRot,
                     newLocalScale,
-                    gameObject->GetName()
+                    parentName,
+                    boneRootParentName
                 );
 
                 // 부모 노드를 자동으로 펼침
@@ -2137,6 +2188,13 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
             SCENE.RemoveGameObjectFromXML(currentSceneName, gameObject->GetName());
             SCENE.GetActiveScene()->RemoveGameObject(gameObject);
         }
+        else if (ImGui::MenuItem("Make Prefab"))
+        {
+            CreatePrefabFromGameObject(Utils::ToString(gameObject->GetName()));
+            wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
+            SCENE.RemoveGameObjectFromXML(currentSceneName, gameObject->GetName());
+            SCENE.GetActiveScene()->RemoveGameObject(gameObject);
+        }
         ImGui::EndPopup();
     }
 
@@ -2177,14 +2235,24 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
             _draggedObject->transform()->SetQTRotation(worldRot);
             _draggedObject->transform()->SetScale(worldScale);
 
-            // XML 파일 업데이트
+            wstring boneRootParentName = L"";
+            if (_draggedObject->GetParent() && _draggedObject->GetParent()->GetBoneObjectFlag())
+            {
+                auto boneParent = _draggedObject->GetParent()->GetBoneParentObject().lock();
+                if (boneParent)
+                {
+                    boneRootParentName = boneParent->GetName();
+                }
+            }
+
             SCENE.UpdateGameObjectParentInXML(
                 SCENE.GetActiveScene()->GetSceneName(),
                 _draggedObject->GetName(),
                 worldPos,
                 worldRot,
                 worldScale,
-                L"" // 빈 문자열로 부모 제거
+                L"",  // 부모 제거
+                boneRootParentName
             );
         }
         _draggedObject = nullptr;
@@ -2192,6 +2260,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
     }
 
 }
+
 
 void GUIManager::RenderUI_End()
 {
@@ -2754,6 +2823,7 @@ void GUIManager::RenderFolderTree(const filesystem::path& path, filesystem::path
     }
 
     ImGui::PopStyleColor(2);
+
 }
 
 void GUIManager::RenderFileGrid(const filesystem::path& path)
@@ -2803,6 +2873,7 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
     {
         clickedItem = false;
     }
+
     if (path.filename() == "Scene")
     {
         if (ImGui::BeginPopupContextWindow("SceneContextMenu", ImGuiPopupFlags_MouseButtonRight))
@@ -2830,6 +2901,7 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             ImGui::EndPopup();
         }
     }
+    
     for (const auto& entry : filesystem::directory_iterator(path))
     {
         if (!filesystem::is_directory(entry))
@@ -2861,6 +2933,10 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             else if (parentFolder == "Shader")
             {
                 icon = RESOURCE.GetResource<Texture>(L"Shader_Icon");
+            }
+            else if (parentFolder == "Prefab")
+            {
+                icon = RESOURCE.GetResource<Texture>(L"Prefab");
             }
             else if (parentFolder == "Scene")
             {
@@ -2969,6 +3045,10 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
                         ReleaseSelectedObject();
                         _selectedTextureFile = entry.path();
                         _selectedFileType = FileType::TEXTURE;
+                    }
+                    else if (parentFolder == "Prefab")
+                    {
+                        ReleaseSelectedObject();
                     }
                 }
 
@@ -5296,6 +5376,61 @@ void GUIManager::ShowTextureInspector(const filesystem::path& xmlPath)
 
 void GUIManager::HandleExternalFilesDrop(const filesystem::path& sourcePath)
 {
+    // 폴더인지 확인
+    if (filesystem::is_directory(sourcePath))
+    {
+        // .mesh 파일 찾기
+        filesystem::path meshFile;
+        vector<filesystem::path> clipFiles;
+
+        for (const auto& entry : filesystem::directory_iterator(sourcePath))
+        {
+            if (entry.path().extension() == ".mesh")
+            {
+                meshFile = entry.path();
+            }
+            else if (entry.path().extension() == ".clip")
+            {
+                clipFiles.push_back(entry.path());
+            }
+        }
+
+        // .mesh 파일이 있는 경우에만 처리
+        if (!meshFile.empty())
+        {
+            // 폴더 이름 추출
+            wstring folderName = sourcePath.filename().wstring();
+
+            // 애니메이션 경로 구성
+            vector<wstring> animations;
+            for (const auto& clipFile : clipFiles)
+            {
+                wstring clipPath = folderName + L"/" + clipFile.stem().wstring();
+                animations.push_back(clipPath);
+            }
+
+            // 모델 경로 구성
+            wstring modelPath = folderName + L"/" + meshFile.stem().wstring();
+
+            // XML 파일 생성
+            filesystem::path xmlPath = L"Resource/Model/" + folderName + L"Model.xml";
+
+            // XML 파일 작성
+            RESOURCE.WriteModelToXML(
+                modelPath,                    // 모델 경로
+                L"AnimatedMesh_Shader",      // 셰이더 이름
+                modelPath,                    // 머티리얼 경로
+                folderName,                  // 모델 이름
+                animations,                  // 애니메이션 목록
+                xmlPath.wstring()            // XML 저장 경로
+            );
+
+            // 새로운 리소스 로드
+            RESOURCE.LoadModelData(xmlPath.wstring());
+        }
+        return;
+    }
+
     // 이미지 파일인지 확인
     if (!IsImageFile(sourcePath))
         return;
@@ -5431,6 +5566,83 @@ void GUIManager::RenderScriptIcon(shared_ptr<Texture> icon, const string& filena
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding);
 }
 
+void GUIManager::CreatePrefabFromGameObject(const string& objectName)
+{
+    // Scene XML 로드
+    wstring scenePath = L"Resource/Scene/" + SCENE.GetActiveScene()->GetSceneName() + L".xml";
+    tinyxml2::XMLDocument sceneDoc;
+    if (sceneDoc.LoadFile(Utils::ToString(scenePath).c_str()) != tinyxml2::XML_SUCCESS)
+        return;
+
+    // Prefab XML 문서 생성
+    tinyxml2::XMLDocument prefabDoc;
+    tinyxml2::XMLElement* prefabRoot = prefabDoc.NewElement("Prefab");
+    prefabDoc.InsertFirstChild(prefabRoot);
+
+    // objectName으로 GameObject 찾기
+    auto gameObj = SCENE.GetActiveScene()->Find(Utils::ToWString(objectName));
+    if (!gameObj)
+        return;
+
+    function<void(shared_ptr<GameObject>)> savePrefab =
+        [&](shared_ptr<GameObject> gameObj)
+    {
+        // Scene XML에서 현재 GameObject 찾아서 저장
+        tinyxml2::XMLElement* sceneGameObj = sceneDoc.FirstChildElement("Scene")->FirstChildElement("GameObject");
+        while (sceneGameObj)
+        {
+            if (Utils::ToWString(sceneGameObj->Attribute("name")) == gameObj->GetName())
+            {
+                // GameObject 노드 생성 및 복사
+                tinyxml2::XMLElement* newObj = prefabDoc.NewElement("GameObject");
+                prefabRoot->InsertEndChild(newObj);
+                CopyXMLElement(sceneGameObj, newObj, prefabDoc);
+                break;
+            }
+            sceneGameObj = sceneGameObj->NextSiblingElement("GameObject");
+        }
+
+        for (const auto& child : gameObj->GetChildren())
+        {
+            savePrefab(child);
+        }
+    };
+
+    // 선택된 GameObject부터 시작하여 재귀적으로 처리
+    savePrefab(gameObj);
+
+    // 하나의 Prefab 파일로 저장
+    wstring prefabPath = L"Resource/Prefab/" + Utils::ToWString(objectName) + L".xml";
+    prefabDoc.SaveFile(Utils::ToString(prefabPath).c_str());
+}
+
+void GUIManager::CopyXMLElement(tinyxml2::XMLElement* source, tinyxml2::XMLElement* target, tinyxml2::XMLDocument& targetDoc)
+{
+    // 속성 복사
+    const tinyxml2::XMLAttribute* attr = source->FirstAttribute();
+    while (attr)
+    {
+        target->SetAttribute(attr->Name(), attr->Value());
+        attr = attr->Next();
+    }
+
+    // 텍스트 복사
+    if (source->GetText())
+    {
+        target->SetText(source->GetText());
+    }
+
+    // 자식 요소 복사
+    tinyxml2::XMLElement* childElem = source->FirstChildElement();
+    while (childElem)
+    {
+        tinyxml2::XMLElement* newChild = targetDoc.NewElement(childElem->Name());
+        target->InsertEndChild(newChild);
+        CopyXMLElement(childElem, newChild, targetDoc);
+        childElem = childElem->NextSiblingElement();
+    }
+}
+
 shared_ptr<Transition> GUIManager::GetTransitionFromPoints(const ImVec2& start, const ImVec2& end)
 {
     if (!_selectedAnimator)
@@ -5524,16 +5736,21 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
                 }
                 else if (meshName == "Grid")
                 {
-                    OutputDebugStringA("Grid");
+                    _droppedObject = SCENE.CreateGridToScene(SCENE.GetActiveScene()->GetSceneName());
                 }
                 else if (meshName == "Quad")
                 {
-                    OutputDebugStringA("Quad");
+                    _droppedObject = SCENE.CreateQuadToScene(SCENE.GetActiveScene()->GetSceneName());
                 }
                 else if (meshName == "Terrain")
                 {
-                    OutputDebugStringA("Terrain");
+                    _droppedObject = SCENE.CreateTerrainToScene(SCENE.GetActiveScene()->GetSceneName());
                 }
+            }
+            else if (folderName == "Prefab")
+            {
+                string prefabName = fileName.substr(0, fileName.find_last_of("."));
+                _droppedObject = SCENE.LoadPrefabToScene(Utils::ToWString(prefabName));
             }
             // Model 폴더 처리
             else if (folderName == "Model")
@@ -5575,7 +5792,8 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
         }
         else
         {
-            _droppedObject->transform()->SetPosition(intersectionPoint);
+            if (_droppedObject)
+                _droppedObject->transform()->SetPosition(intersectionPoint);
         }
     }
 }

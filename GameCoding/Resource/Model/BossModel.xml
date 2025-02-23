@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Boss</Name>
+    <Path>Boss/Boss</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Boss/Boss</Material>
+    <Animations>
+        <Animation>Boss/Idle</Animation>
+    </Animations>
+</Model>

@@ -90,174 +90,16 @@
     </GameObject>
     <GameObject name="FireParticle">
         <Transform posX="-2" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="BloodBombParticleMaterial">
             <RenderPass pass="10" depthStencilState="3"/>
         </MeshRenderer>
-        <ParticleSystem speed="4.6999998" endParticle="false"/>
+        <ParticleSystem speed="4.6999998" endParticle="false" type="0"/>
     </GameObject>
     <GameObject name="skyBox">
         <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="GrassSkybox_Material" mesh="Sphere">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
-    </GameObject>
-    <GameObject name="Ely">
-        <Transform posX="5.9253826" posY="0.15426946" posZ="-2.0723629" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Ely">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-        <Animator>
-            <EntryClip name="Run"/>
-            <Clip name="Fire" animIndex="1" isLoop="false" posX="464" posY="201"/>
-            <Clip name="Run" animIndex="0" isLoop="false" posX="335" posY="76"/>
-            <Clip name="Strafing" animIndex="2" isLoop="false" posX="650" posY="100"/>
-            <Transition clipA="Run" clipB="Fire" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Fire" clipB="Strafing" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Strafing" clipB="Run" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-        </Animator>
-        <Animator>
-            <EntryClip name="Run"/>
-            <Clip name="Fire" animIndex="1" isLoop="false"/>
-            <Clip name="Run" animIndex="0" isLoop="false"/>
-            <Clip name="Strafing" animIndex="2" isLoop="false"/>
-        </Animator>
-    </GameObject>
-    <GameObject name="SMGModel" parent="mixamorig:RightHandThumb1_$AssimpFbx$_Translation">
-        <Transform posX="4.4786515" posY="9.5448008" posZ="0.0079612741" rotX="80.282661" rotY="-3.6453295" rotZ="-70.474075" scaleX="0.010000005" scaleY="0.010000005" scaleZ="0.010000006"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="SMGModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="678.94165" scaleY="3303.562" scaleZ="10457.834" centerX="0" centerY="0" centerZ="-0.5"/>
-    </GameObject>
-    <GameObject name="Dreyar">
-        <Transform posX="7.9694662" posY="0" posZ="-1.6913526" rotX="0" rotY="0" rotZ="0" scaleX="0.001" scaleY="0.001" scaleZ="0.001"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <Animator>
-            <EntryClip name="Kick"/>
-            <Clip name="Dance" animIndex="2" isLoop="false" posX="439" posY="209"/>
-            <Clip name="Fall" animIndex="1" isLoop="false" posX="450" posY="44"/>
-            <Clip name="Kick" animIndex="0" isLoop="false" posX="271" posY="134"/>
-            <Transition clipA="Kick" clipB="Fall" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Fall" clipB="Dance" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Dance" clipB="Kick" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-        </Animator>
-        <BoxCollider scaleX="5000" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="Kachujin1">
-        <Transform posX="3.0809195" posY="0.26865423" posZ="-3.7657254" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
-            <RenderPass pass="9" depthStencilState="0"/>
-        </MeshRenderer>
-        <Animator>
-            <EntryClip name="Run"/>
-            <Clip name="Dismissing" animIndex="2" isLoop="false" posX="455" posY="234"/>
-            <Clip name="Run" animIndex="0" isLoop="false" posX="326" posY="87"/>
-            <Clip name="Slash" animIndex="1" isLoop="false" posX="650" posY="100"/>
-            <Transition clipA="Run" clipB="Dismissing" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Dismissing" clipB="Slash" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-            <Transition clipA="Slash" clipB="Run" transitionDuration="0.30000001" transitionOffset="0" hasExitTime="true" ExitTime="1"/>
-        </Animator>
-    </GameObject>
-    <GameObject name="CottageModel">
-        <Transform posX="19.137199" posY="0" posZ="-3.284374" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel1">
-        <Transform posX="20.134369" posY="0" posZ="4.8353605" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel2">
-        <Transform posX="20.214054" posY="0" posZ="12.753642" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel3">
-        <Transform posX="21.347977" posY="0" posZ="20.110794" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel4">
-        <Transform posX="22.600887" posY="-4.7683716e-07" posZ="27.774914" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel5">
-        <Transform posX="24.012053" posY="0" posZ="35.374836" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel6">
-        <Transform posX="14.902527" posY="0" posZ="33.183544" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel7">
-        <Transform posX="7.4245229" posY="0" posZ="31.352116" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel8">
-        <Transform posX="0.23571825" posY="0" posZ="29.776354" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel9">
-        <Transform posX="-7.1289539" posY="0" posZ="27.592186" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel10">
-        <Transform posX="-7.3329134" posY="0" posZ="16.514637" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel11">
-        <Transform posX="-7.3780165" posY="0" posZ="7.5348887" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel12">
-        <Transform posX="-7.9097347" posY="0" posZ="-0.20786858" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="CottageModel13">
-        <Transform posX="-7.6218214" posY="0" posZ="-7.4954281" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
-            <RenderPass pass="8" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="pngegg">
         <Transform posX="-447.00006" posY="239" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="175.782" scaleY="105.468" scaleZ="1"/>
@@ -266,30 +108,58 @@
         </MeshRenderer>
         <UIImage posX="-447.00006" posY="239" sizeX="58.59375" sizeY="35.15625" rectLeft="49" rectTop="-32" rectRight="400" rectBottom="178" scaleX="175.782" scaleY="105.468"/>
     </GameObject>
-    <GameObject name="Ely1">
-        <Transform posX="7.9141588" posY="1.1920929e-07" posZ="-7.7938519" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Ely">
+    <GameObject name="Boss">
+        <Transform posX="-4.4294815" posY="0" posZ="-3.1462212" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Boss">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
-            <EntryClip name="Run"/>
-            <Clip name="Fire" animIndex="1" isLoop="false" posX="499" posY="247"/>
-            <Clip name="Run" animIndex="0" isLoop="true" posX="450" posY="100" speed="1"/>
-            <Clip name="Strafing" animIndex="2" isLoop="false"/>
+            <EntryClip name="Idle"/>
+            <Clip name="Idle" animIndex="0" isLoop="true" posX="250" posY="100" speed="1"/>
         </Animator>
     </GameObject>
-    <GameObject name="NewObject">
-        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Cube">
-            <RenderPass pass="0" depthStencilState="0"/>
+    <GameObject name="SPAS12" parent="mixamorig:RightHandThumb1_$AssimpFbx$_Translation" boneRootParent="Boss">
+        <Transform posX="5.6220984" posY="57.703247" posZ="3.4126132" rotX="84.934837" rotY="-59.732296" rotZ="-138.80923" scaleX="10.000002" scaleY="10.000004" scaleZ="10.000002"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="SPAS12">
+            <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="Particle">
-        <Transform posX="-2" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="ParticleMaterial">
-            <RenderPass pass="10" depthStencilState="3"/>
+    <GameObject name="Boss1">
+        <Transform posX="-2.1760178" posY="0" posZ="-1.7136383" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Boss">
+            <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <ParticleSystem speed="1" endParticle="false"/>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Idle"/>
+            <Clip name="Idle" animIndex="0" isLoop="true" posX="250" posY="100" speed="1"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="SPAS121" parent="mixamorig:RightHandThumb1_$AssimpFbx$_Translation" boneRootParent="Boss1">
+        <Transform posX="5.6220984" posY="57.703247" posZ="3.4126132" rotX="84.934837" rotY="-59.732296" rotZ="-138.80923" scaleX="10.000002" scaleY="10.000004" scaleZ="10.000002"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="SPAS12">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="Boss2">
+        <Transform posX="-0.35497868" posY="1.1920929e-07" posZ="-1.8481579" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Boss">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Idle"/>
+            <Clip name="Idle" animIndex="0" isLoop="true" posX="250" posY="100" speed="1"/>
+        </Animator>
+    </GameObject>
+    <GameObject name="SPAS122" parent="mixamorig:RightHandThumb1_$AssimpFbx$_Translation" boneRootParent="Boss2">
+        <Transform posX="5.6220984" posY="57.703247" posZ="3.4126132" rotX="84.934837" rotY="-59.732296" rotZ="-138.80923" scaleX="10.000002" scaleY="10.000004" scaleZ="10.000002"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="SPAS12">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
 </Scene>

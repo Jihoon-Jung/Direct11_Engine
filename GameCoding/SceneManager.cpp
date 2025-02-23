@@ -224,8 +224,11 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 			auto particleSystem = make_shared<ParticleSystem>();
 			float speed = particleElem->FloatAttribute("speed");
 			bool endParticle = particleElem->BoolAttribute("endParticle");
+			ParticleType type = static_cast<ParticleType>(particleElem->IntAttribute("type"));
+
 			particleSystem->SetSpeed(speed);
 			particleSystem->SetEndParticleFlag(endParticle);
+			particleSystem->SetParticleTyle(type);
 			gameObj->AddComponent(particleSystem);
 		}
 		// UIImage 컴포넌트 처리
@@ -535,7 +538,28 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 			wstring parentName = Utils::ToWString(parentAttr);
 
 			auto childObj = SCENE.GetActiveScene()->Find(childName);
-			auto parentObj = SCENE.GetActiveScene()->Find(parentName);
+			shared_ptr<GameObject> parentObj = nullptr;
+
+			if (const char* boneRootParentAttr = gameObjElem->Attribute("boneRootParent"))
+			{
+				wstring boneRootParentName = Utils::ToWString(boneRootParentAttr);
+				auto boneRootParent = SCENE.GetActiveScene()->Find(boneRootParentName);
+
+				if (boneRootParent)
+				{
+					vector<shared_ptr<GameObject>> children = boneRootParent->GetChildren();
+					for (shared_ptr<GameObject> child : children)
+					{
+						if (child->GetName() == parentName)
+						{
+							parentObj = child;
+							break;
+						}
+					}
+				}
+			}
+			else
+				parentObj = SCENE.GetActiveScene()->Find(parentName);
 
 			if (childObj && parentObj)
 			{
@@ -1115,6 +1139,641 @@ void SceneManager::CreateNewScene(wstring sceneName)
 	_isCreateNewScene = false;
 }
 
+shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
+{
+	if (ENGINE.GetEngineMode() != EngineMode::Edit)
+		return nullptr;
+
+	// XML 파일 로드
+	tinyxml2::XMLDocument doc;
+	string pathStr = "Resource/Prefab/" + Utils::ToString(prefab) + ".xml";
+	doc.LoadFile(pathStr.c_str());
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("Prefab");
+	if (!root)
+		return nullptr;
+
+	vector<shared_ptr<GameObject>> modelObjects;
+	bool isModelObject = false;
+	shared_ptr<GameObject> leaderObject;
+
+	map<wstring, wstring> nameMapping;
+
+	// 모든 GameObject 순회
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		shared_ptr<GameObject> gameObj = make_shared<GameObject>();
+		if (!leaderObject)
+			leaderObject = gameObj;
+		// 기본 정보 설정
+		wstring name = Utils::ToWString(gameObjElem->Attribute("name"));
+
+		int count = 1;
+		wstring baseName = name;
+		wstring newName = baseName;
+
+		// 이미 존재하는 오브젝트 이름인지 확인
+		while (_activeScene->Find(newName) != nullptr)
+		{
+			newName = baseName + to_wstring(count);
+			count++;
+		}
+		gameObj->SetName(newName);
+
+		nameMapping[name] = newName;
+
+		// Transform 컴포넌트 처리
+		if (auto transformElem = gameObjElem->FirstChildElement("Transform"))
+		{
+			auto transform = make_shared<Transform>();
+			Vec3 pos(
+				transformElem->FloatAttribute("posX"),
+				transformElem->FloatAttribute("posY"),
+				transformElem->FloatAttribute("posZ")
+			);
+			Vec3 rot(
+				transformElem->FloatAttribute("rotX"),
+				transformElem->FloatAttribute("rotY"),
+				transformElem->FloatAttribute("rotZ")
+			);
+			Vec3 scale(
+				transformElem->FloatAttribute("scaleX"),
+				transformElem->FloatAttribute("scaleY"),
+				transformElem->FloatAttribute("scaleZ")
+			);
+
+			transform->SetLocalPosition(pos);
+			// 직접 쿼터니온 생성
+			float pitch = XMConvertToRadians(rot.x);
+			float yaw = XMConvertToRadians(rot.y);
+			float roll = XMConvertToRadians(rot.z);
+			Quaternion qtRot = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
+
+			transform->SetQTRotation(qtRot);
+			//transform->SetLocalRotation(rot);
+			transform->SetLocalScale(scale);
+			gameObj->AddComponent(transform);
+		}
+
+		// Camera 컴포넌트 처리
+		if (auto cameraElem = gameObjElem->FirstChildElement("Camera"))
+		{
+			auto camera = make_shared<Camera>();
+			camera->SetProjectionType(static_cast<ProjectionType>(cameraElem->IntAttribute("projectionType")));
+			gameObj->AddComponent(camera);
+		}
+
+		// Light 컴포넌트 처리
+		if (auto lightElem = gameObjElem->FirstChildElement("Light"))
+		{
+			auto light = make_shared<Light>();
+			LightDesc desc;
+			desc.ambient = Vec4(
+				lightElem->FloatAttribute("ambientR"),
+				lightElem->FloatAttribute("ambientG"),
+				lightElem->FloatAttribute("ambientB"),
+				lightElem->FloatAttribute("ambientA")
+			);
+			desc.diffuse = Vec4(
+				lightElem->FloatAttribute("diffuseR"),
+				lightElem->FloatAttribute("diffuseG"),
+				lightElem->FloatAttribute("diffuseB"),
+				lightElem->FloatAttribute("diffuseA")
+			);
+			desc.specular = Vec4(
+				lightElem->FloatAttribute("specularR"),
+				lightElem->FloatAttribute("specularG"),
+				lightElem->FloatAttribute("specularB"),
+				lightElem->FloatAttribute("specularA")
+			);
+			light->SetLightDesc(desc);
+			gameObj->AddComponent(light);
+		}
+
+		// MeshRenderer 컴포넌트 처리
+		if (auto rendererElem = gameObjElem->FirstChildElement("MeshRenderer"))
+		{
+			auto meshRenderer = make_shared<MeshRenderer>();
+
+			// RasterizerState 설정
+			D3D11_FILL_MODE fillMode = static_cast<D3D11_FILL_MODE>(rendererElem->IntAttribute("fillMode"));
+			D3D11_CULL_MODE cullMode = static_cast<D3D11_CULL_MODE>(rendererElem->IntAttribute("cullMode"));
+			bool frontCounterClockwise = rendererElem->BoolAttribute("frontCounterClockwise");
+			meshRenderer->SetRasterzierState(fillMode, cullMode, frontCounterClockwise);
+
+			// EnvironmentMap 사용 여부 설정
+			meshRenderer->SetUseEnvironmentMap(rendererElem->BoolAttribute("useEnvironmentMap"));
+
+			const char* materialName = rendererElem->Attribute("material");
+			const char* meshName = rendererElem->Attribute("mesh");
+			const char* modelName = rendererElem->Attribute("model");
+
+			if (modelName)
+			{
+				auto model = RESOURCE.GetResource<Model>(Utils::ToWString(modelName));
+				meshRenderer->SetModel(model);
+				meshRenderer->SetMaterial(model->GetMaterials()[0]); // Model의 Material 직접 사용
+				modelObjects.push_back(gameObj);
+				isModelObject = true;
+			}
+			else
+			{
+				const char* materialName = rendererElem->Attribute("material");
+				const char* meshName = rendererElem->Attribute("mesh");
+
+				if (materialName)
+					meshRenderer->SetMaterial(RESOURCE.GetResource<Material>(Utils::ToWString(materialName)));
+				if (meshName)
+					meshRenderer->SetMesh(RESOURCE.GetResource<Mesh>(Utils::ToWString(meshName)));
+			}
+
+
+			// RenderPass 처리
+			for (auto passElem = rendererElem->FirstChildElement("RenderPass");
+				passElem; passElem = passElem->NextSiblingElement("RenderPass"))
+			{
+				meshRenderer->AddRenderPass();
+				auto pass = meshRenderer->GetRenderPasses().back();
+				pass->SetPass(static_cast<Pass>(passElem->IntAttribute("pass")));
+				pass->SetMeshRenderer(meshRenderer);
+				pass->SetTransform(gameObj->transform());
+				pass->SetDepthStencilStateType(static_cast<DSState>(passElem->IntAttribute("depthStencilState")));
+			}
+
+			gameObj->AddComponent(meshRenderer);
+		}
+
+		// Collider 컴포넌트 처리
+		if (auto colliderElem = gameObjElem->FirstChildElement("BoxCollider"))
+		{
+			auto boxCollider = make_shared<BoxCollider>();
+			Vec3 scale(
+				colliderElem->FloatAttribute("scaleX", 1.0f),
+				colliderElem->FloatAttribute("scaleY", 1.0f),
+				colliderElem->FloatAttribute("scaleZ", 1.0f)
+			);
+			Vec3 center(
+				colliderElem->FloatAttribute("centerX", 0.0f),
+				colliderElem->FloatAttribute("centerY", 0.0f),
+				colliderElem->FloatAttribute("centerZ", 0.0f)
+			);
+			boxCollider->SetScale(scale);
+			boxCollider->SetCenter(center);
+			gameObj->AddComponent(boxCollider);
+		}
+		else if (auto colliderElem = gameObjElem->FirstChildElement("SphereCollider"))
+		{
+			auto sphereCollider = make_shared<SphereCollider>();
+
+			// Center 설정
+			Vec3 center(
+				colliderElem->FloatAttribute("centerX"),
+				colliderElem->FloatAttribute("centerY"),
+				colliderElem->FloatAttribute("centerZ")
+			);
+			sphereCollider->SetCenter(center);
+
+			// Radius 설정
+			float radius = colliderElem->FloatAttribute("radius");
+			sphereCollider->SetRadius(radius);
+			sphereCollider->SetScale(Vec3(radius, radius, radius));
+
+			gameObj->AddComponent(sphereCollider);
+		}
+		if (auto particleElem = gameObjElem->FirstChildElement("ParticleSystem"))
+		{
+			auto particleSystem = make_shared<ParticleSystem>();
+			float speed = particleElem->FloatAttribute("speed");
+			bool endParticle = particleElem->BoolAttribute("endParticle");
+			ParticleType type = static_cast<ParticleType>(particleElem->IntAttribute("type"));
+
+			particleSystem->SetSpeed(speed);
+			particleSystem->SetEndParticleFlag(endParticle);
+			particleSystem->SetParticleTyle(type);
+			gameObj->AddComponent(particleSystem);
+		}
+		// UIImage 컴포넌트 처리
+		if (auto uiImageElem = gameObjElem->FirstChildElement("UIImage"))
+		{
+			auto uiImage = make_shared<UIImage>();
+			float posX = uiImageElem->FloatAttribute("posX");
+			float posY = uiImageElem->FloatAttribute("posY");
+			float sizeX = uiImageElem->FloatAttribute("sizeX");
+			float sizeY = uiImageElem->FloatAttribute("sizeY");
+			float rectLeft = uiImageElem->FloatAttribute("rectLeft");
+			float rectTop = uiImageElem->FloatAttribute("rectTop");
+			float rectRight = uiImageElem->FloatAttribute("rectRight");
+			float rectBottom = uiImageElem->FloatAttribute("rectBottom");
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+			uiImage->SetScreenTransformAndRect(Vec2(posX, posY), Vec2(sizeX, sizeY), rect);
+			gameObj->AddComponent(uiImage);
+			gameObj->SetObjectType(GameObjectType::UIObject);
+		}
+
+		// Button 컴포넌트 처리
+		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
+		{
+			auto button = make_shared<Button>();
+
+			// 위치와 크기 설정
+			Vec2 pos(
+				buttonElem->FloatAttribute("posX"),
+				buttonElem->FloatAttribute("posY")
+			);
+			Vec2 size(
+				buttonElem->FloatAttribute("sizeX"),
+				buttonElem->FloatAttribute("sizeY")
+			);
+			float rectLeft = buttonElem->FloatAttribute("rectLeft");
+			float rectTop = buttonElem->FloatAttribute("rectTop");
+			float rectRight = buttonElem->FloatAttribute("rectRight");
+			float rectBottom = buttonElem->FloatAttribute("rectBottom");
+
+			RECT rect;
+			rect.left = rectLeft;
+			rect.top = rectTop;
+			rect.right = rectRight;
+			rect.bottom = rectBottom;
+
+			button->SetScreenTransformAndRect(pos, size, rect);
+
+			// 클릭 이벤트 함수 설정
+			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
+			{
+				button->AddOnClickedEvent(functionKey);
+			}
+
+			gameObj->AddComponent(button);
+		}
+		vector<AnimatorEventLoadData> eventLoadDataList;  // 임시 저장용 구조체
+
+		if (auto animatorElem = gameObjElem->FirstChildElement("Animator"))
+		{
+			auto animator = make_shared<Animator>();
+
+			// Parameters 로드
+			for (auto paramElem = animatorElem->FirstChildElement("Parameter");
+				paramElem; paramElem = paramElem->NextSiblingElement("Parameter"))
+			{
+				string paramName = paramElem->Attribute("name");
+				Parameter::Type paramType = static_cast<Parameter::Type>(paramElem->IntAttribute("type"));
+
+				animator->AddParameter(paramName, paramType);
+
+				// 파라미터 값 로드
+				Parameter* param = animator->GetParameter(paramName);
+				if (param)
+				{
+					switch (paramType)
+					{
+					case Parameter::Type::Bool:
+						param->value.boolValue = paramElem->BoolAttribute("value");
+						break;
+					case Parameter::Type::Int:
+						param->value.intValue = paramElem->IntAttribute("value");
+						break;
+					case Parameter::Type::Float:
+						param->value.floatValue = paramElem->FloatAttribute("value");
+						break;
+					}
+				}
+			}
+			// Clips 로드
+			for (auto clipElem = animatorElem->FirstChildElement("Clip");
+				clipElem; clipElem = clipElem->NextSiblingElement("Clip"))
+			{
+				string clipName = clipElem->Attribute("name");
+				int animIndex = clipElem->IntAttribute("animIndex");
+				bool isLoop = clipElem->BoolAttribute("isLoop");
+				float speed = clipElem->FloatAttribute("speed", 1.0f);
+
+				// 노드 위치 정보 로드
+				float posX = clipElem->FloatAttribute("posX", 0.0f);  // 기본값 0
+				float posY = clipElem->FloatAttribute("posY", 0.0f);  // 기본값 0
+
+				// 클립 추가
+				animator->AddClip(clipName, animIndex, isLoop);
+
+				auto clip = animator->GetClip(clipName);
+				// UI에 표시될 노드 위치 설정
+				if (auto clip = animator->GetClip(clipName))
+				{
+					clip->speed = speed;
+					clip->pos = ImVec2(posX, posY);
+				}
+
+				for (auto eventElem = clipElem->FirstChildElement("Event");
+					eventElem; eventElem = eventElem->NextSiblingElement("Event"))
+				{
+					AnimatorEventLoadData eventData;
+					eventData.gameObject = gameObj;
+					eventData.animator = animator;
+					eventData.clipName = clipName;
+					eventData.time = eventElem->FloatAttribute("time");
+					eventData.functionKey = eventElem->Attribute("function");
+					eventLoadDataList.push_back(eventData);
+				}
+			}
+
+			// Entry Clip 로드
+			if (auto entryElem = animatorElem->FirstChildElement("EntryClip"))
+			{
+				string entryClipName = entryElem->Attribute("name");
+				animator->SetEntryClip(entryClipName);
+			}
+
+			// Transitions 로드
+			for (auto transitionElem = animatorElem->FirstChildElement("Transition");
+				transitionElem; transitionElem = transitionElem->NextSiblingElement("Transition"))
+			{
+				string clipAName = transitionElem->Attribute("clipA");
+				string clipBName = transitionElem->Attribute("clipB");
+
+				animator->AddTransition(clipAName, clipBName);
+
+				// clipA에서 clipB로 가는 특정 트랜지션을 찾아야 함
+				auto clipA = animator->GetClip(clipAName);
+				if (!clipA) continue;
+
+				shared_ptr<Transition> targetTransition = nullptr;
+				for (const auto& trans : clipA->transitions)
+				{
+					if (trans->clipB.lock() == animator->GetClip(clipBName))
+					{
+						targetTransition = trans;
+						break;
+					}
+				}
+
+				if (targetTransition)
+				{
+					bool flag = transitionElem->BoolAttribute("flag");
+					bool hasCondition = transitionElem->BoolAttribute("hasCondition");
+					bool hasExitTime = transitionElem->BoolAttribute("hasExitTime");
+					float offset = transitionElem->FloatAttribute("transitionOffset");
+					float duration = transitionElem->FloatAttribute("transitionDuration");
+					float exitTime = transitionElem->FloatAttribute("ExitTime");
+
+					animator->SetTransitionFlag(targetTransition, flag);
+					targetTransition->hasCondition = hasCondition;
+					targetTransition->hasExitTime = hasExitTime;
+					animator->SetTransitionOffset(targetTransition, offset);
+					animator->SetTransitionDuration(targetTransition, duration);
+					animator->SetTransitionExitTime(targetTransition, exitTime);
+
+					// Conditions 로드
+					targetTransition->conditions.clear();
+					for (auto conditionElem = transitionElem->FirstChildElement("Condition");
+						conditionElem; conditionElem = conditionElem->NextSiblingElement("Condition"))
+					{
+						string paramName = conditionElem->Attribute("parameterName");
+						Parameter::Type paramType = static_cast<Parameter::Type>(conditionElem->IntAttribute("parameterType"));
+						Condition::CompareType compareType = static_cast<Condition::CompareType>(conditionElem->IntAttribute("compareType"));
+
+						animator->AddCondition(targetTransition, paramName, paramType, compareType);
+
+						if (!targetTransition->conditions.empty())
+						{
+							Condition& condition = targetTransition->conditions.back();
+							switch (paramType)
+							{
+							case Parameter::Type::Bool:
+								condition.value.boolValue = conditionElem->BoolAttribute("value");
+								break;
+							case Parameter::Type::Int:
+								condition.value.intValue = conditionElem->IntAttribute("value");
+								break;
+							case Parameter::Type::Float:
+								condition.value.floatValue = conditionElem->FloatAttribute("value");
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			animator->SetCurrentTransition();
+			gameObj->AddComponent(animator);
+		}
+		// Script 컴포넌트 로드
+		for (auto scriptElem = gameObjElem->FirstChildElement("Script");
+			scriptElem; scriptElem = scriptElem->NextSiblingElement("Script"))
+		{
+
+			string type = scriptElem->Attribute("type");
+
+			// EditorCamera 특별 처리
+			if (type == "EditorCamera")
+			{
+				shared_ptr<EditorCamera> editorCamera = make_shared<EditorCamera>();
+				gameObj->AddComponent(editorCamera);
+				continue;
+			}
+
+			// "class " 접두사가 있다면 제거
+			if (type.substr(0, 6) == "class ")
+			{
+				type = type.substr(6);
+			}
+
+			const auto& scripts = CF.GetRegisteredScripts();
+			auto it = scripts.find(type);
+			if (it != scripts.end())
+			{
+				auto script = it->second.createFunc();
+				gameObj->AddComponent(script);
+			}
+		}
+		_activeScene->AddGameObject(gameObj);
+
+		for (const auto& eventData : eventLoadDataList)
+		{
+			auto animator = eventData.animator;
+			auto availableFunctions = animator->GetAvailableFunctions();
+
+			for (const auto& func : availableFunctions)
+			{
+				if (func.functionKey == eventData.functionKey)
+				{
+					AnimationEvent event;
+					event.time = eventData.time;
+					event.function = func;
+
+					if (auto clip = animator->GetClip(eventData.clipName))
+					{
+						clip->events.push_back(event);
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	for (shared_ptr<GameObject> obj : modelObjects)
+	{
+		shared_ptr<Model> model = obj->GetComponent<MeshRenderer>()->GetModel();
+		vector<shared_ptr<ModelBone>> bones = model->GetBones();
+
+		map<int32, shared_ptr<GameObject>> boneObjects;
+
+		for (shared_ptr<ModelBone> bone : bones)
+		{
+			shared_ptr<GameObject> boneObject = make_shared<GameObject>();
+			boneObject->SetName(bone->name);
+			shared_ptr<Transform> transform = make_shared<Transform>();
+
+			Matrix localTransform = bone->transform;
+
+			Vec3 position;
+			Quaternion rotation;
+			Vec3 scale;
+			localTransform.Decompose(scale, rotation, position);
+
+			transform->SetLocalPosition(position);
+			transform->SetQTRotation(rotation);
+			transform->SetLocalScale(scale);
+
+			boneObject->AddComponent(transform);
+
+			boneObjects[bone->index] = boneObject;
+
+			boneObject->SetParent(obj);
+
+			boneObject->SetBoneObjectFlag(true);
+			boneObject->SetBoneParentObject(obj);
+			boneObject->SetBoneIndex(bone->index);
+			_activeScene->AddBoneGameObject(boneObject);
+		}
+
+		shared_ptr<Animator> animator = obj->GetComponent<Animator>();
+		if (animator)
+		{
+			animator->SetBoneObjects(boneObjects);
+
+		}
+	}
+
+	for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+		gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+	{
+		if (const char* parentAttr = gameObjElem->Attribute("parent"))
+		{
+			wstring oldChildName = Utils::ToWString(gameObjElem->Attribute("name"));
+			wstring oldParentName = Utils::ToWString(parentAttr);
+
+			// nameMapping에서 새로운 이름 가져오기
+			wstring newChildName = nameMapping[oldChildName];
+			wstring newParentName = nameMapping[oldParentName];
+
+			shared_ptr<GameObject> childObj = SCENE.GetActiveScene()->Find(newChildName);
+			shared_ptr<GameObject> parentObj = SCENE.GetActiveScene()->Find(newParentName);
+
+			if (!parentObj)
+			{
+				vector<shared_ptr<GameObject>> children = leaderObject->GetChildren();
+				for (shared_ptr<GameObject> child : children)
+				{
+					if (child->GetName() == oldParentName)
+					{
+						parentObj = child;
+						break;
+					}
+				}
+			}
+			if (childObj && parentObj)
+			{
+				childObj->SetParent(parentObj);
+			}
+		}
+	}
+
+	RENDER.GetRenderableObject();
+
+	// 프리팹 내용을 현재 씬의 XML에 복사
+	{
+		// 현재 씬의 XML 로드
+		tinyxml2::XMLDocument sceneDoc;
+		string scenePathStr = "Resource/Scene/" + Utils::ToString(_activeScene->GetSceneName()) + ".xml";
+		sceneDoc.LoadFile(scenePathStr.c_str());
+
+		tinyxml2::XMLElement* sceneRoot = sceneDoc.FirstChildElement("Scene");
+		if (sceneRoot)
+		{
+			// 프리팹의 모든 GameObject를 씬 XML에 복사
+			for (tinyxml2::XMLElement* gameObjElem = root->FirstChildElement("GameObject");
+				gameObjElem; gameObjElem = gameObjElem->NextSiblingElement("GameObject"))
+			{
+				// 새로운 GameObject 요소 생성
+				auto newGameObj = sceneDoc.NewElement("GameObject");
+
+				// 모든 속성 복사
+				const tinyxml2::XMLAttribute* attr = gameObjElem->FirstAttribute();
+				while (attr)
+				{
+					if (string(attr->Name()) == "name")
+					{
+						// name 속성만 새 이름으로 변경
+						wstring oldName = Utils::ToWString(attr->Value());
+						newGameObj->SetAttribute("name", Utils::ToString(nameMapping[oldName]).c_str());
+					}
+					else if (string(attr->Name()) == "parent")
+					{
+						// parent 속성도 새 이름으로 변경
+						wstring oldParentName = Utils::ToWString(attr->Value());
+						if (nameMapping.find(oldParentName) != nameMapping.end() && !nameMapping[oldParentName].empty())
+						{
+							newGameObj->SetAttribute("parent", Utils::ToString(nameMapping[oldParentName]).c_str());
+						}
+						else
+						{
+							// nameMapping에 없거나 매핑된 이름이 빈 문자열인 경우 원래 parent 값을 사용
+							newGameObj->SetAttribute("parent", attr->Value());
+						}
+					}
+					else if (string(attr->Name()) == "boneRootParent")
+					{
+						// boneRootParent 속성도 새 이름으로 변경
+						wstring oldBoneRootParentName = Utils::ToWString(attr->Value());
+						if (nameMapping.find(oldBoneRootParentName) != nameMapping.end() && !nameMapping[oldBoneRootParentName].empty())
+						{
+							newGameObj->SetAttribute("boneRootParent", Utils::ToString(nameMapping[oldBoneRootParentName]).c_str());
+						}
+						else
+						{
+							// nameMapping에 없거나 매핑된 이름이 빈 문자열인 경우 원래 boneRootParent 값을 사용
+							newGameObj->SetAttribute("boneRootParent", attr->Value());
+						}
+					}
+					else
+					{
+						// 나머지 속성은 그대로 복사
+						newGameObj->SetAttribute(attr->Name(), attr->Value());
+					}
+					attr = attr->Next();
+				}
+
+				// 모든 자식 요소 복사
+				for (tinyxml2::XMLElement* child = gameObjElem->FirstChildElement();
+					child; child = child->NextSiblingElement())
+				{
+					auto newChild = child->DeepClone(&sceneDoc)->ToElement();
+					newGameObj->InsertEndChild(newChild);
+				}
+
+				sceneRoot->InsertEndChild(newGameObj);
+			}
+
+			sceneDoc.SaveFile(scenePathStr.c_str());
+		}
+	}
+	return leaderObject;
+}
+
 shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 {
 	shared_ptr<Scene> playScene = make_shared<Scene>();
@@ -1289,8 +1948,11 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			auto particleSystem = make_shared<ParticleSystem>();
 			float speed = particleElem->FloatAttribute("speed");
 			bool endParticle = particleElem->BoolAttribute("endParticle");
+			ParticleType type = static_cast<ParticleType>(particleElem->IntAttribute("type"));
+
 			particleSystem->SetSpeed(speed);
 			particleSystem->SetEndParticleFlag(endParticle);
+			particleSystem->SetParticleTyle(type);
 			gameObj->AddComponent(particleSystem);
 		}
 		else if (auto colliderElem = gameObjElem->FirstChildElement("SphereCollider"))
@@ -1618,7 +2280,28 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			wstring parentName = Utils::ToWString(parentAttr);
 
 			auto childObj = playScene->Find(childName);
-			auto parentObj = playScene->Find(parentName);
+			shared_ptr<GameObject> parentObj = nullptr;
+
+			if (const char* boneRootParentAttr = gameObjElem->Attribute("boneRootParent"))
+			{
+				wstring boneRootParentName = Utils::ToWString(boneRootParentAttr);
+				auto boneRootParent = playScene->Find(boneRootParentName);
+
+				if (boneRootParent)
+				{
+					vector<shared_ptr<GameObject>> children = boneRootParent->GetChildren();
+					for (shared_ptr<GameObject> child : children)
+					{
+						if (child->GetName() == parentName)
+						{
+							parentObj = child;
+							break;
+						}
+					}
+				}
+			}
+			else
+				parentObj = playScene->Find(parentName);
 
 			if (childObj && parentObj)
 			{
@@ -1838,6 +2521,7 @@ void SceneManager::AddComponentToGameObjectAndSaveToXML(const wstring& path, con
 		tinyxml2::XMLElement* particleElem = doc.NewElement("ParticleSystem");
 		particleElem->SetAttribute("speed", particleSystem->GetSpeed());
 		particleElem->SetAttribute("endParticle", particleSystem->GetEndParticleFlag());
+		particleElem->SetAttribute("type", particleSystem->GetParticleType());
 		gameObj->InsertEndChild(particleElem);
 	}
 	else if (auto animator = dynamic_pointer_cast<Animator>(component))
@@ -2261,7 +2945,9 @@ void SceneManager::RemoveGameObjectFromXML(const wstring& sceneName, const wstri
 	}
 }
 
-void SceneManager::UpdateGameObjectParentInXML(const wstring& sceneName, const wstring& objectName, const Vec3& localPosition, const Quaternion& localRotation, const Vec3& localScale, const wstring& parentName)
+void SceneManager::UpdateGameObjectParentInXML(const wstring& sceneName, const wstring& objectName,
+	const Vec3& localPosition, const Quaternion& localRotation, const Vec3& localScale,
+	const wstring& parentName, const wstring& boneRootParentName)
 {
 	if (ENGINE.GetEngineMode() != EngineMode::Edit)
 		return;
@@ -2285,6 +2971,12 @@ void SceneManager::UpdateGameObjectParentInXML(const wstring& sceneName, const w
 				gameObjElem->DeleteAttribute("parent");
 			else
 				gameObjElem->SetAttribute("parent", Utils::ToString(parentName).c_str());
+
+			// bone root parent 설정
+			if (boneRootParentName.empty())
+				gameObjElem->DeleteAttribute("boneRootParent");
+			else
+				gameObjElem->SetAttribute("boneRootParent", Utils::ToString(boneRootParentName).c_str());
 
 			// Transform 업데이트
 			if (auto transformElem = gameObjElem->FirstChildElement("Transform"))
@@ -2808,6 +3500,9 @@ shared_ptr<GameObject> SceneManager::CreateParticleToScene(const wstring& sceneN
 	particleRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::CUSTOM3);
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, particleRenderer, L"ParticleMaterial");
 	auto particleSystem = make_shared<ParticleSystem>();
+	particleSystem->SetEndParticleFlag(false);
+	particleSystem->SetSpeed(1.0f);
+	particleSystem->SetParticleTyle(ParticleType::FLARE);
 	AddComponentToGameObjectAndSaveToXML(sceneName, newName, particleSystem);
 
 	RENDER.GetRenderableObject();
@@ -3434,7 +4129,7 @@ void SceneManager::UpdateGameObjectRenderPassInXML(const wstring& sceneName, con
 	}
 }
 
-void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName, float speed, bool endParticle)
+void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName, float speed, bool endParticle, ParticleType type)
 {
 	if (ENGINE.GetEngineMode() != EngineMode::Edit)
 		return;
@@ -3459,6 +4154,7 @@ void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName,
 				// 속성 업데이트
 				particleElem->SetAttribute("speed", speed);
 				particleElem->SetAttribute("endParticle", endParticle);
+				particleElem->SetAttribute("type", static_cast<int>(type));  // ParticleType 저장
 			}
 			else
 			{
@@ -3466,6 +4162,7 @@ void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName,
 				particleElem = doc.NewElement("ParticleSystem");
 				particleElem->SetAttribute("speed", speed);
 				particleElem->SetAttribute("endParticle", endParticle);
+				particleElem->SetAttribute("type", static_cast<int>(type));  // ParticleType 저장
 				gameObjElem->InsertEndChild(particleElem);
 			}
 

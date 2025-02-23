@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+  <Material>
+    <Name>spas12_mat01</Name>
+    <DiffuseFile>spas12_mat01_Albedo.png</DiffuseFile>
+    <SpecularFile>spas12_mat01_Metallic.png</SpecularFile>
+    <NormalFile>spas12_mat01_Metallic.png</NormalFile>
+    <Ambient R="0.2" G="0.2" B="0.2" A="1"/>
+    <Diffuse R="0.80000001" G="0.80000001" B="0.80000001" A="1"/>
+    <Specular R="0.2" G="0.2" B="0.2" A="20.000006"/>
+    <Emissive R="0" G="0" B="0" A="1"/>
+  </Material>
+</Materials>

@@ -66,7 +66,11 @@ void MovePlayerWithCamera::Update()
             _isAttacking = true;
             isMove = false;
         }
-        
+        if (INPUT.GetButton(KEY_TYPE::R))
+        {
+            shared_ptr<GameObject> prefab = SCENE.LoadPrefabToScene(L"cylinder");
+            prefab->transform()->SetLocalPosition(Vec3(GetGameObject()->transform()->GetLocalPosition() + Vec3(0, 0, 10)));
+        }
         if (isMove)
             _animator->SetBool("isMove", true);
         else

@@ -630,5 +630,8 @@
     <FxCompile Include="Shader\SimpleShader.hlsl">
       <Filter>소스 파일\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\InitParticleSystem_Bomb.hlsl">
+      <Filter>소스 파일\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

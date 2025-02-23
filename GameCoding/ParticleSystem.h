@@ -1,6 +1,12 @@
 #pragma once
 #include "Component.h"
 
+enum ParticleType
+{
+	FLARE,
+	BOMB
+};
+
 class ParticleSystem : public Component
 {
 	using Super = Component;
@@ -14,12 +20,14 @@ public:
 	void SetSpeed(float speed) { _speed = speed; }
 	void SetFirstRunFlag(bool flag) { _firstRun = flag; }
 	void SetEndParticleFlag(bool flag) { _endParticle = flag; }
+	void SetParticleTyle(ParticleType type) { _type = type; }
 	bool GetFirstRunFlag() { return _firstRun; }
 	bool GetEndParticleFlag() { return _endParticle; }
 	ComPtr<ID3D11Buffer> GetinitVB() { return _initVB; }
 	ComPtr<ID3D11Buffer>& GetDrawVB() { return _drawVB; }
 	ComPtr<ID3D11Buffer>& GetStreamOutVB() { return _streamOutVB; }
 	float GetSpeed() { return _speed; }
+	ParticleType GetParticleType() { return _type; }
 	
 private:
 	void BuildVB();
@@ -36,5 +44,6 @@ private:
 
 	ComPtr<ID3D11ShaderResourceView> _texArraySRV;
 	ComPtr<ID3D11ShaderResourceView> _randomTexSRV;
+	ParticleType _type;
 };
 

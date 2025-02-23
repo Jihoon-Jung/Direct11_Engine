@@ -40,9 +40,10 @@ public:
 	void LoadTestScene2(wstring sceneName);
 	void LoadTestInstancingScene();
 	void CreateNewScene(wstring sceneName);
+	shared_ptr<GameObject> LoadPrefabToScene(wstring prefab);
 
 	shared_ptr<Scene> LoadPlayScene(wstring sceneName);
-
+	
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
 	void SetActiveScene(shared_ptr<Scene> scene) { _activeScene = scene; }
 	void SaveAndLoadGameObjectToXML(const wstring& sceneName, const wstring& name,
@@ -68,7 +69,7 @@ public:
 
 	void UpdateGameObjectParentInXML(const wstring& sceneName, const wstring& objectName,
 		const Vec3& localPosition, const Quaternion& localRotation, const Vec3& localScale,
-		const wstring& parentName);
+		const wstring& parentName, const wstring& boneRootParentName = L"");
 
 	void UpdateMeshInXML(const wstring& sceneName, const wstring& objectName, const string& meshName);
 	void UpdateMaterialInXML(const wstring& sceneName, const wstring& objectName, const string& materialName);
@@ -119,7 +120,7 @@ public:
 	void UpdateGameObjectRenderPassInXML(const wstring& sceneName, const wstring& objectName,
 		Pass pass, bool useEnvironmentMap);
 	void UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName,
-		float speed, bool endParticle);
+		float speed, bool endParticle, ParticleType type);
 
 	shared_ptr<GameObject> CreateCubeToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateSphereToScene(const wstring& sceneName);

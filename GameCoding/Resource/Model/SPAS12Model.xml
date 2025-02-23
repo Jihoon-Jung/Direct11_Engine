@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>SPAS12</Name>
+    <Path>SPAS12/SPAS12</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>SPAS12/SPAS12</Material>
+</Model>

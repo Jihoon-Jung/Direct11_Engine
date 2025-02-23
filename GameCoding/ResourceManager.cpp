@@ -104,6 +104,14 @@ void ResourceManager::SaveResource()
 	};
 	WriteShaderToXML(L"Shader/InitParticleSystem.hlsl", L"InitParticle_Shader", types, layouts, slots, L"Resource/Shader/InitParticleShader.xml");
 
+	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER_WITH_STREAMOUTPUT };
+	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
+	slots = {
+		{L"ParticleBuffer", 0},
+		{L"gRandomTex", 0}
+	};
+	WriteShaderToXML(L"Shader/InitParticleSystem_Bomb.hlsl", L"InitParticleBomb_Shader", types, layouts, slots, L"Resource/Shader/InitParticleBombShader.xml");
+
 	types = { ShaderType::VERTEX_SHADER, ShaderType::GEOMETRY_SHADER, ShaderType::PIXEL_SHADER };
 	layouts = { InputLayoutType::VertexParticle, InputLayoutType::VertexParticle, InputLayoutType::VertexParticle };
 	slots = {
@@ -329,7 +337,7 @@ void ResourceManager::AddResource()
 		fireParticleTexture->CreateTexture2DArraySRV(textureVector);
 		fireParticleTexture->SetName(L"Fire_Particle");
 		RESOURCE.AddResource(fireParticleTexture->GetName(), fireParticleTexture);
-
+		
 		randomTexture->CreateRandomTexture1DSRV();
 		randomTexture->SetName(L"Random_Texture");
 		RESOURCE.AddResource(randomTexture->GetName(), randomTexture);

@@ -49,6 +49,40 @@ void Texture::CreateTexture(const wstring& path)
 	_size.x = md.width;
 	_size.y = md.height;
 }
+HRESULT Texture::ConvertPngToDDS(const wstring& inputFile, const wstring& outputFile)
+{
+	// PNG 파일 로드
+	ScratchImage image;
+	HRESULT hr = LoadFromWICFile(inputFile.c_str(), WIC_FLAGS_NONE, nullptr, image);
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	// ? PNG의 포맷을 먼저 RGBA (R8G8B8A8_UNORM)로 변환
+	ScratchImage rgbaImage;
+	hr = Convert(image.GetImages(), image.GetImageCount(), image.GetMetadata(),
+		DXGI_FORMAT_R8G8B8A8_UNORM, TEX_FILTER_DEFAULT, 0.5f, rgbaImage);
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	// ? BC3_UNORM (DXT5)로 변환 (알파 채널 포함)
+	ScratchImage ddsImage;
+	hr = Compress(rgbaImage.GetImages(), rgbaImage.GetImageCount(), rgbaImage.GetMetadata(),
+		DXGI_FORMAT_BC3_UNORM, TEX_COMPRESS_DEFAULT, 0.5f, ddsImage);
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	// DDS 저장
+	hr = SaveToDDSFile(ddsImage.GetImages(), ddsImage.GetImageCount(),
+		ddsImage.GetMetadata(), DDS_FLAGS_NONE, outputFile.c_str());
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	return S_OK;
+}
 ComPtr<ID3D11ShaderResourceView> Texture::LoadTextureFromDDS(const wstring& path)
 {
 	// 파일 확장자 얻기

@@ -133,11 +133,11 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 
 
 // Pixel Shader
-Texture2DArray gTexArray : register(t0);
+Texture2D gTexArray : register(t0);
 SamplerState gSampler : register(s0);
 
 float4 PS(GeoOut  pin) : SV_TARGET
 {
-    float4 texColor = gTexArray.Sample(gSampler, float3(pin.Tex, 0)) * pin.Color;
+    float4 texColor = gTexArray.Sample(gSampler, pin.Tex) * pin.Color;
     return texColor * pin.Color;
 }

@@ -1706,9 +1706,16 @@ void RenderPass::AnimatedMeshRender(bool isEnv)
 void RenderPass::ParticleRender(bool isEnv)
 {
 	auto transformPtr = _transform.lock();
+	shared_ptr<ParticleSystem> particleComponent = transformPtr->GetGameObject()->GetComponent<ParticleSystem>();
 
-	shared_ptr<Shader> initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticle_Shader");
-	shared_ptr<Shader> renderParticleShader = _meshRenderer->GetShader();// RESOURCE.GetResource<Shader>(L"RenderParticle_Shader");
+	shared_ptr<Shader> initParticleShader;
+
+	if (particleComponent->GetParticleType() == ParticleType::FLARE)
+		initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticle_Shader");
+	else
+		initParticleShader = RESOURCE.GetResource<Shader>(L"InitParticleBomb_Shader");
+
+	shared_ptr<Shader> renderParticleShader = _meshRenderer->GetShader();//` RESOURCE.GetResource<Shader>(L"RenderParticle_Shader");
 
 	Matrix viewMat;
 	Matrix projMat;
@@ -1725,7 +1732,7 @@ void RenderPass::ParticleRender(bool isEnv)
 	}
 
 
-	shared_ptr<ParticleSystem> particleComponent = transformPtr->GetGameObject()->GetComponent<ParticleSystem>();
+	
 	Vec3 _eyePosW = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	Vec3 _emitPosW = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	Vec3 _emitDirW = XMFLOAT3(0.0f, 1.0f, 0.0f);

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shader>
+    <Name>InitParticleBomb_Shader</Name>
+    <Path>Shader/InitParticleSystem_Bomb.hlsl</Path>
+    <ShaderTypes>
+        <Type>0</Type>
+        <Type>4</Type>
+    </ShaderTypes>
+    <InputLayouts>
+        <Layout>4</Layout>
+        <Layout>4</Layout>
+    </InputLayouts>
+    <Slots>
+        <Slot name="ParticleBuffer" index="0"/>
+        <Slot name="gRandomTex" index="0"/>
+    </Slots>
+</Shader>
