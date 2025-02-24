@@ -876,7 +876,7 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	auto skyBoxRenderer = make_shared<MeshRenderer>();
 	skyBoxRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
 	skyBoxRenderer->SetModel(nullptr);
-	skyBoxRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
+	skyBoxRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"GrassSkybox_Material"));
 	skyBoxRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, true);
 	skyBoxRenderer->AddRenderPass();
 	skyBoxRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
@@ -884,7 +884,7 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	skyBoxRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"skyBox")->transform());
 	skyBoxRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"skyBox", skyBoxRenderer,
-		L"SkyBoxMaterial", L"Sphere");
+		L"GrassSkybox_Material", L"Sphere");
 }
 
 #include <random>
@@ -1126,7 +1126,7 @@ void SceneManager::CreateNewScene(wstring sceneName)
 	auto skyBoxRenderer = make_shared<MeshRenderer>();
 	skyBoxRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Sphere"));
 	skyBoxRenderer->SetModel(nullptr);
-	skyBoxRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"SkyBoxMaterial"));
+	skyBoxRenderer->SetMaterial(RESOURCE.GetResource<Material>(L"GrassSkybox_Material"));
 	skyBoxRenderer->SetRasterzierState(D3D11_FILL_SOLID, D3D11_CULL_BACK, true);
 	skyBoxRenderer->AddRenderPass();
 	skyBoxRenderer->GetRenderPasses()[0]->SetPass(Pass::DEFAULT_RENDER);
@@ -1134,7 +1134,7 @@ void SceneManager::CreateNewScene(wstring sceneName)
 	skyBoxRenderer->GetRenderPasses()[0]->SetTransform(_activeScene->Find(L"skyBox")->transform());
 	skyBoxRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::NORMAL);
 	AddComponentToGameObjectAndSaveToXML(sceneName, L"skyBox", skyBoxRenderer,
-		L"SkyBoxMaterial", L"Sphere");
+		L"GrassSkybox_Material", L"Sphere");
 
 	_isCreateNewScene = false;
 }

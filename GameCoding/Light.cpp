@@ -22,9 +22,6 @@ void Light::Update()
 	Vec3 initialOffset = Vec3(-30, 39, 34);  // 카메라로부터의 상대적 거리
 	float radius = initialOffset.Length();    // 공전 반지름
 
-	// 현재 회전 각도 업데이트
-	/*_totalRotationTime += deltaAngle;
-	_totalRotationTime = -30.0f;*/
 	// 공전 위치 계산
 	float x = radius * cos(XMConvertToRadians(30.0f));
 	float z = radius * sin(XMConvertToRadians(30.0f));

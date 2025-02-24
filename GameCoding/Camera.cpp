@@ -105,7 +105,7 @@ void Camera::SetShadowMapViewProjectionMatrix()
 	shared_ptr<GameObject> light = SCENE.GetActiveScene()->GetMainLight();
 	Vec3 main_cameraPos = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition();
 	Vec3 eye = light->transform()->GetWorldPosition();
-	Vec3 at = Vec3(main_cameraPos.x, 0, main_cameraPos.z);//GP.centerPos;
+	Vec3 at = Vec3(main_cameraPos.x, 0, main_cameraPos.z);
 	Vec3 up = Vec3(0.0f, 1.0f, 0.0f);
 	_shadowView = ::XMMatrixLookAtLH(eye, at, up);
 
@@ -113,7 +113,7 @@ void Camera::SetShadowMapViewProjectionMatrix()
 	int height = GP.GetProjectHeight();
 	float nearZ = 1.0f;
 	float farZ = 100.0f;
-	float orthoSize = 100.0f;
+	float orthoSize = 30.0f;
 	float aspect = width / height;
 
 	_shadowProjection = ::XMMatrixOrthographicLH(orthoSize * aspect, orthoSize, nearZ, farZ);

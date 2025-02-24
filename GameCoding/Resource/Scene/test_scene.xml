@@ -53,7 +53,7 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="Kachujin_OBJ">
-        <Transform posX="5.8769355" posY="0.065524697" posZ="4.6361711e-06" rotX="0" rotY="179.99995" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <Transform posX="5.8769355" posY="-0.022708878" posZ="4.6361711e-06" rotX="0" rotY="179.99994" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
@@ -159,6 +159,20 @@
         <Transform posX="5.6220984" posY="57.703247" posZ="3.4126132" rotX="84.934837" rotY="-59.732296" rotZ="-138.80923" scaleX="10.000002" scaleY="10.000004" scaleZ="10.000002"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="SPAS12">
             <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="cube">
+        <Transform posX="0.17259741" posY="1.2853761" posZ="-4.636682" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+    </GameObject>
+    <GameObject name="CottageModel">
+        <Transform posX="15.720395" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
+            <RenderPass pass="8" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>

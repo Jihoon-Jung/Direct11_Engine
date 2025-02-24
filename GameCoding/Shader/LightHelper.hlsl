@@ -52,6 +52,28 @@ struct Shadow
 	SamplerState shadowSampler;
 	Texture2D shadowMap;
 };
+
+static const float2 POISSON_DISK[16] =
+{
+	float2(-0.94201624, -0.39906216),
+	float2(0.94558609, -0.76890725),
+	float2(-0.09418410, -0.92938870),
+	float2(0.34495938,  0.29387760),
+	float2(-0.91588581,  0.45771432),
+	float2(-0.81544232, -0.87912464),
+	float2(-0.38277543,  0.27676845),
+	float2(0.97484398,  0.75648379),
+	float2(0.44323325, -0.97511554),
+	float2(0.53742981, -0.47373420),
+	float2(-0.26496911, -0.41893023),
+	float2(0.79197514,  0.19090188),
+	float2(-0.24188840,  0.99706507),
+	float2(-0.81409955,  0.91437590),
+	float2(0.19984126,  0.78641367),
+	float2(0.14383161, -0.14100790)
+};
+
+
 //---------------------------------------------------------------------------------------
 // Computes the ambient, diffuse, and specular terms in the lighting equation
 // from a directional light.  We need to output the terms separately because
@@ -240,48 +262,68 @@ void ComputeNormalMapping(inout float3 normal, float3 tangent, float2 uv, Textur
 
 float CalculateShadowFactor(Shadow info)
 {
-	float shadow = 1.0;
-
+	// 1. light space 좌표를 [0,1] 범위로 변환
+	float4 lightPos = info.lightPosition;
 	float2 projCoords;
-	projCoords.x = (info.lightPosition.x / info.lightPosition.w) * 0.5f + 0.5f;
-	projCoords.y = -(info.lightPosition.y / info.lightPosition.w) * 0.5f + 0.5f;
+	projCoords.x = (lightPos.x / lightPos.w) * 0.5f + 0.5f;
+	projCoords.y = -(lightPos.y / lightPos.w) * 0.5f + 0.5f;
 
-	if (projCoords.x < 0.0f || projCoords.x > 1.0f || projCoords.y < 0.0f || projCoords.y > 1.0f)
-		return shadow;
-
-	float currentDepth = info.lightPosition.z / info.lightPosition.w;
-
-	// 수정된 부분: normal과 light 방향 계산
-	float3 lightDir = info.lightDir;
-	float cosTheta = saturate(dot(normalize(info.normal), lightDir));
-
-	// 수직면에 가까운 경우 그림자 제거 (수정된 임계값)
-	if (cosTheta < 0.2f)
-		return 1.0;
-
-	// 동적 bias 계산 수정
-	float bias = lerp(0.01, 0.001, cosTheta * cosTheta);
-
-	shadow = 0.0;
-	float2 texelSize = 1.0 / 2048.0;
-
-	[unroll]
-	for (int x = -1; x <= 1; ++x)
+	// 범위를 벗어나면 그림자 없음
+	if (projCoords.x < 0.0f || projCoords.x > 1.0f ||
+		projCoords.y < 0.0f || projCoords.y > 1.0f)
 	{
-		[unroll]
-		for (int y = -1; y <= 1; ++y)
-		{
-			float pcfDepth = info.shadowMap.Sample(info.shadowSampler, projCoords + float2(x, y) * texelSize).r;
-			shadow += (currentDepth - bias) < pcfDepth ? 1.0 : 0.0;
-		}
+		return 1.0f;
 	}
 
-	shadow /= 9.0;
+	// 2. 현재 픽셀의 깊이값 (light space)
+	float currentDepth = lightPos.z / lightPos.w;
 
-	// 깊이값이 1에 가까우면 그림자 없음
+	// 3. 표면 normal과 light direction의 각도 계산
+	float3 norm = normalize(info.normal);
+	float3 lightDir = normalize(info.lightDir);
+	float cosTheta = saturate(dot(norm, lightDir));
+
+	// 수직에 가까운 경우는 그림자 미적용
+	if (cosTheta < 0.2f)
+	{
+		return 1.0f;
+	}
+
+	// 4. slope-scale bias 계산
+	float bias = max(0.005f * (1.0f - cosTheta), 0.001f);
+
+	// 5. Normal offset bias
+	float adjustedDepth = currentDepth - bias;
+
+	// 6. Poisson Disk 기반 PCF 샘플링
+	//    (16개의 비정형 샘플 포인트를 사용)
+	float shadow = 0.0f;
+
+	// Shadow Map이 1920x1040인 경우
+	float2 texelSize = float2(1.0f / 1920.0f, 1.0f / 1040.0f);
+
+	// "샘플 반경" (직접 조정해서 실험)
+	float radius = 5.0f;
+
+	// 16개 Poisson Disk 샘플
+	for (int i = 0; i < 16; i++)
+	{
+		float2 offset = POISSON_DISK[i] * (radius * texelSize);
+		float sampleDepth = info.shadowMap.Sample(info.shadowSampler, projCoords + offset).r;
+		shadow += (adjustedDepth < sampleDepth) ? 1.0f : 0.0f;
+	}
+
+	// 평균값
+	shadow /= 16.0f;
+
+	// 7. 만약 현재 깊이가 near plane (즉, 물체가 멀리 있을 경우)라면 그림자 효과 없음
 	if (currentDepth > 0.99f)
-		shadow = 1.0;
+	{
+		shadow = 1.0f;
+	}
 
 	return shadow;
-
 }
+
+
+
