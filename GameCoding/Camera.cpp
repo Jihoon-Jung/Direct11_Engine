@@ -113,7 +113,7 @@ void Camera::SetShadowMapViewProjectionMatrix()
 	int height = GP.GetProjectHeight();
 	float nearZ = 1.0f;
 	float farZ = 100.0f;
-	float orthoSize = 30.0f;
+	float orthoSize = 100.0f;
 	float aspect = width / height;
 
 	_shadowProjection = ::XMMatrixOrthographicLH(orthoSize * aspect, orthoSize, nearZ, farZ);

@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "framework.h"
 #include "GameCoding.h"
-#include "Engine.h"
 #include "EngineBody.h"
 #include <string>
 #include <sstream>
@@ -70,7 +69,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 float fps = frameCount / elapsedTime;
 
                 std::wstringstream wss;
-                wss << L"J_Engine - FPS: " << std::fixed << std::setprecision(2) << fps;
+                wss << L"Jihoon_Engine - FPS: " << std::fixed << std::setprecision(2) << fps;
                 SetWindowText(hWnd, wss.str().c_str());
 
                 frameCount = 0;
@@ -126,7 +125,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     int posX = (screenWidth - windowWidth) / 2;
     int posY = (screenHeight - windowHeight) / 2;
 
-    hWnd = CreateWindowW(L"GameCoding", L"J_Engine", WS_OVERLAPPEDWINDOW,
+    hWnd = CreateWindowW(L"GameCoding", L"Jihoon_Engine", WS_OVERLAPPEDWINDOW,
         posX, posY, // CW_USEDEFAULT 대신 계산된 위치 사용
         windowWidth, windowHeight,
         nullptr, nullptr, hInstance, nullptr);

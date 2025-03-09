@@ -25,19 +25,32 @@ void SceneManager::Update()
 
 void SceneManager::LoadScene(wstring sceneName)
 {
-	SCENE.Reset();  // 완전 초기화
-	RENDER.Reset(); // 완전 초기화
+	tinyxml2::XMLDocument doc;
+	string pathStr = "../../SceneInfo.xml";
+
+	if (doc.LoadFile(pathStr.c_str()) != tinyxml2::XML_SUCCESS) {
+		tinyxml2::XMLElement* root = doc.NewElement("SceneInfo");
+		doc.InsertFirstChild(root);
+	}
+
+	tinyxml2::XMLElement* root = doc.FirstChildElement("SceneInfo");
+	if (root) {
+		root->SetAttribute("sceneName", Utils::ToString(sceneName).c_str());
+		doc.SaveFile(pathStr.c_str());
+	}
+
+	SCENE.Reset();
+	RENDER.Reset();
 	GUI.ResetSelectedObject();
 
-	LoadTestScene2(sceneName);
+	LoadSceneXML(sceneName);
 	//LoadTestScene(sceneName);
 	//LoadTestInstancingScene();
 
 	SCENE.Init();
 	RENDER.Init();
-	//GUI.Init();
 }
-void SceneManager::LoadTestScene2(wstring sceneName)
+void SceneManager::LoadSceneXML(wstring sceneName)
 {
 	_activeScene = make_shared<Scene>();
 	_activeScene->SetSceneName(sceneName);
@@ -90,7 +103,6 @@ void SceneManager::LoadTestScene2(wstring sceneName)
 			Quaternion qtRot = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 
 			transform->SetQTRotation(qtRot);
-			//transform->SetLocalRotation(rot);
 			transform->SetLocalScale(scale);
 			gameObj->AddComponent(transform);
 		}

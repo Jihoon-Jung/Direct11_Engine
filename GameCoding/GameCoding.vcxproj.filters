@@ -98,9 +98,6 @@
     <ClInclude Include="SimpleMath.h">
       <Filter>소스 파일\Headers\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>소스 파일\Main</Filter>
-    </ClInclude>
     <ClInclude Include="InputLayout.h">
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
@@ -111,9 +108,6 @@
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
     <ClInclude Include="SamplerState.h">
-      <Filter>소스 파일\PipleLine</Filter>
-    </ClInclude>
-    <ClInclude Include="Pipeline.h">
       <Filter>소스 파일\PipleLine</Filter>
     </ClInclude>
     <ClInclude Include="Buffer.h">
@@ -350,9 +344,6 @@
     <ClCompile Include="SimpleMath.cpp">
       <Filter>소스 파일\Headers\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>소스 파일\Main</Filter>
-    </ClCompile>
     <ClCompile Include="InputLayout.cpp">
       <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
@@ -363,9 +354,6 @@
       <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
     <ClCompile Include="SamplerState.cpp">
-      <Filter>소스 파일\PipleLine</Filter>
-    </ClCompile>
-    <ClCompile Include="Pipeline.cpp">
       <Filter>소스 파일\PipleLine</Filter>
     </ClCompile>
     <ClCompile Include="Buffer.cpp">

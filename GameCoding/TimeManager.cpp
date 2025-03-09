@@ -17,7 +17,7 @@ void TimeManager::Update()
 
     // Edit 모드이거나 Pause 모드일 때는 deltaTime을 0으로 설정
     EngineMode mode = ENGINE.GetEngineMode();
-    EngineMode mode2 = EngineMode::Play;
+
     if (_isEnginePause || _isPaused || ENGINE.GetEngineMode() == EngineMode::Edit)
     {
         _deltaTime = 0.0f;

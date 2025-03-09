@@ -175,8 +175,8 @@ void Graphics::SetShadowMapRenderTarget()
 {
 	// viewport ¼³Á¤
 	D3D11_VIEWPORT viewport = {};
-	viewport.Width = GetProjectWidth();//GetViewWidth();
-	viewport.Height = GetProjectHeight();//GetViewHeight();
+	viewport.Width = GetProjectWidth()*2;//GetViewWidth();
+	viewport.Height = GetProjectHeight()*2;//GetViewHeight();
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0.0f;
@@ -201,8 +201,8 @@ void Graphics::CreateShadowMapRenderTarget()
 	// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going to interpret
 	// the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS.
 	D3D11_TEXTURE2D_DESC texDesc;
-	texDesc.Width = GetProjectWidth();//GetViewWidth();
-	texDesc.Height = GetProjectHeight();//GetViewHeight();
+	texDesc.Width = GetProjectWidth()*2;//GetViewWidth();
+	texDesc.Height = GetProjectHeight()*2;//GetViewHeight();
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;

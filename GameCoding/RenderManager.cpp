@@ -7,7 +7,6 @@
 #include <chrono> // std::chrono::seconds
 void RenderManager::Init()
 {
-	_pipeline = make_shared<Pipeline>();
 	vector<shared_ptr<GameObject>> gameObjects = SCENE.GetActiveScene()->GetGameObjects();
 	for (shared_ptr<GameObject>& gameObject : gameObjects)
 	{

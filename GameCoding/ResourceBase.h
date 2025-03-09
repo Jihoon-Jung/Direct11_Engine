@@ -25,10 +25,6 @@ public:
 	const wstring& GetName() { return _name; }
 
 protected:
-	virtual void Load(const wstring& path) { }
-	virtual void Save(const wstring& path) { }
-
-protected:
 	ResourceType _type = ResourceType::None;
 	wstring _name;
 	wstring _path;

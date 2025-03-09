@@ -325,7 +325,7 @@ void GUIManager::RenderUI()
                 {
                     // GameObject 생성 및 저장
                     SCENE.SaveAndLoadGameObjectToXML(sceneName, objectName, _newObjectPosition, _newObjectRotation, _newObjectScale);
-                    RENDER.GetRenderableObject();
+                    
                     // MeshRenderer 추가
                     if (_newObjectUseMeshRenderer && _newObjectSelectedMesh < _meshList.size() && _newObjectSelectedMaterial < _materialList.size())
                     {
@@ -343,7 +343,7 @@ void GUIManager::RenderUI()
                         SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, objectName, meshRenderer,
                             _materialList[_newObjectSelectedMaterial], _meshList[_newObjectSelectedMesh]);
                     }
-
+                    RENDER.GetRenderableObject();
                     // 초기화
                     strcpy_s(_newObjectName, "NewObject");
                     _newObjectPosition = Vec3::Zero;

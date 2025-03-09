@@ -1,6 +1,5 @@
 #pragma once
 #include "ConstantBufferType.h"
-#include "Pipeline.h"
 #include "Buffer.h"
 #include "GameObject.h"
 #include "InstancingBuffer.h"
@@ -33,7 +32,6 @@ public:
 	}
 
 	void Reset() {
-		_pipeline = nullptr;
 		_renderObjects.clear();
 		_envMappedObjects.clear();
 		_billboardObjs.clear();
@@ -73,8 +71,6 @@ public:
 	shared_ptr<Texture> _envTexture;
 
 private:
-	shared_ptr<Pipeline> _pipeline;
-	PipelineInfo _pipelineInfo;
 	vector<shared_ptr<GameObject>> _renderObjects;
 	vector<shared_ptr<GameObject>> _envMappedObjects;
 	vector<shared_ptr<GameObject>> _billboardObjs;

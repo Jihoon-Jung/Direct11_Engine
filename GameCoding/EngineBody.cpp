@@ -22,13 +22,32 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	INPUT.Init(hwnd);
 	TIME.Init();
 	RESOURCE.Init();
-	SCENE.LoadScene(L"test_scene");
+	
+    wstring sceneName = L"test_scene";
+    tinyxml2::XMLDocument doc;
+    string pathStr = "../../SceneInfo.xml";
+
+    if (doc.LoadFile(pathStr.c_str()) == tinyxml2::XML_SUCCESS) {
+        tinyxml2::XMLElement* root = doc.FirstChildElement("SceneInfo");
+        if (root) {
+            const char* sceneNameAttr = root->Attribute("sceneName");
+            if (sceneNameAttr) {
+                sceneName = Utils::ToWString(sceneNameAttr);
+            }
+        }
+    }
+    else {
+        tinyxml2::XMLDocument newDoc;
+        tinyxml2::XMLElement* root = newDoc.NewElement("SceneInfo");
+        root->SetAttribute("sceneName", "test_scene");
+        newDoc.InsertFirstChild(root);
+        newDoc.SaveFile(pathStr.c_str());
+    }
+
+    SCENE.LoadScene(sceneName);
+
     _editScene = SCENE.GetActiveScene();
-
-    /*SCENE.Init();
-	RENDER.Init();*/
 	GUI.Init();
-
 }
 
 void EngineBody::Update()

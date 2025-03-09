@@ -37,7 +37,7 @@ public:
 	void Update();
 	void LoadScene(wstring sceneName);
 	void LoadTestScene(wstring sceneName);
-	void LoadTestScene2(wstring sceneName);
+	void LoadSceneXML(wstring sceneName);
 	void LoadTestInstancingScene();
 	void CreateNewScene(wstring sceneName);
 	shared_ptr<GameObject> LoadPrefabToScene(wstring prefab);

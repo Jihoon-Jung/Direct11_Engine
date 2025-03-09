@@ -88,7 +88,7 @@ public:
 	int _environmentMapHeight = 256;
 
 	uint32    _4xMsaaQuality = 0;
-	Vec3 centerPos = { 0.0f, 0.0f, 0.0f }; // { 3.0f, 0.0f, 117.0f };
+	Vec3 centerPos = { 0.0f, 0.0f, 0.0f };
 
 };
 
