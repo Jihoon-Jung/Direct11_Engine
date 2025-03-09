@@ -25,7 +25,7 @@ void EngineBody::Init(HWND hwnd, int width, int height)
 	
     wstring sceneName = L"test_scene";
     tinyxml2::XMLDocument doc;
-    string pathStr = "../../SceneInfo.xml";
+    string pathStr = "../SceneInfo.xml";
 
     if (doc.LoadFile(pathStr.c_str()) == tinyxml2::XML_SUCCESS) {
         tinyxml2::XMLElement* root = doc.FirstChildElement("SceneInfo");

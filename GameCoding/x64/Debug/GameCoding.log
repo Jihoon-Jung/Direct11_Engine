@@ -1,40 +1,53 @@
 ﻿  EngineBody.cpp
   SceneManager.cpp
 D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(266,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(267,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(268,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(269,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(295,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(296,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(297,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(298,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(759,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(987,32): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(987,16): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1010,34): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1010,18): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1057,33): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1057,17): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1380,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1388,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1389,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1390,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1391,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1417,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1418,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1419,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1420,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2010,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2011,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2012,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2013,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2039,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2040,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2041,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2042,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2209,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(3050,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(3846,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(259,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(260,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(261,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(262,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(288,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(289,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(290,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(291,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(756,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(980,32): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(980,16): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1003,34): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1003,18): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1050,33): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1050,17): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1378,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1381,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1382,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1383,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1384,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1410,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1411,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1412,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(1413,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2003,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2004,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2005,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2006,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2032,16): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2033,15): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2034,17): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2035,18): warning C4244: '=': 'float'에서 'LONG'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(2212,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(3054,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\GameCoding\SceneManager.cpp(3844,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
   코드를 생성하고 있습니다...
+  LINK : D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
+DirectXTex_debug.lib(BC.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(BC4BC5.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC4BC5.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(BC6HBC7.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(BC6HBC7.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexCompress.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexCompress.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexConvert.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexConvert.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexD3D11.obj) : warning LNK4099: '' PDB를 'DirectXTex_debug.lib(DirectXTexD3D11.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexDDS.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexDDS.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexImage.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexImage.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexMipMaps.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexMipMaps.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexTGA.obj) : warning LNK4099: '' PDB를 'DirectXTex_debug.lib(DirectXTexTGA.obj)' 또는 ''에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexUtil.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexUtil.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
+DirectXTex_debug.lib(DirectXTexWIC.obj) : warning LNK4099: 'DirectXTex.pdb' PDB를 'DirectXTex_debug.lib(DirectXTexWIC.obj)' 또는 'D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\DirectXTex.pdb'에서 찾을 수 없습니다. 디버그 정보가 없는 것처럼 개체를 링크합니다.
   GameCoding.vcxproj -> D:\Rookiss_Direct\JJHEngin_Git\Direct11_Engine\Binaries\GameCoding.exe

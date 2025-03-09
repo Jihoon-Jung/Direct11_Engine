@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Model>
+    <Name>Mutant</Name>
+    <Path>Mutant/Mutant</Path>
+    <Shader>AnimatedMesh_Shader</Shader>
+    <Material>Mutant/Mutant</Material>
+    <Animations>
+        <Animation>Mutant/Roaring</Animation>
+    </Animations>
+</Model>

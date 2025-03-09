@@ -86,4 +86,15 @@
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
+    <GameObject name="Mutant">
+        <Transform posX="15.986616" posY="-2.3841858e-07" posZ="4.2095981" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Mutant">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Animator>
+            <EntryClip name="Roaring"/>
+            <Clip name="Roaring" animIndex="0" isLoop="true" posX="250" posY="100" speed="1"/>
+        </Animator>
+    </GameObject>
 </Scene>
