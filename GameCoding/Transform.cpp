@@ -18,25 +18,6 @@ void Transform::Update()
 }
 Vec3 Transform::ToEulerAngles(Quaternion q)
 {
-	//Vec3 angles;
-
-	//// roll (x-axis rotation)
-	//double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
-	//double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-	//angles.x = std::atan2(sinr_cosp, cosr_cosp);
-
-	//// pitch (y-axis rotation)
-	//double sinp = std::sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
-	//double cosp = std::sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
-	//angles.y = 2 * std::atan2(sinp, cosp) - 3.14159f / 2;
-
-	//// yaw (z-axis rotation)
-	//double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-	//double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-	//angles.z = std::atan2(siny_cosp, cosy_cosp);
-
-	//return angles;
-
     Vec3 angles;
 
     // pitch (x-axis rotation)
@@ -75,21 +56,8 @@ void Transform::UpdateTransform()
         _worldMat = _localMat;
     }
 
-    // 3. 공전이 있다면 월드 공간에서 적용
-    if (_revolutionInfo.isActive)
-    {
-        Matrix toOrigin = Matrix::CreateTranslation(-_revolutionInfo.center);
-        Matrix rotation = Matrix::CreateFromAxisAngle(
-            _revolutionInfo.axis,
-            XMConvertToRadians(_revolutionInfo.angle)
-        );
-        Matrix fromOrigin = Matrix::CreateTranslation(_revolutionInfo.center);
 
-        // 공전은 월드 공간에서 적용
-        _worldMat = _worldMat * toOrigin * rotation * fromOrigin;
-    }
-
-    // 4. 최종 월드 변환값 추출
+    // 3. 최종 월드 변환값 추출
     Quaternion worldQuat;
     _worldMat.Decompose(_worldScale, worldQuat, _worldPosition);
     _worldRotation = ToEulerAngles(worldQuat);
@@ -100,18 +68,20 @@ void Transform::UpdateTransform()
         child->UpdateTransform();
     }
 
-	// 12. 셰이더에 전달할 상수 버퍼 업데이트
+	// 4. 셰이더에 전달할 상수 버퍼 업데이트
     _transformBuffer = make_shared<Buffer>();
     TransformBuffer _transformBufferData;
 
-    // 월드 행렬의 역행렬과 전치 행렬 계산
+    // 5. 월드 행렬의 역행렬과 전치 행렬 계산
     Matrix inverseWorld = _worldMat.Invert();
     _transformBufferData.worldMatrix = _worldMat;
     _transformBufferData.inverseTransposeWorldMatrix = inverseWorld.Transpose();
 
-    // 상수 버퍼 생성 및 데이터 복사
+    // 6. 상수 버퍼 생성 및 데이터 복사
     _transformBuffer->CreateConstantBuffer<TransformBuffer>();
     _transformBuffer->CopyData(_transformBufferData);
+
+    //SCENE.CheckCollision();
 }
 
 
@@ -147,12 +117,7 @@ void Transform::RotateAround(const Vec3& center, const Vec3& axis, float angle)
         _localPosition = newWorldPos;  // 부모가 없으면 월드 위치가 곧 로컬 위치
     }
 
-    // 5. 회전도 적용
-    Quaternion currentRotation = _qtLocalRotation;
-    Quaternion additionalRotation = Quaternion::CreateFromAxisAngle(axis, XMConvertToRadians(angle));
-    _qtLocalRotation = currentRotation * additionalRotation;
-
-    // 6. Transform 업데이트
+    // 5. Transform 업데이트
     UpdateTransform();
 }
 
@@ -195,7 +160,7 @@ void Transform::SetRotation(const Vec3& rotation)
 	}
 	UpdateTransform();
 }
-void Transform::SetQTRotation(const Quaternion& rotation)
+void Transform::SetQTLocaslRotation(const Quaternion& rotation)
 {
 	_qtLocalRotation = rotation;
 	UpdateTransform();

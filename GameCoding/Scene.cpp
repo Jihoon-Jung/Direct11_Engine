@@ -32,8 +32,16 @@ void Scene::LateUpdate()
 	}
 	Picking();
 	UIPicking();
-	//CheckCollision();
-	
+
+	// 물리 업데이트 빈도 제어 (예: 60FPS에서 20FPS로)
+	static float accumulatedTime = 0.0f;
+	accumulatedTime += TIME.GetDeltaTime();
+
+	if (accumulatedTime >= 0.05f)  // 20Hz로 제한
+	{
+		CheckCollision();
+		accumulatedTime = 0.0f;
+	}
 }
 
 void Scene::AddGameObject(shared_ptr<GameObject> gameObject)
@@ -160,33 +168,7 @@ void Scene::Picking()
 			}
 			
 		}
-		/*if (Find(L"Billboard") == nullptr)
-			AddGameObject(_billboard_obj);*/
 	}
-
-	//if (INPUT.GetButton(KEY_TYPE::LBUTTON))
-	//{
-	//	if (picked != nullptr)
-	//	{
-	//		int32 currentMouseX = INPUT.GetMousePos().x;
-	//		int32 currentMouseY = INPUT.GetMousePos().y;
-
-	//		Vec3 startScreenPos = Vec3(firstClickedMouseX, firstClickedMouseY, 0.0f);
-	//		Vec3 endScreenPos = Vec3(currentMouseX, currentMouseY, 0.0f);
-
-	//		Vec3 startWorldPos = GP.GetViewport().Unproject(startScreenPos, worldMatrix, viewMatrix, projectionMatrix);
-	//		Vec3 endWorldPos = GP.GetViewport().Unproject(endScreenPos, worldMatrix, viewMatrix, projectionMatrix);
-	//		Vec3 worldMoveRatio = endWorldPos - startWorldPos;
-
-	//		picked->transform()->SetLocalPosition(picked->transform()->GetLocalPosition() + worldMoveRatio * 50.0f);
-
-	//		// Update first clicked position for next frame
-	//		firstClickedMouseX = currentMouseX;
-	//		firstClickedMouseY = currentMouseY;
-	//	}
-	//		
-
-	//}
 	
 	if (INPUT.GetPublicButtonUp(KEY_TYPE::LBUTTON))
 	{
@@ -254,19 +236,245 @@ void Scene::CheckCollision()
 		colliders.push_back(gameObject->GetComponent<BaseCollider>());
 	}
 
-	// BruteForce
-	for (int32 i = 0; i < colliders.size(); i++)
+	// 최적 축 선택
+	int bestAxis = 0; // 기본값은 x축
+
+	if (colliders.size() > 1)
 	{
-		for (int32 j = i + 1; j < colliders.size(); j++)
+		float xSpread = CalculateSpread(colliders, 0);
+		float ySpread = CalculateSpread(colliders, 1);
+		float zSpread = CalculateSpread(colliders, 2);
+
+		// 가장 분산이 큰 축 선택 (객체 간격이 가장 넓은 축)
+		if (ySpread > xSpread && ySpread > zSpread)
+			bestAxis = 1; // y축
+		else if (zSpread > xSpread && zSpread > ySpread)
+			bestAxis = 2; // z축
+	}
+
+	vector<pair<shared_ptr<GameObject>, shared_ptr<GameObject>>> potentialCollisions;
+
+	// 선택된 최적 축으로 정렬
+	SortAndSweep(colliders, bestAxis);
+
+	// 스윕 과정 - 선택된 축을 기준으로 진행
+	vector<shared_ptr<BaseCollider>> activeList;
+	for (int i = 0; i < colliders.size(); i++)
+	{
+		float currentMax = GetMaxBound(colliders[i], bestAxis);
+
+		for (int j = 0; j < activeList.size(); j++)
 		{
-			shared_ptr<BaseCollider>& other = colliders[j];
-			if (colliders[i]->Intersects(other))
+			float activeMin = GetMinBound(activeList[j], bestAxis);
+
+			if (activeMin > currentMax)
 			{
-				RemoveGameObject(colliders[i]->GetGameObject());
-				RemoveGameObject(other->GetGameObject());
+				activeList.erase(activeList.begin() + j);
+				j--;
+			}
+			else
+			{
+				potentialCollisions.push_back({
+					activeList[j]->GetGameObject(),
+					colliders[i]->GetGameObject()
+					});
 			}
 		}
+
+		activeList.push_back(colliders[i]);
 	}
+
+	// 추가 필터링 - 다른 두 축에서도 겹치는지 확인하여 후보 더 줄이기
+	vector<pair<shared_ptr<GameObject>, shared_ptr<GameObject>>> filteredCollisions;
+	for (const auto& pair : potentialCollisions)
+	{
+		shared_ptr<BaseCollider> colliderA = pair.first->GetComponent<BaseCollider>();
+		shared_ptr<BaseCollider> colliderB = pair.second->GetComponent<BaseCollider>();
+
+		// 다른 두 축에서도 겹치는지 확인
+		bool overlapsOnAllAxes = true;
+		for (int axis = 0; axis < 3; axis++)
+		{
+			if (axis == bestAxis)
+				continue; // 이미 검사한 축은 건너뜀
+
+			if (GetMaxBound(colliderA, axis) < GetMinBound(colliderB, axis) ||
+				GetMinBound(colliderA, axis) > GetMaxBound(colliderB, axis))
+			{
+				overlapsOnAllAxes = false;
+				break;
+			}
+		}
+
+		if (overlapsOnAllAxes)
+			filteredCollisions.push_back(pair);
+	}
+
+	// 최종 충돌 검사 수행
+	for (const auto& pair : filteredCollisions)
+	{
+		shared_ptr<BaseCollider> colliderA = pair.first->GetComponent<BaseCollider>();
+		shared_ptr<BaseCollider> colliderB = pair.second->GetComponent<BaseCollider>();
+
+		if (colliderA->Intersects(colliderB))
+		{
+			
+			char buffer[100];
+			sprintf_s(buffer, "collision object : %ls, %ls\n", pair.first->GetName().c_str(), pair.second->GetName().c_str());
+			OutputDebugStringA(buffer);
+
+			/*RemoveGameObject(pair.first);
+			RemoveGameObject(pair.second);*/
+		}
+	}
+}
+
+void Scene::SortAndSweep(vector<shared_ptr<BaseCollider>>& colliders, int axis)
+{
+	// 지정된 축을 기준으로 충돌체들을 정렬
+	std::sort(colliders.begin(), colliders.end(), [axis](const shared_ptr<BaseCollider>& a, const shared_ptr<BaseCollider>& b) {
+		float aMin = 0.0f;
+		float bMin = 0.0f;
+
+		// 각 충돌체 타입에 따라 해당 축의 최소값 구하기
+		if (a->GetColliderType() == ColliderType::Box)
+		{
+			shared_ptr<BoxCollider> boxCollider = dynamic_pointer_cast<BoxCollider>(a);
+			BoundingOrientedBox box = boxCollider->GetBoundingBox();
+
+			// 중심 위치와 크기 값 가져오기
+			Vec3 center = Vec3(box.Center.x, box.Center.y, box.Center.z);
+			Vec3 extents = Vec3(box.Extents.x, box.Extents.y, box.Extents.z);
+
+			// 해당 축의 최소값 계산
+			if (axis == 0) aMin = center.x - extents.x;  // x축
+			else if (axis == 1) aMin = center.y - extents.y;  // y축
+			else aMin = center.z - extents.z;  // z축
+		}
+		else if (a->GetColliderType() == ColliderType::Sphere)
+		{
+			shared_ptr<SphereCollider> sphereCollider = dynamic_pointer_cast<SphereCollider>(a);
+			BoundingSphere sphere = sphereCollider->GetBoundingSphere();
+
+			// 중심 위치와 반지름 값 가져오기
+			Vec3 center = Vec3(sphere.Center.x, sphere.Center.y, sphere.Center.z);
+			float radius = sphere.Radius;
+
+			// 해당 축의 최소값 계산
+			if (axis == 0) aMin = center.x - radius;  // x축
+			else if (axis == 1) aMin = center.y - radius;  // y축
+			else aMin = center.z - radius;  // z축
+		}
+
+		// 두 번째 충돌체에 대해서도 동일한 계산
+		if (b->GetColliderType() == ColliderType::Box)
+		{
+			shared_ptr<BoxCollider> boxCollider = dynamic_pointer_cast<BoxCollider>(b);
+			BoundingOrientedBox box = boxCollider->GetBoundingBox();
+
+			Vec3 center = Vec3(box.Center.x, box.Center.y, box.Center.z);
+			Vec3 extents = Vec3(box.Extents.x, box.Extents.y, box.Extents.z);
+
+			if (axis == 0) bMin = center.x - extents.x;
+			else if (axis == 1) bMin = center.y - extents.y;
+			else bMin = center.z - extents.z;
+		}
+		else if (b->GetColliderType() == ColliderType::Sphere)
+		{
+			shared_ptr<SphereCollider> sphereCollider = dynamic_pointer_cast<SphereCollider>(b);
+			BoundingSphere sphere = sphereCollider->GetBoundingSphere();
+
+			Vec3 center = Vec3(sphere.Center.x, sphere.Center.y, sphere.Center.z);
+			float radius = sphere.Radius;
+
+			if (axis == 0) bMin = center.x - radius;
+			else if (axis == 1) bMin = center.y - radius;
+			else bMin = center.z - radius;
+		}
+
+		// 최소값을 기준으로 정렬
+		return aMin < bMin;
+		});
+}
+
+// 충돌체의 최소 경계값 구하기
+float Scene::GetMinBound(const shared_ptr<BaseCollider>& collider, int axis)
+{
+	if (collider->GetColliderType() == ColliderType::Box)
+	{
+		shared_ptr<BoxCollider> boxCollider = dynamic_pointer_cast<BoxCollider>(collider);
+		BoundingOrientedBox box = boxCollider->GetBoundingBox();
+		Vec3 center(box.Center.x, box.Center.y, box.Center.z);
+		Vec3 extents(box.Extents.x, box.Extents.y, box.Extents.z);
+
+		if (axis == 0) return center.x - extents.x;
+		else if (axis == 1) return center.y - extents.y;
+		else return center.z - extents.z;
+	}
+	else if (collider->GetColliderType() == ColliderType::Sphere)
+	{
+		shared_ptr<SphereCollider> sphereCollider = dynamic_pointer_cast<SphereCollider>(collider);
+		BoundingSphere sphere = sphereCollider->GetBoundingSphere();
+		Vec3 center(sphere.Center.x, sphere.Center.y, sphere.Center.z);
+		float radius = sphere.Radius;
+
+		if (axis == 0) return center.x - radius;
+		else if (axis == 1) return center.y - radius;
+		else return center.z - radius;
+	}
+
+	return 0.0f;
+}
+
+// 충돌체의 최대 경계값 구하기
+float Scene::GetMaxBound(const shared_ptr<BaseCollider>& collider, int axis)
+{
+	if (collider->GetColliderType() == ColliderType::Box)
+	{
+		shared_ptr<BoxCollider> boxCollider = dynamic_pointer_cast<BoxCollider>(collider);
+		BoundingOrientedBox box = boxCollider->GetBoundingBox();
+		Vec3 center(box.Center.x, box.Center.y, box.Center.z);
+		Vec3 extents(box.Extents.x, box.Extents.y, box.Extents.z);
+
+		if (axis == 0) return center.x + extents.x;
+		else if (axis == 1) return center.y + extents.y;
+		else return center.z + extents.z;
+	}
+	else if (collider->GetColliderType() == ColliderType::Sphere)
+	{
+		shared_ptr<SphereCollider> sphereCollider = dynamic_pointer_cast<SphereCollider>(collider);
+		BoundingSphere sphere = sphereCollider->GetBoundingSphere();
+		Vec3 center(sphere.Center.x, sphere.Center.y, sphere.Center.z);
+		float radius = sphere.Radius;
+
+		if (axis == 0) return center.x + radius;
+		else if (axis == 1) return center.y + radius;
+		else return center.z + radius;
+	}
+
+	return 0.0f;
+}
+
+float Scene::CalculateSpread(const vector<shared_ptr<BaseCollider>>& colliders, int axis)
+{
+	if (colliders.empty())
+		return 0.0f;
+
+	float minValue = FLT_MAX;
+	float maxValue = -FLT_MAX;
+
+	// 해당 축에서 최소값과 최대값 찾기
+	for (const auto& collider : colliders)
+	{
+		float min = GetMinBound(collider, axis);
+		float max = GetMaxBound(collider, axis);
+
+		if (min < minValue) minValue = min;
+		if (max > maxValue) maxValue = max;
+	}
+
+	// 분산 계산 (최대-최소 범위)
+	return maxValue - minValue;
 }
 
 shared_ptr<GameObject> Scene::Find(const wstring& name)
@@ -301,7 +509,7 @@ shared_ptr<GameObject> Scene::FindWithComponent(ComponentType type)
 		case ComponentType::Camera:
 			if (gameObject->GetComponent<Camera>() != nullptr)
 			{
-				if (GUI.isSceneView()/*ENGINE.GetEngineMode() == EngineMode::Edit || ENGINE.GetEngineMode() == EngineMode::Pause*/)
+				if (GUI.isSceneView())
 				{
 					if (gameObject->GetName() != L"EditorCamera")
 						continue;

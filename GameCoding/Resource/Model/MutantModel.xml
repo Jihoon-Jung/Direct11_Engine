@@ -5,6 +5,8 @@
     <Shader>AnimatedMesh_Shader</Shader>
     <Material>Mutant/Mutant</Material>
     <Animations>
-        <Animation>Mutant/Roaring</Animation>
+        <Animation>Mutant/Idle</Animation>
+        <Animation>Mutant/Run</Animation>
+        <Animation>Mutant/Swiping</Animation>
     </Animations>
 </Model>

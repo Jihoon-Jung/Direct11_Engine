@@ -1,6 +1,6 @@
 <Prefab>
     <GameObject name="cube">
-        <Transform posX="8.2294207" posY="1.4404891" posZ="2.3065338" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="8.4340391" posY="1.5573728" posZ="3.6571183" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cube">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
@@ -12,12 +12,6 @@
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
         <SphereCollider radius="0.5" centerX="0" centerY="0" centerZ="0"/>
-    </GameObject>
-    <GameObject name="cylinder" parent="sphere">
-        <Transform posX="-3.7837648" posY="0.39798117" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cylinder">
-            <RenderPass pass="0" depthStencilState="0"/>
-        </MeshRenderer>
-        <BoxCollider scaleX="0.866" scaleY="3" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Script type="TestEvent"/>
     </GameObject>
 </Prefab>

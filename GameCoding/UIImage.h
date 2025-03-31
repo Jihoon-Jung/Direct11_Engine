@@ -8,6 +8,7 @@ public:
 	UIImage();
 	virtual ~UIImage();
 	bool Picked(POINT screenPos);
+	void SetRect(RECT rect) { _rect = rect; }
 	void SetTransformAndRect(Vec2 screenPos, Vec2 size);
 	void SetScreenTransformAndRect(Vec2 pos, Vec2 size, RECT rect);
 	void UpdateRect(Vec2 ndcPos, Vec2 size);

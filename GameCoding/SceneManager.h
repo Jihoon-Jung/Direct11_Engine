@@ -13,6 +13,11 @@ struct AnimatorEventLoadData
 	float time;
 	string functionKey;
 };
+struct ButtonEventLoadData {
+	shared_ptr<GameObject> gameObject;
+	shared_ptr<Button> button;
+	string functionKey;
+};
 
 class SceneManager
 {
@@ -40,6 +45,7 @@ public:
 	void LoadSceneXML(wstring sceneName);
 	void LoadTestInstancingScene();
 	void CreateNewScene(wstring sceneName);
+	void CheckCollision();
 	shared_ptr<GameObject> LoadPrefabToScene(wstring prefab);
 
 	shared_ptr<Scene> LoadPlayScene(wstring sceneName);
@@ -121,6 +127,8 @@ public:
 		Pass pass, bool useEnvironmentMap);
 	void UpdateGameObjectParticleSystemInXML(const wstring& sceneName, const wstring& objectName,
 		float speed, bool endParticle, ParticleType type);
+
+	void UpdateButtonEventInXML(const wstring& sceneName, const wstring& objectName, const string& functionKey);
 
 	shared_ptr<GameObject> CreateCubeToScene(const wstring& sceneName);
 	shared_ptr<GameObject> CreateSphereToScene(const wstring& sceneName);

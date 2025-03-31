@@ -207,7 +207,7 @@ void Converter::ReadSkinData()
 		for (uint32 b = 0; b < srcMesh->mNumBones; b++)
 		{
 			aiBone* srcMeshBone = srcMesh->mBones[b];
-			uint32 boneIndex = GetBoneIndex(srcMeshBone->mName.C_Str()); // 우리가 파싱한 뼈의 인덱스 추출
+			uint32 boneIndex = GetBoneIndex(srcMeshBone->mName.C_Str()); // 파싱한 뼈의 인덱스 추출
 
 			for (uint32 w = 0; w < srcMeshBone->mNumWeights; w++)
 			{
@@ -478,47 +478,6 @@ shared_ptr<asAnimationNode> Converter::ParseAnimationNode(shared_ptr<asAnimation
 
 	for (uint32 k = 0; k < keyCount; k++)
 	{
-		//asKeyframeData frameData;
-
-		//bool found = false;
-		//uint32 t = node->keyframe.size();
-
-		//// Position
-		//if (::fabsf((float)srcNode->mPositionKeys[k].mTime - (float)t) <= 0.0001f)
-		//{
-		//	aiVectorKey key = srcNode->mPositionKeys[k];
-		//	frameData.time = (float)key.mTime;
-		//	::memcpy_s(&frameData.translation, sizeof(Vec3), &key.mValue, sizeof(aiVector3D));
-
-		//	found = true;
-		//}
-
-		//// Rotation
-		//if (::fabsf((float)srcNode->mRotationKeys[k].mTime - (float)t) <= 0.0001f)
-		//{
-		//	aiQuatKey key = srcNode->mRotationKeys[k];
-		//	frameData.time = (float)key.mTime;
-
-		//	frameData.rotation.x = key.mValue.x;
-		//	frameData.rotation.y = key.mValue.y;
-		//	frameData.rotation.z = key.mValue.z;
-		//	frameData.rotation.w = key.mValue.w;
-
-		//	found = true;
-		//}
-
-		//// Scale
-		//if (::fabsf((float)srcNode->mScalingKeys[k].mTime - (float)t) <= 0.0001f)
-		//{
-		//	aiVectorKey key = srcNode->mScalingKeys[k];
-		//	frameData.time = (float)key.mTime;
-		//	::memcpy_s(&frameData.scale, sizeof(Vec3), &key.mValue, sizeof(aiVector3D));
-
-		//	found = true;
-		//}
-
-		//if (found == true)
-		//	node->keyframe.push_back(frameData);
 		asKeyframeData frameData;
 		frameData.scale = Vec3(1.0f, 1.0f, 1.0f);  // 스케일을 항상 1로 고정
 		bool found = false;
@@ -564,35 +523,6 @@ shared_ptr<asAnimationNode> Converter::ParseAnimationNode(shared_ptr<asAnimation
 
 void Converter::ReadKeyframeData(shared_ptr<asAnimation> animation, aiNode* srcNode, map<string, shared_ptr<asAnimationNode>>& cache)
 {
-	//shared_ptr<asKeyframe> keyframe = make_shared<asKeyframe>();
-	//keyframe->boneName = srcNode->mName.C_Str();
-
-	//shared_ptr<asAnimationNode> findNode = cache[srcNode->mName.C_Str()];
-
-	//for (uint32 i = 0; i < animation->frameCount; i++)
-	//{
-	//	asKeyframeData frameData;
-
-	//	if (findNode == nullptr)
-	//	{
-	//		Matrix transform(srcNode->mTransformation[0]);
-	//		transform = transform.Transpose();
-	//		frameData.time = (float)i;
-	//		transform.Decompose(OUT frameData.scale, OUT frameData.rotation, OUT frameData.translation);
-	//	}
-	//	else
-	//	{
-	//		frameData = findNode->keyframe[i];
-	//	}
-
-	//	keyframe->transforms.push_back(frameData);
-	//}
-
-	//// 애니메이션 키프레임 채우기
-	//animation->keyframes.push_back(keyframe);
-
-	//for (uint32 i = 0; i < srcNode->mNumChildren; i++)
-	//	ReadKeyframeData(animation, srcNode->mChildren[i], cache);
 	shared_ptr<asKeyframe> keyframe = make_shared<asKeyframe>();
 	keyframe->boneName = srcNode->mName.C_Str();
 

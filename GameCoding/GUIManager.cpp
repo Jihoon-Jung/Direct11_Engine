@@ -3,6 +3,7 @@
 #include "GUIManager.h"
 #include "TestEvent.h"
 #include "EditorCamera.h"
+#include <unordered_set>
 #include <algorithm>
 #include <fstream>
 
@@ -110,7 +111,7 @@ void GUIManager::Update()
 
                 // 변환된 값 적용
                 camera->transform()->SetLocalPosition(newPos);
-                camera->transform()->SetQTRotation(newRot);
+                camera->transform()->SetQTLocaslRotation(newRot);
 
                 // 카메라 이동이 완료되면 회전값 초기화
                 if (t >= 1.0f)
@@ -899,7 +900,7 @@ void GUIManager::RenderUI()
                         float angle = XMConvertToRadians(deltaAngle);
                         Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localRight, angle);
                         Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        transform->SetQTLocaslRotation(transform->GetQTRotation() * deltaRotation);
                         lastRotation.x = tempRotation.x;
                         currentEulerAngles.x = tempRotation.x;
                     }
@@ -927,7 +928,7 @@ void GUIManager::RenderUI()
                         float angle = XMConvertToRadians(deltaAngle);
                         Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localUp, angle);
                         Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        transform->SetQTLocaslRotation(transform->GetQTRotation() * deltaRotation);
                         lastRotation.y = tempRotation.y;
                         currentEulerAngles.y = tempRotation.y;
                     }
@@ -955,7 +956,7 @@ void GUIManager::RenderUI()
                         float angle = XMConvertToRadians(deltaAngle);
                         Matrix rotationMatrix = Matrix::CreateFromAxisAngle(localForward, angle);
                         Quaternion deltaRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
-                        transform->SetQTRotation(transform->GetQTRotation() * deltaRotation);
+                        transform->SetQTLocaslRotation(transform->GetQTRotation() * deltaRotation);
                         lastRotation.z = tempRotation.z;
                         currentEulerAngles.z = tempRotation.z;
                     }
@@ -1511,7 +1512,59 @@ void GUIManager::RenderUI()
                         }
                         else if (auto button = dynamic_pointer_cast<Button>(component))
                         {
+                            // 현재 설정된 함수 표시
+                            string currentFunction = button->GetOnClickedFuntionKey();
+                            if (currentFunction.empty())
+                            currentFunction = "None";
 
+                            if (ImGui::BeginCombo("OnClick Function", currentFunction.c_str()))
+                            {
+                                // None 옵션 추가
+                                if (ImGui::Selectable("None", currentFunction == "None"))
+                                {
+                                    button->AddOnClickedEvent("", nullptr); // nullptr 추가
+                                    // XML 업데이트
+                                    SCENE.UpdateButtonEventInXML(
+                                        SCENE.GetActiveScene()->GetSceneName(),
+                                        button->GetGameObject()->GetName(),
+                                        ""
+                                    );
+                                }
+
+                                // GameObject의 모든 MonoBehaviour 컴포넌트 순회
+                                auto gameObj = button->GetGameObject();
+                                for (auto& comp : gameObj->GetComponents())
+                                {
+                                    MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+                                    if (!mb)
+                                        continue;
+
+                                    string className = typeid(*mb).name();
+
+                                    // 등록된 모든 메소드 순회
+                                    const auto& registeredMethods = MR.GetAllMethods();
+                                    for (const auto& [key, method] : registeredMethods)
+                                    {
+                                        if (key.find(className + "::") == 0)
+                                        {
+                                            // 메소드 이름 추출 (className:: 부분 제거)
+                                            string methodName = key.substr(key.find("::") + 2);
+
+                                            if (ImGui::Selectable(methodName.c_str(), key == currentFunction))
+                                            {
+                                                button->AddOnClickedEvent(key, mb);
+                                                // XML 업데이트
+                                                SCENE.UpdateButtonEventInXML(
+                                                    SCENE.GetActiveScene()->GetSceneName(),
+                                                    button->GetGameObject()->GetName(),
+                                                    key
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                                ImGui::EndCombo();
+                            }
                         }
                         ImGui::Separator();
                     }
@@ -1695,6 +1748,13 @@ void GUIManager::RenderUI()
                     {
                         auto uiImage = make_shared<UIImage>();
 
+                        if (hasButton)
+                        {
+                            shared_ptr<Button> button = _selectedObject->GetComponent<Button>();
+                            RECT rect = button->GetRect();
+                            uiImage->SetRect(rect);
+                        }
+
                         // XML 업데이트
                         SCENE.AddComponentToGameObjectAndSaveToXML(
                             SCENE.GetActiveScene()->GetSceneName(),
@@ -1707,6 +1767,12 @@ void GUIManager::RenderUI()
                     {
                         auto button = make_shared<Button>();
 
+                        if (hasUIImage)
+                        {
+                            shared_ptr<UIImage> uiImage = _selectedObject->GetComponent<UIImage>();
+                            RECT rect = uiImage->GetRect();
+                            button->SetRect(rect);
+                        }
                         // XML 업데이트
                         SCENE.AddComponentToGameObjectAndSaveToXML(
                             SCENE.GetActiveScene()->GetSceneName(),
@@ -2115,7 +2181,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
 
                 Quaternion newLocalRot;
                 XMStoreFloat4(&newLocalRot, newLocalRotVec);
-                (*sourceObj)->transform()->SetQTRotation(newLocalRot);
+                (*sourceObj)->transform()->SetQTLocaslRotation(newLocalRot);
 
                 // 월드 스케일을 새로운 부모의 로컬 공간으로 변환
                 Vec3 parentScale = gameObject->transform()->GetWorldScale();
@@ -2251,6 +2317,8 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
             wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
             SCENE.RemoveGameObjectFromXML(currentSceneName, gameObject->GetName());
             SCENE.GetActiveScene()->RemoveGameObject(gameObject);
+            _selectedObject = nullptr;
+            SCENE.GetActiveScene()->AddPickedObject(nullptr);
         }
         else if (ImGui::MenuItem("Make Prefab"))
         {
@@ -2258,6 +2326,8 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
             wstring currentSceneName = SCENE.GetActiveScene()->GetSceneName();
             SCENE.RemoveGameObjectFromXML(currentSceneName, gameObject->GetName());
             SCENE.GetActiveScene()->RemoveGameObject(gameObject);
+            _selectedObject = nullptr;
+            SCENE.GetActiveScene()->AddPickedObject(nullptr);
         }
         ImGui::EndPopup();
     }
@@ -2296,7 +2366,7 @@ void GUIManager::RenderGameObjectHierarchy(shared_ptr<GameObject> gameObject)
             }
             // 월드 변환 유지
             _draggedObject->transform()->SetPosition(worldPos);
-            _draggedObject->transform()->SetQTRotation(worldRot);
+            _draggedObject->transform()->SetQTLocaslRotation(worldRot);
             _draggedObject->transform()->SetScale(worldScale);
 
             wstring boneRootParentName = L"";
@@ -2465,14 +2535,14 @@ void GUIManager::RenderGuizmo()
                             newLocalMatrix.Decompose(newLocalScale, newLocalRotation, newLocalTranslation);
 
                             // 7. 새로운 로컬 회전 적용
-                            pickedObj->transform()->SetQTRotation(newLocalRotation);
+                            pickedObj->transform()->SetQTLocaslRotation(newLocalRotation);
                         }
                         else
                         {
                             // 부모가 없는 경우 직접 델타 회전 적용
                             Quaternion currentRot = pickedObj->transform()->GetQTRotation();
                             Quaternion newRot = currentRot * deltaRotation;
-                            pickedObj->transform()->SetQTRotation(newRot);
+                            pickedObj->transform()->SetQTLocaslRotation(newRot);
                         }
 
                         _rotationUpdated = true;
@@ -2966,6 +3036,13 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
         }
     }
     
+    static const unordered_set<string> hiddenIcons = {
+    "CameraIcon", "Camera_Guizmo", "CMake_ICon", "CPP_Icon",
+    "hide-layer", "H_Icon", "Material_Icon", "Mesh_Icon",
+    "Model_Icon", "pauseButton", "Prefab", "Scene_Icon",
+    "Shader_Icon", "startButton", "stopButton"
+    };
+
     for (const auto& entry : filesystem::directory_iterator(path))
     {
         if (!filesystem::is_directory(entry))
@@ -2973,6 +3050,13 @@ void GUIManager::RenderFileGrid(const filesystem::path& path)
             string filename = entry.path().filename().string();
             string filenameWithoutExt = filename.substr(0, filename.find_last_of("."));
             string parentFolder = entry.path().parent_path().filename().string();
+
+            if (parentFolder == "Texture" &&
+                hiddenIcons.find(filenameWithoutExt) != hiddenIcons.end())
+            {
+                continue;
+            }
+
             shared_ptr<Texture> icon = nullptr;
 
             // 폴더별로 다른 아이콘 적용
@@ -5857,7 +5941,7 @@ void GUIManager::OnResourceDroppedToViewport(const std::string& fullPath)
         else
         {
             if (_droppedObject)
-                _droppedObject->transform()->SetPosition(intersectionPoint);
+                _droppedObject->transform()->SetPosition(intersectionPoint + Vec3(0.0f, 0.78f, 0.0f));
         }
     }
 }
@@ -5873,6 +5957,7 @@ void GUIManager::OnResourceDragEnd()
         start += strlen("Resource/");
         string folderName = string(start, strcspn(start, "\\"));
 
+        wstring newName = L"";
         if (folderName == "Texture")
         {
             // XML 파일에서 텍스처 이름 추출
@@ -5885,14 +5970,25 @@ void GUIManager::OnResourceDragEnd()
                     if (auto nameElem = root->FirstChildElement("Name"))
                     {
                         textureName = Utils::ToWString(nameElem->GetText());
+
+                        int count = 1;
+                        wstring baseName = textureName;
+                        newName = baseName;
+
+                        // 이미 존재하는 오브젝트 이름인지 확인
+                        while (SCENE.GetActiveScene()->Find(newName) != nullptr)
+                        {
+                            newName = baseName + to_wstring(count);
+                            count++;
+                        }
                     }
                 }
             }
 
             // UI 오브젝트 생성 및 설정
             wstring sceneName = SCENE.GetActiveScene()->GetSceneName();
-            SCENE.SaveAndLoadGameObjectToXML(sceneName, textureName, Vec3::Zero, Vec3::Zero, Vec3::One);
-            auto gameObject = SCENE.GetActiveScene()->Find(textureName);
+            SCENE.SaveAndLoadGameObjectToXML(sceneName, newName, Vec3::Zero, Vec3::Zero, Vec3::One);
+            auto gameObject = SCENE.GetActiveScene()->Find(newName);
             gameObject->SetObjectType(GameObjectType::UIObject);
 
             // Material 생성
@@ -5926,7 +6022,7 @@ void GUIManager::OnResourceDragEnd()
             meshRenderer->GetRenderPasses()[0]->SetTransform(gameObject->transform());
             meshRenderer->GetRenderPasses()[0]->SetDepthStencilStateType(DSState::UI);
 
-            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, textureName, meshRenderer,
+            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, newName, meshRenderer,
                 materialName, L"Quad");
 
             // UIImage 컴포넌트 추가
@@ -5937,12 +6033,12 @@ void GUIManager::OnResourceDragEnd()
             mousePos.x -= GP.GetProjectWidth() * (1.0f / 10.0f);
             mousePos.y -= GP.GetProjectHeight() * (3.0f / 100.0f);
             uiImage->SetTransformAndRect(Vec2(mousePos.x, mousePos.y), imageSize);
-            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, textureName, uiImage);
+            SCENE.AddComponentToGameObjectAndSaveToXML(sceneName, newName, uiImage);
 
             // Transform 업데이트
             gameObject->transform()->SetLocalPosition(uiImage->GetNDCPosition());
             gameObject->transform()->SetLocalScale(uiImage->GetSize());
-            SCENE.UpdateGameObjectTransformInXML(sceneName, textureName,
+            SCENE.UpdateGameObjectTransformInXML(sceneName, newName,
                 uiImage->GetNDCPosition(), Vec3::Zero, uiImage->GetSize());
         }
 

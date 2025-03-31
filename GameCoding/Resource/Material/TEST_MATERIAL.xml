@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Material>
+    <Name>TEST_MATERIAL</Name>
+    <Texture>Panda</Texture>
+    <NormalMap>DefaultNormal</NormalMap>
+    <Shader>Default_Shader</Shader>
+    <MaterialDesc>
+        <Ambient r="0.49019608" g="0.49019608" b="0.49019608" a="1"/>
+        <Diffuse r="0.49019608" g="0.49019608" b="0.49019608" a="1"/>
+        <Specular r="0.49019608" g="0.49019608" b="0.49019608" a="1"/>
+    </MaterialDesc>
+</Material>

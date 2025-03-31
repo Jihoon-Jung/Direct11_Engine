@@ -34,8 +34,6 @@ void Animator::Start()
 
 void Animator::Update()
 {
-	/*SetTransitionFlag(GetClip("Clip1")->transition, GP.test);
-	SetTransitionFlag(GetClip("Clip2")->transition, GP.test2);*/
 
 	if (_model.expired())
 	{
@@ -441,66 +439,66 @@ void Animator::CheckConditionsAndSetFlag()
 			// 파라미터 값 가져오기
 			switch (condition.parameterType)
 			{
-			case Parameter::Type::Bool:
-			{
-				bool paramValue = GetBool(condition.parameterName);
-				bool conditionValue = condition.value.boolValue;
-
-				switch (condition.compareType)
+				case Parameter::Type::Bool:
 				{
-				case Condition::CompareType::Equals:
-					conditionSatisfied = (paramValue == conditionValue);
-					break;
-				case Condition::CompareType::NotEqual:
-					conditionSatisfied = (paramValue != conditionValue);
+					bool paramValue = GetBool(condition.parameterName);
+					bool conditionValue = condition.value.boolValue;
+
+					switch (condition.compareType)
+					{
+					case Condition::CompareType::Equals:
+						conditionSatisfied = (paramValue == conditionValue);
+						break;
+					case Condition::CompareType::NotEqual:
+						conditionSatisfied = (paramValue != conditionValue);
+						break;
+					}
 					break;
 				}
-				break;
-			}
-			case Parameter::Type::Int:
-			{
-				int paramValue = GetInt(condition.parameterName);
-				int conditionValue = condition.value.intValue;
-
-				switch (condition.compareType)
+				case Parameter::Type::Int:
 				{
-				case Condition::CompareType::Equals:
-					conditionSatisfied = (paramValue == conditionValue);
-					break;
-				case Condition::CompareType::NotEqual:
-					conditionSatisfied = (paramValue != conditionValue);
-					break;
-				case Condition::CompareType::Greater:
-					conditionSatisfied = (paramValue > conditionValue);
-					break;
-				case Condition::CompareType::Less:
-					conditionSatisfied = (paramValue < conditionValue);
+					int paramValue = GetInt(condition.parameterName);
+					int conditionValue = condition.value.intValue;
+
+					switch (condition.compareType)
+					{
+					case Condition::CompareType::Equals:
+						conditionSatisfied = (paramValue == conditionValue);
+						break;
+					case Condition::CompareType::NotEqual:
+						conditionSatisfied = (paramValue != conditionValue);
+						break;
+					case Condition::CompareType::Greater:
+						conditionSatisfied = (paramValue > conditionValue);
+						break;
+					case Condition::CompareType::Less:
+						conditionSatisfied = (paramValue < conditionValue);
+						break;
+					}
 					break;
 				}
-				break;
-			}
-			case Parameter::Type::Float:
-			{
-				float paramValue = GetFloat(condition.parameterName);
-				float conditionValue = condition.value.floatValue;
-
-				switch (condition.compareType)
+				case Parameter::Type::Float:
 				{
-				case Condition::CompareType::Equals:
-					conditionSatisfied = (abs(paramValue - conditionValue) < 0.0001f);
-					break;
-				case Condition::CompareType::NotEqual:
-					conditionSatisfied = (abs(paramValue - conditionValue) >= 0.0001f);
-					break;
-				case Condition::CompareType::Greater:
-					conditionSatisfied = (paramValue > conditionValue);
-					break;
-				case Condition::CompareType::Less:
-					conditionSatisfied = (paramValue < conditionValue);
+					float paramValue = GetFloat(condition.parameterName);
+					float conditionValue = condition.value.floatValue;
+
+					switch (condition.compareType)
+					{
+					case Condition::CompareType::Equals:
+						conditionSatisfied = (abs(paramValue - conditionValue) < 0.0001f);
+						break;
+					case Condition::CompareType::NotEqual:
+						conditionSatisfied = (abs(paramValue - conditionValue) >= 0.0001f);
+						break;
+					case Condition::CompareType::Greater:
+						conditionSatisfied = (paramValue > conditionValue);
+						break;
+					case Condition::CompareType::Less:
+						conditionSatisfied = (paramValue < conditionValue);
+						break;
+					}
 					break;
 				}
-				break;
-			}
 			}
 
 			// 하나의 조건이라도 만족하지 않으면 전체 조건은 실패
@@ -522,6 +520,7 @@ void Animator::CheckConditionsAndSetFlag()
 		
 		if (prevFlag != transition->flag)
 		{
+			// XML에 Animator 설정 저장
 			if (auto clipA = transition->clipA.lock())
 				if (auto clipB = transition->clipB.lock())
 					SCENE.UpdateAnimatorTransitionFlagInXML(
@@ -833,7 +832,7 @@ void Animator::UpdateBoneTransforms()
 
 			auto boneTransform = boneObject->transform();
 			boneTransform->SetLocalPosition(translation);
-			boneTransform->SetQTRotation(rotation);
+			boneTransform->SetQTLocaslRotation(rotation);
 			boneTransform->SetLocalScale(scale);
 		}
 	}

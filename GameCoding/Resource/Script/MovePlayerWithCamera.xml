@@ -72,7 +72,7 @@ void MovePlayerWithCamera::Update()
         }
         if (INPUT.GetButton(KEY_TYPE::R))
         {
-            shared_ptr&lt;GameObject&gt; prefab = SCENE.LoadPrefabToScene(L"cylinder");
+            shared_ptr&lt;GameObject&gt; prefab = SCENE.LoadPrefabToScene(L"cylinder1");
             prefab-&gt;transform()-&gt;SetLocalPosition(Vec3(GetGameObject()-&gt;transform()-&gt;GetLocalPosition() + Vec3(0, 0, 10)));
         }
         if (isMove)
@@ -116,18 +116,14 @@ void MovePlayerWithCamera::Update()
             float yaw = XMConvertToRadians(_accumulatedRotY);
 
             Quaternion newRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
-            /*GetTransform()-&gt;SetQTRotation(newRotation);
-            camera-&gt;transform()-&gt;SetQTRotation(newRotation);*/
-            // 플레이어는 Y축(좌우) 회전만
             Quaternion playerRotation = Quaternion::CreateFromYawPitchRoll(yaw, 0.0f, 0.0f);
-            GetTransform()-&gt;SetQTRotation(playerRotation);
+            GetTransform()-&gt;SetQTLocaslRotation(playerRotation);
             
-            // 카메라는 로컬 X축(상하) 회전만 추가
             Quaternion cameraRotation = Quaternion::CreateFromYawPitchRoll(0.0f, pitch, 0.0f);
             camera-&gt;transform()-&gt;SetLocalRotation(Vec3(
-                XMConvertToDegrees(pitch),  // X축(상하)
-                180.0f,                       // Y축(좌우)
-                0.0f                        // Z축
+                XMConvertToDegrees(pitch),
+                180.0f,                   
+                0.0f                 
             ));
 
             POINT center;

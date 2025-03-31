@@ -20,14 +20,14 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="Env_Sphere">
-        <Transform posX="35.694397" posY="1.7208896" posZ="21.260183" rotX="0" rotY="0" rotZ="0" scaleX="2" scaleY="2" scaleZ="2"/>
+        <Transform posX="49.442516" posY="1.7208896" posZ="21.260183" rotX="0" rotY="0" rotZ="0" scaleX="2" scaleY="2" scaleZ="2"/>
         <MeshRenderer useEnvironmentMap="true" fillMode="3" cullMode="3" frontCounterClockwise="false" material="DefaultMaterial" mesh="Sphere">
             <RenderPass pass="7" depthStencilState="0"/>
         </MeshRenderer>
         <SphereCollider radius="2.494858" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="tessellation_cube">
-        <Transform posX="24.869913" posY="1.5" posZ="19.862064" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="35.393848" posY="1.5" posZ="21.117794" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="Tessellation_Material" mesh="Cylinder">
             <RenderPass pass="5" depthStencilState="0"/>
         </MeshRenderer>
@@ -47,11 +47,10 @@
         </MeshRenderer>
     </GameObject>
     <GameObject name="Kachujin_OBJ">
-        <Transform posX="24.23015" posY="0.027369976" posZ="28.16143" rotX="-0" rotY="-90.189964" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <Transform posX="28.713169" posY="0.21632171" posZ="36.907307" rotX="0" rotY="171.62814" rotZ="-0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="202.7" scaleY="101.9" scaleZ="60.599998" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
             <EntryClip name="Dismissing"/>
             <Parameter name="isAttacking" type="0" value="false"/>
@@ -100,7 +99,6 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Boss">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
             <EntryClip name="Idle"/>
             <Clip name="Idle" animIndex="0" isLoop="true" posX="250" posY="100" speed="1"/>
@@ -118,28 +116,24 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
             <RenderPass pass="8" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="CottageModel1">
         <Transform posX="14.873364" posY="0" posZ="29.891777" rotX="-0" rotY="-77.911118" rotZ="0" scaleX="0.0070000002" scaleY="0.0070000002" scaleZ="0.0070000002"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
             <RenderPass pass="8" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="CottageModel2">
         <Transform posX="16.22217" posY="0" posZ="40.385414" rotX="0" rotY="-68.632668" rotZ="0" scaleX="0.0070000002" scaleY="0.0070000002" scaleZ="0.0070000002"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
             <RenderPass pass="8" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="CottageModel3">
         <Transform posX="20.406824" posY="0" posZ="50.023056" rotX="0" rotY="-64.273338" rotZ="0" scaleX="0.0070000002" scaleY="0.0070000002" scaleZ="0.0070000002"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="CottageModel">
             <RenderPass pass="8" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
     <GameObject name="CottageModel4">
         <Transform posX="24.495329" posY="0" posZ="11.890122" rotX="0" rotY="0" rotZ="0" scaleX="0.0049999999" scaleY="0.0049999999" scaleZ="0.0049999999"/>
@@ -153,7 +147,6 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Kachujin">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
             <EntryClip name="Run"/>
             <Clip name="Dismissing" animIndex="2" isLoop="false" posX="396" posY="243"/>
@@ -169,7 +162,6 @@
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Dreyar">
             <RenderPass pass="9" depthStencilState="0"/>
         </MeshRenderer>
-        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
         <Animator>
             <EntryClip name="Kick"/>
             <Clip name="Dance" animIndex="2" isLoop="false" posX="456" posY="236"/>
@@ -181,24 +173,42 @@
         </Animator>
     </GameObject>
     <GameObject name="cube">
-        <Transform posX="8.4340391" posY="1.5573728" posZ="3.6571183" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Transform posX="31.826689" posY="0.92859524" posZ="47.472321" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
         <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cube">
             <RenderPass pass="0" depthStencilState="0"/>
         </MeshRenderer>
         <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
     </GameObject>
-    <GameObject name="sphere" parent="cube">
-        <Transform posX="1.9596643" posY="1.1400769" posZ="-2.4572649" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Sphere">
-            <RenderPass pass="0" depthStencilState="0"/>
+    <GameObject name="ArrowButton">
+        <Transform posX="515.00006" posY="-51" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="62.451172" scaleY="62.5" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="ArrowButton_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="4"/>
         </MeshRenderer>
-        <SphereCollider radius="0.5" centerX="0" centerY="0" centerZ="0"/>
+        <Button posX="515.00006" posY="-51" sizeX="0" sizeY="0" rectLeft="1124" rectTop="300" rectRight="1249" rectBottom="425" onClickedFunctionKey="class TestEvent::MoveRight" scaleX="62.451172" scaleY="62.5"/>
+        <Script type="TestEvent"/>
     </GameObject>
-    <GameObject name="cylinder" parent="sphere">
-        <Transform posX="-3.7837648" posY="0.39798117" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
-        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cylinder">
-            <RenderPass pass="0" depthStencilState="0"/>
+    <GameObject name="ArrowButton1">
+        <Transform posX="286" posY="-54.999962" posZ="0" rotX="0" rotY="0" rotZ="-179.99997" scaleX="62.451172" scaleY="62.5" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="ArrowButton_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="4"/>
         </MeshRenderer>
-        <BoxCollider scaleX="0.866" scaleY="3" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Button posX="0" posY="0" sizeX="0" sizeY="0" rectLeft="895" rectTop="304" rectRight="1020" rectBottom="429" onClickedFunctionKey="class TestEvent::MoveLeft"/>
+        <Script type="TestEvent"/>
+    </GameObject>
+    <GameObject name="ArrowButton2">
+        <Transform posX="400" posY="60" posZ="0" rotX="0" rotY="0" rotZ="89.999992" scaleX="62.451172" scaleY="62.5" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="ArrowButton_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="4"/>
+        </MeshRenderer>
+        <Button posX="0" posY="0" sizeX="0" sizeY="0" rectLeft="1009" rectTop="189" rectRight="1134" rectBottom="314" onClickedFunctionKey="class TestEvent::MoveForward"/>
+        <Script type="TestEvent"/>
+    </GameObject>
+    <GameObject name="ArrowButton3">
+        <Transform posX="400" posY="-160" posZ="0" rotX="0" rotY="0" rotZ="-89.999985" scaleX="62.451172" scaleY="62.5" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="ArrowButton_Material" mesh="Quad">
+            <RenderPass pass="11" depthStencilState="4"/>
+        </MeshRenderer>
+        <Button posX="400" posY="-160" sizeX="0" sizeY="0" rectLeft="1009" rectTop="409" rectRight="1134" rectBottom="534" onClickedFunctionKey="class TestEvent::MoveBackward" scaleX="62.451172" scaleY="62.5"/>
+        <Script type="TestEvent"/>
     </GameObject>
 </Scene>

@@ -38,22 +38,23 @@ void RenderManager::Init()
 void RenderManager::Update()
 {
 	//// 현재 카메라 위치 가져오기
-	//Vec3 cameraPos = SCENE.GetActiveScene()->GetMainCamera()->transform()->GetWorldPosition();
-
+	//Vec3 spherePos = SCENE.GetActiveScene()->Find(L"sphere")->transform()->GetWorldPosition();
+	//shared_ptr<GameObject> sphere1 = SCENE.GetActiveScene()->Find(L"sphere1");
 	//const float ROTATION_SPEED = 30.0f;  // 초당 회전 각도
-	//float deltaAngle = ROTATION_SPEED * TIME.GetDeltaTime();
+	//float deltaAngle = ROTATION_SPEED * TIME.GetDeltaTime() * 3;
 
 	//// 공전 중심점과 회전 각도 설정
-	//_lightObject->transform()->SetRevolutionCenter(Vec3(0,0,0));
-	//_lightObject->transform()->RotateAround(
-	//	cameraPos,         // 공전 중심
+	//sphere1->transform()->RotateAround(
+	//	spherePos,         // 공전 중심
 	//	Vec3::Up,            // 회전 축 (Y축)
 	//	deltaAngle           // 이번 프레임의 회전 각도
 	//);
 
-	////// 자전
-	////Vec3 localRotation(0.0f, deltaAngle, 0.0f);
-	////_lightObject->transform()->SetLocalRotation(localRotation);
+	//// 자전
+	//Vec3 currentRotation = sphere1->transform()->GetLocalRotation();
+	//Vec3 additionalRotation(0.0f, deltaAngle * 5, 0.0f);
+	//Vec3 newRotation = currentRotation + additionalRotation;
+	//sphere1->transform()->SetLocalRotation(newRotation);
 
 	
 	GP.SetRenderTarget();

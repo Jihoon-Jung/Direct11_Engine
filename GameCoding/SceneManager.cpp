@@ -102,7 +102,7 @@ void SceneManager::LoadSceneXML(wstring sceneName)
 			float roll = XMConvertToRadians(rot.z);
 			Quaternion qtRot = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 
-			transform->SetQTRotation(qtRot);
+			transform->SetQTLocaslRotation(qtRot);
 			transform->SetLocalScale(scale);
 			gameObj->AddComponent(transform);
 		}
@@ -266,6 +266,7 @@ void SceneManager::LoadSceneXML(wstring sceneName)
 		}
 
 		// Button 컴포넌트 처리
+		vector<ButtonEventLoadData> buttonEventLoadDataList;
 		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
 		{
 			auto button = make_shared<Button>();
@@ -295,9 +296,12 @@ void SceneManager::LoadSceneXML(wstring sceneName)
 			// 클릭 이벤트 함수 설정
 			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
 			{
-				button->AddOnClickedEvent(functionKey);
+				ButtonEventLoadData eventData;
+				eventData.gameObject = gameObj;
+				eventData.button = button;
+				eventData.functionKey = functionKey;
+				buttonEventLoadDataList.push_back(eventData);
 			}
-
 			gameObj->AddComponent(button);
 		}
 		vector<AnimatorEventLoadData> eventLoadDataList;  // 임시 저장용 구조체
@@ -481,6 +485,60 @@ void SceneManager::LoadSceneXML(wstring sceneName)
 		}
 		_activeScene->AddGameObject(gameObj);
 
+		for (const auto& eventData : buttonEventLoadDataList)
+		{
+			string functionKey = eventData.functionKey;
+			if (functionKey.empty()) continue;
+
+			auto gameObj = eventData.gameObject;
+			MonoBehaviour* scriptObj = nullptr;
+
+			// 모든 등록된 메서드와 게임 오브젝트의 모든 스크립트 확인
+			const auto& registeredMethods = MR.GetAllMethods();
+
+			for (auto& comp : gameObj->GetComponents())
+			{
+				MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+				if (!mb) continue;
+
+				// 컴포넌트 클래스 이름 출력
+				string compClassName = typeid(*mb).name();
+
+				// 모든 스크립트에서 호출 가능한 함수 리스트 구성
+				for (const auto& [key, method] : registeredMethods)
+				{
+
+					// 함수 키 비교 - 정확한 문자열 매칭
+					if (key == functionKey)
+					{
+						scriptObj = mb;
+						break;
+					}
+
+					// 함수 키 비교 - 부분 문자열 매칭
+					size_t pos1 = key.find("::");
+					size_t pos2 = functionKey.find("::");
+
+					if (pos1 != string::npos && pos2 != string::npos)
+					{
+						string methodName1 = key.substr(pos1 + 2);
+						string methodName2 = functionKey.substr(pos2 + 2);
+
+						if (methodName1 == methodName2)
+						{
+							scriptObj = mb;
+							break;
+						}
+					}
+				}
+
+				if (scriptObj) break;
+			}
+
+			// 버튼에 이벤트 설정
+			eventData.button->AddOnClickedEvent(functionKey, scriptObj);
+
+		}
 		for (const auto& eventData : eventLoadDataList)
 		{
 			auto animator = eventData.animator;
@@ -525,7 +583,7 @@ void SceneManager::LoadSceneXML(wstring sceneName)
 			localTransform.Decompose(scale, rotation, position);
 
 			transform->SetLocalPosition(position);
-			transform->SetQTRotation(rotation);
+			transform->SetQTLocaslRotation(rotation);
 			transform->SetLocalScale(scale);
 
 			boneObject->AddComponent(transform);
@@ -782,9 +840,22 @@ void SceneManager::LoadTestScene(wstring sceneName)
 	SaveAndLoadGameObjectToXML(sceneName, L"UI_Button", Vec3::Zero);
 
 	auto button = make_shared<Button>();
-	string className = typeid(TestEvent).name();
-	string functionKey = className + "::TestLog";
-	button->AddOnClickedEvent(functionKey);
+	// TestEvent 컴포넌트 찾기 및 등록
+	auto gameObject = SCENE.GetActiveScene()->Find(L"UI_Button");
+	if (gameObject)
+	{
+		// TestEvent 찾기 또는 생성
+		shared_ptr<TestEvent> testEvent = gameObject->GetComponent<TestEvent>();
+		if (!testEvent)
+		{
+			testEvent = make_shared<TestEvent>();
+			gameObject->AddComponent(testEvent);
+		}
+
+		string className = typeid(TestEvent).name();
+		string functionKey = className + "::TestLog";
+		button->AddOnClickedEvent(functionKey, testEvent.get());
+	}
 
 	imageSize = RESOURCE.GetResource<Material>(L"Debug_UI_Material")->GetTexture()->GetSize() * 0.09765625f;
 	button->SetTransformAndRect(Vec2(50, 574), imageSize);
@@ -1151,11 +1222,13 @@ void SceneManager::CreateNewScene(wstring sceneName)
 	_isCreateNewScene = false;
 }
 
+void SceneManager::CheckCollision()
+{
+	_activeScene->CheckCollision();
+}
+
 shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 {
-	if (ENGINE.GetEngineMode() != EngineMode::Edit)
-		return nullptr;
-
 	// XML 파일 로드
 	tinyxml2::XMLDocument doc;
 	string pathStr = "Resource/Prefab/" + Utils::ToString(prefab) + ".xml";
@@ -1222,7 +1295,7 @@ shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 			float roll = XMConvertToRadians(rot.z);
 			Quaternion qtRot = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 
-			transform->SetQTRotation(qtRot);
+			transform->SetQTLocaslRotation(qtRot);
 			//transform->SetLocalRotation(rot);
 			transform->SetLocalScale(scale);
 			gameObj->AddComponent(transform);
@@ -1388,6 +1461,7 @@ shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 		}
 
 		// Button 컴포넌트 처리
+		vector<ButtonEventLoadData> buttonEventLoadDataList;
 		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
 		{
 			auto button = make_shared<Button>();
@@ -1417,7 +1491,11 @@ shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 			// 클릭 이벤트 함수 설정
 			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
 			{
-				button->AddOnClickedEvent(functionKey);
+				ButtonEventLoadData eventData;
+				eventData.gameObject = gameObj;
+				eventData.button = button;
+				eventData.functionKey = functionKey;
+				buttonEventLoadDataList.push_back(eventData);
 			}
 
 			gameObj->AddComponent(button);
@@ -1603,6 +1681,60 @@ shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 		}
 		_activeScene->AddGameObject(gameObj);
 
+		for (const auto& eventData : buttonEventLoadDataList)
+		{
+			string functionKey = eventData.functionKey;
+			if (functionKey.empty()) continue;
+
+			auto gameObj = eventData.gameObject;
+			MonoBehaviour* scriptObj = nullptr;
+
+
+			// 모든 등록된 메서드와 게임 오브젝트의 모든 스크립트 확인
+			const auto& registeredMethods = MR.GetAllMethods();
+
+			for (auto& comp : gameObj->GetComponents())
+			{
+				MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+				if (!mb) continue;
+
+				// 컴포넌트 클래스 이름 출력
+				string compClassName = typeid(*mb).name();
+
+				// 모든 스크립트에서 호출 가능한 함수 리스트 구성
+				for (const auto& [key, method] : registeredMethods)
+				{
+					// 함수 키 비교 - 정확한 문자열 매칭
+					if (key == functionKey)
+					{
+						scriptObj = mb;
+						break;
+					}
+
+					// 함수 키 비교 - 부분 문자열 매칭
+					size_t pos1 = key.find("::");
+					size_t pos2 = functionKey.find("::");
+
+					if (pos1 != string::npos && pos2 != string::npos)
+					{
+						string methodName1 = key.substr(pos1 + 2);
+						string methodName2 = functionKey.substr(pos2 + 2);
+
+						if (methodName1 == methodName2)
+						{
+							scriptObj = mb;
+							break;
+						}
+					}
+				}
+
+				if (scriptObj) break;
+			}
+
+			// 버튼에 이벤트 설정
+			eventData.button->AddOnClickedEvent(functionKey, scriptObj);
+
+		}
 		for (const auto& eventData : eventLoadDataList)
 		{
 			auto animator = eventData.animator;
@@ -1647,7 +1779,7 @@ shared_ptr<GameObject> SceneManager::LoadPrefabToScene(wstring prefab)
 			localTransform.Decompose(scale, rotation, position);
 
 			transform->SetLocalPosition(position);
-			transform->SetQTRotation(rotation);
+			transform->SetQTLocaslRotation(rotation);
 			transform->SetLocalScale(scale);
 
 			boneObject->AddComponent(transform);
@@ -1844,7 +1976,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			float roll = XMConvertToRadians(rot.z);
 			Quaternion qtRot = Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
 
-			transform->SetQTRotation(qtRot);
+			transform->SetQTLocaslRotation(qtRot);
 			//transform->SetLocalRotation(rot);
 			transform->SetLocalScale(scale);
 			gameObj->AddComponent(transform);
@@ -2010,6 +2142,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 		}
 
 		// Button 컴포넌트 처리
+		vector<ButtonEventLoadData> buttonEventLoadDataList;
 		if (auto buttonElem = gameObjElem->FirstChildElement("Button"))
 		{
 			auto button = make_shared<Button>();
@@ -2039,7 +2172,11 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			// 클릭 이벤트 함수 설정
 			if (const char* functionKey = buttonElem->Attribute("onClickedFunctionKey"))
 			{
-				button->AddOnClickedEvent(functionKey);
+				ButtonEventLoadData eventData;
+				eventData.gameObject = gameObj;
+				eventData.button = button;
+				eventData.functionKey = functionKey;
+				buttonEventLoadDataList.push_back(eventData);
 			}
 
 			gameObj->AddComponent(button);
@@ -2216,6 +2353,59 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 		}
 		playScene->AddGameObject(gameObj);
 
+		for (const auto& eventData : buttonEventLoadDataList)
+		{
+			string functionKey = eventData.functionKey;
+			if (functionKey.empty()) continue;
+
+			auto gameObj = eventData.gameObject;
+			MonoBehaviour* scriptObj = nullptr;
+
+			// 모든 등록된 메서드와 게임 오브젝트의 모든 스크립트 확인
+			const auto& registeredMethods = MR.GetAllMethods();
+
+			for (auto& comp : gameObj->GetComponents())
+			{
+				MonoBehaviour* mb = dynamic_cast<MonoBehaviour*>(comp.get());
+				if (!mb) continue;
+
+				// 컴포넌트 클래스 이름 출력
+				string compClassName = typeid(*mb).name();
+
+				// 모든 스크립트에서 호출 가능한 함수 리스트 구성
+				for (const auto& [key, method] : registeredMethods)
+				{
+					// 함수 키 비교 - 정확한 문자열 매칭
+					if (key == functionKey)
+					{
+						scriptObj = mb;
+						break;
+					}
+
+					// 함수 키 비교 - 부분 문자열 매칭
+					size_t pos1 = key.find("::");
+					size_t pos2 = functionKey.find("::");
+
+					if (pos1 != string::npos && pos2 != string::npos)
+					{
+						string methodName1 = key.substr(pos1 + 2);
+						string methodName2 = functionKey.substr(pos2 + 2);
+
+						if (methodName1 == methodName2)
+						{
+							scriptObj = mb;
+							break;
+						}
+					}
+				}
+
+				if (scriptObj) break;
+			}
+
+			// 버튼에 이벤트 설정
+			eventData.button->AddOnClickedEvent(functionKey, scriptObj);
+
+		}
 		for (const auto& eventData : eventLoadDataList)
 		{
 			auto animator = eventData.animator;
@@ -2261,7 +2451,7 @@ shared_ptr<Scene> SceneManager::LoadPlayScene(wstring sceneName)
 			localTransform.Decompose(scale, rotation, position);
 
 			transform->SetLocalPosition(position);
-			transform->SetQTRotation(rotation);
+			transform->SetQTLocaslRotation(rotation);
 			transform->SetLocalScale(scale);
 
 			boneObject->AddComponent(transform);
@@ -3426,7 +3616,7 @@ shared_ptr<GameObject> SceneManager::CreateGridToScene(const wstring& sceneName)
 	}
 
 	SaveAndLoadGameObjectToXML(sceneName, newName,
-		Vec3(0.0f, 0.0f, 0.0f));
+		Vec3(-50.0f, 0.0f, -50.0f));
 	auto cylinderRenderer = make_shared<MeshRenderer>();
 	cylinderRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Grid"));
 	cylinderRenderer->SetModel(nullptr);
@@ -3464,7 +3654,7 @@ shared_ptr<GameObject> SceneManager::CreateTerrainToScene(const wstring& sceneNa
 	}
 
 	// Terrain
-	SaveAndLoadGameObjectToXML(sceneName, newName, Vec3::Zero);
+	SaveAndLoadGameObjectToXML(sceneName, newName, Vec3(-164.f, 0.0f, 140.0f));
 	auto terrainRenderer = make_shared<MeshRenderer>();
 	terrainRenderer->SetMesh(RESOURCE.GetResource<Mesh>(L"Terrain"));
 	terrainRenderer->SetModel(nullptr);
@@ -3574,7 +3764,7 @@ shared_ptr<GameObject> SceneManager::CreateAnimatedMeshToScene(const wstring& sc
 		localTransform.Decompose(scale, rotation, position);
 
 		transform->SetLocalPosition(position);
-		transform->SetQTRotation(rotation);
+		transform->SetQTLocaslRotation(rotation);
 		transform->SetLocalScale(scale);
 
 		boneObject->AddComponent(transform);
@@ -3645,7 +3835,7 @@ shared_ptr<GameObject> SceneManager::CreateStaticMeshToScene(const wstring& scen
 		localTransform.Decompose(scale, rotation, position);
 
 		transform->SetLocalPosition(position);
-		transform->SetQTRotation(rotation);
+		transform->SetQTLocaslRotation(rotation);
 		transform->SetLocalScale(scale);
 
 		boneObject->AddComponent(transform);
@@ -4180,6 +4370,43 @@ void SceneManager::UpdateGameObjectParticleSystemInXML(const wstring& sceneName,
 
 			doc.SaveFile(pathStr.c_str());
 			break;
+		}
+	}
+}
+
+void SceneManager::UpdateButtonEventInXML(const wstring& sceneName, const wstring& objectName, const string& functionKey)
+{
+	wstring path = L"Resource/Scene/" + sceneName + L".xml";
+
+	tinyxml2::XMLDocument doc;
+	if (doc.LoadFile(Utils::ToString(path).c_str()) != tinyxml2::XML_SUCCESS)
+		return;
+
+	// Scene 태그를 먼저 찾고
+	tinyxml2::XMLElement* sceneNode = doc.FirstChildElement("Scene");
+	if (!sceneNode)
+		return;
+
+	// 그 다음 GameObjects를 찾습니다
+	for (tinyxml2::XMLElement* objectNode = sceneNode->FirstChildElement("GameObject");
+		objectNode != nullptr;
+		objectNode = objectNode->NextSiblingElement("GameObject"))
+	{
+		if (string(objectNode->Attribute("name")) == Utils::ToString(objectName))
+		{
+			// Button 컴포넌트를 직접 찾습니다
+			for (tinyxml2::XMLElement* componentNode = objectNode->FirstChildElement();
+				componentNode != nullptr;
+				componentNode = componentNode->NextSiblingElement())
+			{
+				if (componentNode->Name() == string("Button"))
+				{
+					// OnClickEvent 속성 업데이트
+					componentNode->SetAttribute("onClickedFunctionKey", functionKey.c_str());
+					doc.SaveFile(Utils::ToString(path).c_str());
+					return;
+				}
+			}
 		}
 	}
 }

@@ -75,7 +75,7 @@ void MoveObject::Update()
                 float yaw = XMConvertToRadians(_accumulatedRotY);
 
                 Quaternion newRotation = Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
-                GetTransform()-&gt;SetQTRotation(newRotation);
+                GetTransform()-&gt;SetQTLocaslRotation(newRotation);
 
                 _prevMousePos = cursorPos;
             }

@@ -20,9 +20,10 @@ bool Button::Picked(POINT screenPos)
 	return result;
 }
 
-void Button::AddOnClickedEvent(const string& functionKey)
+void Button::AddOnClickedEvent(const string& functionKey, MonoBehaviour* script)
 {
 	_onClickedFunctionKey = functionKey;
+	_onClickedScript = script;  // 스크립트 객체 저장
 }
 
 void Button::InvokeOnClicked()
@@ -31,7 +32,7 @@ void Button::InvokeOnClicked()
 	{
 		if (auto method = MR.getMethod(_onClickedFunctionKey))
 		{
-			method(nullptr);
+			method(_onClickedScript);  // 저장된 스크립트 객체 전달
 		}
 	}
 }

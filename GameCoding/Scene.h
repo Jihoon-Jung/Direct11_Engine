@@ -20,6 +20,10 @@ public:
 	void SetSceneName(wstring sceneName) { _sceneName = sceneName; }
 	void SwitchMainCameraToEditorCamera() { _mainCamera = Find(L"EditorCamera"); }
 	void SwitchMainCameraToMainCamera() { _mainCamera = Find(L"MainCamera"); }
+	void SortAndSweep(vector<shared_ptr<BaseCollider>>& colliders, int axis);
+	float GetMinBound(const shared_ptr<BaseCollider>& collider, int axis);
+	float GetMaxBound(const shared_ptr<BaseCollider>& collider, int axis);
+	float CalculateSpread(const vector<shared_ptr<BaseCollider>>& colliders, int axis);
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 	shared_ptr<GameObject> Find(const wstring& name);
 

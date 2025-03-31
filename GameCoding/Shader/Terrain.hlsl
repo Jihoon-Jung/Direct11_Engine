@@ -82,14 +82,13 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	// Terrain specified directly in world space.
+	// World공간에서 직접 지정된 Terrain
 	vout.PosW = mul(float4(vin.PosL, 1.0f), worldMatrix).xyz;
 
-	// Displace the patch corners to world space.  This is to make 
-	// the eye to patch distance calculation more accurate.
+	// 패치 모서리를 월드 공간으로 옮깁.
+	// 눈에서 패치까지의 거리 계산을 더 정확하게 하기 위한 것.
 	vout.PosW.y = gHeightMap.SampleLevel(samHeightmap, vin.Tex, 0).r;
 
-	// Output vertex attributes to next stage.
 	vout.Tex = vin.Tex;
 	vout.BoundsY = vin.BoundsY;
 
@@ -99,7 +98,7 @@ float CalcTessFactor(float3 p)
 {
 	float d = distance(p, cameraPosition);
 
-	// max norm in xz plane (useful to see detail levels from a bird's eye).
+	// xz 평면의 최대 표준(세부 수준을 확인하는 데 유용함).
 	//float d = max( abs(p.x-gEyePosW.x), abs(p.z-gEyePosW.z) );
 
 	float s = saturate((d - gMinDist) / (gMaxDist - gMinDist));
@@ -107,30 +106,28 @@ float CalcTessFactor(float3 p)
 	return pow(2, (lerp(gMaxTess, gMinTess, s)));
 }
 
-// Returns true if the box is completely behind (in negative half space) of plane.
+// 상자가 평면의 완전히 뒤에(음의 반공간에) 있는 경우 true를 반환.
 bool AabbBehindPlaneTest(float3 center, float3 extents, float4 plane)
 {
 	float3 n = abs(plane.xyz);
 
-	// This is always positive.
+	// 이것은 항상 양.
 	float r = dot(extents, n);
 
-	// signed distance from center point to plane.
+	// 중심점에서 평면까지의 거리 표시.
 	float s = dot(float4(center, 1.0f), plane);
 
-	// If the center point of the box is a distance of e or more behind the
-	// plane (in which case s is negative since it is behind the plane),
-	// then the box is completely in the negative half space of the plane.
+	// 상자의 중심점이 평면 뒤로 e 이상 떨어져 있는 경우(이 경우 평면 뒤에 있으므로 s는 음수임), 
+	// 상자는 평면의 음의 반공간에 완전히 위치함.
 	return (s + r) < 0.0f;
 }
 
-// Returns true if the box is completely outside the frustum.
+// 상자가 frustum 밖에 완전히 있는 경우 true를 반환
 bool AabbOutsideFrustumTest(float3 center, float3 extents, float4 frustumPlanes[6])
 {
 	for (int i = 0; i < 6; ++i)
 	{
-		// If the box is completely behind any of the frustum planes
-		// then it is outside the frustum.
+		// 상자가 절두체 평면 중 하나 뒤에 완전히 있는 경우 절두체 외부에 있음.
 		if (AabbBehindPlaneTest(center, extents, frustumPlanes[i]))
 		{
 			return true;
@@ -154,12 +151,12 @@ PatchTess ConstantHS(InputPatch<VertexOut, 4> patch, uint patchID : SV_Primitive
 	// Frustum cull
 	//
 
-	// We store the patch BoundsY in the first control point.
+	// 첫 번째 제어점에 패치 BoundsY를 저장
 	float minY = patch[0].BoundsY.x;
 	float maxY = patch[0].BoundsY.y;
 
-	// Build axis-aligned bounding box.  patch[2] is lower-left corner
-	// and patch[1] is upper-right corner.
+	// 축에 맞춰 정렬된 경계 상자를 만듬. 
+	// patch[2]는 왼쪽 아래 모서리이고 patch[1]은 오른쪽 위 모서리.
 	float3 vMin = float3(patch[2].PosW.x, minY, patch[2].PosW.z);
 	float3 vMax = float3(patch[1].PosW.x, maxY, patch[1].PosW.z);
 

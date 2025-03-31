@@ -5,6 +5,7 @@
     <Shader>AnimatedMesh_Shader</Shader>
     <Material>Boss/Boss</Material>
     <Animations>
+        <Animation>Boss/Crouch_Fire</Animation>
         <Animation>Boss/Idle</Animation>
     </Animations>
 </Model>

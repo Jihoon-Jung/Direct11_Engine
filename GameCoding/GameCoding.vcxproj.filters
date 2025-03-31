@@ -542,9 +542,6 @@
     <ClCompile Include="TestEvent.cpp">
       <Filter>소스 파일\CustomScript</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentFactory.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="InstancingBuffer.cpp">
       <Filter>소스 파일\Buffer</Filter>
     </ClCompile>
@@ -553,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="MovePlayerWithCamera.cpp">
       <Filter>소스 파일\CustomScript</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentFactory.cpp">
+      <Filter>소스 파일\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

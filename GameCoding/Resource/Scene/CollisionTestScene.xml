@@ -1,0 +1,49 @@
+<Scene>
+    <GameObject name="EditorCamera">
+        <Transform posX="0" posY="5" posZ="-10" rotX="22" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="0"/>
+        <Script type="EditorCamera"/>
+    </GameObject>
+    <GameObject name="MainCamera">
+        <Transform posX="0" posY="5" posZ="-10" rotX="22" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="0"/>
+    </GameObject>
+    <GameObject name="UICamera">
+        <Transform posX="0" posY="0" posZ="-3" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <Camera projectionType="1"/>
+    </GameObject>
+    <GameObject name="MainLight">
+        <Transform posX="-50" posY="37" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="10" scaleY="10" scaleZ="10"/>
+        <Light ambientR="1" ambientG="1" ambientB="1" ambientA="1" diffuseR="1" diffuseG="1" diffuseB="1" diffuseA="1" specularR="1" specularG="1" specularB="1" specularA="1" emissiveR="1" emissiveG="1" emissiveB="1" emissiveA="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SimpleMaterial" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="skyBox">
+        <Transform posX="0" posY="0" posZ="0" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="true" material="GrassSkybox_Material" mesh="Sphere">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="Grid">
+        <Transform posX="-50" posY="0" posZ="-50" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="1" frontCounterClockwise="false" material="StoneMaterial" mesh="Grid">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+    </GameObject>
+    <GameObject name="cube">
+        <Transform posX="6.6017981" posY="1.9657172" posZ="-17.909859" rotX="0" rotY="0" rotZ="0" scaleX="1" scaleY="1" scaleZ="1"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" material="SolidWhiteMaterial" mesh="Cube">
+            <RenderPass pass="0" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1.8446561" scaleZ="2.667057" centerX="0" centerY="0.2" centerZ="3.5"/>
+    </GameObject>
+    <GameObject name="Ely">
+        <Transform posX="0.9731164" posY="0.0015795231" posZ="2.0645719" rotX="0" rotY="0" rotZ="0" scaleX="0.0099999998" scaleY="0.0099999998" scaleZ="0.0099999998"/>
+        <MeshRenderer useEnvironmentMap="false" fillMode="3" cullMode="3" frontCounterClockwise="false" model="Ely">
+            <RenderPass pass="9" depthStencilState="0"/>
+        </MeshRenderer>
+        <BoxCollider scaleX="1" scaleY="1" scaleZ="1" centerX="0" centerY="0" centerZ="0"/>
+        <Script type="TestEvent"/>
+    </GameObject>
+</Scene>

@@ -4,6 +4,15 @@
     <DisplayName>TestEvent</DisplayName>
     <CppContent>#include "pch.h"
 #include "TestEvent.h"
+
+void TestEvent::Start()
+{
+}
+
+void TestEvent::Update()
+{
+}
+
 </CppContent>
     <HeaderContent>#pragma once
 #include "Component.h"
@@ -16,8 +25,8 @@ public:
 	TestEvent() {};
 	~TestEvent() {};
 
-	virtual void Start() {};
-	virtual void Update() {};
+	virtual void Start();
+	virtual void Update();
 
 	void TestLog() {
 		char buffer[100];
@@ -34,12 +43,42 @@ public:
 		sprintf_s(buffer, "Event Test3.\n");
 		OutputDebugStringA(buffer);
 	}
+	void MoveRight() {
+		shared_ptr&lt;Transform&gt; transform = SCENE.GetActiveScene()-&gt;Find(L"cube")-&gt;transform();
+		Vec3 position = transform-&gt;GetLocalPosition();
+		transform-&gt;SetLocalPosition(Vec3(position.x + 5.0f, position.y, position.z));
+	}
+	void MoveLeft() {
+		shared_ptr&lt;Transform&gt; transform = SCENE.GetActiveScene()-&gt;Find(L"cube")-&gt;transform();
+		Vec3 position = transform-&gt;GetLocalPosition();
+		transform-&gt;SetLocalPosition(Vec3(position.x - 5.0f, position.y, position.z));
+	}
+	void MoveForward() {
+		shared_ptr&lt;Transform&gt; transform = SCENE.GetActiveScene()-&gt;Find(L"cube")-&gt;transform();
+		Vec3 position = transform-&gt;GetLocalPosition();
+		transform-&gt;SetLocalPosition(Vec3(position.x, position.y, position.z + 5.0f));
+	}
+	void MoveBackward() {
+		shared_ptr&lt;Transform&gt; transform = SCENE.GetActiveScene()-&gt;Find(L"cube")-&gt;transform();
+		Vec3 position = transform-&gt;GetLocalPosition();
+		transform-&gt;SetLocalPosition(Vec3(position.x, position.y, position.z - 5.0f));
+	}
+
+private:
+	shared_ptr&lt;GameObject&gt; _gameObject = nullptr;
+	int a = 10;
 };
 
+
 // 등록 매크로 추가
+REGISTER_SCRIPT(TestEvent, "TestEvent");
 REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog);
 REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog2);
 REGISTER_MONOBEHAVIOR_METHOD(TestEvent, TestLog3);
-REGISTER_SCRIPT(TestEvent, "TestEvent");
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, MoveRight);
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, MoveLeft);
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, MoveForward);
+REGISTER_MONOBEHAVIOR_METHOD(TestEvent, MoveBackward);
+
 </HeaderContent>
 </Script>

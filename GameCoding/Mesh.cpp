@@ -305,7 +305,7 @@ void Mesh::CreateTerrain()
 	_numPatchVertCols = ((_info.heightmapWidth - 1) / CellsPerPatch) + 1; // _numPatchVertCols = 33      => 33 x 33개의 패치를 사용하고 각 패치는 64개의 셀을 사용
 
 	_numPatchVertices = _numPatchVertRows * _numPatchVertCols; // 33 * 33 = 1089
-	_numPatchQuadFaces = (_numPatchVertRows - 1) * (_numPatchVertCols - 1); // 332 * 32 = 1024
+	_numPatchQuadFaces = (_numPatchVertRows - 1) * (_numPatchVertCols - 1); // 32 * 32 = 1024
 
 	LoadHeightmap();
 	Smooth();
@@ -467,7 +467,7 @@ float Mesh::Average(int32 i, int32 j)
 
 void Mesh::CalcAllPatchBoundsY()
 {
-	_patchBoundsY.resize(_numPatchQuadFaces);
+	_patchBoundsY.resize(_numPatchQuadFaces);  // _numPatchQuadFaces = 32 * 32 = 1024
 
 	// For each patch
 	for (uint32 i = 0; i < _numPatchVertRows - 1; ++i)// _numPatchVertRows = 33

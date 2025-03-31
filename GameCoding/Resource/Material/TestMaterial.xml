@@ -2,11 +2,11 @@
 <Material>
     <Name>TestMaterial</Name>
     <Texture>Panda</Texture>
-    <NormalMap>None</NormalMap>
-    <Shader>Default_Shader</Shader>
+    <NormalMap>DefaultNormal</NormalMap>
+    <Shader>SimpleShader</Shader>
     <MaterialDesc>
-        <Ambient r="1" g="1" b="1" a="1"/>
+        <Ambient r="0.5" g="0.5" b="0.5" a="0.5"/>
         <Diffuse r="1" g="1" b="1" a="1"/>
-        <Specular r="1" g="1" b="1" a="1"/>
+        <Specular r="0.5" g="0.5" b="0.5" a="0.5"/>
     </MaterialDesc>
 </Material>
