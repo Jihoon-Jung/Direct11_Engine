@@ -1,7 +1,13 @@
 # Jihoon Engine
-[![Video Label](http://img.youtube.com/vi/kh5B659Ge1o/0.jpg)]([https://youtu.be/59USvjy2toI](https://youtu.be/kh5B659Ge1o))
+![image](https://github.com/user-attachments/assets/76e89d6b-2930-401f-a12b-81434bfcd0e1)
 
 Direct3D 11 기반의 3D 게임 엔진으로, 컴포넌트 기반 아키텍처를 통해 GameObject에 다양한 컴포넌트를 부착하여 유연하고 직관적인 게임 로직 구성이 가능하도록 설계되었습니다.
+
+## GitBook
+Jihoon_Engine에 대한 자세한 설명은 아래 링크를 통해 확인할 수 있습니다.
+
+<https://jihoon-jungs-organization.gitbook.io/jihoon_engine/>
+
 
 ## 사용한 라이브러리
 
