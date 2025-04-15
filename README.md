@@ -10,6 +10,7 @@ Jihoon_Engine에 대한 자세한 설명은 아래 링크를 통해 확인할 �
 <https://jihoon-jungs-organization.gitbook.io/jihoon_engine/>
 
 ---
+
 ## 사용한 라이브러리
 
 * **Direct11** 
@@ -21,14 +22,28 @@ Jihoon_Engine에 대한 자세한 설명은 아래 링크를 통해 확인할 �
 
 ---
 
-## 예제 영상
+## 개발 환경
+Visual Studio 2019
 
+---
+
+## 예제 영상
 
 
 https://github.com/user-attachments/assets/56c85f05-e1c0-45fa-b245-89559b9dc170
 
+---
+## Editor구조
+![①](https://github.com/user-attachments/assets/4b53da72-4a8c-40e8-8725-68aed35f620b)
 
 ---
+
+## Engine 구조
+
+![Engine Body (1300 x 2000 px) (3)](https://github.com/user-attachments/assets/e7b25824-f63c-45e6-8fcc-4f0f8481aaab)
+
+---
+
 ## 주요 기능
 
 ### 통합 에디터 인터페이스
